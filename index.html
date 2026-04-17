@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pokédex App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      background: #1e293b;
+    }
+
+    #app {
+      padding: 20px;
+    }
+
+    .loader {
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 15px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .stats {
+      margin-top: 20px;
+      padding: 15px;
+      background: #1e293b;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>Pokédex</header>
+
+<div id="app">
+  <div class="loader" id="loader">Cargando Pokémon...</div>
+  <div class="error" id="error"></div>
+  <div class="grid" id="grid"></div>
+  <div class="stats" id="stats"></div>
+</div>
+
+<script>
+const API = "https://pokeapi.co/api/v2/pokemon?limit=50";
+
+async function fetchWithTimeout(url, timeout = 8000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+
+    if (!res.ok) throw new Error("Error HTTP");
+
+    return await res.json();
+
+  } catch (err) {
+    throw err;
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+const state = {
+  pokemon: [],
+  captured: JSON.parse(localStorage.getItem("captured")) || []
+};
+
+function render() {
+  const grid = document.getElementById("grid");
+  const stats = document.getElementById("stats");
+
+  grid.innerHTML = state.pokemon.map(p => `
+    <div class="card" onclick="toggleCapture('${p.name}')">
+      <h4>${p.name}</h4>
+      <p>${state.captured.includes(p.name) ? "✅ Capturado" : "⬜️ No capturado"}</p>
+    </div>
+  `).join("");
+
+  stats.innerHTML = `
+    <h3>Estadísticas</h3>
+    <p>Total Pokémon: ${state.pokemon.length}</p>
+    <p>Capturados: ${state.captured.length}</p>
+    <p>No capturados: ${state.pokemon.length - state.captured.length}</p>
+  `;
+}
+
+function toggleCapture(name) {
+  if (state.captured.includes(name)) {
+    state.captured = state.captured.filter(p => p !== name);
+  } else {
+    state.captured.push(name);
+  }
+
+  localStorage.setItem("captured", JSON.stringify(state.captured));
+  render();
+}
+
+async function init() {
+  const loader = document.getElementById("loader");
+  const error = document.getElementById("error");
+
+  try {
+    const data = await fetchWithTimeout(API);
+
+    state.pokemon = data.results;
+
+    loader.style.display = "none";
+    render();
+
+  } catch (err) {
+    loader.style.display = "none";
+    error.textContent = "Error cargando datos 😢";
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>
