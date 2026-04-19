@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PokéPlanner">
+  <title>PokéPlanner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0d0d1a; --card:#161628; --accent:#e94560; --gold:#ffd700;
+      --text:#eeeeff; --text2:#7878a8; --text3:#3a3a5a;
+      --border:#252540; --border2:#2e2e50; --green:#4ade80; --blue:#60a5fa;
+      --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
+      --font:'Nunito',-apple-system,BlinkMacSystemFont,sans-serif;
+    }
+    *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body{ font-family:var(--font); background:var(--bg); color:var(--text); height:100dvh; overflow:hidden; }
+
+```
+/* LOADING */
+#loading{ position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2000; padding:32px; padding-top:calc(32px + var(--safe-top)); text-align:center; }
+#loading.hidden{ display:none; }
+.ld-ball{ font-size:72px; margin-bottom:16px; animation:spin 3s linear infinite; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.ld-title{ font-size:34px; font-weight:900; letter-spacing:-.5px; margin-bottom:4px; }
+.ld-sub{ color:var(--text2); font-size:14px; font-weight:700; margin-bottom:32px; }
+.bar-wrap{ width:100%; height:12px; background:var(--border); border-radius:6px; overflow:hidden; margin-bottom:8px; }
+.bar-fill{ height:100%; background:linear-gradient(90deg,var(--accent),var(--gold)); border-radius:6px; transition:width .4s; width:0%; }
+.bar-pct{ font-size:20px; font-weight:900; margin-bottom:10px; }
+.ld-hint{ color:var(--text2); font-size:13px; font-weight:700; margin-bottom:6px; }
+.ld-note{ color:var(--text3); font-size:11px; font-weight:700; }
+.ld-error{ color:var(--accent); font-size:14px; font-weight:800; margin-top:16px; display:none; }
+.ld-retry{ margin-top:12px; padding:12px 28px; background:var(--accent); border:none; border-radius:12px; color:#fff; font-size:15px; font-weight:800; cursor:pointer; font-family:var(--font); display:none; }
+
+/* APP */
+#app{ display:none; flex-direction:column; height:100dvh; }
+#app.visible{ display:flex; }
+
+/* HEADER */
+.app-header{ padding:calc(10px + var(--safe-top)) 16px 10px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; border-bottom:1px solid var(--border); }
+.app-title{ font-size:24px; font-weight:900; letter-spacing:-.5px; }
+.app-stats{ font-size:11px; color:var(--text2); font-weight:700; margin-top:1px; }
+.hdr-btn{ width:38px; height:38px; background:var(--card); border-radius:11px; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:17px; cursor:pointer; }
+
+/* TAB BAR */
+.tab-bar{ flex-shrink:0; display:flex; border-top:1px solid var(--border); background:var(--card); padding-bottom:var(--safe-bottom); }
+.tab-btn{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:9px 4px 7px; cursor:pointer; gap:3px; border:none; background:none; font-family:var(--font); }
+.tab-icon{ font-size:19px; line-height:1; }
+.tab-label{ font-size:9px; font-weight:800; color:var(--text3); text-transform:uppercase; letter-spacing:.3px; }
+.tab-btn.active .tab-label{ color:var(--accent); }
+
+/* PAGES */
+.page{ display:none; flex-direction:column; flex:1; overflow:hidden; min-height:0; }
+.page.active{ display:flex; }
+
+/* SEARCH */
+.search-wrap{ padding:10px 16px 6px; flex-shrink:0; }
+.search-box{ display:flex; align-items:center; background:var(--card); border-radius:14px; padding:11px 14px; gap:10px; border:1.5px solid var(--border); }
+.search-input{ flex:1; background:none; border:none; outline:none; color:var(--text); font-size:16px; font-family:var(--font); font-weight:700; }
+.search-input::placeholder{ color:var(--text3); font-weight:700; }
+.s-clear{ color:var(--text2); cursor:pointer; font-size:14px; padding:4px; display:none; }
+.s-clear.show{ display:block; }
+
+/* FILTER ROWS */
+.frow{ overflow-x:auto; padding:0 16px 6px; flex-shrink:0; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.frow::-webkit-scrollbar{ display:none; }
+.frow-inner{ display:flex; gap:6px; white-space:nowrap; }
+.chip{ display:inline-flex; align-items:center; padding:6px 12px; border-radius:20px; background:var(--card); border:1.5px solid var(--border); color:var(--text2); font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; font-family:var(--font); }
+.chip.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.rchip{ display:inline-flex; align-items:center; gap:4px; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; font-family:var(--font); border:1.5px solid; }
+.results-info{ padding:0 16px 4px; color:var(--text3); font-size:11px; flex-shrink:0; font-weight:800; }
+
+/* GRID */
+.grid-scroll{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 10px; padding-bottom:calc(8px + var(--safe-bottom)); overscroll-behavior:contain; }
+.poke-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+
+.poke-card{ background:var(--card); border-radius:14px; padding:8px 6px 8px; display:flex; flex-direction:column; align-items:center; border:1.5px solid var(--border); cursor:pointer; transition:transform .12s; min-height:122px; position:relative; overflow:hidden; }
+.poke-card:active{ transform:scale(.93); }
+.card-top{ display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:1px; }
+.card-num{ font-size:9px; color:var(--text3); font-weight:800; }
+.card-rar{ font-size:10px; line-height:1; }
+.poke-img{ width:62px; height:62px; object-fit:contain; }
+.poke-img.px{ width:54px; height:54px; image-rendering:pixelated; margin:4px; }
+.poke-name{ font-size:10px; font-weight:800; text-align:center; margin:3px 0 2px; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.poke-types{ display:flex; gap:3px; flex-wrap:wrap; justify-content:center; }
+.type-tag{ padding:2px 5px; border-radius:5px; font-size:8px; font-weight:800; color:#fff; }
+.card-badges{ position:absolute; bottom:5px; right:5px; display:flex; gap:1px; font-size:10px; }
+.card-top-right{ position:absolute; top:5px; right:5px; display:flex; gap:1px; font-size:10px; line-height:1; }
+.badge-cap{ color:var(--green); font-weight:900; }
+
+/* MODAL */
+#overlay{ position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:900; display:none; align-items:flex-end; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+#overlay.open{ display:flex; }
+#modal{ background:var(--bg); width:100%; max-height:93dvh; border-radius:28px 28px 0 0; display:flex; flex-direction:column; animation:sUp .3s cubic-bezier(.34,1.4,.64,1); padding-bottom:var(--safe-bottom); border:1.5px solid var(--border); border-bottom:none; }
+@keyframes sUp{ from{transform:translateY(100%)} to{transform:translateY(0)} }
+.modal-handle{ width:40px; height:4px; background:var(--border2); border-radius:2px; margin:10px auto 0; }
+.modal-hdr{ display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-bottom:1px solid var(--border); }
+.modal-num{ color:var(--text2); font-size:14px; font-weight:800; }
+.modal-hdr-btns{ display:flex; gap:6px; }
+.mbtn{ width:36px; height:36px; background:var(--card); border-radius:10px; border:1.5px solid var(--border); color:#fff; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:var(--font); }
+.mbtn.on{ background:var(--accent); border-color:var(--accent); }
+.modal-body{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+
+/* MODAL HERO */
+.mhero{ display:flex; flex-direction:column; align-items:center; padding:16px 20px 14px; margin:12px 16px; border-radius:20px; position:relative; }
+.shiny-btn{ position:absolute; top:10px; right:10px; width:36px; height:36px; background:rgba(0,0,0,.3); border-radius:10px; border:1.5px solid rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; }
+.shiny-btn.on{ background:rgba(255,215,0,.2); border-color:var(--gold); }
+.msprite-wrap{ position:relative; width:130px; height:130px; }
+.mimg{ width:130px; height:130px; object-fit:contain; position:absolute; top:0; left:0; transition:opacity .2s; }
+.mimg.px{ image-rendering:pixelated; width:110px; height:110px; top:10px; left:10px; }
+.mimg.shiny-glow{ filter:drop-shadow(0 0 12px rgba(255,215,0,.7)); }
+.mname{ font-size:26px; font-weight:900; margin-top:8px; text-transform:capitalize; letter-spacing:-.3px; }
+.mform-name{ font-size:12px; color:var(--text2); font-weight:700; margin-top:2px; text-transform:capitalize; }
+.mrar-badge{ display:inline-flex; align-items:center; gap:5px; padding:4px 13px; border-radius:20px; font-size:12px; font-weight:800; margin:8px 0; border:1.5px solid; }
+.mtype-row{ display:flex; gap:8px; margin-bottom:12px; }
+.mtype-pill{ padding:5px 16px; border-radius:20px; font-size:13px; font-weight:800; color:#fff; }
+.mstats-row{ display:flex; gap:22px; align-items:center; }
+.mstat{ text-align:center; }
+.mstat-val{ font-size:18px; font-weight:900; }
+.mstat-lbl{ font-size:10px; color:var(--text2); font-weight:700; margin-top:1px; }
+.mstat-div{ width:1px; height:30px; background:var(--border); }
+
+/* QUICK ACTIONS */
+.mquick{ display:flex; gap:8px; padding:0 16px 10px; }
+.qbtn{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:10px; border-radius:12px; border:1.5px solid var(--border); background:var(--card); cursor:pointer; font-size:13px; font-weight:800; color:var(--text2); font-family:var(--font); }
+.qbtn.fav-on{ background:rgba(233,69,96,.12); border-color:var(--accent); color:var(--accent); }
+.qbtn.team-on{ background:rgba(96,165,250,.12); border-color:var(--blue); color:var(--blue); }
+
+/* FORMS */
+.forms-sec{ margin:0 16px 10px; }
+.forms-label{ font-size:10px; font-weight:900; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:7px; }
+.forms-scroll{ overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.forms-scroll::-webkit-scrollbar{ display:none; }
+.forms-inner{ display:flex; gap:7px; padding-bottom:2px; }
+.fchip{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:7px 10px; background:var(--card); border-radius:12px; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; min-width:68px; max-width:80px; }
+.fchip.on{ border-color:var(--accent); background:rgba(233,69,96,.1); }
+.fchip img{ width:48px; height:48px; object-fit:contain; }
+.fchip img.px{ image-rendering:pixelated; width:40px; height:40px; }
+.fchip-name{ font-size:9px; font-weight:800; color:var(--text2); text-align:center; text-transform:capitalize; max-width:78px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fchip.on .fchip-name{ color:var(--accent); }
+
+/* LEGEND */
+.mlegend{ margin:0 16px 10px; padding:9px 12px; background:var(--card); border-radius:12px; font-size:11px; color:var(--text2); text-align:center; font-weight:700; line-height:1.9; border:1px solid var(--border); }
+
+/* GEN SECTIONS */
+.gen-sec{ margin:0 16px 8px; background:var(--card); border-radius:14px; overflow:hidden; border:1.5px solid var(--border); }
+.gen-hdr{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; cursor:pointer; user-select:none; }
+.gen-hdr-l{ display:flex; align-items:center; gap:7px; }
+.gen-arrow{ font-size:9px; color:var(--text3); transition:transform .2s; display:inline-block; }
+.gen-arrow.open{ transform:rotate(90deg); }
+.gen-title{ font-size:13px; font-weight:800; }
+.gen-act{ background:rgba(74,222,128,.1); color:var(--green); font-size:10px; font-weight:800; padding:3px 8px; border-radius:9px; border:1px solid rgba(74,222,128,.25); }
+.gen-games{ padding:0 10px 10px; gap:5px; flex-direction:column; display:none; }
+.gen-games.open{ display:flex; }
+.game-row{ background:var(--bg); border-radius:11px; padding:9px 10px; border:1px solid var(--border); }
+.game-row.has{ border-color:rgba(74,222,128,.4); background:#0b160b; }
+.game-top{ display:flex; align-items:center; gap:7px; }
+.game-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.game-name{ flex:1; font-size:12px; font-weight:800; color:#c8c8e8; }
+.game-opts{ display:flex; gap:4px; }
+.obtn{ width:32px; height:32px; border-radius:8px; background:var(--border); border:none; font-size:12px; cursor:pointer; opacity:.28; display:flex; align-items:center; justify-content:center; font-family:var(--font); }
+.obtn.on{ opacity:1; }
+.obtn.cap.on{ background:#0d2a0d; }
+.obtn.shy.on{ background:#2a2000; }
+.obtn.box.on{ background:#0d1a2e; }
+.obtn.note.on{ background:#1e0d2e; opacity:1; }
+
+/* BALL SELECTOR */
+.ball-sec{ margin-top:7px; display:none; }
+.ball-sec.open{ display:block; }
+.ball-label{ font-size:10px; color:var(--text2); font-weight:800; margin-bottom:5px; text-transform:uppercase; letter-spacing:.3px; }
+.ball-grid{ display:flex; flex-wrap:wrap; gap:4px; }
+.ball-opt{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:5px 6px; border-radius:9px; background:var(--border); border:1.5px solid transparent; cursor:pointer; min-width:46px; }
+.ball-opt.on{ border-color:var(--gold); background:rgba(255,215,0,.1); }
+.ball-emoji{ font-size:17px; }
+.ball-name{ font-size:8px; color:var(--text2); font-weight:800; text-align:center; }
+.notes-wrap{ margin-top:7px; display:none; }
+.notes-wrap.open{ display:block; }
+.notes-ta{ width:100%; background:var(--border); border:none; border-radius:10px; padding:9px; color:#fff; font-size:14px; font-family:var(--font); font-weight:600; min-height:56px; resize:none; outline:none; }
+.notes-ta::placeholder{ color:var(--text3); }
+.mspacer{ height:28px; }
+
+/* FAVORITES / TEAM */
+.col-header{ padding:10px 16px 6px; flex-shrink:0; }
+.col-title{ font-size:22px; font-weight:900; letter-spacing:-.3px; }
+.col-sub{ font-size:11px; color:var(--text2); font-weight:700; margin-top:2px; }
+.empty-state{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:40px; text-align:center; }
+.empty-icon{ font-size:52px; opacity:.4; }
+.empty-title{ font-size:16px; font-weight:800; color:var(--text2); }
+.empty-sub{ font-size:13px; color:var(--text3); font-weight:700; }
+
+/* TEAM SLOTS */
+.team-slots{ display:grid; grid-template-columns:repeat(3,1fr); gap:7px; padding:0 16px 10px; flex-shrink:0; }
+.tslot{ background:var(--card); border-radius:13px; border:1.5px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:9px 5px; min-height:92px; cursor:pointer; position:relative; }
+.tslot.filled{ border-color:var(--blue); }
+.tslot.empty{ border-style:dashed; opacity:.4; }
+.tslot img{ width:52px; height:52px; object-fit:contain; }
+.tslot-name{ font-size:9px; font-weight:800; text-align:center; margin-top:3px; text-transform:capitalize; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%; padding:0 4px; }
+.tslot-rm{ position:absolute; top:4px; right:4px; font-size:10px; width:18px; height:18px; background:rgba(0,0,0,.5); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.tslot-num{ font-size:22px; opacity:.25; }
+
+/* STATS */
+.stats-scroll{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 16px; padding-bottom:calc(16px + var(--safe-bottom)); overscroll-behavior:contain; }
+.stats-hdr{ padding:12px 16px 6px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.stats-title{ font-size:22px; font-weight:900; letter-spacing:-.3px; flex-shrink:0; }
+.game-sel{ background:var(--card); border:1.5px solid var(--border); border-radius:11px; padding:8px 12px; color:var(--text); font-size:13px; font-family:var(--font); font-weight:700; outline:none; -webkit-appearance:none; appearance:none; flex:1; }
+.sec-title{ font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.7px; color:var(--text2); margin-bottom:8px; padding-top:16px; }
+.big-nums{ display:grid; grid-template-columns:repeat(2,1fr); gap:7px; margin-bottom:0; }
+.bnum{ background:var(--card); border-radius:13px; padding:13px; border:1.5px solid var(--border); text-align:center; }
+.bnum-val{ font-size:30px; font-weight:900; line-height:1; }
+.bnum-lbl{ font-size:10px; color:var(--text2); font-weight:700; margin-top:4px; }
+.stat-card{ background:var(--card); border-radius:13px; padding:12px; border:1.5px solid var(--border); margin-bottom:0; }
+.brow{ display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+.brow:last-child{ margin-bottom:0; }
+.blabel{ font-size:10px; font-weight:800; width:72px; flex-shrink:0; color:var(--text2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bbar-wrap{ flex:1; height:16px; background:var(--border); border-radius:8px; overflow:hidden; }
+.bbar{ height:100%; border-radius:8px; transition:width .5s ease; min-width:3px; }
+.bval{ font-size:10px; font-weight:900; width:28px; text-align:right; flex-shrink:0; }
+.prow-list{ display:flex; flex-direction:column; gap:5px; }
+.prow{ display:flex; align-items:center; gap:9px; background:var(--card); border-radius:11px; padding:7px 10px; border:1px solid var(--border); cursor:pointer; }
+.prow:active{ transform:scale(.97); }
+.prow img{ width:40px; height:40px; object-fit:contain; }
+.prow-info{ flex:1; min-width:0; }
+.prow-name{ font-size:12px; font-weight:800; text-transform:capitalize; }
+.prow-num{ font-size:10px; color:var(--text3); font-weight:700; }
+.prow-right{ font-size:12px; font-weight:800; flex-shrink:0; }
+```
+
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+
+<div id="loading">
+  <div class="ld-ball">⚪</div>
+  <div class="ld-title">PokéPlanner</div>
+  <div class="ld-sub">Descargando Pokédex completa…</div>
+  <div class="bar-wrap"><div class="bar-fill" id="bar-fill"></div></div>
+  <div class="bar-pct" id="bar-pct">0%</div>
+  <div class="ld-hint" id="ld-hint">Iniciando…</div>
+  <div class="ld-note">Solo la primera vez · Luego es instantáneo ⚡</div>
+  <div class="ld-error" id="ld-error"></div>
+  <button class="ld-retry" id="ld-retry" onclick="init()">Reintentar</button>
+</div>
+
+<!-- APP -->
+
+<div id="app">
+  <!-- HEADER -->
+  <div class="app-header">
+    <div>
+      <div class="app-title">PokéPlanner</div>
+      <div class="app-stats" id="app-stats">Cargando…</div>
+    </div>
+    <div class="hdr-btn" id="sprite-btn" onclick="toggleSprite()">🎨</div>
+  </div>
+
+  <!-- PAGE: POKÉDEX -->
+
+  <div class="page active" id="page-dex">
+    <div class="search-wrap">
+      <div class="search-box">
+        <span style="font-size:16px">🔍</span>
+        <input class="search-input" id="search" placeholder="Nombre o número…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <span class="s-clear" id="s-clear" onclick="clearSearch()">✕</span>
+      </div>
+    </div>
+    <div class="frow"><div class="frow-inner" id="gen-bar"></div></div>
+    <div class="frow"><div class="frow-inner" id="type-bar"></div></div>
+    <div class="frow"><div class="frow-inner" id="rarity-bar"></div></div>
+    <div class="results-info" id="results-info"></div>
+    <div class="grid-scroll"><div class="poke-grid" id="grid"></div></div>
+  </div>
+
+  <!-- PAGE: FAVORITES -->
+
+  <div class="page" id="page-fav">
+    <div class="col-header">
+      <div class="col-title">❤️ Favoritos</div>
+      <div class="col-sub" id="fav-count">0 Pokémon</div>
+    </div>
+    <div class="grid-scroll" id="fav-wrap"><div class="poke-grid" id="fav-grid"></div></div>
+  </div>
+
+  <!-- PAGE: TEAM -->
+
+  <div class="page" id="page-team">
+    <div class="col-header">
+      <div class="col-title">⚔️ Mi Equipo</div>
+      <div class="col-sub" id="team-count">0/6 Pokémon</div>
+    </div>
+    <div class="team-slots" id="team-slots"></div>
+    <div class="grid-scroll" id="team-wrap"><div class="poke-grid" id="team-grid"></div></div>
+  </div>
+
+  <!-- PAGE: STATS -->
+
+  <div class="page" id="page-stats">
+    <div class="stats-hdr">
+      <div class="stats-title">📊 Stats</div>
+      <select class="game-sel" id="stats-sel" onchange="renderStats()">
+        <option value="all">Todos los juegos</option>
+      </select>
+    </div>
+    <div class="stats-scroll" id="stats-scroll"></div>
+  </div>
+
+  <!-- TAB BAR -->
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="goTab('dex')" id="tab-dex">
+      <span class="tab-icon">📖</span><span class="tab-label">Pokédex</span>
+    </button>
+    <button class="tab-btn" onclick="goTab('fav')" id="tab-fav">
+      <span class="tab-icon">❤️</span><span class="tab-label">Favoritos</span>
+    </button>
+    <button class="tab-btn" onclick="goTab('team')" id="tab-team">
+      <span class="tab-icon">⚔️</span><span class="tab-label">Equipo</span>
+    </button>
+    <button class="tab-btn" onclick="goTab('stats')" id="tab-stats">
+      <span class="tab-icon">📊</span><span class="tab-label">Stats</span>
+    </button>
+  </div>
+</div>
+
+<!-- MODAL -->
+
+<div id="overlay" onclick="overlayClick(event)">
+  <div id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <button class="mbtn" onclick="closeModal()">✕</button>
+      <span class="modal-num" id="modal-num">#001</span>
+      <div class="modal-hdr-btns">
+        <button class="mbtn" id="modal-sprite-btn" onclick="toggleModalSprite()">👾</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════
+const GAMES=[
+  {id:'red',name:'Rojo',gen:1,color:'#C03028'},{id:'blue',name:'Azul',gen:1,color:'#4890F0'},
+  {id:'yellow',name:'Amarillo',gen:1,color:'#F8D030'},{id:'firered',name:'Rojo Fuego',gen:1,color:'#F08030'},
+  {id:'leafgreen',name:'Verde Hoja',gen:1,color:'#78C850'},{id:'gold',name:'Oro',gen:2,color:'#DAA520'},
+  {id:'silver',name:'Plata',gen:2,color:'#C0C0C0'},{id:'crystal',name:'Cristal',gen:2,color:'#4169E1'},
+  {id:'heartgold',name:'HeartGold',gen:2,color:'#DAA520'},{id:'soulsilver',name:'SoulSilver',gen:2,color:'#708090'},
+  {id:'ruby',name:'Rubí',gen:3,color:'#DC143C'},{id:'sapphire',name:'Zafiro',gen:3,color:'#0057AE'},
+  {id:'emerald',name:'Esmeralda',gen:3,color:'#50C878'},{id:'diamond',name:'Diamante',gen:4,color:'#87CEEB'},
+  {id:'pearl',name:'Perla',gen:4,color:'#FFB6C1'},{id:'platinum',name:'Platino',gen:4,color:'#A0A0A0'},
+  {id:'black',name:'Negro',gen:5,color:'#555'},{id:'white',name:'Blanco',gen:5,color:'#BBB'},
+  {id:'black2',name:'Negro 2',gen:5,color:'#444'},{id:'white2',name:'Blanco 2',gen:5,color:'#DDD'},
+  {id:'x',name:'X',gen:6,color:'#0064C8'},{id:'y',name:'Y',gen:6,color:'#E84040'},
+  {id:'omegaruby',name:'Rubí Omega',gen:6,color:'#8B0000'},{id:'alphasapphire',name:'Zafiro Alfa',gen:6,color:'#00008B'},
+  {id:'sun',name:'Sol',gen:7,color:'#FF8C00'},{id:'moon',name:'Luna',gen:7,color:'#6A5ACD'},
+  {id:'ultrasun',name:'Ultra Sol',gen:7,color:'#FFA500'},{id:'ultramoon',name:'Ultra Luna',gen:7,color:'#4B0082'},
+  {id:'letsgopikachu',name:"Let's Go Pikachu",gen:7,color:'#FFD700'},{id:'letsgoeevee',name:"Let's Go Eevee",gen:7,color:'#C4A265'},
+  {id:'sword',name:'Espada',gen:8,color:'#0000CD'},{id:'shield',name:'Escudo',gen:8,color:'#C80000'},
+  {id:'brilliantdiamond',name:'Diamante Brillante',gen:8,color:'#7EC8E3'},{id:'shiningpearl',name:'Perla Reluciente',gen:8,color:'#FFB3C6'},
+  {id:'legendsarceus',name:'Leyendas: Arceus',gen:8,color:'#D4AF37'},
+  {id:'scarlet',name:'Escarlata',gen:9,color:'#DC143C'},{id:'violet',name:'Púrpura',gen:9,color:'#7B2FBE'},
+];
+const TYPES=[
+  {id:'normal',name:'Normal',color:'#A8A878'},{id:'fire',name:'Fuego',color:'#F08030'},
+  {id:'water',name:'Agua',color:'#6890F0'},{id:'electric',name:'Eléctrico',color:'#F8D030'},
+  {id:'grass',name:'Planta',color:'#78C850'},{id:'ice',name:'Hielo',color:'#98D8D8'},
+  {id:'fighting',name:'Lucha',color:'#C03028'},{id:'poison',name:'Veneno',color:'#A040A0'},
+  {id:'ground',name:'Tierra',color:'#E0C068'},{id:'flying',name:'Volador',color:'#A890F0'},
+  {id:'psychic',name:'Psíquico',color:'#F85888'},{id:'bug',name:'Bicho',color:'#A8B820'},
+  {id:'rock',name:'Roca',color:'#B8A038'},{id:'ghost',name:'Fantasma',color:'#705898'},
+  {id:'dragon',name:'Dragón',color:'#7038F8'},{id:'dark',name:'Siniestro',color:'#705848'},
+  {id:'steel',name:'Acero',color:'#B8B8D0'},{id:'fairy',name:'Hada',color:'#EE99AC'},
+];
+const GNAMES={1:'Generación I',2:'Generación II',3:'Generación III',4:'Generación IV',
+  5:'Generación V',6:'Generación VI',7:'Generación VII',8:'Generación VIII',9:'Generación IX'};
+const GFILTER=[{id:0,n:'Todas'},{id:1,n:'Gen I'},{id:2,n:'Gen II'},{id:3,n:'Gen III'},
+  {id:4,n:'Gen IV'},{id:5,n:'Gen V'},{id:6,n:'Gen VI'},{id:7,n:'Gen VII'},{id:8,n:'Gen VIII'},{id:9,n:'Gen IX'}];
+const RARITY={
+  normal:   {l:'Normal',    i:'⚪',c:'#888899',bg:'rgba(136,136,153,.15)',br:'rgba(136,136,153,.3)'},
+  singular: {l:'Singular',  i:'⭐',c:'#F8C030',bg:'rgba(248,192,48,.12)', br:'rgba(248,192,48,.3)'},
+  legendary:{l:'Legendario',i:'🟡',c:'#F08030',bg:'rgba(240,128,48,.12)', br:'rgba(240,128,48,.3)'},
+  mythical: {l:'Mítico',    i:'💜',c:'#A040A0',bg:'rgba(160,64,160,.15)', br:'rgba(160,64,160,.35)'},
+  ultrabeast:{l:'Ultra Ente',i:'🔵',c:'#00BFFF',bg:'rgba(0,191,255,.12)',br:'rgba(0,191,255,.3)'},
+  paradox:  {l:'Paradoja',  i:'🔴',c:'#DC143C',bg:'rgba(220,20,60,.12)',  br:'rgba(220,20,60,.3)'},
+};
+const S_IDS=new Set([144,145,146,150,243,244,245,249,250,377,378,379,380,381,382,383,384,
+  480,481,482,483,484,485,486,487,488,638,639,640,641,642,643,644,645,646,716,717,718,
+  772,773,785,786,787,788,789,790,791,792,800,888,889,890,895,896,897,898,905]);
+const MY_IDS=new Set([151,251,385,386,489,490,491,492,493,494,647,648,649,719,720,721,
+  801,802,807,808,809,893,894,1000,1001,1002,1003,1004]);
+const UB_IDS=new Set([793,794,795,796,797,798,799,803,804,805,806]);
+const PX_IDS=new Set([984,985,986,987,988,989,990,991,992,993,994,995,996,997,998,999,
+  1005,1006,1007,1008,1009,1010]);
+const BALLS=[
+  {id:'poke',n:'Poké',e:'🔴'},{id:'great',n:'Super',e:'🔵'},{id:'ultra',n:'Ultra',e:'🟡'},
+  {id:'master',n:'Master',e:'⚫'},{id:'safari',n:'Safari',e:'🟢'},{id:'fast',n:'Rápida',e:'🔶'},
+  {id:'level',n:'Nivel',e:'🟠'},{id:'lure',n:'Señuelo',e:'💙'},{id:'moon',n:'Luna',e:'🌙'},
+  {id:'love',n:'Amor',e:'💗'},{id:'friend',n:'Amigo',e:'💚'},{id:'heavy',n:'Pesada',e:'⚙️'},
+  {id:'dusk',n:'Anochecer',e:'🌑'},{id:'heal',n:'Curación',e:'🩷'},{id:'quick',n:'Rápida+',e:'⚡'},
+  {id:'net',n:'Red',e:'🕸️'},{id:'dive',n:'Buceo',e:'🌊'},{id:'nest',n:'Nido',e:'🌿'},
+  {id:'repeat',n:'Repetir',e:'🔁'},{id:'timer',n:'Tempor.',e:'⏱️'},{id:'luxury',n:'Lujo',e:'✨'},
+  {id:'premier',n:'Premio',e:'🎁'},{id:'dream',n:'Sueño',e:'💭'},{id:'beast',n:'Ultra Ente',e:'🫙'},
+  {id:'sport',n:'Torneo',e:'🏆'},{id:'cherish',n:'Preciada',e:'❤️'},{id:'gs',n:'GS',e:'🌟'},
+  {id:'wing',n:'Pluma',e:'🪶'},{id:'park',n:'Parque',e:'🌲'},
+];
+
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+const S={
+  poke:[],          // [{id,name,types,generation,rarity}]
+  tracking:{},      // {id:{gameId:{captured,shiny,inBox,notes,ball}}}
+  favs:new Set(),
+  team:[],          // max 6 ids
+  settings:{modern:true},
+  filters:{q:'',type:null,gen:0,rarity:null},
+  tab:'dex',
+  // modal state
+  mId:null, mForms:[], mFormIdx:0, mModern:true, mShiny:false,
+  formsCache:{},
+};
+
+// ═══════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════
+const genOf=id=>id<=151?1:id<=251?2:id<=386?3:id<=493?4:id<=649?5:id<=721?6:id<=809?7:id<=905?8:9;
+const rarOf=id=>PX_IDS.has(id)?'paradox':UB_IDS.has(id)?'ultrabeast':MY_IDS.has(id)?'mythical':S_IDS.has(id)?'legendary':'normal';
+const tc=id=>TYPES.find(t=>t.id===id)?.color||'#A8A878';
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):'';
+const pad=n=>String(n).padStart(3,'0');
+const mUrl=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+const sUrl=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`;
+const pUrl=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+const psUrl=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`;
+const spriteOf=(id,modern,shiny)=>modern?(shiny?sUrl(id):mUrl(id)):(shiny?psUrl(id):pUrl(id));
+const formSprite=(f,modern,shiny)=>{
+  if(!f) return'';
+  if(modern) return shiny?(f.sprites?.official_shiny||sUrl(f.id)):(f.sprites?.official||mUrl(f.id));
+  return shiny?(f.sprites?.front_shiny||psUrl(f.id)):(f.sprites?.front_default||pUrl(f.id));
+};
+const fmtForm=(name,species)=>{
+  if(!name||name===species) return'Normal';
+  return name.replace(species+'-','').split('-').map(cap).join(' ');
+};
+
+// ═══════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════
+const LS={
+  KEY_POKE:'pp_poke_v4', KEY_TRACK:'pp_track', KEY_FAV:'pp_fav', KEY_TEAM:'pp_team',
+  KEY_SET:'pp_set', KEY_FORMS:'pp_forms_v3',
+  savePoke(d){try{localStorage.setItem(this.KEY_POKE,JSON.stringify(d));}catch(e){console.warn('Cache full',e);}},
+  loadPoke(){try{const d=localStorage.getItem(this.KEY_POKE);return d?JSON.parse(d):null;}catch{return null;}},
+  saveUser(){
+    try{
+      localStorage.setItem(this.KEY_TRACK,JSON.stringify(S.tracking));
+      localStorage.setItem(this.KEY_FAV,JSON.stringify([...S.favs]));
+      localStorage.setItem(this.KEY_TEAM,JSON.stringify(S.team));
+      localStorage.setItem(this.KEY_SET,JSON.stringify(S.settings));
+    }catch(e){console.warn('Save error',e);}
+  },
+  loadUser(){
+    try{S.tracking=JSON.parse(localStorage.getItem(this.KEY_TRACK))||{};}catch{S.tracking={};}
+    try{S.favs=new Set(JSON.parse(localStorage.getItem(this.KEY_FAV))||[]);}catch{S.favs=new Set();}
+    try{S.team=JSON.parse(localStorage.getItem(this.KEY_TEAM))||[];}catch{S.team=[];}
+    try{const d=localStorage.getItem(this.KEY_SET);if(d){const p=JSON.parse(d);S.settings={...S.settings,...p};}}catch{}
+  },
+  saveForms(){try{localStorage.setItem(this.KEY_FORMS,JSON.stringify(S.formsCache));}catch{}},
+  loadForms(){try{const d=localStorage.getItem(this.KEY_FORMS);if(d)S.formsCache=JSON.parse(d);}catch{}},
+};
+
+// ═══════════════════════════════════════
+//  FETCH POKEMON — uses bulk endpoint (way faster)
+// ═══════════════════════════════════════
+async function fetchAllPokemon(onProgress){
+  // Use the list endpoint + limit to get all names/ids, then batch fetch details
+  // Strategy: fetch in batches of 100 concurrent requests
+  const TOTAL=1025;
+  const all=[];
+  const BATCH=100;
+  let done=0;
+
+  for(let start=1; start<=TOTAL; start+=BATCH){
+    const ids=[];
+    for(let i=start; i<start+BATCH && i<=TOTAL; i++) ids.push(i);
+
+    const results=await Promise.allSettled(
+      ids.map(id=>
+        fetch(`https://pokeapi.co/api/v2/pokemon/${id}`,{cache:'force-cache'})
+          .then(r=>{ if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+          .then(d=>({
+            id:d.id,
+            name:d.name,
+            types:d.types.map(t=>t.type.name),
+            generation:genOf(d.id),
+            rarity:rarOf(d.id),
+          }))
+      )
+    );
+
+    results.forEach(r=>{ if(r.status==='fulfilled') all.push(r.value); });
+    done+=ids.length;
+    onProgress(Math.round((done/TOTAL)*100));
+  }
+  return all.sort((a,b)=>a.id-b.id);
+}
+
+// ═══════════════════════════════════════
+//  FETCH FORMS (lazy, per pokemon)
+// ═══════════════════════════════════════
+async function fetchForms(baseId){
+  if(S.formsCache[baseId]) return S.formsCache[baseId];
+  const base=S.poke.find(p=>p.id===baseId);
+  const fallback=[{id:baseId,name:base?.name||'',speciesName:base?.name||'',types:base?.types||[],
+    isDefault:true,sprites:{official:mUrl(baseId),official_shiny:sUrl(baseId),front_default:pUrl(baseId),front_shiny:psUrl(baseId)}}];
+  try{
+    const specRes=await fetch(`https://pokeapi.co/api/v2/pokemon-species/${baseId}`,{cache:'force-cache'});
+    if(!specRes.ok) throw new Error('spec fail');
+    const spec=await specRes.json();
+    const varieties=spec.varieties||[];
+    if(varieties.length<=1){ S.formsCache[baseId]=fallback; LS.saveForms(); return fallback; }
+
+    const forms=await Promise.allSettled(
+      varieties.map(v=>
+        fetch(v.pokemon.url,{cache:'force-cache'}).then(r=>r.json())
+          .then(d=>({
+            id:d.id, name:d.name, speciesName:spec.name,
+            types:d.types.map(t=>t.type.name),
+            isDefault:v.is_default,
+            sprites:{
+              official:d.sprites?.other?.['official-artwork']?.front_default||null,
+              official_shiny:d.sprites?.other?.['official-artwork']?.front_shiny||null,
+              front_default:d.sprites?.front_default||null,
+              front_shiny:d.sprites?.front_shiny||null,
+            }
+          }))
+      )
+    );
+    const valid=forms.filter(f=>f.status==='fulfilled').map(f=>f.value)
+      .sort((a,b)=>a.isDefault?-1:b.isDefault?1:a.id-b.id);
+    const result=valid.length?valid:fallback;
+    S.formsCache[baseId]=result;
+    LS.saveForms();
+    return result;
+  }catch(e){
+    S.formsCache[baseId]=fallback;
+    return fallback;
+  }
+}
+
+// ═══════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════
+const isCap=id=>{const t=S.tracking[id];return t&&Object.values(t).some(g=>g.captured);};
+const isShiny=id=>{const t=S.tracking[id];return t&&Object.values(t).some(g=>g.shiny);};
+const isFav=id=>S.favs.has(id);
+const inTeam=id=>S.team.includes(id);
+const trackDefault=()=>({captured:false,shiny:false,inBox:false,notes:'',ball:null});
+
+// ═══════════════════════════════════════
+//  CARD HTML
+// ═══════════════════════════════════════
+function cardHTML(p){
+  const caught=isCap(p.id), shiny=isShiny(p.id), fav=isFav(p.id), team=inTeam(p.id);
+  const modern=S.settings.modern;
+  const rar=RARITY[p.rarity];
+  const types=p.types.map(t=>`<span class="type-tag" style="background:${tc(t)}">${cap(t)}</span>`).join('');
+  const topRight=(fav?'❤️':'')+(team?'⚔️':'');
+  // Card border/bg based on capture
+  const typeClr=tc(p.types[0]);
+  let cardStyle='';
+  if(caught) cardStyle=`border-color:${typeClr};background:${typeClr}18;`;
+  else if(shiny) cardStyle='border-color:#ffd700;';
+  else if(fav) cardStyle='border-color:#e9456055;';
+
+  return`<div class="poke-card" style="${cardStyle}" data-id="${p.id}" onclick="openModal(${p.id})">
+    <div class="card-top">
+      <span class="card-num">#${pad(p.id)}</span>
+      <span class="card-rar">${rar.i}</span>
+    </div>
+    ${topRight?`<div class="card-top-right">${topRight}</div>`:''}
+    <img class="poke-img${modern?'':' px'}" src="${spriteOf(p.id,modern,false)}" alt="${p.name}" loading="lazy" onerror="this.style.opacity='.3'">
+    <div class="poke-name">${cap(p.name)}</div>
+    <div class="poke-types">${types}</div>
+    ${caught||shiny?`<div class="card-badges">${caught?'<span class="badge-cap">✓</span>':''}${shiny?'✨':''}</div>`:''}
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+//  GRID
+// ═══════════════════════════════════════
+function getFiltered(){
+  const{q,type,gen,rarity}=S.filters;
+  return S.poke.filter(p=>{
+    if(q){const lq=q.toLowerCase();if(!p.name.includes(lq)&&!String(p.id).includes(q))return false;}
+    if(type&&!p.types.includes(type))return false;
+    if(gen&&p.generation!==gen)return false;
+    if(rarity&&p.rarity!==rarity)return false;
+    return true;
+  });
+}
+
+function renderGrid(){
+  const list=getFiltered();
+  document.getElementById('grid').innerHTML=list.map(cardHTML).join('');
+  document.getElementById('results-info').textContent=`${list.length} Pokémon`;
+  updateStats();
+}
+
+function updateStats(){
+  const capC=Object.keys(S.tracking).filter(id=>Object.values(S.tracking[id]).some(g=>g.captured)).length;
+  const shyC=Object.keys(S.tracking).filter(id=>Object.values(S.tracking[id]).some(g=>g.shiny)).length;
+  document.getElementById('app-stats').textContent=`${capC}/${S.poke.length} capturados · ${shyC}✨`;
+}
+
+function updateCard(id){
+  const p=S.poke.find(x=>x.id===id); if(!p) return;
+  document.querySelectorAll(`.poke-card[data-id="${id}"]`).forEach(el=>{ el.outerHTML=cardHTML(p); });
+}
+
+// ═══════════════════════════════════════
+//  FILTERS
+// ═══════════════════════════════════════
+function renderFilters(){
+  // Gens
+  document.getElementById('gen-bar').innerHTML=GFILTER.map(g=>
+    `<button class="chip${S.filters.gen===g.id?' on':''}" onclick="setGen(${g.id})">${g.n}</button>`
+  ).join('');
+  // Types
+  document.getElementById('type-bar').innerHTML=
+    `<button class="chip${!S.filters.type?' on':''}" onclick="setType(null)">Todos</button>`+
+    TYPES.map(t=>{
+      const act=S.filters.type===t.id;
+      return`<button class="chip" onclick="setType('${t.id}')"
+        style="background:${act?t.color:t.color+'28'};border-color:${act?t.color:t.color+'55'};color:${act?'#fff':'#ddd'}">${t.name}</button>`;
+    }).join('');
+  // Rarity
+  document.getElementById('rarity-bar').innerHTML=
+    `<button class="rchip${!S.filters.rarity?' on':''}" onclick="setRarity(null)"
+      style="background:${!S.filters.rarity?'var(--accent)':'var(--card)'};border-color:${!S.filters.rarity?'var(--accent)':'var(--border)'};color:${!S.filters.rarity?'#fff':'var(--text2)'}">Todos</button>`+
+    Object.entries(RARITY).map(([k,r])=>{
+      const act=S.filters.rarity===k;
+      return`<button class="rchip" onclick="setRarity('${k}')"
+        style="background:${act?r.c:r.bg};border-color:${act?r.c:r.br};color:${act?'#fff':'#ddd'}">${r.i} ${r.l}</button>`;
+    }).join('');
+}
+
+function setGen(g){S.filters.gen=g;renderFilters();renderGrid();}
+function setType(t){S.filters.type=t;renderFilters();renderGrid();}
+function setRarity(r){S.filters.rarity=r;renderFilters();renderGrid();}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('search').addEventListener('input',e=>{
+    S.filters.q=e.target.value.trim();
+    document.getElementById('s-clear').classList.toggle('show',!!S.filters.q);
+    renderGrid();
+  });
+});
+function clearSearch(){
+  S.filters.q='';
+  document.getElementById('search').value='';
+  document.getElementById('s-clear').classList.remove('show');
+  renderGrid();
+}
+
+// ═══════════════════════════════════════
+//  SPRITE TOGGLE
+// ═══════════════════════════════════════
+function toggleSprite(){
+  S.settings.modern=!S.settings.modern;
+  document.getElementById('sprite-btn').textContent=S.settings.modern?'🎨':'👾';
+  LS.saveUser();
+  renderGrid();
+  if(S.tab==='fav') renderFavPage();
+  if(S.tab==='team') renderTeamPage();
+}
+
+// ═══════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════
+function goTab(t){
+  S.tab=t;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+t).classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='fav') renderFavPage();
+  if(t==='team') renderTeamPage();
+  if(t==='stats') renderStats();
+}
+
+// ═══════════════════════════════════════
+//  FAVORITES
+// ═══════════════════════════════════════
+function toggleFav(id){
+  S.favs.has(id)?S.favs.delete(id):S.favs.add(id);
+  LS.saveUser(); updateCard(id);
+  if(S.tab==='fav') renderFavPage();
+}
+function renderFavPage(){
+  const list=S.poke.filter(p=>S.favs.has(p.id));
+  document.getElementById('fav-count').textContent=`${list.length} Pokémon`;
+  const w=document.getElementById('fav-wrap');
+  if(!list.length){
+    w.innerHTML=`<div class="empty-state"><div class="empty-icon">❤️</div><div class="empty-title">Sin favoritos aún</div><div class="empty-sub">Toca ❤️ en cualquier Pokémon</div></div>`;
+  }else{
+    w.innerHTML=`<div class="poke-grid">${list.map(cardHTML).join('')}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════
+//  TEAM
+// ═══════════════════════════════════════
+function toggleTeam(id){
+  if(S.team.includes(id)){S.team=S.team.filter(x=>x!==id);}
+  else{if(S.team.length>=6){alert('¡Equipo lleno! Máximo 6 Pokémon.');return;}S.team.push(id);}
+  LS.saveUser(); updateCard(id);
+  if(S.tab==='team') renderTeamPage();
+}
+function removeFromTeam(id){S.team=S.team.filter(x=>x!==id);LS.saveUser();updateCard(id);renderTeamPage();}
+function renderTeamPage(){
+  // Slots
+  let sl='';
+  for(let i=0;i<6;i++){
+    const id=S.team[i];
+    if(id){
+      const p=S.poke.find(x=>x.id===id);
+      sl+=`<div class="tslot filled" onclick="openModal(${id})">
+        <div class="tslot-rm" onclick="event.stopPropagation();removeFromTeam(${id})">✕</div>
+        <img src="${spriteOf(id,S.settings.modern,false)}" alt="" onerror="this.style.opacity='.2'">
+        <div class="tslot-name">${cap(p?.name||'')}</div>
+      </div>`;
+    }else{
+      sl+=`<div class="tslot empty"><div class="tslot-num">${i+1}</div></div>`;
+    }
+  }
+  document.getElementById('team-slots').innerHTML=sl;
+  document.getElementById('team-count').textContent=`${S.team.length}/6 Pokémon`;
+  const list=S.poke.filter(p=>S.team.includes(p.id));
+  const w=document.getElementById('team-wrap');
+  if(!list.length){
+    w.innerHTML=`<div class="empty-state"><div class="empty-icon">⚔️</div><div class="empty-title">Equipo vacío</div><div class="empty-sub">Añade hasta 6 Pokémon desde su ficha</div></div>`;
+  }else{
+    w.innerHTML=`<div class="poke-grid">${list.map(cardHTML).join('')}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════
+//  STATISTICS
+// ═══════════════════════════════════════
+function renderStats(){
+  if(S.tab!=='stats') return;
+  const gid=document.getElementById('stats-sel').value;
+  const total=S.poke.length;
+  const capIds=new Set(), shyIds=new Set();
+  const neverCap=[], alwaysCap=[];
+  const typeCapC={}; TYPES.forEach(t=>{typeCapC[t.id]=0;});
+  const rarCapC={}; Object.keys(RARITY).forEach(k=>{rarCapC[k]=0;});
+  const ballC={}; BALLS.forEach(b=>{ballC[b.id]=0;});
+
+  S.poke.forEach(p=>{
+    const t=S.tracking[p.id];
+    let capInSel=false;
+    if(gid==='all'){
+      const anyCap=t&&Object.values(t).some(g=>g.captured);
+      const allCap=t&&GAMES.every(g=>t[g.id]?.captured);
+      if(anyCap){
+        capIds.add(p.id);
+        p.types.forEach(tp=>{if(tp in typeCapC)typeCapC[tp]++;});
+        rarCapC[p.rarity]=(rarCapC[p.rarity]||0)+1;
+      }
+      if(!anyCap) neverCap.push(p);
+      if(allCap) alwaysCap.push(p);
+      // shiny any game
+      if(t&&Object.values(t).some(g=>g.shiny)) shyIds.add(p.id);
+      // ball counts
+      if(t) Object.values(t).forEach(g=>{if(g?.ball&&g.ball in ballC)ballC[g.ball]++;});
+    }else{
+      capInSel=!!(t&&t[gid]?.captured);
+      if(capInSel){
+        capIds.add(p.id);
+        p.types.forEach(tp=>{if(tp in typeCapC)typeCapC[tp]++;});
+        rarCapC[p.rarity]=(rarCapC[p.rarity]||0)+1;
+      }
+      if(!capInSel) neverCap.push(p);
+      if(t&&t[gid]?.shiny) shyIds.add(p.id);
+      if(t&&t[gid]?.ball){const b=t[gid].ball;if(b in ballC)ballC[b]++;}
+    }
+  });
+
+  const pct=total?Math.round((capIds.size/total)*100):0;
+  const typesSorted=TYPES.map(t=>({...t,c:typeCapC[t.id]})).sort((a,b)=>b.c-a.c);
+  const maxT=typesSorted[0]?.c||1;
+  const topBalls=BALLS.filter(b=>ballC[b.id]>0).sort((a,b)=>ballC[b.id]-ballC[a.id]).slice(0,10);
+  const maxBall=topBalls[0]?ballC[topBalls[0].id]:1;
+  const perGame=gid==='all'?GAMES.map(g=>({...g,c:Object.values(S.tracking).filter(t=>t[g.id]?.captured).length})).sort((a,b)=>b.c-a.c).slice(0,12):[];
+  const maxGame=perGame[0]?.c||1;
+  const gameName=gid==='all'?'global':(GAMES.find(g=>g.id===gid)?.name||gid);
+
+  document.getElementById('stats-scroll').innerHTML=`
+    <div class="sec-title">📈 Resumen ${gameName}</div>
+    <div class="big-nums">
+      <div class="bnum"><div class="bnum-val" style="color:var(--green)">${capIds.size}</div><div class="bnum-lbl">Capturados</div></div>
+      <div class="bnum"><div class="bnum-val" style="color:var(--gold)">${shyIds.size}</div><div class="bnum-lbl">✨ Shiny</div></div>
+      <div class="bnum"><div class="bnum-val" style="color:var(--accent)">${pct}%</div><div class="bnum-lbl">Completado</div></div>
+      <div class="bnum"><div class="bnum-val" style="color:var(--text2)">${neverCap.length}</div><div class="bnum-lbl">Sin capturar</div></div>
+    </div>
+
+    <div class="sec-title">🎯 Por tipo</div>
+    <div class="stat-card">
+      ${typesSorted.map(t=>`<div class="brow">
+        <div class="blabel">${t.name}</div>
+        <div class="bbar-wrap"><div class="bbar" style="width:${Math.round((t.c/maxT)*100)}%;background:${t.color}"></div></div>
+        <div class="bval">${t.c}</div>
+      </div>`).join('')}
+    </div>
+
+    <div class="sec-title">⭐ Por rareza</div>
+    <div class="stat-card">
+      ${Object.entries(RARITY).map(([k,r])=>{
+        const tot=S.poke.filter(p=>p.rarity===k).length;
+        const got=rarCapC[k]||0;
+        return`<div class="brow">
+          <div class="blabel">${r.i} ${r.l}</div>
+          <div class="bbar-wrap"><div class="bbar" style="width:${tot?Math.round((got/tot)*100):0}%;background:${r.c}"></div></div>
+          <div class="bval">${got}/${tot}</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    ${perGame.length?`<div class="sec-title">🎮 Top juegos</div>
+    <div class="stat-card">
+      ${perGame.map(g=>`<div class="brow">
+        <div class="blabel">${g.name}</div>
+        <div class="bbar-wrap"><div class="bbar" style="width:${Math.round((g.c/maxGame)*100)}%;background:${g.color}"></div></div>
+        <div class="bval">${g.c}</div>
+      </div>`).join('')}
+    </div>`:''}
+
+    ${topBalls.length?`<div class="sec-title">🔴 Pokéballs usadas</div>
+    <div class="stat-card">
+      ${topBalls.map(b=>`<div class="brow">
+        <div class="blabel">${b.e} ${b.n}</div>
+        <div class="bbar-wrap"><div class="bbar" style="width:${Math.round((ballC[b.id]/maxBall)*100)}%;background:var(--accent)"></div></div>
+        <div class="bval">${ballC[b.id]}</div>
+      </div>`).join('')}
+    </div>`:''}
+
+    ${neverCap.length?`<div class="sec-title">😔 Nunca capturado (${Math.min(30,neverCap.length)} de ${neverCap.length})</div>
+    <div class="prow-list">
+      ${neverCap.slice(0,30).map(p=>`<div class="prow" onclick="openModal(${p.id})">
+        <img src="${spriteOf(p.id,S.settings.modern,false)}" onerror="this.style.opacity='.2'">
+        <div class="prow-info"><div class="prow-name">${cap(p.name)}</div><div class="prow-num">#${pad(p.id)} · ${RARITY[p.rarity].i} ${RARITY[p.rarity].l}</div></div>
+        <div class="prow-right" style="color:var(--accent)">✕</div>
+      </div>`).join('')}
+    </div>`:''}
+
+    ${alwaysCap.length?`<div class="sec-title">🏆 En todos los juegos (${alwaysCap.length})</div>
+    <div class="prow-list">
+      ${alwaysCap.slice(0,30).map(p=>`<div class="prow" onclick="openModal(${p.id})">
+        <img src="${spriteOf(p.id,S.settings.modern,false)}" onerror="this.style.opacity='.2'">
+        <div class="prow-info"><div class="prow-name">${cap(p.name)}</div><div class="prow-num">#${pad(p.id)}</div></div>
+        <div class="prow-right" style="color:var(--green)">★</div>
+      </div>`).join('')}
+    </div>`:''}
+
+    <div style="height:20px"></div>
+  `;
+}
+
+// ═══════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════
+async function openModal(id){
+  S.mId=id; S.mFormIdx=0; S.mModern=S.settings.modern; S.mShiny=false; S.mForms=[];
+  const base=S.poke.find(p=>p.id===id); if(!base) return;
+  buildModal(base,[]);
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  // Load forms async
+  const forms=await fetchForms(id);
+  if(S.mId===id){ S.mForms=forms; buildModal(base,forms); }
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';}
+function overlayClick(e){if(e.target.id==='overlay')closeModal();}
+
+function buildModal(base,forms){
+  const id=base.id;
+  const rar=RARITY[base.rarity];
+  const fav=isFav(id), team=inTeam(id);
+  const typeClr=tc(base.types[0]);
+  const caughtC=GAMES.filter(g=>S.tracking?.[id]?.[g.id]?.captured).length;
+  const curForm=forms[S.mFormIdx]||null;
+  const imgSrc=curForm?formSprite(curForm,S.mModern,S.mShiny):spriteOf(id,S.mModern,S.mShiny);
+  const formLabel=curForm?fmtForm(curForm.name,curForm.speciesName):null;
+
+  document.getElementById('modal-num').textContent=`#${pad(id)}`;
+  document.getElementById('modal-sprite-btn').textContent=S.mModern?'👾':'🎨';
+
+  const typePills=base.types.map(t=>{
+    const ti=TYPES.find(x=>x.id===t);
+    return`<span class="mtype-pill" style="background:${tc(t)}">${ti?.name||t}</span>`;
+  }).join('');
+
+  const formsHTML=forms.length>1?`<div class="forms-sec">
+    <div class="forms-label">Formas (${forms.length})</div>
+    <div class="forms-scroll"><div class="forms-inner">
+      ${forms.map((f,i)=>{
+        const sp=S.mModern?(f.sprites.official||mUrl(f.id)):(f.sprites.front_default||pUrl(f.id));
+        return`<div class="fchip${i===S.mFormIdx?' on':''}" onclick="selectForm(${i})">
+          <img src="${sp}" alt="${f.name}" class="${S.mModern?'':'px'}" onerror="this.style.opacity='.2'">
+          <div class="fchip-name">${fmtForm(f.name,f.speciesName)}</div>
+        </div>`;
+      }).join('')}
+    </div></div>
+  </div>`:'';
+
+  const heroStyle=S.mShiny?'rgba(255,215,0,.12)':typeClr+'18';
+
+  const gens=[1,2,3,4,5,6,7,8,9].map(gen=>{
+    const gGames=GAMES.filter(g=>g.gen===gen);
+    const active=gGames.some(g=>{const d=S.tracking?.[id]?.[g.id];return d&&(d.captured||d.shiny||d.inBox||d.notes||d.ball);});
+    return`<div class="gen-sec">
+      <div class="gen-hdr" onclick="tGen(${gen})">
+        <div class="gen-hdr-l">
+          <span class="gen-arrow" id="ga-${gen}">▶</span>
+          <span class="gen-title">${GNAMES[gen]}</span>
+        </div>
+        ${active?'<span class="gen-act">✓ activo</span>':''}
+      </div>
+      <div class="gen-games" id="gg-${gen}">
+        ${gGames.map(g=>gameRow(id,g)).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('modal-body').innerHTML=`
+    <div class="mhero" id="mhero" style="background:${heroStyle}">
+      <button class="shiny-btn${S.mShiny?' on':''}" id="shiny-btn" onclick="toggleShiny()">✨</button>
+      <div class="msprite-wrap">
+        <img id="mimg" class="mimg${S.mModern?'':' px'}${S.mShiny?' shiny-glow':''}" src="${imgSrc}" alt="${base.name}" onerror="this.style.opacity='.3'">
+      </div>
+      <div class="mname">${cap(base.name)}</div>
+      ${formLabel&&S.mFormIdx>0?`<div class="mform-name">${formLabel}</div>`:''}
+      <div class="mrar-badge" style="background:${rar.bg};border-color:${rar.br};color:${rar.c}">${rar.i} ${rar.l}</div>
+      <div class="mtype-row">${typePills}</div>
+      <div class="mstats-row">
+        <div class="mstat"><div class="mstat-val">${caughtC}/${GAMES.length}</div><div class="mstat-lbl">Juegos</div></div>
+        <div class="mstat-div"></div>
+        <div class="mstat"><div class="mstat-val">Gen ${base.generation}</div><div class="mstat-lbl">Generación</div></div>
+      </div>
+    </div>
+    <div class="mquick">
+      <button class="qbtn${fav?' fav-on':''}" id="qfav" onclick="doFav(${id})">${fav?'❤️':'🤍'} ${fav?'Favorito':'Favoritos'}</button>
+      <button class="qbtn${team?' team-on':''}" id="qteam" onclick="doTeam(${id})">${team?'⚔️':'🗡️'} ${team?'En equipo':'Al equipo'}</button>
+    </div>
+    ${formsHTML}
+    <div class="mlegend">✅ Capturado · ✨ Shiny · 📦 En caja · 🔴 Poké Ball · 📝 Notas</div>
+    ${gens}
+    <div class="mspacer"></div>`;
+}
+
+function selectForm(idx){
+  S.mFormIdx=idx;
+  const base=S.poke.find(p=>p.id===S.mId);
+  if(base) buildModal(base,S.mForms);
+}
+
+function toggleModalSprite(){
+  S.mModern=!S.mModern;
+  document.getElementById('modal-sprite-btn').textContent=S.mModern?'👾':'🎨';
+  const base=S.poke.find(p=>p.id===S.mId);
+  if(base) buildModal(base,S.mForms);
+}
+
+function toggleShiny(){
+  S.mShiny=!S.mShiny;
+  const base=S.poke.find(p=>p.id===S.mId);
+  if(base) buildModal(base,S.mForms);
+}
+
+function doFav(id){
+  toggleFav(id);
+  const fav=isFav(id);
+  const btn=document.getElementById('qfav');
+  if(btn){btn.className=`qbtn${fav?' fav-on':''}`;btn.innerHTML=`${fav?'❤️':'🤍'} ${fav?'Favorito':'Favoritos'}`;}
+}
+function doTeam(id){
+  toggleTeam(id);
+  const team=inTeam(id);
+  const btn=document.getElementById('qteam');
+  if(btn){btn.className=`qbtn${team?' team-on':''}`;btn.innerHTML=`${team?'⚔️':'🗡️'} ${team?'En equipo':'Al equipo'}`;}
+}
+
+function tGen(gen){
+  const gg=document.getElementById(`gg-${gen}`);
+  const ga=document.getElementById(`ga-${gen}`);
+  const open=gg.classList.toggle('open');
+  if(ga) ga.classList.toggle('open',open);
+}
+function tNotes(key){document.getElementById(`nw-${key}`)?.classList.toggle('open');}
+function tBalls(key){document.getElementById(`bs-${key}`)?.classList.toggle('open');}
+
+function gameRow(pid,game){
+  const d={...trackDefault(),...(S.tracking?.[pid]?.[game.id]||{})};
+  const hasData=d.captured||d.shiny||d.inBox||d.notes||d.ball;
+  const ballObj=d.ball?BALLS.find(b=>b.id===d.ball):null;
+  return`<div class="game-row${hasData?' has':''}" id="gr-${pid}-${game.id}">
+    <div class="game-top">
+      <div class="game-dot" style="background:${game.color}"></div>
+      <span class="game-name">${game.name}</span>
+      <div class="game-opts">
+        <button class="obtn cap${d.captured?' on':''}" onclick="doTrack(${pid},'${game.id}','captured')">✅</button>
+        <button class="obtn shy${d.shiny?' on':''}" onclick="doTrack(${pid},'${game.id}','shiny')">✨</button>
+        <button class="obtn box${d.inBox?' on':''}" onclick="doTrack(${pid},'${game.id}','inBox')">📦</button>
+        <button class="obtn${d.ball?' on':''}" onclick="tBalls('${pid}-${game.id}')" style="opacity:${d.ball?1:.28}">${ballObj?ballObj.e:'🔴'}</button>
+        <button class="obtn note${d.notes?' on':''}" onclick="tNotes('${pid}-${game.id}')">📝</button>
+      </div>
+    </div>
+    <div class="ball-sec" id="bs-${pid}-${game.id}">
+      <div class="ball-label">Elegir Poké Ball</div>
+      <div class="ball-grid">
+        ${BALLS.map(b=>`<div class="ball-opt${d.ball===b.id?' on':''}" onclick="doBall(${pid},'${game.id}','${b.id}')">
+          <span class="ball-emoji">${b.e}</span><span class="ball-name">${b.n}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="notes-wrap${d.notes?' open':''}" id="nw-${pid}-${game.id}">
+      <textarea class="notes-ta" placeholder="Añadir nota…" onchange="doNote(${pid},'${game.id}',this.value)">${d.notes||''}</textarea>
+
+```
+</div>
+```
+
+  </div>`;
+}
+
+function refreshRow(pid,gid){
+const notesOpen=document.getElementById(`nw-${pid}-${gid}`)?.classList.contains(‘open’);
+const ballsOpen=document.getElementById(`bs-${pid}-${gid}`)?.classList.contains(‘open’);
+const row=document.getElementById(`gr-${pid}-${gid}`);
+const game=GAMES.find(g=>g.id===gid);
+if(row&&game){
+row.outerHTML=gameRow(pid,game);
+if(notesOpen)document.getElementById(`nw-${pid}-${gid}`)?.classList.add(‘open’);
+if(ballsOpen)document.getElementById(`bs-${pid}-${gid}`)?.classList.add(‘open’);
+}
+}
+
+function doTrack(pid,gid,field){
+if(!S.tracking[pid]) S.tracking[pid]={};
+if(!S.tracking[pid][gid]) S.tracking[pid][gid]=trackDefault();
+S.tracking[pid][gid][field]=!S.tracking[pid][gid][field];
+LS.saveUser(); refreshRow(pid,gid); updateCard(pid); updateStats();
+}
+
+function doBall(pid,gid,ballId){
+if(!S.tracking[pid]) S.tracking[pid]={};
+if(!S.tracking[pid][gid]) S.tracking[pid][gid]=trackDefault();
+S.tracking[pid][gid].ball=S.tracking[pid][gid].ball===ballId?null:ballId;
+LS.saveUser(); refreshRow(pid,gid);
+}
+
+function doNote(pid,gid,value){
+if(!S.tracking[pid]) S.tracking[pid]={};
+if(!S.tracking[pid][gid]) S.tracking[pid][gid]=trackDefault();
+S.tracking[pid][gid].notes=value;
+LS.saveUser(); updateCard(pid);
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+async function init(){
+// Reset error UI
+document.getElementById(‘ld-error’).style.display=‘none’;
+document.getElementById(‘ld-retry’).style.display=‘none’;
+document.getElementById(‘bar-fill’).style.width=‘0%’;
+document.getElementById(‘bar-pct’).textContent=‘0%’;
+
+LS.loadUser();
+LS.loadForms();
+document.getElementById(‘sprite-btn’).textContent=S.settings.modern?‘🎨’:‘👾’;
+
+// Populate stats game selector
+const sel=document.getElementById(‘stats-sel’);
+// Remove any existing options except first
+while(sel.options.length>1) sel.remove(1);
+GAMES.forEach(g=>{const o=document.createElement(‘option’);o.value=g.id;o.textContent=g.name;sel.appendChild(o);});
+
+// Try cache first
+const cached=LS.loadPoke();
+if(cached&&cached.length>=100){
+S.poke=cached.map(p=>({…p,rarity:p.rarity||rarOf(p.id)}));
+launch(); return;
+}
+
+// Fetch from API
+const onProg=pct=>{
+document.getElementById(‘bar-fill’).style.width=pct+’%’;
+document.getElementById(‘bar-pct’).textContent=pct+’%’;
+const h=document.getElementById(‘ld-hint’);
+if(pct<25) h.textContent=‘🔴 Cargando Gen I…’;
+else if(pct<50) h.textContent=‘🟠 Cargando Gen II y III…’;
+else if(pct<75) h.textContent=‘🟡 Cargando Gen IV, V y VI…’;
+else if(pct<95) h.textContent=‘🟢 Cargando Gen VII, VIII y IX…’;
+else h.textContent=‘⚡ Preparando la app…’;
+};
+
+try{
+S.poke=await fetchAllPokemon(onProg);
+if(!S.poke.length) throw new Error(‘Sin datos’);
+LS.savePoke(S.poke);
+launch();
+}catch(err){
+console.error(‘Fetch error:’,err);
+document.getElementById(‘ld-error’).style.display=‘block’;
+document.getElementById(‘ld-error’).textContent=‘Error al cargar. Comprueba tu conexión.’;
+document.getElementById(‘ld-retry’).style.display=‘inline-block’;
+}
+}
+
+function launch(){
+document.getElementById(‘loading’).classList.add(‘hidden’);
+document.getElementById(‘app’).classList.add(‘visible’);
+renderFilters();
+renderGrid();
+}
+
+init();
+</script>
+
+</body>
+</html>
