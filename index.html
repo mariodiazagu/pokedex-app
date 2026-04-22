@@ -611,14 +611,23 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
       <div class="hdr-stat" id="hstat" style="font-size:10px;color:var(--t3);font-weight:500;margin-top:1px">Cargando…</div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:6px">
-    <img id="hdr-trainer-img" src="" style="width:36px;height:36px;object-fit:contain;image-rendering:pixelated;display:none" onerror="this.src='https://play.pokemonshowdown.com/sprites/trainers/youngster.png';this.onerror=null">
-    <button class="ibtn" id="sprbtn" onclick="toggleSprite()" title="Modo sprite">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-    </button>
+  <div style="display:flex;align-items:center;gap:8px">
     <button class="ibtn" id="tb-cfg" onclick="goTab('cfg')" title="Ajustes">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
+    <div id="hdr-trainer-avatar" onclick="goTab('cfg')" style="
+      width:38px;height:38px;border-radius:50%;
+      background:var(--ac);border:2px solid var(--ac);
+      overflow:hidden;cursor:pointer;flex-shrink:0;
+      display:flex;align-items:flex-end;justify-content:center;
+      box-shadow:0 2px 8px rgba(232,24,74,.35);
+    ">
+      <img id="hdr-trainer-img" src="" style="
+        width:52px;height:52px;object-fit:contain;
+        image-rendering:pixelated;
+        margin-bottom:-4px;
+      " onerror="this.src='https://play.pokemonshowdown.com/sprites/trainers/red.png';this.onerror=null">
+    </div>
   </div>
 </header>
 
@@ -2233,7 +2242,7 @@ auth.onAuthStateChanged(async user => {
     updateHeaderUser(user);
     renderFilters();
     renderGrid();
-    document.getElementById('sprbtn').classList.toggle('on', !S.set.modern);
+    document.getElementById('sprbtn')?.classList.toggle('on', !S.set.modern);
     const sel = document.getElementById('stsel');
     if (!sel.options.length || sel.options[0].value !== 'all') {
       sel.innerHTML = '<option value="all">Todos los juegos</option>';
@@ -2267,42 +2276,21 @@ auth.onAuthStateChanged(async user => {
 });
 
 function updateHeaderUser(user) {
-  const sprBtn = document.getElementById('sprbtn');
-  let avatar = document.getElementById('user-avatar-btn');
-  // Remove existing login btn if any
-  document.getElementById('login-btn')?.remove();
   if(user){
-    if (!avatar) {
-      avatar = document.createElement('img');
-      avatar.id = 'user-avatar-btn';
-      avatar.className = 'user-avatar';
-      avatar.onclick = toggleUserMenu;
-      avatar.title = user.displayName || 'Mi cuenta';
-      sprBtn.parentElement.insertBefore(avatar, sprBtn.nextSibling);
-    }
-    avatar.src = user.photoURL || '';
-    avatar.alt = user.displayName || '';
-    // Sync status dot
+    // Update user menu
+    document.getElementById('um-name').textContent = user.displayName || 'Usuario';
+    document.getElementById('um-email').textContent = user.email || '';
+    // Show sync dot
     const stat = document.getElementById('hstat');
-    if (!stat.querySelector('.sync-dot')) {
+    if(stat && !stat.querySelector('.sync-dot')){
       const syncEl = document.createElement('span');
       syncEl.className = 'sync-status';
       syncEl.innerHTML = '<span class="sync-dot"></span> Sincronizado';
       stat.after(syncEl);
     }
-    document.getElementById('um-name').textContent = user.displayName || 'Usuario';
-    document.getElementById('um-email').textContent = user.email || '';
-  } else {
-    // Show login button
-    if(avatar)avatar.remove();
-    const loginBtn = document.createElement('button');
-    loginBtn.id = 'login-btn';
-    loginBtn.className = 'ibtn';
-    loginBtn.title = 'Iniciar sesión para sincronizar';
-    loginBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`;
-    loginBtn.onclick = ()=>{ document.getElementById('auth-screen').classList.remove('hidden'); };
-    sprBtn.parentElement.insertBefore(loginBtn, sprBtn.nextSibling);
   }
+  // Always update trainer avatar
+  updateTrainerUI();
 }
 
 // ═══════════════════════════════════════
@@ -2607,15 +2595,15 @@ function updateTrainerUI(){
   const sprite=trainerSprite();
   const hasName=(S.set.trainerName||'').trim().length>0;
 
-  // Header
-  const hdrName=document.getElementById('hdr-trainer-name');
-  const hdrLbl=document.getElementById('hdr-trainer-lbl');
+  // Header trainer avatar
   const hdrImg=document.getElementById('hdr-trainer-img');
-  if(hdrName)hdrName.textContent=name;
-  if(hdrLbl)hdrLbl.textContent=hasName?'Trainer':'PokéPlanner';
-  if(hdrImg){
-    hdrImg.src=sprite;
-    hdrImg.style.display=hasName?'block':'none';
+  const hdrAvatar=document.getElementById('hdr-trainer-avatar');
+  if(hdrImg) hdrImg.src=sprite;
+  if(hdrAvatar){
+    const colors={male:'#E8184A',female:'#FF6B8A',nb:'#C4B5F4'};
+    const c=colors[S.set.trainerGender||'male'];
+    hdrAvatar.style.background=c;
+    hdrAvatar.style.borderColor=c;
   }
 
   // hstat — only show if no trainer name (otherwise header shows trainer)
@@ -2705,7 +2693,7 @@ function renderSettings(){
 
 function toggleSprite(){
   S.set.modern=!S.set.modern;
-  document.getElementById('sprbtn').classList.toggle('on',!S.set.modern);
+  document.getElementById('sprbtn')?.classList.toggle('on',!S.set.modern);
   scheduleSave();renderGrid();
   if(S.tab==='fav')renderFav();
   if(S.tab==='team')renderTeam();
