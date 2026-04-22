@@ -559,6 +559,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
 .sync-dot.syncing{background:var(--gold);animation:pulse .8s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 </style>
 </head>
 <body>
@@ -675,22 +676,25 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<!-- AUTH SCREEN -->
+<!-- PASSWORD GATE -->
 <div id="auth-screen">
-  <button onclick="document.getElementById('auth-screen').classList.add('hidden')" style="position:absolute;top:calc(var(--st) + 16px);right:16px;background:none;border:none;cursor:pointer;color:var(--t3);padding:8px">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
   <div class="auth-logo">
     <img src="favicon.png" style="width:36px;height:36px;object-fit:contain;image-rendering:pixelated">
   </div>
   <div class="auth-title">PokéPlanner</div>
-  <div class="auth-sub">Inicia sesión para guardar tus capturas y sincronizar en todos tus dispositivos.</div>
-  <button class="auth-btn" onclick="signInWithGoogle()">
-    <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-    Continuar con Google
-  </button>
-  <div class="auth-loading" id="auth-loading">Iniciando sesión…</div>
-  <div class="auth-note">También puedes explorar la app sin cuenta — tus datos se guardarán localmente.</div>
+  <div class="auth-sub">Introduce la contraseña para acceder.</div>
+  <div style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:10px">
+    <input id="pw-input" type="password" placeholder="Contraseña…"
+      style="width:100%;padding:16px;border-radius:var(--r-lg);border:2px solid var(--bd);background:var(--s1);font-size:16px;font-family:var(--fn);outline:none;color:var(--t1);text-align:center"
+      onkeydown="if(event.key==='Enter')checkPassword()"
+      onfocus="this.style.borderColor='var(--ac)'" onblur="this.style.borderColor='var(--bd)'">
+    <button class="auth-btn" onclick="checkPassword()" style="background:var(--ac);color:var(--t1)">
+      Entrar
+    </button>
+    <div id="pw-error" style="display:none;font-size:13px;color:var(--red);font-weight:600;text-align:center">
+      Contraseña incorrecta
+    </div>
+  </div>
 </div>
 
 <div class="user-menu" id="user-menu">
@@ -2053,30 +2057,35 @@ function loadFormsCache() {
 
 // ── AUTH STATE LISTENER ──
 auth.onAuthStateChanged(async user => {
+  const unlocked=localStorage.getItem(PW_KEY)==='1';
   if (user) {
     currentUser = user;
     await loadUserData(user.uid);
-    document.getElementById('auth-screen').classList.add('hidden');
-    updateHeaderUser(user);
-    renderFilters();
-    renderGrid();
-    document.getElementById('sprbtn').classList.toggle('on', !S.set.modern);
-    const sel = document.getElementById('stsel');
-    if (!sel.options.length || sel.options[0].value !== 'all') {
-      sel.innerHTML = '<option value="all">Todos los juegos</option>';
-      GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
+    if(unlocked){
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('app').style.display='flex';
+      updateHeaderUser(user);
+      renderFilters();
+      renderGrid();
+      document.getElementById('sprbtn').classList.toggle('on', !S.set.modern);
+      const sel = document.getElementById('stsel');
+      if (!sel.options.length || sel.options[0].value !== 'all') {
+        sel.innerHTML = '<option value="all">Todos los juegos</option>';
+        GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
+      }
+      setTimeout(fetchTypesInBackground, 1500);
     }
-    setTimeout(fetchTypesInBackground, 1500);
   } else {
     currentUser = null;
-    // No login — show app with local data anyway
-    loadFromLocalStorage();
-    document.getElementById('auth-screen').classList.add('hidden');
-    document.getElementById('app').style.display = 'flex';
-    renderFilters();
-    renderGrid();
-    document.getElementById('sprbtn').classList.toggle('on', !S.set.modern);
-    setTimeout(fetchTypesInBackground, 1500);
+    if(unlocked){
+      loadFromLocalStorage();
+      document.getElementById('app').style.display = 'flex';
+      updateHeaderUser(null);
+      renderFilters();
+      renderGrid();
+      document.getElementById('sprbtn').classList.toggle('on', !S.set.modern);
+      setTimeout(fetchTypesInBackground, 1500);
+    }
   }
 });
 
@@ -2944,6 +2953,31 @@ function doNota(pid,gid,val){
 }
 
 // ═══════════════════════════════════════
+//  PASSWORD GATE
+// ═══════════════════════════════════════
+const PW_KEY='pkp_auth';
+const CORRECT_PW='Pokemon2026'; // ← cambia esto por tu contraseña
+
+function checkPassword(){
+  const input=document.getElementById('pw-input');
+  const err=document.getElementById('pw-error');
+  if(input.value===CORRECT_PW){
+    localStorage.setItem(PW_KEY,'1');
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('app').style.display='flex';
+    err.style.display='none';
+    // Shake animation reset
+    input.style.animation='';
+  } else {
+    err.style.display='block';
+    input.value='';
+    input.style.animation='shake .3s ease';
+    setTimeout(()=>input.style.animation='',400);
+    input.focus();
+  }
+}
+
+// ═══════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════
 (function(){
@@ -2960,14 +2994,20 @@ function doNota(pid,gid,val){
     renderGrid();
   });
 
-  // Show app immediately — auth is optional for cloud sync
-  document.getElementById('app').style.display = 'flex';
-  document.getElementById('auth-screen').classList.add('hidden');
-  loadFromLocalStorage();
-  renderFilters();
-  renderGrid();
-  // Show login button in header
-  setTimeout(()=>updateHeaderUser(null),0);
+  // Check if already authenticated this session
+  if(localStorage.getItem(PW_KEY)==='1'){
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('app').style.display='flex';
+    loadFromLocalStorage();
+    renderFilters();
+    renderGrid();
+    setTimeout(()=>updateHeaderUser(null),0);
+  } else {
+    // Show password gate
+    document.getElementById('app').style.display='none';
+    document.getElementById('auth-screen').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('pw-input')?.focus(),100);
+  }
 })();
 
 </script>
