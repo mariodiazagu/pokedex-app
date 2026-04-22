@@ -1946,14 +1946,13 @@ const genOf=id=>id<=151?1:id<=251?2:id<=386?3:id<=493?4:id<=649?5:id<=721?6:id<=
 const BALL_IMG=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${id}-ball.png`;
 
 // ── TRAINER SPRITES ──
-// Pokemon Showdown trainer sprites (reliable, comprehensive)
 const TRAINER_SPRITES={
   male:  'https://play.pokemonshowdown.com/sprites/trainers/red.png',
-  female:'https://play.pokemonshowdown.com/sprites/trainers/leaf.png',
-  nb:    'https://play.pokemonshowdown.com/sprites/trainers/dawn.png',
+  female:'https://play.pokemonshowdown.com/sprites/trainers/dawn.png',
+  nb:    'https://play.pokemonshowdown.com/sprites/trainers/bede.png',
 };
 function trainerSprite(){return TRAINER_SPRITES[S.set.trainerGender||'male'];}
-function trainerDisplayName(){const n=(S.set.trainerName||'').trim();return n||(S.set.trainerGender==='female'?'Leaf':S.set.trainerGender==='nb'?'Dawn':'Red');}
+function trainerDisplayName(){const n=(S.set.trainerName||'').trim();return n||(S.set.trainerGender==='female'?'Dawn':S.set.trainerGender==='nb'?'Bede':'Red');}
 const BALLS=[
   {id:'poke',n:'Pokéball'},{id:'great',n:'Superball'},{id:'ultra',n:'Ultraball'},
   {id:'master',n:'Masterball'},{id:'safari',n:'Safariball'},{id:'fast',n:'Velozball'},
@@ -3363,7 +3362,7 @@ function applyColsSetting(){
 //  PASSWORD GATE
 // ═══════════════════════════════════════
 const PW_KEY='pkp_auth';
-const CORRECT_PW='Pokemon2026'; // ← cambia esto
+const CORRECT_PW='tu_contraseña_aqui'; // ← cambia esto
 
 function isPwUnlocked(){ return localStorage.getItem(PW_KEY)==='1'; }
 function setPwUnlocked(){ localStorage.setItem(PW_KEY,'1'); }
