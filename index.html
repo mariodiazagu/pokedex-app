@@ -2271,6 +2271,7 @@ function scheduleSave() {
         trainerName: S.set.trainerName || '',
         trainerGender: S.set.trainerGender || 'male',
         modern: S.set.modern,
+        cardFavKey: S.set.cardFavKey || null,
       };
       await db.collection('users').doc(currentUser.uid).set({
         track: S.track,
@@ -2312,6 +2313,7 @@ async function loadUserData(uid) {
         if (trainerName !== undefined) S.set.trainerName = trainerName;
         if (trainerGender !== undefined) S.set.trainerGender = trainerGender;
         if (modern !== undefined) S.set.modern = modern;
+        if (d.set.cardFavKey !== undefined) S.set.cardFavKey = d.set.cardFavKey;
       }
     } else {
       loadFromLocalStorage();
