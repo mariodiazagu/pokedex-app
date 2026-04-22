@@ -2325,16 +2325,24 @@ function getFiltered(){
 }
 
 function renderGrid(){
-  S.filtered=getFiltered();S.rendered=0;
-  document.getElementById('grid').innerHTML='';
-  document.getElementById('rc').textContent=`${S.filtered.length} Pokémon`;
-  renderMore();setupScrollSentinel();updateStat();
+  try{
+    const grid=document.getElementById('grid');
+    if(!grid)return;
+    S.filtered=getFiltered();S.rendered=0;
+    grid.innerHTML='';
+    document.getElementById('rc').textContent=`${S.filtered.length} Pokémon`;
+    renderMore();setupScrollSentinel();updateStat();
+  }catch(e){console.error('renderGrid error:',e);}
 }
 
 function updateStat(){
-  const c=Object.keys(S.track).filter(id=>Object.values(S.track[id]).some(g=>g.captured)).length;
-  const s=Object.keys(S.track).filter(id=>Object.values(S.track[id]).some(g=>g.shiny)).length;
-  document.getElementById('hstat').textContent=`${c} / ${S.poke.length} capturados · ${s} shiny`;
+  try{
+    const c=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch{return false;}}).length;
+    const s=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch{return false;}}).length;
+    document.getElementById('hstat').textContent=`${c} / ${S.poke.length} capturados · ${s} shiny`;
+  }catch(e){
+    document.getElementById('hstat').textContent=`0 / ${S.poke.length} capturados`;
+  }
 }
 
 function updateCard(id){
