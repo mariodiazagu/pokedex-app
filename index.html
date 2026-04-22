@@ -2272,6 +2272,7 @@ function scheduleSave() {
         trainerGender: S.set.trainerGender || 'male',
         modern: S.set.modern,
         cardFavKey: S.set.cardFavKey || null,
+        myGames: S.set.myGames || [],
       };
       await db.collection('users').doc(currentUser.uid).set({
         track: S.track,
@@ -2314,6 +2315,7 @@ async function loadUserData(uid) {
         if (trainerGender !== undefined) S.set.trainerGender = trainerGender;
         if (modern !== undefined) S.set.modern = modern;
         if (d.set.cardFavKey !== undefined) S.set.cardFavKey = d.set.cardFavKey;
+        if (d.set.myGames !== undefined) S.set.myGames = d.set.myGames;
       }
     } else {
       loadFromLocalStorage();
@@ -3303,6 +3305,8 @@ function buildMdl(base,forms){
       <span style="color:var(--t2)">✎</span> Notas
     </div>
     ${gens}<div class="msp"></div>`;
+  // Auto-select base form so picker is ready without user needing to tap
+  setTimeout(()=>_refreshPickerButtons(base.id, base.id, false), 0);
 }
 
 function toggleMSprite(){S.mMod=!S.mMod;const b=S.poke.find(p=>p.id===S.mId);if(b)buildMdl(b,S.mForms);}
@@ -3390,7 +3394,6 @@ function buildVariantSection(base, forms){
   const id=base.id;
   const mod=S.set.modern;
   const allForms=forms.length?forms:[{id,name:base.name,speciesName:base.name,types:base.types,isDefault:true,sprites:{official:iArt(id),official_shiny:iShy(id),front_default:iPx(id),front_shiny:iPxS(id)}}];
-  const gensWithGames=[1,2,3,4,5,6,7,8,9].map(gen=>({gen,gs:GAMES.filter(g=>g.gen===gen)})).filter(x=>x.gs.length);
   const loading=forms.length===0?'<span style="font-size:10px;color:var(--t3);font-weight:500;margin-left:5px">Cargando…</span>':'';
 
   function makeChip(f){
@@ -3414,15 +3417,17 @@ function buildVariantSection(base, forms){
     </div>`;
   }
 
-  // Only form chips — no shiny section
-  const formChips=allForms.map(f=>makeChip(f)).join('');
-  const formSection=`<div class="vsec">
+  // Only show variants section if there are multiple forms
+  const hasMultipleForms = allForms.length > 1;
+  const formSection = hasMultipleForms ? `<div class="vsec">
     <div class="slbl">Variantes${loading}</div>
     <div class="vrow">${formChips}</div>
-  </div>`;
+  </div>` : '';
 
-  // Shared game picker (hidden, updated dynamically)
-  const pickerRows=gensWithGames.map(({gen,gs})=>{
+  // Shared game picker — only show activeGames
+  const pickerGames = activeGames();
+  const pickerGensWithGames = [1,2,3,4,5,6,7,8,9].map(gen=>({gen,gs:pickerGames.filter(g=>g.gen===gen)})).filter(x=>x.gs.length);
+  const pickerRows = pickerGensWithGames.map(({gen,gs})=>{
     const row=gs.map(g=>`<button class="tgpchip" style="--tgc:${g.c}" data-gid="${g.id}">
       <span class="tgpchip-dot" style="background:${g.c}"></span>
       <span class="tgpchip-name">${g.n}</span>
@@ -3474,7 +3479,7 @@ function openVariantPicker(pokeId,formId,isShiny){
   previewVariant(pokeId,formId,isShiny);
   _refreshPickerButtons(pokeId,formId,isShiny);
   const picker=document.getElementById('variant-picker');
-  if(picker){picker.style.display='';picker.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  if(picker) picker.style.display='';
 }
 
 function closeVariantPicker(){
