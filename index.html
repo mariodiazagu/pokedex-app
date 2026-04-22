@@ -838,6 +838,20 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
         </div>
       </div>
     </div>
+    <!-- Theme selector -->
+    <div class="cfg-card">
+      <div class="cfg-label" style="margin-bottom:4px">Tema de color</div>
+      <div class="cfg-sub" style="margin-bottom:12px">El color de acento de toda la app</div>
+      <div id="theme-grid" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+    </div>
+
+    <!-- Banner selector -->
+    <div class="cfg-card">
+      <div class="cfg-label" style="margin-bottom:4px">Banner Trainer Card</div>
+      <div class="cfg-sub" style="margin-bottom:12px">El paisaje de fondo de tu tarjeta</div>
+      <div id="banner-grid" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
     <div class="cfg-card">
       <div class="cfg-row">
         <div>
@@ -2079,6 +2093,389 @@ const TYPE_ID={
   dark:17,fairy:18
 };
 
+// ── THEMES ──
+const THEMES={
+  magenta:{name:'Magenta',ac:'#E8184A',ac2:'#FF6B8A',bg:'#FDF4F6',s2:'#F9EEF1',s3:'#F0DDE3',bd:'#F0DDE3'},
+  fire:    {name:'Fuego',  ac:'#FF6B35',ac2:'#FF9B6B',bg:'#FFF8F5',s2:'#FFE8DE',s3:'#FFD5C5',bd:'#FFD5C5'},
+  water:   {name:'Agua',   ac:'#4A90E2',ac2:'#6BAED6',bg:'#F5F9FF',s2:'#DCE8F5',s3:'#C5D9ED',bd:'#C5D9ED'},
+  grass:   {name:'Planta', ac:'#38A169',ac2:'#68B98A',bg:'#F5FFF8',s2:'#DCF0E4',s3:'#C5E3CE',bd:'#C5E3CE'},
+  electric:{name:'Eléctrico',ac:'#D4A017',ac2:'#F5C842',bg:'#FFFDF0',s2:'#FFF5CC',s3:'#FFEDAA',bd:'#FFEDAA'},
+  psychic: {name:'Psíquico',ac:'#C0598E',ac2:'#E07BAE',bg:'#FFF5FB',s2:'#F5DDEE',s3:'#EAC5DE',bd:'#EAC5DE'},
+  ice:     {name:'Hielo',  ac:'#4DC3D4',ac2:'#7DDDE8',bg:'#F2FDFF',s2:'#CCF0F5',s3:'#AAE5ED',bd:'#AAE5ED'},
+  dragon:  {name:'Dragón', ac:'#6A5ACD',ac2:'#8B7FE0',bg:'#F8F5FF',s2:'#E5DEFC',s3:'#D0C7F7',bd:'#D0C7F7'},
+  dark:    {name:'Siniestro',ac:'#4A4063',ac2:'#7A6E9E',bg:'#F8F7FC',s2:'#E8E5F2',s3:'#D5D0E8',bd:'#D5D0E8'},
+  fairy:   {name:'Hada',   ac:'#E85D9E',ac2:'#F08BBE',bg:'#FFF5FB',s2:'#F8DDF0',s3:'#F0C5E3',bd:'#F0C5E3'},
+  fighting:{name:'Lucha',  ac:'#C0392B',ac2:'#E05040',bg:'#FFF8F7',s2:'#F5DCDA',s3:'#EAC0BC',bd:'#EAC0BC'},
+  poison:  {name:'Veneno', ac:'#9B59B6',ac2:'#BF80D4',bg:'#FBF5FF',s2:'#EDD9F8',s3:'#DDBFF0',bd:'#DDBFF0'},
+  ground:  {name:'Tierra', ac:'#D4A855',ac2:'#E8C07A',bg:'#FFFCF5',s2:'#F5EDD5',s3:'#EDE0BC',bd:'#EDE0BC'},
+  rock:    {name:'Roca',   ac:'#9E8E6A',ac2:'#BCA884',bg:'#FAFAF8',s2:'#EDE9E0',s3:'#DDD8CC',bd:'#DDD8CC'},
+  bug:     {name:'Bicho',  ac:'#7BAD40',ac2:'#A0C868',bg:'#F8FFF5',s2:'#E5F2D5',s3:'#D0E8BB',bd:'#D0E8BB'},
+  ghost:   {name:'Fantasma',ac:'#5B4A8A',ac2:'#8070B0',bg:'#F8F7FC',s2:'#E5E0F5',s3:'#D0C8EC',bd:'#D0C8EC'},
+  steel:   {name:'Acero',  ac:'#6B7F9E',ac2:'#8FA0BC',bg:'#F5F7FA',s2:'#DDE3EC',s3:'#C8D0DD',bd:'#C8D0DD'},
+  flying:  {name:'Volador',ac:'#7B9ED4',ac2:'#9BBCE8',bg:'#F5F8FF',s2:'#DCE5F5',s3:'#C5D5EC',bd:'#C5D5EC'},
+  normal:  {name:'Normal', ac:'#6B7280',ac2:'#9CA3AF',bg:'#F9FAFB',s2:'#E8EAED',s3:'#D5D8DC',bd:'#D5D8DC'},
+};
+
+function applyTheme(themeId){
+  const t=THEMES[themeId]||THEMES.magenta;
+  const root=document.documentElement;
+  root.style.setProperty('--ac',t.ac);
+  root.style.setProperty('--ac2',t.ac2);
+  root.style.setProperty('--bg',t.bg);
+  root.style.setProperty('--s2',t.s2);
+  root.style.setProperty('--s3',t.s3);
+  root.style.setProperty('--bd',t.bd);
+  root.style.setProperty('--red',t.ac);
+  root.style.setProperty('--acg',t.ac+'22');
+  // Update trainer avatar bg
+  const avatar=document.getElementById('hdr-trainer-avatar');
+  if(avatar){avatar.style.background=t.ac;avatar.style.borderColor=t.ac;}
+}
+
+function setBanner(bannerId){
+  S.set.banner=bannerId;
+  scheduleSave();
+  renderSettings();
+  renderTrainerCard();
+}
+
+function setTheme(themeId){
+  S.set.theme=themeId;
+  applyTheme(themeId);
+  scheduleSave();
+  renderSettings();
+}
+
+// ── BANNERS ──
+const BANNERS={
+  route:{name:'Ruta Pallet',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <rect width="400" height="120" fill="#87CEEB"/>
+    <rect x="0" y="60" width="400" height="60" fill="#228B22"/>
+    <rect x="0" y="55" width="400" height="8" fill="#32CD32"/>
+    <rect x="20" y="30" width="16" height="30" fill="#8B4513"/>
+    <rect x="14" y="20" width="28" height="16" fill="#228B22"/>
+    <rect x="16" y="15" width="24" height="10" fill="#32CD32"/>
+    <rect x="60" y="35" width="12" height="25" fill="#8B4513"/>
+    <rect x="55" y="22" width="22" height="16" fill="#228B22"/>
+    <rect x="180" y="55" width="40" height="5" fill="#DEB887"/>
+    <rect x="220" y="55" width="40" height="5" fill="#DEB887"/>
+    <rect x="260" y="55" width="40" height="5" fill="#DEB887"/>
+    <rect x="350" y="25" width="20" height="35" fill="#CD853F"/>
+    <rect x="345" y="15" width="30" height="12" fill="#A0522D"/>
+    <rect x="348" y="40" width="4" height="20" fill="#FFD700"/>
+    <rect x="300" y="40" width="18" height="20" fill="#F5F5DC"/>
+    <rect x="298" y="36" width="22" height="6" fill="#A0522D"/>
+    <rect x="305" y="45" width="4" height="10" fill="#87CEEB"/>
+    <rect x="312" y="45" width="4" height="10" fill="#87CEEB"/>
+  </svg>`},
+  cave:{name:'Cueva',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <rect width="400" height="120" fill="#1a1a2e"/>
+    <rect x="0" y="0" width="400" height="120" fill="#16213e"/>
+    <rect x="0" y="70" width="400" height="50" fill="#0a0a0a"/>
+    <rect x="0" y="60" width="80" height="60" fill="#1a1a1a"/>
+    <rect x="320" y="55" width="80" height="65" fill="#1a1a1a"/>
+    <rect x="100" y="65" width="200" height="55" fill="#111"/>
+    <rect x="40" y="30" width="8" height="40" fill="#2a2a4a"/>
+    <rect x="44" y="26" width="4" height="8" fill="#3a3a6a"/>
+    <rect x="80" y="20" width="6" height="50" fill="#2a2a4a"/>
+    <rect x="200" y="15" width="10" height="55" fill="#2a2a4a"/>
+    <rect x="300" y="25" width="8" height="45" fill="#2a2a4a"/>
+    <rect x="160" y="70" width="80" height="10" fill="#1a1a3a"/>
+    <rect x="50" y="80" width="4" height="4" fill="#4444aa" opacity="0.8"/>
+    <rect x="120" y="75" width="3" height="3" fill="#4444aa" opacity="0.6"/>
+    <rect x="250" y="78" width="4" height="4" fill="#4444aa" opacity="0.7"/>
+    <rect x="320" y="82" width="3" height="3" fill="#4444aa" opacity="0.5"/>
+    <rect x="185" y="60" width="30" height="4" fill="#e8c84a" opacity="0.3"/>
+  </svg>`},
+  ocean:{name:'Océano',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <rect width="400" height="120" fill="#4FC3F7"/>
+    <rect x="0" y="0" width="400" height="50" fill="#0288D1"/>
+    <rect x="0" y="50" width="400" height="70" fill="#0277BD"/>
+    <rect x="0" y="65" width="400" height="55" fill="#01579B"/>
+    <rect x="0" y="80" width="400" height="40" fill="#003c8f"/>
+    <rect x="50" y="58" width="60" height="4" fill="#29B6F6" opacity="0.6"/>
+    <rect x="180" y="62" width="80" height="4" fill="#29B6F6" opacity="0.5"/>
+    <rect x="300" y="55" width="50" height="4" fill="#29B6F6" opacity="0.6"/>
+    <rect x="20" y="70" width="40" height="4" fill="#0288D1" opacity="0.7"/>
+    <rect x="200" y="72" width="60" height="4" fill="#0288D1" opacity="0.6"/>
+    <rect x="100" y="20" width="30" height="12" fill="#fff" opacity="0.7"/>
+    <rect x="95" y="24" width="40" height="8" fill="#fff" opacity="0.8"/>
+    <rect x="280" y="15" width="50" height="14" fill="#fff" opacity="0.7"/>
+    <rect x="275" y="19" width="60" height="10" fill="#fff" opacity="0.8"/>
+    <rect x="170" y="85" width="20" height="6" fill="#1E88E5" opacity="0.8"/>
+    <rect x="340" y="90" width="16" height="6" fill="#1E88E5" opacity="0.7"/>
+  </svg>`},
+  forest:{name:'Bosque',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <rect width="400" height="120" fill="#1B5E20"/>
+    <rect x="0" y="0" width="400" height="40" fill="#2E7D32"/>
+    <rect x="0" y="70" width="400" height="50" fill="#1B5E20"/>
+    <rect x="0" y="60" width="400" height="15" fill="#33691E"/>
+    <rect x="10" y="20" width="20" height="50" fill="#1B5E20"/>
+    <rect x="0" y="10" width="40" height="20" fill="#2E7D32"/>
+    <rect x="5" y="5" width="30" height="12" fill="#388E3C"/>
+    <rect x="50" y="15" width="22" height="55" fill="#1a5c1a"/>
+    <rect x="42" y="8" width="38" height="18" fill="#2E7D32"/>
+    <rect x="46" y="2" width="30" height="12" fill="#388E3C"/>
+    <rect x="120" y="25" width="18" height="45" fill="#1B5E20"/>
+    <rect x="113" y="14" width="32" height="16" fill="#2E7D32"/>
+    <rect x="117" y="7" width="24" height="10" fill="#43A047"/>
+    <rect x="200" y="18" width="20" height="52" fill="#1B5E20"/>
+    <rect x="192" y="8" width="36" height="16" fill="#388E3C"/>
+    <rect x="196" y="2" width="28" height="10" fill="#43A047"/>
+    <rect x="290" y="22" width="18" height="48" fill="#1B5E20"/>
+    <rect x="282" y="12" width="34" height="16" fill="#2E7D32"/>
+    <rect x="286" y="5" width="26" height="10" fill="#388E3C"/>
+    <rect x="360" y="20" width="20" height="50" fill="#1a5c1a"/>
+    <rect x="352" y="10" width="36" height="16" fill="#2E7D32"/>
+    <rect x="356" y="3" width="28" height="10" fill="#43A047"/>
+    <rect x="80" y="68" width="8" height="4" fill="#AED581" opacity="0.7"/>
+    <rect x="160" y="65" width="10" height="4" fill="#AED581" opacity="0.6"/>
+    <rect x="240" y="67" width="8" height="4" fill="#AED581" opacity="0.7"/>
+    <rect x="330" y="66" width="10" height="4" fill="#AED581" opacity="0.6"/>
+  </svg>`},
+  mountain:{name:'Montaña',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <rect width="400" height="120" fill="#B0BEC5"/>
+    <rect x="0" y="0" width="400" height="50" fill="#78909C"/>
+    <rect x="0" y="50" width="400" height="70" fill="#546E7A"/>
+    <polygon points="120,10 200,80 40,80" fill="#455A64"/>
+    <polygon points="220,5 320,80 120,80" fill="#37474F"/>
+    <polygon points="300,20 380,80 220,80" fill="#455A64"/>
+    <polygon points="0,30 80,80 -20,80" fill="#37474F"/>
+    <rect x="140" y="10" width="30" height="8" fill="#ECEFF1" opacity="0.9"/>
+    <rect x="240" y="5" width="24" height="6" fill="#ECEFF1" opacity="0.9"/>
+    <rect x="0" y="80" width="400" height="40" fill="#4CAF50"/>
+    <rect x="0" y="75" width="400" height="8" fill="#66BB6A"/>
+    <rect x="50" y="90" width="20" height="8" fill="#388E3C"/>
+    <rect x="300" y="85" width="24" height="10" fill="#388E3C"/>
+  </svg>`},
+  night:{name:'Ciudad Noche',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <rect width="400" height="120" fill="#0d0d2b"/>
+    <rect x="20" y="10" width="3" height="3" fill="#fff" opacity="0.8"/>
+    <rect x="80" y="5" width="2" height="2" fill="#fff" opacity="0.9"/>
+    <rect x="150" y="8" width="3" height="3" fill="#fff" opacity="0.7"/>
+    <rect x="220" y="3" width="2" height="2" fill="#fff" opacity="0.8"/>
+    <rect x="300" y="12" width="3" height="3" fill="#fff" opacity="0.6"/>
+    <rect x="370" y="6" width="2" height="2" fill="#fff" opacity="0.9"/>
+    <rect x="60" y="18" width="2" height="2" fill="#fff" opacity="0.5"/>
+    <rect x="180" y="20" width="2" height="2" fill="#fff" opacity="0.7"/>
+    <rect x="340" y="15" width="2" height="2" fill="#fff" opacity="0.6"/>
+    <rect x="0" y="50" width="400" height="70" fill="#1a1a3a"/>
+    <rect x="20" y="30" width="40" height="90" fill="#2d2d5e"/>
+    <rect x="25" y="35" width="6" height="6" fill="#FFD700" opacity="0.8"/>
+    <rect x="35" y="35" width="6" height="6" fill="#FFD700" opacity="0.6"/>
+    <rect x="45" y="35" width="6" height="6" fill="#FFD700" opacity="0.9"/>
+    <rect x="25" y="48" width="6" height="6" fill="#87CEEB" opacity="0.7"/>
+    <rect x="45" y="48" width="6" height="6" fill="#FFD700" opacity="0.5"/>
+    <rect x="80" y="20" width="55" height="100" fill="#1e1e4a"/>
+    <rect x="86" y="26" width="8" height="8" fill="#FFD700" opacity="0.9"/>
+    <rect x="100" y="26" width="8" height="8" fill="#87CEEB" opacity="0.7"/>
+    <rect x="114" y="26" width="8" height="8" fill="#FFD700" opacity="0.6"/>
+    <rect x="86" y="40" width="8" height="8" fill="#87CEEB" opacity="0.8"/>
+    <rect x="114" y="40" width="8" height="8" fill="#FFD700" opacity="0.9"/>
+    <rect x="86" y="54" width="8" height="8" fill="#FFD700" opacity="0.5"/>
+    <rect x="100" y="54" width="8" height="8" fill="#87CEEB" opacity="0.7"/>
+    <rect x="200" y="35" width="45" height="85" fill="#252550"/>
+    <rect x="206" y="42" width="8" height="8" fill="#FFD700" opacity="0.8"/>
+    <rect x="218" y="42" width="8" height="8" fill="#FFD700" opacity="0.6"/>
+    <rect x="230" y="42" width="8" height="8" fill="#87CEEB" opacity="0.9"/>
+    <rect x="206" y="56" width="8" height="8" fill="#87CEEB" opacity="0.7"/>
+    <rect x="230" y="56" width="8" height="8" fill="#FFD700" opacity="0.8"/>
+    <rect x="310" y="25" width="60" height="95" fill="#1e1e4a"/>
+    <rect x="316" y="32" width="8" height="8" fill="#FFD700" opacity="0.9"/>
+    <rect x="330" y="32" width="8" height="8" fill="#87CEEB" opacity="0.7"/>
+    <rect x="344" y="32" width="8" height="8" fill="#FFD700" opacity="0.5"/>
+    <rect x="358" y="32" width="8" height="8" fill="#FFD700" opacity="0.8"/>
+    <rect x="316" y="46" width="8" height="8" fill="#87CEEB" opacity="0.6"/>
+    <rect x="344" y="46" width="8" height="8" fill="#FFD700" opacity="0.9"/>
+    <rect x="160" y="85" width="50" height="35" fill="#111130"/>
+    <rect x="155" y="80" width="60" height="8" fill="#333366"/>
+  </svg>`},
+  volcano:{name:'Volcán',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <rect width="400" height="120" fill="#FF6B35" opacity="0.3"/>
+    <rect width="400" height="120" fill="#1a0a00"/>
+    <rect x="0" y="60" width="400" height="60" fill="#2d0800"/>
+    <polygon points="150,5 250,90 50,90" fill="#3d1200"/>
+    <polygon points="200,0 310,90 90,90" fill="#2d0e00"/>
+    <rect x="185" y="0" width="30" height="15" fill="#FF4500" opacity="0.8"/>
+    <rect x="190" y="0" width="20" height="8" fill="#FF6B00" opacity="0.9"/>
+    <rect x="193" y="0" width="14" height="5" fill="#FFD700" opacity="0.7"/>
+    <rect x="0" y="75" width="400" height="45" fill="#1a0500"/>
+    <rect x="20" y="78" width="60" height="6" fill="#FF4500" opacity="0.6"/>
+    <rect x="100" y="80" width="80" height="5" fill="#FF6B00" opacity="0.5"/>
+    <rect x="250" y="76" width="70" height="7" fill="#FF4500" opacity="0.7"/>
+    <rect x="340" y="79" width="60" height="5" fill="#FF6B00" opacity="0.4"/>
+    <rect x="0" y="90" width="400" height="30" fill="#110300"/>
+    <rect x="50" y="92" width="30" height="4" fill="#FF4500" opacity="0.4"/>
+    <rect x="200" y="93" width="50" height="4" fill="#FF4500" opacity="0.3"/>
+    <rect x="320" y="91" width="40" height="4" fill="#FF6B00" opacity="0.4"/>
+  </svg>`},
+  beach:{name:'Playa',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <rect width="400" height="120" fill="#87CEEB"/>
+    <rect x="0" y="0" width="400" height="55" fill="#64B5F6"/>
+    <rect x="0" y="55" width="400" height="30" fill="#4FC3F7"/>
+    <rect x="0" y="75" width="400" height="45" fill="#F5DEB3"/>
+    <rect x="0" y="72" width="400" height="8" fill="#DEB887"/>
+    <rect x="60" y="55" width="80" height="6" fill="#81D4FA" opacity="0.6"/>
+    <rect x="260" y="58" width="60" height="5" fill="#81D4FA" opacity="0.5"/>
+    <rect x="50" y="78" width="12" height="3" fill="#C8A87A" opacity="0.7"/>
+    <rect x="200" y="80" width="16" height="3" fill="#C8A87A" opacity="0.6"/>
+    <rect x="320" y="79" width="12" height="3" fill="#C8A87A" opacity="0.7"/>
+    <rect x="20" y="40" width="16" height="18" fill="#8B4513"/>
+    <rect x="8" y="20" width="20" height="4" fill="#4CAF50"/>
+    <rect x="10" y="16" width="16" height="8" fill="#66BB6A"/>
+    <rect x="22" y="18" width="14" height="6" fill="#81C784"/>
+    <rect x="24" y="14" width="10" height="6" fill="#A5D6A7"/>
+    <rect x="350" y="35" width="14" height="23" fill="#8B4513"/>
+    <rect x="338" y="15" width="18" height="4" fill="#4CAF50"/>
+    <rect x="340" y="10" width="14" height="8" fill="#66BB6A"/>
+    <rect x="350" y="12" width="12" height="6" fill="#81C784"/>
+    <rect x="352" y="8" width="8" height="5" fill="#A5D6A7"/>
+    <rect x="100" y="20" width="30" height="10" fill="#fff" opacity="0.8"/>
+    <rect x="280" y="15" width="40" height="12" fill="#fff" opacity="0.7"/>
+  </svg>`},
+};
+
+// ── ACHIEVEMENTS ──
+const ACHIEVEMENTS=[
+  {id:'first_catch',    name:'Primera Captura',   desc:'Captura tu primer Pokémon',           icon:'pokeball',   check:s=>Object.keys(s.track).some(id=>Object.values(s.track[id]).some(g=>g?.captured))},
+  {id:'catch_10',       name:'Entrenador Novel',  desc:'Captura 10 Pokémon distintos',        icon:'badge',      check:s=>countCap(s)>=10},
+  {id:'catch_50',       name:'Coleccionista',     desc:'Captura 50 Pokémon distintos',        icon:'star',       check:s=>countCap(s)>=50},
+  {id:'catch_100',      name:'Centenario',        desc:'Captura 100 Pokémon distintos',       icon:'trophy',     check:s=>countCap(s)>=100},
+  {id:'catch_500',      name:'Maestro Pokédex',   desc:'Captura 500 Pokémon distintos',       icon:'crown',      check:s=>countCap(s)>=500},
+  {id:'catch_all',      name:'Pokédex Completa',  desc:'Captura los 1025 Pokémon',            icon:'dex',        check:s=>countCap(s)>=1025},
+  {id:'first_shiny',    name:'Destello',          desc:'Encuentra tu primer shiny',           icon:'sparkle',    check:s=>countShiny(s)>=1},
+  {id:'shiny_10',       name:'Cazador Shiny',     desc:'Encuentra 10 Pokémon shiny',          icon:'gem',        check:s=>countShiny(s)>=10},
+  {id:'shiny_50',       name:'Shiny Hunter',      desc:'Encuentra 50 Pokémon shiny',          icon:'diamond',    check:s=>countShiny(s)>=50},
+  {id:'first_legendary',name:'Encuentro Legendario',desc:'Captura un Pokémon legendario',     icon:'legend',     check:s=>Object.keys(s.track).some(id=>S_IDS.has(parseInt(id))&&Object.values(s.track[id]).some(g=>g?.captured))},
+  {id:'all_legendary',  name:'Guardián Legendario',desc:'Captura todos los legendarios',      icon:'shield',     check:s=>[...S_IDS].every(id=>Object.keys(s.track).includes(String(id))&&Object.values(s.track[String(id)]).some(g=>g?.captured))},
+  {id:'first_mythical', name:'Misterio Mítico',   desc:'Captura un Pokémon mítico',           icon:'myth',       check:s=>Object.keys(s.track).some(id=>MY_IDS.has(parseInt(id))&&Object.values(s.track[id]).some(g=>g?.captured))},
+  {id:'complete_gen1',  name:'Campeón Kanto',     desc:'Completa la Gen I',                   icon:'gen1',       check:s=>checkGenComplete(s,1)},
+  {id:'complete_gen2',  name:'Campeón Johto',     desc:'Completa la Gen II',                  icon:'gen2',       check:s=>checkGenComplete(s,2)},
+  {id:'complete_gen3',  name:'Campeón Hoenn',     desc:'Completa la Gen III',                 icon:'gen3',       check:s=>checkGenComplete(s,3)},
+  {id:'full_team',      name:'Equipo Completo',   desc:'Forma un equipo de 6 Pokémon',        icon:'team',       check:s=>Object.values(s.teams||{}).some(t=>t?.length>=6)},
+  {id:'all_teams',      name:'Multi-Liga',        desc:'Ten equipos completos en 3 juegos',   icon:'leagues',    check:s=>Object.values(s.teams||{}).filter(t=>t?.length>=6).length>=3},
+  {id:'type_master',    name:'Maestro de Tipo',   desc:'Captura 30 Pokémon del mismo tipo',   icon:'typemaster', check:s=>getTopTypeCount(s)>=30},
+  {id:'variety',        name:'Versátil',          desc:'Captura Pokémon de los 18 tipos',     icon:'rainbow',    check:s=>getCapturedTypes(s).size>=18},
+  {id:'ball_collector', name:'Coleccionista Balls',desc:'Usa 10 tipos de Poké Ball distintos',icon:'balls',      check:s=>getBallsUsed(s)>=10},
+  {id:'noter',          name:'Diario de Ruta',    desc:'Escribe notas en 10 Pokémon',         icon:'notes',      check:s=>getNotesCount(s)>=10},
+  {id:'multi_game',     name:'Veterano',          desc:'Juega 5 juegos distintos',            icon:'games',      check:s=>(s.set?.myGames||[]).length>=5},
+  {id:'daily_3',        name:'Constancia',        desc:'Completa 3 retos diarios',            icon:'calendar',   check:s=>(s.dailyCount||0)>=3},
+  {id:'daily_7',        name:'Racha Semanal',     desc:'Completa 7 retos diarios',            icon:'streak',     check:s=>(s.dailyCount||0)>=7},
+  {id:'daily_30',       name:'Entrenador Dedicado',desc:'Completa 30 retos diarios',          icon:'medal',      check:s=>(s.dailyCount||0)>=30},
+];
+
+// Achievement helper counters
+const countCap=s=>new Set(Object.keys(s.track).filter(id=>Object.values(s.track[id]).some(g=>g?.captured))).size;
+const countShiny=s=>new Set(Object.keys(s.track).filter(id=>Object.values(s.track[id]).some(g=>g?.shiny))).size;
+const checkGenComplete=(s,gen)=>{
+  const genPoke=S.poke.filter(p=>p.generation===gen);
+  return genPoke.every(p=>s.track[String(p.id)]&&Object.values(s.track[String(p.id)]).some(g=>g?.captured));
+};
+const getTopTypeCount=s=>{
+  const tc={};
+  Object.keys(s.track).filter(id=>Object.values(s.track[id]).some(g=>g?.captured)).forEach(id=>{
+    const p=S.poke.find(x=>x.id===parseInt(id));
+    if(p)(p.types||[]).forEach(t=>{tc[t]=(tc[t]||0)+1;});
+  });
+  return Math.max(0,...Object.values(tc));
+};
+const getCapturedTypes=s=>{
+  const types=new Set();
+  Object.keys(s.track).filter(id=>Object.values(s.track[id]).some(g=>g?.captured)).forEach(id=>{
+    const p=S.poke.find(x=>x.id===parseInt(id));
+    if(p)(p.types||[]).forEach(t=>types.add(t));
+  });
+  return types;
+};
+const getBallsUsed=s=>new Set(Object.values(s.track).flatMap(g=>Object.values(g).map(d=>d?.ball).filter(Boolean))).size;
+const getNotesCount=s=>Object.values(s.track).reduce((a,g)=>a+Object.values(g).filter(d=>d?.notes).length,0);
+
+function getUnlockedAchievements(){
+  const state={track:S.track,teams:S.teams,set:S.set,dailyCount:S.dailyCount||0};
+  return ACHIEVEMENTS.filter(a=>{try{return a.check(state);}catch{return false;}});
+}
+
+// Achievement SVG icons
+function achievementIcon(id,size=20,color='currentColor'){
+  const icons={
+    pokeball:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="${color}"/></svg>`,
+    badge:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`,
+    star:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
+    trophy:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>`,
+    crown:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" stroke="none"><path d="M2 20h20L19 9l-5 7-2-9-2 9-5-7z"/></svg>`,
+    dex:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg>`,
+    sparkle:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" stroke="none"><path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/></svg>`,
+    gem:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" stroke="none"><path d="M6 3l-4 6 10 12L22 9l-4-6H6zm0 0l4 6h4l4-6"/></svg>`,
+    diamond:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" stroke="none"><path d="M12 2L2 9l10 13L22 9z"/></svg>`,
+    legend:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>`,
+    shield:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" stroke="none"><path d="M12 2L4 6v6c0 5.5 3.5 10.74 8 12 4.5-1.26 8-6.5 8-12V6z"/></svg>`,
+    myth:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>`,
+    gen1:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="16" text-anchor="middle" font-size="10" fill="${color}" stroke="none" font-weight="bold">I</text></svg>`,
+    gen2:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="16" text-anchor="middle" font-size="9" fill="${color}" stroke="none" font-weight="bold">II</text></svg>`,
+    gen3:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="16" text-anchor="middle" font-size="8" fill="${color}" stroke="none" font-weight="bold">III</text></svg>`,
+    team:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    leagues:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" stroke="none"><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></svg>`,
+    typemaster:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>`,
+    rainbow:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><path d="M22 17a10 10 0 0 0-20 0"/><path d="M6 17a6 6 0 0 1 12 0"/><path d="M10 17a2 2 0 0 1 4 0"/></svg>`,
+    balls:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2" fill="${color}"/></svg>`,
+    notes:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+    games:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01M7 12v-2m0 4v-2m13-2h-2m4 0h-2"/></svg>`,
+    calendar:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>`,
+    streak:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" stroke="none"><path d="M13 2L4.5 13.5H11L9 22l10.5-13H13L15 2z"/></svg>`,
+    medal:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="14" r="7"/><path d="M9 9l-3-7h12l-3 7"/><line x1="12" y1="7" x2="12" y2="10"/></svg>`,
+  };
+  return icons[id]||icons.star;
+}
+
+// ── DAILY CHALLENGE ──
+function getDailyChallenge(){
+  const today=new Date();
+  const seed=today.getFullYear()*10000+(today.getMonth()+1)*100+today.getDate();
+  const rng=(s)=>{let x=Math.sin(s)*10000;return x-Math.floor(x);};
+  const r1=rng(seed),r2=rng(seed+1),r3=rng(seed+2);
+  const typeKeys=Object.keys(TYPES.reduce((a,t)=>{a[t.id]=t;return a},{}));
+  const types=TYPES.map(t=>t.id);
+  const rarities=['normal','legendary','mythical','paradox'];
+  const gens=[1,2,3,4,5,6,7,8,9];
+  const kind=Math.floor(r1*3); // 0=type, 1=rarity, 2=gen
+  let challenge;
+  if(kind===0){
+    const type=types[Math.floor(r2*types.length)];
+    const ti=TYPES.find(t=>t.id===type);
+    challenge={type:'type',value:type,label:`Captura un Pokémon de tipo ${ti?.n||type}`,color:ti?.c||'var(--ac)'};
+  } else if(kind===1){
+    const rar=rarities[Math.floor(r2*rarities.length)];
+    const rarLabel={normal:'Normal',legendary:'Legendario',mythical:'Mítico',paradox:'Paradoja'};
+    challenge={type:'rarity',value:rar,label:`Captura un Pokémon ${rarLabel[rar]||rar}`,color:'var(--ac)'};
+  } else {
+    const gen=gens[Math.floor(r2*gens.length)];
+    challenge={type:'gen',value:gen,label:`Captura un Pokémon de Gen ${gen}`,color:'var(--ac)'};
+  }
+  return challenge;
+}
+
+function isDailyChallengeCompleted(){
+  const today=todayStr();
+  return S.set.dailyDone===today;
+}
+
+function todayStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function completeDailyChallenge(){
+  const today=todayStr();
+  if(S.set.dailyDone===today)return;
+  S.set.dailyDone=today;
+  S.dailyCount=(S.dailyCount||0)+1;
+  scheduleSave();
+  renderTrainerCard();
+  // Show feedback
+  const btn=document.getElementById('daily-complete-btn');
+  if(btn){btn.style.background='var(--green)';btn.style.color='#fff';btn.innerHTML=`${achievementIcon('calendar',14,'#fff')} ¡Completado!`;}
+}
+
 // ── TRAINER SPRITES ──
 const TRAINER_SPRITES={
   male:  'https://play.pokemonshowdown.com/sprites/trainers/red.png',
@@ -2185,7 +2582,7 @@ async function fetchTypesInBackground(){
 
 const S={
   poke:POKE,track:{},favs:new Set(),teams:{},
-  set:{modern:true, cols:3, myGames:[], trainerName:'', trainerGender:'male', cardFavKey:null},
+  set:{modern:true, cols:3, myGames:[], trainerName:'', trainerGender:'male', cardFavKey:null, theme:'magenta', banner:'route', dailyDone:null},
   f:{q:'',types:[],gen:0,rar:null},
   tab:'dex',
   teamGame:null,
@@ -2273,6 +2670,10 @@ function scheduleSave() {
         modern: S.set.modern,
         cardFavKey: S.set.cardFavKey || null,
         myGames: S.set.myGames || [],
+        theme: S.set.theme || 'magenta',
+        banner: S.set.banner || 'route',
+        dailyDone: S.set.dailyDone || null,
+        dailyCount: S.dailyCount || 0,
       };
       await db.collection('users').doc(currentUser.uid).set({
         track: S.track,
@@ -2316,6 +2717,10 @@ async function loadUserData(uid) {
         if (modern !== undefined) S.set.modern = modern;
         if (d.set.cardFavKey !== undefined) S.set.cardFavKey = d.set.cardFavKey;
         if (d.set.myGames !== undefined) S.set.myGames = d.set.myGames;
+        if (d.set.theme !== undefined) { S.set.theme = d.set.theme; applyTheme(d.set.theme); }
+        if (d.set.banner !== undefined) S.set.banner = d.set.banner;
+        if (d.set.dailyDone !== undefined) S.set.dailyDone = d.set.dailyDone;
+        if (d.set.dailyCount !== undefined) S.dailyCount = d.set.dailyCount;
       }
     } else {
       loadFromLocalStorage();
@@ -2759,7 +3164,6 @@ function _renderTrainerCardInner(wrap){
   const favKey=S.set.cardFavKey&&S.favs.has(S.set.cardFavKey)?S.set.cardFavKey:[...S.favs][0];
   const favBaseId=favKey?parseInt(String(favKey).split('_')[0]):null;
   const favPoke=favBaseId&&!isNaN(favBaseId)?S.poke.find(p=>p.id===favBaseId):null;
-  const allFavs=[...new Set([...S.favs].map(k=>parseInt(String(k).split('_')[0])))].map(id=>S.poke.find(p=>p.id===id)).filter(Boolean);
   const trainerId=String(name).split('').reduce((a,c)=>a+c.charCodeAt(0),10000).toString().slice(-5);
   const typeIconUrl=t=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-viii/sword-shield/${TYPE_ID[t]||1}.png`;
   const r=parseInt(topTypeColor.slice(1,3),16);
@@ -2769,47 +3173,109 @@ function _renderTrainerCardInner(wrap){
   const heroText=luminance>0.6?'rgba(0,0,0,0.85)':'#fff';
   const heroSub=luminance>0.6?'rgba(0,0,0,0.55)':'rgba(255,255,255,0.75)';
 
-  const favPickerHTML='';
+  // Banner
+  const bannerId=S.set.banner||'route';
+  const banner=BANNERS[bannerId]||BANNERS.route;
+  const bannerSVG=banner.svg.replace('viewBox="0 0 400 120"','viewBox="0 0 400 120" width="100%" height="140" preserveAspectRatio="xMidYMid slice"');
+
+  // Achievements
+  const unlocked=getUnlockedAchievements();
+
+  // Daily challenge
+  const daily=getDailyChallenge();
+  const dailyDone=isDailyChallengeCompleted();
 
   wrap.innerHTML=`
-  <div style="border-radius:24px;overflow:hidden;box-shadow:0 12px 40px rgba(${r},${g2},${b},0.35);margin-bottom:16px;border:2px solid rgba(${r},${g2},${b},0.3)">
-    <div style="background:linear-gradient(135deg,${topTypeColor} 0%,rgba(${r},${g2},${b},0.75) 100%);min-height:160px;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;padding:0">
+  <div style="border-radius:24px;overflow:hidden;box-shadow:0 12px 40px rgba(${r},${g2},${b},0.3);margin-bottom:16px;border:2px solid rgba(${r},${g2},${b},0.25)">
 
-      <div style="padding:18px 18px 16px;flex:1;position:relative;z-index:2">
-        <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${heroSub};margin-bottom:6px">Trainer Card · ID ${trainerId}</div>
-        <div style="font-size:36px;font-weight:900;color:${heroText};letter-spacing:-.5px;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.15)">${name}</div>
-        ${isShinyHunter?`<div style="margin-top:8px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,215,0,0.25);border:1.5px solid rgba(255,215,0,0.6);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;color:#FFD700">✦ Shiny Hunter</div>`:''}
-      </div>
-      <div style="display:flex;align-items:flex-end;flex-shrink:0;padding-right:8px;position:relative;z-index:2">
-        ${favPoke?`<img src="${favPoke.id<=649?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${favPoke.id}.gif`:iPx(favPoke.id)}" style="width:90px;height:90px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))" onerror="this.src='${iPx(favPoke.id)}';this.onerror=null">`:''}
-        <img src="${sprite}" style="width:130px;height:130px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))" onerror="this.style.display='none'">
+    <!-- HERO with pixel-art banner -->
+    <div style="position:relative;overflow:hidden;min-height:140px">
+      <!-- Banner SVG background -->
+      <div style="position:absolute;inset:0;overflow:hidden">${bannerSVG}</div>
+      <!-- Color overlay -->
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(${r},${g2},${b},0.75) 0%,rgba(${r},${g2},${b},0.4) 100%)"></div>
+      <!-- Content -->
+      <div style="position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;min-height:140px">
+        <div style="padding:18px 18px 16px;flex:1">
+          <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${heroSub};margin-bottom:6px">Trainer Card · ID ${trainerId}</div>
+          <div style="font-size:36px;font-weight:900;color:${heroText};letter-spacing:-.5px;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.2)">${name}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+            ${isShinyHunter?`<div style="background:rgba(255,215,0,0.25);border:1.5px solid rgba(255,215,0,0.6);border-radius:20px;padding:3px 8px;font-size:9px;font-weight:800;color:#FFD700">✦ Shiny Hunter</div>`:''}
+            ${dailyDone?`<div style="background:rgba(107,203,139,0.25);border:1.5px solid rgba(107,203,139,0.6);border-radius:20px;padding:3px 8px;font-size:9px;font-weight:800;color:#6BCB8B;display:flex;align-items:center;gap:4px">${achievementIcon('calendar',10,'#6BCB8B')} Reto completado</div>`:''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-end;flex-shrink:0;padding-right:8px">
+          ${favPoke?`<img src="${favPoke.id<=649?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${favPoke.id}.gif`:iPx(favPoke.id)}" style="width:90px;height:90px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))" onerror="this.src='${iPx(favPoke.id)}';this.onerror=null">`:''}
+          <img src="${sprite}" style="width:130px;height:130px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))" onerror="this.style.display='none'">
+        </div>
       </div>
     </div>
+
+    <!-- BODY -->
     <div style="background:var(--s1);padding:16px">
+
+      <!-- Maestro tipo -->
       ${topTypeName?`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(${r},${g2},${b},0.08);border-radius:16px;border:1.5px solid rgba(${r},${g2},${b},0.2);margin-bottom:14px">
-        <img src="${typeIconUrl(topTypeName)}" style="width:44px;height:44px;border-radius:10px;object-fit:contain;flex-shrink:0" onerror="this.style.opacity='.3'">
+        <img src="${typeIconUrl(topTypeName)}" style="width:44px;height:44px;border-radius:10px;object-fit:contain" onerror="this.style.opacity='.3'">
         <div><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px">Entrenador Maestro</div>
-        <div style="font-size:22px;font-weight:900;color:${topTypeColor};line-height:1.2">Tipo ${topTypeLabel}</div></div>
+        <div style="font-size:22px;font-weight:900;color:${topTypeColor}">Tipo ${topTypeLabel}</div></div>
       </div>`:''}
+
+      <!-- Stats -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
         <div style="background:var(--bg);border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:28px;font-weight:900;color:var(--t1);line-height:1">${totalCap}</div><div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">Capturados</div></div>
         <div style="background:var(--bg);border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:28px;font-weight:900;color:var(--gold);line-height:1">${totalShiny}</div><div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">Shiny</div></div>
         <div style="background:var(--bg);border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:28px;font-weight:900;color:var(--t1);line-height:1">${gamesWithData.length}</div><div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">Juegos</div></div>
       </div>
+
+      <!-- Pokédex progress -->
       <div style="background:var(--bg);border-radius:14px;padding:12px 14px;margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;font-weight:800;color:var(--t2)">Pokédex</span><span style="font-size:11px;font-weight:800;color:${topTypeColor}">${totalCap} / ${S.poke.length} · ${pct}%</span></div>
         <div style="height:10px;background:rgba(0,0,0,.07);border-radius:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${topTypeColor},rgba(${r},${g2},${b},0.5));border-radius:5px;min-width:${pct>0?'10px':'0'}"></div></div>
       </div>
-      ${topTypes.length?`<div style="background:var(--bg);border-radius:14px;padding:12px 14px;margin-bottom:0">
+
+      <!-- Tipos capturados -->
+      ${topTypes.length?`<div style="background:var(--bg);border-radius:14px;padding:12px 14px;margin-bottom:14px">
         <div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Tipos capturados</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${topTypes.slice(0,9).map(([t,n])=>{const ti=TYPES.find(x=>x.id===t);const tc=ti?.c||'#888';return `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;background:${tc}18;border:1.5px solid ${tc}44"><img src="${typeIconUrl(t)}" style="width:22px;height:22px;object-fit:contain;border-radius:4px" onerror="this.style.display='none'"><span style="font-size:12px;font-weight:800;color:${tc}">${ti?.n||t}</span><span style="font-size:11px;font-weight:700;color:${tc};opacity:.7">${n}</span></div>`;}).join('')}
+          ${topTypes.slice(0,9).map(([t,n])=>{const ti=TYPES.find(x=>x.id===t);const tc2=ti?.c||'#888';return `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;background:${tc2}18;border:1.5px solid ${tc2}44"><img src="${typeIconUrl(t)}" style="width:22px;height:22px;object-fit:contain;border-radius:4px" onerror="this.style.display='none'"><span style="font-size:12px;font-weight:800;color:${tc2}">${ti?.n||t}</span><span style="font-size:11px;font-weight:700;color:${tc2};opacity:.7">${n}</span></div>`;}).join('')}
         </div>
       </div>`:''}
-      ${favPickerHTML}
+
+      <!-- Daily challenge -->
+      <div style="background:var(--bg);border-radius:14px;padding:12px 14px;margin-bottom:14px">
+        <div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Reto de hoy</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:${dailyDone?'rgba(107,203,139,.15)':'rgba('+r+','+g2+','+b+',.1)'};border:2px solid ${dailyDone?'var(--green)':'rgba('+r+','+g2+','+b+',.3)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            ${dailyDone?achievementIcon('calendar',16,'var(--green)'):achievementIcon('calendar',16,topTypeColor)}
+          </div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:var(--t1)">${daily.label}</div>
+            <div style="font-size:10px;color:var(--t3);margin-top:2px">${dailyDone?'✓ Completado hoy':'Se resetea mañana'}</div>
+          </div>
+          ${!dailyDone?`<button id="daily-complete-btn" onclick="completeDailyChallenge()" style="padding:7px 12px;border-radius:var(--r-md);border:none;background:rgba(${r},${g2},${b},0.1);color:${topTypeColor};font-size:11px;font-weight:800;font-family:var(--fn);cursor:pointer;display:flex;align-items:center;gap:5px;flex-shrink:0">${achievementIcon('calendar',12,topTypeColor)} Marcar</button>`:''}
+        </div>
+      </div>
+
+      <!-- Achievements -->
+      ${unlocked.length?`<div style="background:var(--bg);border-radius:14px;padding:12px 14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px">Logros (${unlocked.length}/${ACHIEVEMENTS.length})</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${unlocked.map(a=>`<div title="${a.name}: ${a.desc}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:help">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(${r},${g2},${b},0.1);border:1.5px solid rgba(${r},${g2},${b},0.25);display:flex;align-items:center;justify-content:center">
+              ${achievementIcon(a.icon,20,topTypeColor)}
+            </div>
+            <span style="font-size:8px;font-weight:700;color:var(--t3);text-align:center;max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name}</span>
+          </div>`).join('')}
+        </div>
+      </div>`:``}
+
     </div>
   </div>`;
 }
+
 
 
 
@@ -2883,6 +3349,44 @@ function updateTrainerUI(){
 }
 
 function renderSettings(){
+  // Theme grid
+  const themeGrid=document.getElementById('theme-grid');
+  if(themeGrid){
+    const cur=S.set.theme||'magenta';
+    themeGrid.innerHTML=Object.entries(THEMES).map(([id,t])=>`
+      <button onclick="setTheme('${id}')" style="
+        display:flex;align-items:center;gap:6px;
+        padding:7px 12px;border-radius:var(--r-md);
+        border:2px solid ${cur===id?t.ac:'transparent'};
+        background:${t.bg};cursor:pointer;font-family:var(--fn);
+        box-shadow:${cur===id?`0 4px 12px ${t.ac}44`:'var(--shadow)'};
+        transition:all .15s;
+      ">
+        <div style="width:14px;height:14px;border-radius:50%;background:${t.ac};flex-shrink:0"></div>
+        <span style="font-size:11px;font-weight:700;color:${t.ac}">${t.name}</span>
+      </button>`).join('');
+  }
+
+  // Banner grid
+  const bannerGrid=document.getElementById('banner-grid');
+  if(bannerGrid){
+    const cur=S.set.banner||'route';
+    bannerGrid.innerHTML=Object.entries(BANNERS).map(([id,b])=>`
+      <button onclick="setBanner('${id}')" style="
+        border-radius:var(--r-md);overflow:hidden;
+        border:3px solid ${cur===id?'var(--ac)':'transparent'};
+        cursor:pointer;padding:0;background:none;
+        box-shadow:${cur===id?'0 4px 12px rgba(0,0,0,.2)':'var(--shadow)'};
+        transition:all .15s;display:block;width:100%;
+      ">
+        <div style="position:relative">
+          ${b.svg.replace('viewBox="0 0 400 120"','viewBox="0 0 400 120" width="100%" height="80"')}
+          <div style="position:absolute;bottom:6px;left:8px;background:rgba(0,0,0,.5);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;color:#fff">${b.name}</div>
+          ${cur===id?'<div style="position:absolute;top:6px;right:6px;background:var(--ac);border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>':''}
+        </div>
+      </button>`).join('');
+  }
+
   // Trainer profile
   const sprite=trainerSprite();
   const name=trainerDisplayName();
@@ -2892,28 +3396,22 @@ function renderSettings(){
   if(nameDisplay)nameDisplay.textContent=name;
   const nameInput=document.getElementById('trainer-name-input');
   if(nameInput&&!nameInput.matches(':focus'))nameInput.value=S.set.trainerName||'';
-  // Stats
   const statsEl=document.getElementById('trainer-stats-display');
   if(statsEl){
-    const cap=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch{return false;}}).length;
-    const shy=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch{return false;}}).length;
-    const teams=GAMES.reduce((acc,g)=>acc+(S.teams[g.id]?.length||0),0);
-    statsEl.textContent=`${cap} capturados · ${shy} shiny · ${teams} en equipo`;
+    const capCount=countCap({track:S.track});
+    const shinyCount=countShiny({track:S.track});
+    const teamCount=GAMES.reduce((a,g)=>a+(S.teams[g.id]?.length||0),0);
+    statsEl.textContent=`${capCount} capturados · ${shinyCount} shiny · ${teamCount} en equipo`;
   }
-  // Gender buttons
   const g=S.set.trainerGender||'male';
   ['male','female','nb'].forEach(id=>{
     document.getElementById(`tg-${id}`)?.classList.toggle('on',g===id);
   });
-
-  // Cols slider
   const cols=S.set.cols||3;
   const slider=document.getElementById('cols-slider');
   const colsVal=document.getElementById('cols-val');
   if(slider)slider.value=cols;
   if(colsVal)colsVal.textContent=cols;
-
-  // Sprite toggle
   const tog=document.getElementById('sprite-toggle');
   if(tog)tog.className=`cfg-toggle${!S.set.modern?' on':''}`;
   const modImg=document.getElementById('prev-img-modern');
@@ -2924,8 +3422,6 @@ function renderSettings(){
   const prevP=document.getElementById('prev-pixel');
   if(prevM)prevM.className=`cfg-preview${S.set.modern?' on':''}`;
   if(prevP)prevP.className=`cfg-preview${!S.set.modern?' on':''}`;
-
-  // My games
   const grid=document.getElementById('my-games-grid');
   if(!grid)return;
   const selected=S.set.myGames||[];
@@ -2939,10 +3435,7 @@ function renderSettings(){
         ${g.n}
       </button>`;
     }).join('');
-    return`<div class="mygames-gen">
-      <div class="mygames-gen-lbl">${GNS[gen]}</div>
-      <div class="mygames-row">${chips}</div>
-    </div>`;
+    return`<div class="mygames-gen"><div class="mygames-gen-lbl">${GNS[gen]}</div><div class="mygames-row">${chips}</div></div>`;
   }).join('');
 }
 
@@ -3417,8 +3910,9 @@ function buildVariantSection(base, forms){
     </div>`;
   }
 
-  // Only show variants section if there are multiple forms
-  const hasMultipleForms = allForms.length > 1;
+  // Only show variants section if there are real multiple forms (not the fallback single)
+  const hasMultipleForms = forms.length > 1;
+  const formChips = allForms.map(f=>makeChip(f)).join('');
   const formSection = hasMultipleForms ? `<div class="vsec">
     <div class="slbl">Variantes${loading}</div>
     <div class="vrow">${formChips}</div>
@@ -3661,6 +4155,8 @@ function checkPassword(){
 
   // Apply saved columns setting
   applyColsSetting();
+  // Apply saved theme
+  applyTheme(S.set.theme||'magenta');
   // Apply trainer UI
   setTimeout(()=>updateTrainerUI(), 0);
 
