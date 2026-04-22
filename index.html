@@ -612,7 +612,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:6px">
-    <img id="hdr-trainer-img" src="" style="width:36px;height:36px;object-fit:contain;image-rendering:pixelated;display:none">
+    <img id="hdr-trainer-img" src="" style="width:36px;height:36px;object-fit:contain;image-rendering:pixelated;display:none" onerror="this.src='https://play.pokemonshowdown.com/sprites/trainers/youngster.png';this.onerror=null">
     <button class="ibtn" id="sprbtn" onclick="toggleSprite()" title="Modo sprite">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
   </button>
@@ -673,7 +673,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 <div class="pg" id="pg-team">
   <div class="phdr">
     <div style="display:flex;align-items:center;gap:10px">
-      <img id="team-trainer-img" src="" style="width:52px;height:52px;object-fit:contain;image-rendering:pixelated;display:none">
+      <img id="team-trainer-img" src="" style="width:52px;height:52px;object-fit:contain;image-rendering:pixelated;display:none" onerror="this.src='https://play.pokemonshowdown.com/sprites/trainers/youngster.png';this.onerror=null">
       <div>
         <div class="ptitle" id="team-page-title">Mi Equipo</div>
         <div class="psub" id="tsub">0 / 6</div>
@@ -702,7 +702,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
     <!-- Trainer Profile -->
     <div class="cfg-card" style="background:linear-gradient(135deg,var(--ac) 0%,var(--ac2) 100%);color:#fff">
       <div style="display:flex;align-items:center;gap:14px">
-        <img id="trainer-avatar-big" src="" style="width:72px;height:72px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))">
+        <img id="trainer-avatar-big" src="" style="width:72px;height:72px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))" onerror="this.src='https://play.pokemonshowdown.com/sprites/trainers/youngster.png';this.onerror=null">
         <div style="flex:1;min-width:0">
           <div style="font-size:11px;font-weight:700;opacity:.8;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px">Entrenador</div>
           <div id="trainer-name-display" style="font-size:22px;font-weight:900;letter-spacing:-.3px">—</div>
@@ -769,6 +769,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
     <div style="height:20px"></div>
   </div>
 </div>
+
+<nav class="tabs">
   <button class="tab on" id="tb-dex" onclick="goTab('dex')">
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
     <span class="tab-lbl">Pokédex</span>
@@ -1944,10 +1946,11 @@ const genOf=id=>id<=151?1:id<=251?2:id<=386?3:id<=493?4:id<=649?5:id<=721?6:id<=
 const BALL_IMG=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${id}-ball.png`;
 
 // ── TRAINER SPRITES ──
+// Pokemon Showdown trainer sprites (reliable, comprehensive)
 const TRAINER_SPRITES={
-  male:  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/red.png',
-  female:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/leaf.png',
-  nb:    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/dawn.png',
+  male:  'https://play.pokemonshowdown.com/sprites/trainers/red.png',
+  female:'https://play.pokemonshowdown.com/sprites/trainers/leaf.png',
+  nb:    'https://play.pokemonshowdown.com/sprites/trainers/dawn.png',
 };
 function trainerSprite(){return TRAINER_SPRITES[S.set.trainerGender||'male'];}
 function trainerDisplayName(){const n=(S.set.trainerName||'').trim();return n||(S.set.trainerGender==='female'?'Leaf':S.set.trainerGender==='nb'?'Dawn':'Red');}
