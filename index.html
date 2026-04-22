@@ -1935,20 +1935,19 @@ const db = firebase.firestore();
 let currentUser = null;
 let syncTimeout = null;
 
-// Handle redirect result (called after Google redirects back to the app)
-auth.getRedirectResult().catch(err => {
-  console.error('Redirect result error:', err);
-});
-
 // ── AUTH FUNCTIONS ──
 function signInWithGoogle() {
   document.getElementById('auth-loading').classList.add('on');
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider).catch(err => {
-    console.error('Sign-in error:', err);
-    document.getElementById('auth-loading').classList.remove('on');
-    alert('Error al iniciar sesión. Inténtalo de nuevo.');
-  });
+  auth.signInWithPopup(provider)
+    .then(()=>{ document.getElementById('auth-loading').classList.remove('on'); })
+    .catch(err => {
+      console.error('Sign-in error:', err);
+      document.getElementById('auth-loading').classList.remove('on');
+      if(err.code !== 'auth/popup-closed-by-user'){
+        alert('Error al iniciar sesión: ' + err.message);
+      }
+    });
 }
 
 function signOut() {
@@ -2966,7 +2965,7 @@ function doNota(pid,gid,val){
 //  PASSWORD GATE
 // ═══════════════════════════════════════
 const PW_KEY='pkp_auth';
-const CORRECT_PW='Pokemon2026'; // ← cambia esto
+const CORRECT_PW='tu_contraseña_aqui'; // ← cambia esto
 
 function isPwUnlocked(){ return sessionStorage.getItem(PW_KEY)==='1'; }
 function setPwUnlocked(){ sessionStorage.setItem(PW_KEY,'1'); }
