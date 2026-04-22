@@ -891,8 +891,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
   </div>
 </div>
 
-<div id="walker-wrap" style="position:fixed;bottom:0;left:0;right:0;height:72px;pointer-events:none;z-index:200;overflow:hidden">
-  <img id="walker-img" style="position:absolute;bottom:18px;width:40px;height:40px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));pointer-events:all;cursor:pointer" onclick="walkerClick()">
+<div id="walker-wrap" style="position:fixed;bottom:0;left:0;right:0;pointer-events:none;z-index:200">
+  <img id="walker-img" style="position:absolute;width:40px;height:40px;object-fit:contain;image-rendering:pixelated;pointer-events:all;cursor:pointer" onclick="walkerClick()">
 </div>
 
 <nav class="tabs">
@@ -2292,6 +2292,10 @@ function walkerMove(){
   const img=document.getElementById('walker-img');
   if(!img)return;
 
+  // Get nav height to position walker on top of it
+  const nav=document.querySelector('.tabs');
+  const navH=nav?nav.offsetHeight:60;
+
   // Random pause
   if(!_walkerState.paused&&!_walkerState.jumping&&Math.random()<0.008){
     _walkerState.paused=true;
@@ -2299,16 +2303,16 @@ function walkerMove(){
     _walkerState.pauseTimer=setTimeout(()=>{_walkerState.paused=false;},800+Math.random()*2200);
   }
 
-  // Random jump trigger
-  if(!_walkerState.jumping&&!_walkerState.paused&&Math.random()<0.004){
+  // Random jump — much less frequent (0.0008 = ~every 80s at 60fps)
+  if(!_walkerState.jumping&&!_walkerState.paused&&Math.random()<0.0008){
     _walkerState.jumping=true;
-    _walkerState.jumpVel=4+Math.random()*3;
+    _walkerState.jumpVel=5+Math.random()*3;
   }
 
   // Physics jump
   if(_walkerState.jumping){
     _walkerState.jumpY+=_walkerState.jumpVel;
-    _walkerState.jumpVel-=0.35;
+    _walkerState.jumpVel-=0.4;
     if(_walkerState.jumpY<=0){
       _walkerState.jumpY=0;
       _walkerState.jumpVel=0;
@@ -2316,15 +2320,13 @@ function walkerMove(){
     }
   }
 
-  // Random shiny switch (rare, ~every ~20s at 60fps)
+  // Random shiny switch
   if(Math.random()<0.0008){
     _walkerState.shiny=!_walkerState.shiny;
-    const newSrc=walkerSrc(_walkerState.pokeId,_walkerState.shiny);
-    img.src=newSrc;
-    // Sparkle effect when going shiny
+    img.src=walkerSrc(_walkerState.pokeId,_walkerState.shiny);
     if(_walkerState.shiny){
-      img.style.filter='drop-shadow(0 0 6px gold) drop-shadow(0 2px 4px rgba(0,0,0,.25))';
-      setTimeout(()=>{img.style.filter='drop-shadow(0 2px 4px rgba(0,0,0,.25))';},1500);
+      img.style.filter='drop-shadow(0 0 5px gold)';
+      setTimeout(()=>{img.style.filter='';},1500);
     }
   }
 
@@ -2337,7 +2339,8 @@ function walkerMove(){
   }
 
   img.style.left=`${_walkerState.x}%`;
-  img.style.bottom=`${18+_walkerState.jumpY}px`;
+  // Sit on top of nav bar + jump offset
+  img.style.bottom=`${navH+_walkerState.jumpY}px`;
   img.style.transform=`scaleX(${_walkerState.dir>0?1:-1})`;
 
   _walkerState.moveTimer=requestAnimationFrame(walkerMove);
