@@ -2015,7 +2015,7 @@ async function loadUserData(uid) {
     if (doc.exists) {
       const d = doc.data();
       S.track = d.track || {};
-      S.favs = new Set(d.favs || []);
+      S.favs = new Set((d.favs || []).map(String));
       S.teams = sanitizeTeams(d.teams || {});
       if (d.set) Object.assign(S.set, d.set);
     } else {
@@ -2045,7 +2045,7 @@ function sanitizeTeams(raw){
 
 function loadFromLocalStorage() {
   try { S.track = JSON.parse(localStorage.getItem('t')) || {}; } catch { S.track = {}; }
-  try { S.favs = new Set(JSON.parse(localStorage.getItem('fv')) || []); } catch { S.favs = new Set(); }
+  try { S.favs = new Set((JSON.parse(localStorage.getItem('fv')) || []).map(String)); } catch { S.favs = new Set(); }
   try { S.teams = sanitizeTeams(JSON.parse(localStorage.getItem('tms')||'{}')); } catch { S.teams = {}; }
   try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch {}
 }
@@ -2152,7 +2152,7 @@ function updateHeaderUser(user) {
 const isCap=id=>{const t=S.track[id];return t&&Object.values(t).some(g=>g.captured);};
 const isShy=id=>{const t=S.track[id];return t&&Object.values(t).some(g=>g.shiny);};
 const isFav=key=>S.favs.has(String(key));
-const isAnyFav=id=>[...S.favs].some(k=>parseInt(k.split('_')[0])===id);
+const isAnyFav=id=>[...S.favs].some(k=>parseInt(String(k).split('_')[0])===id);
 // Team slot = {pokeId, formId, isShiny}  formId=pokeApi form id (int), isShiny=bool
 const slotKey=(slot)=>`${slot.pokeId}_${slot.formId||slot.pokeId}_${slot.isShiny?'s':'n'}`;
 const inTm=id=>GAMES.some(g=>(S.teams[g.id]||[]).some(s=>s.pokeId===id));
@@ -2982,7 +2982,7 @@ function doNota(pid,gid,val){
 //  PASSWORD GATE
 // ═══════════════════════════════════════
 const PW_KEY='pkp_auth';
-const CORRECT_PW='tu_contraseña_aqui'; // ← cambia esto
+const CORRECT_PW='Pokemon2026'; // ← cambia esto
 
 function isPwUnlocked(){ return localStorage.getItem(PW_KEY)==='1'; }
 function setPwUnlocked(){ localStorage.setItem(PW_KEY,'1'); }
