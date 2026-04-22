@@ -1952,6 +1952,7 @@ function signInWithGoogle() {
 
 function signOut() {
   closeUserMenu();
+  localStorage.removeItem(PW_KEY);
   auth.signOut();
 }
 
@@ -2066,6 +2067,7 @@ function loadFormsCache() {
 // ── AUTH STATE LISTENER ──
 auth.onAuthStateChanged(async user => {
   if (user && isPwUnlocked()) {
+    // Fully authenticated — show app
     currentUser = user;
     await loadUserData(user.uid);
     document.getElementById('auth-screen').classList.add('hidden');
@@ -2081,20 +2083,27 @@ auth.onAuthStateChanged(async user => {
     }
     setTimeout(fetchTypesInBackground, 1500);
   } else if (user && !isPwUnlocked()) {
-    // Has Google session but hasn't entered password this session
-    currentUser = user; // keep user ref but show password gate
+    // Google session exists but password not entered — ask for password
+    currentUser = user;
     document.getElementById('app').style.display='none';
     document.getElementById('auth-screen').classList.remove('hidden');
     document.getElementById('pw-step').style.display='flex';
     document.getElementById('google-step').style.display='none';
     setTimeout(()=>document.getElementById('pw-input')?.focus(),100);
   } else {
+    // Not logged in — show password gate
     currentUser = null;
     document.getElementById('app').style.display='none';
     document.getElementById('auth-screen').classList.remove('hidden');
-    document.getElementById('pw-step').style.display='flex';
-    document.getElementById('google-step').style.display='none';
-    setTimeout(()=>document.getElementById('pw-input')?.focus(),100);
+    // If password already unlocked, skip to Google step
+    if(isPwUnlocked()){
+      document.getElementById('pw-step').style.display='none';
+      document.getElementById('google-step').style.display='flex';
+    } else {
+      document.getElementById('pw-step').style.display='flex';
+      document.getElementById('google-step').style.display='none';
+      setTimeout(()=>document.getElementById('pw-input')?.focus(),100);
+    }
   }
 });
 
@@ -2967,8 +2976,8 @@ function doNota(pid,gid,val){
 const PW_KEY='pkp_auth';
 const CORRECT_PW='tu_contraseña_aqui'; // ← cambia esto
 
-function isPwUnlocked(){ return sessionStorage.getItem(PW_KEY)==='1'; }
-function setPwUnlocked(){ sessionStorage.setItem(PW_KEY,'1'); }
+function isPwUnlocked(){ return localStorage.getItem(PW_KEY)==='1'; }
+function setPwUnlocked(){ localStorage.setItem(PW_KEY,'1'); }
 
 function checkPassword(){
   const input=document.getElementById('pw-input');
@@ -2977,10 +2986,8 @@ function checkPassword(){
     err.style.display='none';
     input.style.animation='';
     setPwUnlocked();
-    // Show Google login step
     document.getElementById('pw-step').style.display='none';
-    const gs=document.getElementById('google-step');
-    gs.style.display='flex';
+    document.getElementById('google-step').style.display='flex';
   } else {
     err.style.display='block';
     input.value='';
