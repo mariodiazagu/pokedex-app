@@ -2066,7 +2066,7 @@ function loadFormsCache() {
 
 // ── AUTH STATE LISTENER ──
 auth.onAuthStateChanged(async user => {
-  if (user) {
+  if (user && isPwUnlocked()) {
     currentUser = user;
     await loadUserData(user.uid);
     document.getElementById('auth-screen').classList.add('hidden');
@@ -2081,9 +2081,16 @@ auth.onAuthStateChanged(async user => {
       GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
     }
     setTimeout(fetchTypesInBackground, 1500);
+  } else if (user && !isPwUnlocked()) {
+    // Has Google session but hasn't entered password this session
+    currentUser = user; // keep user ref but show password gate
+    document.getElementById('app').style.display='none';
+    document.getElementById('auth-screen').classList.remove('hidden');
+    document.getElementById('pw-step').style.display='flex';
+    document.getElementById('google-step').style.display='none';
+    setTimeout(()=>document.getElementById('pw-input')?.focus(),100);
   } else {
     currentUser = null;
-    // Always show password gate when not logged in
     document.getElementById('app').style.display='none';
     document.getElementById('auth-screen').classList.remove('hidden');
     document.getElementById('pw-step').style.display='flex';
@@ -2959,7 +2966,10 @@ function doNota(pid,gid,val){
 //  PASSWORD GATE
 // ═══════════════════════════════════════
 const PW_KEY='pkp_auth';
-const CORRECT_PW='Pokemon2026'; // ← cambia esto por tu contraseña
+const CORRECT_PW='Pokemon2026'; // ← cambia esto
+
+function isPwUnlocked(){ return sessionStorage.getItem(PW_KEY)==='1'; }
+function setPwUnlocked(){ sessionStorage.setItem(PW_KEY,'1'); }
 
 function checkPassword(){
   const input=document.getElementById('pw-input');
@@ -2967,6 +2977,7 @@ function checkPassword(){
   if(input.value===CORRECT_PW){
     err.style.display='none';
     input.style.animation='';
+    setPwUnlocked();
     // Show Google login step
     document.getElementById('pw-step').style.display='none';
     const gs=document.getElementById('google-step');
