@@ -136,7 +136,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 
 /* ── GRID ── */
 .gscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 12px;padding-bottom:calc(12px + var(--sb));overscroll-behavior:contain}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
 .sentinel{height:1px;width:100%}
 
 /* ── CARD ── */
@@ -265,26 +265,27 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 .gchev.on{transform:rotate(90deg)}
 .gtitle{font-size:14px;font-weight:700;color:var(--t1)}
 .gbadge{background:rgba(107,203,139,.15);color:var(--green);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
-.ggames{padding:0 10px 10px;display:none;flex-direction:column;gap:6px}
+.ggames{padding:0 10px 10px;display:none;flex-direction:column;gap:8px}
 .ggames.on{display:flex}
-.grow{background:var(--bg);border-radius:var(--r-sm);padding:9px 10px;border:1.5px solid var(--bd)}
-.grow.hd{border-color:rgba(107,203,139,.4);background:rgba(107,203,139,.04)}
-.gtop{display:flex;align-items:center;gap:7px}
-.gdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.gname{flex:1;font-size:12px;font-weight:700;color:var(--t1)}
-.gacts{display:flex;gap:4px}
-.abtn{
-  width:32px;height:32px;border-radius:10px;
-  background:var(--s2);border:none;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;opacity:.35;transition:all .12s;color:var(--t2);
-}
-.abtn.on{opacity:1}
-.abtn.cap.on{background:rgba(107,203,139,.15);color:var(--green)}
-.abtn.shy.on{background:rgba(232,24,74,.12);color:var(--gold)}
-.abtn.box.on{background:rgba(123,184,244,.15);color:var(--blue)}
-.abtn.ball.on{background:var(--acg);color:var(--t1)}
-.abtn.note.on{background:rgba(196,181,244,.15);color:var(--ac3)}
+/* ── NEW GAME ROW ── */
+.grow{background:var(--bg);border-radius:var(--r-md);padding:12px;border:2px solid var(--bd);transition:all .15s}
+.grow.hd{border-color:rgba(107,203,139,.4);background:rgba(107,203,139,.03)}
+.grow-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.grow-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.grow-name{font-size:13px;font-weight:800;color:var(--t1);flex:1}
+.grow-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.grow-tag.cap{background:rgba(107,203,139,.15);color:var(--green)}
+.grow-tag.shy{background:rgba(245,200,66,.15);color:var(--gold)}
+.grow-btns{display:flex;gap:6px;margin-bottom:8px}
+.grow-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 6px;border-radius:var(--r-sm);border:2px solid var(--bd);background:var(--s2);font-size:11px;font-weight:700;color:var(--t3);font-family:var(--fn);cursor:pointer;transition:all .13s}
+.grow-btn.on{background:var(--gbg,var(--acg));border-color:var(--gc,var(--ac));color:var(--gc,var(--ac))}
+.grow-btn:active{transform:scale(.95)}
+.grow-level{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.grow-level-lbl{font-size:11px;font-weight:700;color:var(--t2)}
+.grow-extras{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.grow-extra-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:var(--r-sm);border:2px solid var(--bd);background:var(--s2);font-size:11px;font-weight:700;color:var(--t3);font-family:var(--fn);cursor:pointer;transition:all .13s}
+.grow-extra-btn.on{background:var(--acg);border-color:var(--ac);color:var(--t1)}
+.abtn{display:none}
 
 /* ── BALLS ── */
 .bsec{margin-top:7px;display:none}
@@ -471,7 +472,39 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 .vchip-badge{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .vchip-badge.team{background:rgba(123,184,244,.2)}
 
-/* ── FLAVOR TEXT ── */
+/* ── TRAINER ── */
+.trainer-gender-btn{
+  flex:1;padding:8px 4px;border-radius:var(--r-sm);border:2px solid rgba(255,255,255,.35);
+  background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;
+  font-family:var(--fn);cursor:pointer;transition:all .13s;backdrop-filter:blur(8px);
+}
+.trainer-gender-btn.on{background:rgba(255,255,255,.35);border-color:rgba(255,255,255,.8)}
+.trainer-gender-btn:active{transform:scale(.95)}
+/* Header trainer info */
+.hdr-trainer{display:flex;align-items:center;gap:7px;min-width:0}
+.hdr-trainer-img{width:32px;height:32px;object-fit:contain;image-rendering:pixelated}
+.hdr-trainer-info{min-width:0}
+.hdr-trainer-lbl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px}
+.hdr-trainer-name{font-size:16px;font-weight:900;letter-spacing:-.3px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfg-card{background:var(--s1);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cfg-label{font-size:15px;font-weight:800;color:var(--t1)}
+.cfg-sub{font-size:12px;color:var(--t3);font-weight:500;margin-top:2px}
+.cfg-toggle{width:48px;height:28px;border-radius:14px;background:var(--s3);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.cfg-toggle.on{background:var(--ac)}
+.cfg-toggle-knob{width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.cfg-toggle.on .cfg-toggle-knob{transform:translateX(20px)}
+.cfg-preview{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;border-radius:var(--r-md);background:var(--bg);border:2px solid transparent;transition:all .15s}
+.cfg-preview.on{border-color:var(--ac);background:rgba(232,24,74,.05)}
+.cfg-preview-lbl{font-size:10px;font-weight:700;color:var(--t2)}
+/* My games grid */
+.mygames-gen{margin-bottom:14px}
+.mygames-gen:last-child{margin-bottom:0}
+.mygames-gen-lbl{font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.mygames-row{display:flex;gap:6px;flex-wrap:wrap}
+.mygame-chip{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:var(--r-md);background:var(--bg);border:2px solid var(--bd);cursor:pointer;font-family:var(--fn);transition:all .15s;font-size:12px;font-weight:700;color:var(--t2)}
+.mygame-chip.on{border-color:var(--tgc,var(--ac));background:color-mix(in srgb,var(--tgc,var(--ac)) 12%,#fff);color:var(--t1)}
+.mygame-chip:active{transform:scale(.94)}
 .hdesc{
   margin:12px 16px 0;padding:12px 14px;
   background:rgba(255,255,255,.6);border-radius:var(--r-md);
@@ -572,14 +605,18 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
     <div class="hdr-logo">
       <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAEG0lEQVR42r2UW0yTdxjGf1+hLT0ELJYCpQiYDkSo022Cp6hkmDHdFLdpohlmcVnmLrZkZm4XGqMb3izcLvFm2bKZhZ0k0zHDTio6dYhMwIpIW1cOHuiHLW0ptN/X778LowvJjLtY9ly9yZv88r558jzwH0t62OKZpeuEQWdCSAYiiTixZByn044hqUBaxdvnxTc9Kj0SWOdZLkps8yiyFHAjGCKk6rEXucixmug/e5IljrkYtSRGm5VJo8pHZ76UHgrctm6z2Fr3Ih53NV8d+Rb/qEzZE6sYuyVjljTMyRhvbH4WSzrFxYuX6PYPMKiF+OT8Nw84uvvD1sc3iuw7ZhrXbOTYN8cZURNsfXsXV4Z6qVm6kMXVJSSJULi2iuzGFeRb8lm/YA2LpWLeqtkm7nMyH5DDsKOpiX179jOSCHP4+0+ZliAxo9D40pP0/HidEx1fc7mri8VFlehiYIhLNJTW0PLdYarnlIgrkaCUATDfWih2bXmN3ssDjCop3jywj9HQBOUVNha4nZw+GSCvrJir3iFGzw2QGgiRE9eTnTaQEU1gsVkY0Ue4Jg8fvPdypp5+X5CJtA5LQSmllUV8/lkrfZfucqj5CKdOn8fhMmKw5BGd1jOVMmB2OFAMEInHMRpNxGIxADIAzNa8Aza7hxL3UmbSOvr6g8jhCX47c4F0So+SlNBLToYGR7Da8rni9xGbCjOpTJI06RiaucNg+iY35LGDmQCKJBiO3sIaHcaea6Pjlzbk6E00VSXblMuymjq+ONKKs7CUyHSShNXK2ZEAFjFNjsXEoDxIljvnb1PGQ37JmGkUKmNkDWcR1SbY8vJ6ysvLaWs7RvfVn6lZsoloLEFsIozQMiC/EMWo0DfqZUy9iyurcLbLr+x8gQ8ONUtut1ts376d3bt3oWkazzXWU7f6efqudSKpVnSKICNTx0x6iuj4HcZv+7HZjUylpmcDl694itu3hkXDhk0oaZWcnBzSSRXfUACrVcfpCx9LDsd8odMkFEUh1zEXk9lAfUMtmqYy4O+fnZTqBY+Jfq+Xru4/qK2tlbou/C6Ki4o48UMHO19/Vdq7/z1R4HTiyLVTmF/A+ISMyWimoqyCfXv309rWOjvG8wpcYn19g4iFI+Ldd/YIgMqKhQKgufl9kRaaEEIIMaWJGTkh+i/1isC16+LD5maxrm6t+Mcsb6jfIPIKcmlpaaH7Yg89PT0sW7mMVatXEg7HmIrEmRyPII+HKCmbR/tP7XR2/kpbe7v00LapX/O0cLlc7GhqwuPxoKoqweANUikVSZKwz7EjyzJHjx7F96eP4x3t0iP7cFGlRyzyeLDb7TgcDqqqqjBm6rnu9xEIBAiHwwSDQU6d65T+dcECVMwvF8XFxciyjATMtd+77rK3V+L/0l9XOstUnAxtBQAAAABJRU5ErkJggg==" style="width:24px;height:24px;object-fit:contain;image-rendering:pixelated">
     </div>
-    <div>
-      <div class="hdr-name">PokéPlanner</div>
-      <div class="hdr-stat" id="hstat">Cargando…</div>
+    <div class="hdr-trainer-info">
+      <div class="hdr-trainer-lbl" id="hdr-trainer-lbl">Trainer</div>
+      <div class="hdr-trainer-name" id="hdr-trainer-name">—</div>
+      <div class="hdr-stat" id="hstat" style="font-size:10px;color:var(--t3);font-weight:500;margin-top:1px">Cargando…</div>
     </div>
   </div>
-  <button class="ibtn" id="sprbtn" onclick="toggleSprite()" title="Modo sprite">
+  <div style="display:flex;align-items:center;gap:6px">
+    <img id="hdr-trainer-img" src="" style="width:36px;height:36px;object-fit:contain;image-rendering:pixelated;display:none">
+    <button class="ibtn" id="sprbtn" onclick="toggleSprite()" title="Modo sprite">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
   </button>
+  </div>
 </header>
 
 <div class="pg on" id="pg-dex">
@@ -620,14 +657,29 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 </div>
 
 <div class="pg" id="pg-fav">
-  <div class="phdr"><div class="ptitle">Favoritos</div><div class="psub" id="fsub">0 Pokémon</div></div>
+  <div class="phdr">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div>
+        <div class="ptitle" id="fav-page-title">Favoritos</div>
+        <div class="psub" id="fsub">0 Pokémon</div>
+      </div>
+    </div>
+  </div>
   <div class="frow" id="fav-grow"></div>
   <div class="frow" id="fav-trow"></div>
   <div class="gscroll" id="fscroll"></div>
 </div>
 
 <div class="pg" id="pg-team">
-  <div class="phdr"><div class="ptitle">Mi Equipo</div><div class="psub" id="tsub">0 / 6</div></div>
+  <div class="phdr">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img id="team-trainer-img" src="" style="width:52px;height:52px;object-fit:contain;image-rendering:pixelated;display:none">
+      <div>
+        <div class="ptitle" id="team-page-title">Mi Equipo</div>
+        <div class="psub" id="tsub">0 / 6</div>
+      </div>
+    </div>
+  </div>
   <div class="tgsel-wrap" id="tgsel"></div>
   <div class="tslots" id="tslots"></div>
   <div class="gscroll" id="tscroll"></div>
@@ -643,7 +695,80 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
   <div class="stscroll" id="stbody"></div>
 </div>
 
-<nav class="tabs">
+<div class="pg" id="pg-cfg">
+  <div class="phdr"><div class="ptitle">Ajustes</div></div>
+  <div class="gscroll" style="padding:0 16px">
+
+    <!-- Trainer Profile -->
+    <div class="cfg-card" style="background:linear-gradient(135deg,var(--ac) 0%,var(--ac2) 100%);color:#fff">
+      <div style="display:flex;align-items:center;gap:14px">
+        <img id="trainer-avatar-big" src="" style="width:72px;height:72px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:700;opacity:.8;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px">Entrenador</div>
+          <div id="trainer-name-display" style="font-size:22px;font-weight:900;letter-spacing:-.3px">—</div>
+          <div id="trainer-stats-display" style="font-size:11px;opacity:.85;margin-top:3px;font-weight:600"></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+        <input id="trainer-name-input" type="text" maxlength="16" placeholder="Tu nombre de entrenador…"
+          style="width:100%;padding:10px 14px;border-radius:var(--r-md);border:none;background:rgba(255,255,255,.25);color:#fff;font-size:14px;font-family:var(--fn);font-weight:700;outline:none;backdrop-filter:blur(8px)"
+          oninput="setTrainerName(this.value)"
+          placeholder="Tu nombre de entrenador…">
+        <div style="display:flex;gap:6px">
+          <button class="trainer-gender-btn" id="tg-male" onclick="setTrainerGender('male')">♂ Masculino</button>
+          <button class="trainer-gender-btn" id="tg-female" onclick="setTrainerGender('female')">♀ Femenino</button>
+          <button class="trainer-gender-btn" id="tg-nb" onclick="setTrainerGender('nb')">⚡ No binario</button>
+        </div>
+      </div>
+    </div>
+    <div class="cfg-card">
+      <div class="cfg-row">
+        <div>
+          <div class="cfg-label">Columnas de la grid</div>
+          <div class="cfg-sub">Actualmente: <span id="cols-val">3</span></div>
+        </div>
+      </div>
+      <input type="range" min="2" max="8" step="1" id="cols-slider"
+        style="width:100%;margin-top:10px;accent-color:var(--ac)"
+        oninput="setCols(parseInt(this.value))">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);font-weight:700;margin-top:4px">
+        <span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>
+      </div>
+    </div>
+
+    <!-- Sprite toggle -->
+    <div class="cfg-card">
+      <div class="cfg-row">
+        <div>
+          <div class="cfg-label">Estilo de imagen</div>
+          <div class="cfg-sub">Arte oficial o sprites pixelados</div>
+        </div>
+        <button class="cfg-toggle" id="sprite-toggle" onclick="toggleSprite()">
+          <div class="cfg-toggle-knob"></div>
+        </button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <div class="cfg-preview" id="prev-modern">
+          <img id="prev-img-modern" style="width:52px;height:52px;object-fit:contain">
+          <div class="cfg-preview-lbl">Arte oficial</div>
+        </div>
+        <div class="cfg-preview" id="prev-pixel">
+          <img id="prev-img-pixel" style="width:52px;height:52px;object-fit:contain;image-rendering:pixelated">
+          <div class="cfg-preview-lbl">Sprite</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My games -->
+    <div class="cfg-card">
+      <div class="cfg-label" style="margin-bottom:4px">Mis juegos</div>
+      <div class="cfg-sub" style="margin-bottom:12px">Solo estos juegos aparecerán en las fichas y equipos. Si no seleccionas ninguno, se muestran todos.</div>
+      <div id="my-games-grid"></div>
+    </div>
+
+    <div style="height:20px"></div>
+  </div>
+</div>
   <button class="tab on" id="tb-dex" onclick="goTab('dex')">
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
     <span class="tab-lbl">Pokédex</span>
@@ -659,6 +784,10 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
   <button class="tab" id="tb-stats" onclick="goTab('stats')">
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
     <span class="tab-lbl">Stats</span>
+  </button>
+  <button class="tab" id="tb-cfg" onclick="goTab('cfg')">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg>
+    <span class="tab-lbl">Ajustes</span>
   </button>
 </nav>
 </div>
@@ -1813,6 +1942,15 @@ const rarOf=id=>PX_IDS.has(id)?'paradox':UB_IDS.has(id)?'ultrabeast':MY_IDS.has(
 const genOf=id=>id<=151?1:id<=251?2:id<=386?3:id<=493?4:id<=649?5:id<=721?6:id<=809?7:id<=905?8:9;
 // Pokéball icons — use official sprites from PokeAPI sprites repo
 const BALL_IMG=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${id}-ball.png`;
+
+// ── TRAINER SPRITES ──
+const TRAINER_SPRITES={
+  male:  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/red.png',
+  female:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/leaf.png',
+  nb:    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/dawn.png',
+};
+function trainerSprite(){return TRAINER_SPRITES[S.set.trainerGender||'male'];}
+function trainerDisplayName(){const n=(S.set.trainerName||'').trim();return n||(S.set.trainerGender==='female'?'Leaf':S.set.trainerGender==='nb'?'Dawn':'Red');}
 const BALLS=[
   {id:'poke',n:'Pokéball'},{id:'great',n:'Superball'},{id:'ultra',n:'Ultraball'},
   {id:'master',n:'Masterball'},{id:'safari',n:'Safariball'},{id:'fast',n:'Velozball'},
@@ -1911,7 +2049,7 @@ async function fetchTypesInBackground(){
 
 const S={
   poke:POKE,track:{},favs:new Set(),teams:{},
-  set:{modern:true},
+  set:{modern:true, cols:3, myGames:[], trainerName:'', trainerGender:'male'},
   f:{q:'',types:[],gen:0,rar:null},
   tab:'dex',
   teamGame:null,
@@ -2087,6 +2225,7 @@ auth.onAuthStateChanged(async user => {
       sel.innerHTML = '<option value="all">Todos los juegos</option>';
       GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
     }
+    updateTrainerUI();
     setTimeout(fetchTypesInBackground, 1500);
   } else if (user && !isPwUnlocked()) {
     // Google session exists but password not entered — ask for password
@@ -2344,6 +2483,7 @@ function renderGrid(){
     grid.innerHTML='';
     document.getElementById('rc').textContent=`${S.filtered.length} Pokémon`;
     renderMore();setupScrollSentinel();updateStat();
+    applyColsSetting();
   }catch(e){console.error('renderGrid error:',e);}
 }
 
@@ -2351,9 +2491,14 @@ function updateStat(){
   try{
     const c=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch{return false;}}).length;
     const s=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch{return false;}}).length;
-    document.getElementById('hstat').textContent=`${c} / ${S.poke.length} capturados · ${s} shiny`;
+    const hstat=document.getElementById('hstat');
+    if(hstat)hstat.textContent=`${c} / ${S.poke.length} capturados · ${s} shiny`;
+    // Update header trainer name display
+    const hdrName=document.getElementById('hdr-trainer-name');
+    if(hdrName)hdrName.textContent=trainerDisplayName();
   }catch(e){
-    document.getElementById('hstat').textContent=`0 / ${S.poke.length} capturados`;
+    const hstat=document.getElementById('hstat');
+    if(hstat)hstat.textContent=`0 / ${S.poke.length} capturados`;
   }
 }
 
@@ -2409,11 +2554,148 @@ function setGen(g){S.f.gen=g;renderFilters();renderGrid();}
 function setRar(r){S.f.rar=r;renderFilters();renderGrid();}
 function clearSearch(){S.f.q='';document.getElementById('si').value='';document.getElementById('sx').classList.remove('on');renderGrid();}
 
+// Helper: get active games (myGames if set, all games otherwise)
+function activeGames(){
+  return S.set.myGames&&S.set.myGames.length>0
+    ?GAMES.filter(g=>S.set.myGames.includes(g.id))
+    :GAMES;
+}
+
+function setCols(n){
+  S.set.cols=n;
+  applyColsSetting();
+  scheduleSave();
+}
+
+function toggleMyGame(gid){
+  const arr=S.set.myGames||[];
+  const idx=arr.indexOf(gid);
+  if(idx>=0)arr.splice(idx,1);
+  else arr.push(gid);
+  S.set.myGames=arr;
+  renderSettings();
+  scheduleSave();
+}
+
+function setTrainerName(val){
+  S.set.trainerName=val;
+  scheduleSave();
+  updateTrainerUI();
+}
+function setTrainerGender(g){
+  S.set.trainerGender=g;
+  scheduleSave();
+  renderSettings();
+  updateTrainerUI();
+}
+function updateTrainerUI(){
+  const name=trainerDisplayName();
+  const sprite=trainerSprite();
+  const hasName=(S.set.trainerName||'').trim().length>0;
+
+  // Header
+  const hdrName=document.getElementById('hdr-trainer-name');
+  const hdrLbl=document.getElementById('hdr-trainer-lbl');
+  const hdrImg=document.getElementById('hdr-trainer-img');
+  if(hdrName)hdrName.textContent=name;
+  if(hdrLbl)hdrLbl.textContent=hasName?'Trainer':'PokéPlanner';
+  if(hdrImg){
+    hdrImg.src=sprite;
+    hdrImg.style.display=hasName?'block':'none';
+  }
+
+  // hstat — only show if no trainer name (otherwise header shows trainer)
+  const hstat=document.getElementById('hstat');
+  if(hstat&&!hasName){
+    try{
+      const c=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch{return false;}}).length;
+      const s=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch{return false;}}).length;
+      hstat.textContent=`${c} / ${S.poke.length} capturados · ${s} shiny`;
+    }catch{}
+  }
+
+  // Fav page title
+  const favTitle=document.getElementById('fav-page-title');
+  if(favTitle)favTitle.textContent=hasName?`${name}'s Favourites`:'Favoritos';
+
+  // Team page title
+  const teamTitle=document.getElementById('team-page-title');
+  const teamImg=document.getElementById('team-trainer-img');
+  if(teamTitle)teamTitle.textContent=hasName?`${name}'s Team`:'Mi Equipo';
+  if(teamImg){teamImg.src=sprite;teamImg.style.display=hasName?'block':'none';}
+}
+
+function renderSettings(){
+  // Trainer profile
+  const sprite=trainerSprite();
+  const name=trainerDisplayName();
+  const bigAvatar=document.getElementById('trainer-avatar-big');
+  if(bigAvatar)bigAvatar.src=sprite;
+  const nameDisplay=document.getElementById('trainer-name-display');
+  if(nameDisplay)nameDisplay.textContent=name;
+  const nameInput=document.getElementById('trainer-name-input');
+  if(nameInput&&!nameInput.matches(':focus'))nameInput.value=S.set.trainerName||'';
+  // Stats
+  const statsEl=document.getElementById('trainer-stats-display');
+  if(statsEl){
+    const cap=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch{return false;}}).length;
+    const shy=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch{return false;}}).length;
+    const teams=GAMES.reduce((acc,g)=>acc+(S.teams[g.id]?.length||0),0);
+    statsEl.textContent=`${cap} capturados · ${shy} shiny · ${teams} en equipo`;
+  }
+  // Gender buttons
+  const g=S.set.trainerGender||'male';
+  ['male','female','nb'].forEach(id=>{
+    document.getElementById(`tg-${id}`)?.classList.toggle('on',g===id);
+  });
+
+  // Cols slider
+  const cols=S.set.cols||3;
+  const slider=document.getElementById('cols-slider');
+  const colsVal=document.getElementById('cols-val');
+  if(slider)slider.value=cols;
+  if(colsVal)colsVal.textContent=cols;
+
+  // Sprite toggle
+  const tog=document.getElementById('sprite-toggle');
+  if(tog)tog.className=`cfg-toggle${!S.set.modern?' on':''}`;
+  const modImg=document.getElementById('prev-img-modern');
+  const pxImg=document.getElementById('prev-img-pixel');
+  if(modImg)modImg.src=iArt(25);
+  if(pxImg)pxImg.src=iPx(25);
+  const prevM=document.getElementById('prev-modern');
+  const prevP=document.getElementById('prev-pixel');
+  if(prevM)prevM.className=`cfg-preview${S.set.modern?' on':''}`;
+  if(prevP)prevP.className=`cfg-preview${!S.set.modern?' on':''}`;
+
+  // My games
+  const grid=document.getElementById('my-games-grid');
+  if(!grid)return;
+  const selected=S.set.myGames||[];
+  grid.innerHTML=[1,2,3,4,5,6,7,8,9].map(gen=>{
+    const gs=GAMES.filter(g=>g.gen===gen);
+    if(!gs.length)return'';
+    const chips=gs.map(g=>{
+      const on=selected.includes(g.id);
+      return`<button class="mygame-chip${on?' on':''}" style="--tgc:${g.c}" onclick="toggleMyGame('${g.id}')">
+        <span style="width:8px;height:8px;border-radius:50%;background:${g.c};flex-shrink:0;display:inline-block"></span>
+        ${g.n}
+      </button>`;
+    }).join('');
+    return`<div class="mygames-gen">
+      <div class="mygames-gen-lbl">${GNS[gen]}</div>
+      <div class="mygames-row">${chips}</div>
+    </div>`;
+  }).join('');
+}
+
 function toggleSprite(){
   S.set.modern=!S.set.modern;
   document.getElementById('sprbtn').classList.toggle('on',!S.set.modern);
   scheduleSave();renderGrid();
-  if(S.tab==='fav')renderFav();if(S.tab==='team')renderTeam();
+  if(S.tab==='fav')renderFav();
+  if(S.tab==='team')renderTeam();
+  if(S.tab==='cfg')renderSettings();
 }
 
 function toggleHelp(){
@@ -2429,7 +2711,10 @@ function goTab(t){
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
   document.getElementById('pg-'+t).classList.add('on');
   document.getElementById('tb-'+t).classList.add('on');
-  if(t==='fav')renderFav();if(t==='team')renderTeam();if(t==='stats')drawStats();
+  if(t==='fav')renderFav();
+  if(t==='team')renderTeam();
+  if(t==='stats')drawStats();
+  if(t==='cfg')renderSettings();
 }
 
 function toggleFav(key){
@@ -2561,9 +2846,10 @@ function toggleTeamForGame(pokeId,formId,isShiny,gid){
 }
 function renderTeamGameSel(){
   const el=document.getElementById('tgsel');if(!el)return;
+  const games=activeGames();
   const gens=[1,2,3,4,5,6,7,8,9];
   el.innerHTML=gens.map(gen=>{
-    const gs=GAMES.filter(g=>g.gen===gen);
+    const gs=games.filter(g=>g.gen===gen);
     if(!gs.length)return'';
     const cards=gs.map(g=>{
       const cnt=(S.teams[g.id]||[]).length;
@@ -2709,7 +2995,8 @@ function buildMdl(base,forms){
   document.getElementById('msprbtn').classList.toggle('on',!S.mMod);
   const tPills=dispTypes.map(t=>{const ti=TYPES.find(x=>x.id===t);return`<span class="htype" style="background:${tc(t)}">${ti?.n||t}</span>`;}).join('');
   const gens=[1,2,3,4,5,6,7,8,9].map(gen=>{
-    const gGs=GAMES.filter(g=>g.gen===gen);
+    const gGs=activeGames().filter(g=>g.gen===gen);
+    if(!gGs.length)return'';
     const act=gGs.some(g=>{const d=S.track?.[id]?.[g.id];return d&&(d.captured||d.shiny||d.inBox||d.notes||d.ball);});
     return`<div class="gsec"><div class="ghdr" onclick="tGen(${gen})"><div class="ghdrl"><svg class="gchev" id="gc${gen}" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg><span class="gtitle">${GNLONG[gen]}</span></div>${act?'<span class="gbadge">✦ activo</span>':''}</div><div class="ggames" id="gg${gen}">${gGs.map(g=>gRow(id,g)).join('')}</div></div>`;
   }).join('');
@@ -2968,29 +3255,53 @@ function tBalls(k){document.getElementById(`bs${k}`)?.classList.toggle('on');}
 
 function gRow(pid,game){
   const d={...tDef(),...(S.track?.[pid]?.[game.id]||{})};
-  const hd=d.captured||d.shiny||d.inBox||d.notes||d.ball;
   const bObj=d.ball?BALLS.find(b=>b.id===d.ball):null;
-  const ballImg=bObj?`<img src="${BALL_IMG(bObj.id)}" style="width:14px;height:14px;object-fit:contain" onerror="this.style.display='none'">`
-    :`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>`;
-  // Shiny icon = sparkle/diamond shape (distinct from star=favorite)
-  const shinyIcon=`<svg width="12" height="12" viewBox="0 0 24 24" fill="${d.shiny?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2" fill="${d.shiny?'currentColor':'none'}"/></svg>`;
-  return`<div class="grow${hd?' hd':''}" id="gr${pid}${game.id}">
-    <div class="gtop">
-      <div class="gdot" style="background:${game.c}"></div>
-      <span class="gname">${game.n}</span>
-      <div class="gacts">
-        <button class="abtn cap${d.captured?' on':''}" onclick="doTrk(${pid},'${game.id}','captured')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></button>
-        <button class="abtn shy${d.shiny?' on':''}" title="Shiny" onclick="doTrk(${pid},'${game.id}','shiny')">${shinyIcon}</button>
-        <button class="abtn box${d.inBox?' on':''}" onclick="doTrk(${pid},'${game.id}','inBox')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></button>
-        <button class="abtn ball${d.ball?' on':''}" onclick="tBalls('${pid}${game.id}')" style="${d.ball?'opacity:1':''}">${ballImg}</button>
-        <button class="abtn note${d.notes?' on':''}" onclick="tNota('${pid}${game.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-      </div>
+  return`<div class="grow${d.captured||d.shiny||d.inBox?' hd':''}" id="gr${pid}${game.id}">
+    <!-- Game header -->
+    <div class="grow-hdr">
+      <div class="grow-dot" style="background:${game.c}"></div>
+      <span class="grow-name">${game.n}</span>
+      ${d.captured?`<span class="grow-tag cap">✓ Capturado</span>`:''}
+      ${d.shiny?`<span class="grow-tag shy">✦ Shiny</span>`:''}
     </div>
-    ${d.captured?`<div class="glvl"><span class="glvl-lbl">Nivel:</span><input class="glvl-inp" type="number" min="1" max="100" placeholder="–" value="${d.level||''}" onchange="doLevel(${pid},'${game.id}',this.value)" onclick="event.stopPropagation()"></div>`:''}
+    <!-- Status buttons -->
+    <div class="grow-btns">
+      <button class="grow-btn${d.captured?' on':''}" onclick="doTrk(${pid},'${game.id}','captured')" style="${d.captured?`--gbg:rgba(107,203,139,.15);--gc:var(--green)`:''}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Capturado
+      </button>
+      <button class="grow-btn${d.shiny?' on':''}" onclick="doTrk(${pid},'${game.id}','shiny')" style="${d.shiny?`--gbg:rgba(245,200,66,.15);--gc:var(--gold)`:''}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="${d.shiny?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        Shiny
+      </button>
+      <button class="grow-btn${d.inBox?' on':''}" onclick="doTrk(${pid},'${game.id}','inBox')" style="${d.inBox?`--gbg:rgba(123,184,244,.15);--gc:var(--blue)`:''}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        En caja
+      </button>
+    </div>
+    <!-- Level (if captured) -->
+    ${d.captured?`<div class="grow-level">
+      <span class="grow-level-lbl">Nivel</span>
+      <input class="glvl-inp" type="number" min="1" max="100" placeholder="–" value="${d.level||''}"
+        onchange="doLevel(${pid},'${game.id}',this.value)" onclick="event.stopPropagation()">
+    </div>`:''}
+    <!-- Ball picker toggle -->
+    <div class="grow-extras">
+      <button class="grow-extra-btn${d.ball?' on':''}" onclick="tBalls('${pid}${game.id}')">
+        ${bObj?`<img src="${BALL_IMG(bObj.id)}" style="width:16px;height:16px;object-fit:contain">`:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>`}
+        ${bObj?bObj.n:'Ball'}
+      </button>
+      <button class="grow-extra-btn${d.notes?' on':''}" onclick="tNota('${pid}${game.id}')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Nota${d.notes?' ✓':''}
+      </button>
+    </div>
+    <!-- Ball selector -->
     <div class="bsec" id="bs${pid}${game.id}">
       <div class="bslbl">Elegir Poké Ball</div>
       <div class="bgrid">${BALLS.map(b=>`<div class="bchip${d.ball===b.id?' on':''}" onclick="doBall(${pid},'${game.id}','${b.id}')"><div class="bico"><img src="${BALL_IMG(b.id)}" style="width:18px;height:18px;object-fit:contain" onerror="this.style.opacity='.3'"></div><div class="bnm">${b.n}</div></div>`).join('')}</div>
     </div>
+    <!-- Notes -->
     <div class="nota${d.notes?' on':''}" id="nw${pid}${game.id}">
       <textarea class="nta" placeholder="Añadir nota…" onchange="doNota(${pid},'${game.id}',this.value)">${d.notes||''}</textarea>
     </div>
@@ -3033,6 +3344,18 @@ function doNota(pid,gid,val){
   scheduleSave();updateCard(pid);
 }
 
+function applyColsSetting(){
+  const cols=S.set.cols||3;
+  const minPx=Math.round(300/cols);
+  document.querySelectorAll('.grid').forEach(g=>{
+    g.style.gridTemplateColumns=`repeat(auto-fill,minmax(${minPx}px,1fr))`;
+  });
+  const slider=document.getElementById('cols-slider');
+  const colsVal=document.getElementById('cols-val');
+  if(slider)slider.value=cols;
+  if(colsVal)colsVal.textContent=cols;
+}
+
 // ═══════════════════════════════════════
 //  PASSWORD GATE
 // ═══════════════════════════════════════
@@ -3066,6 +3389,11 @@ function checkPassword(){
 (function(){
   loadFormsCache();
   try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch {}
+
+  // Apply saved columns setting
+  applyColsSetting();
+  // Apply trainer UI
+  setTimeout(()=>updateTrainerUI(), 0);
 
   const sel = document.getElementById('stsel');
   sel.innerHTML = '<option value="all">Todos los juegos</option>';
