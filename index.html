@@ -94,7 +94,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 .tab:active{transform:scale(.93)}
 
 /* ── PAGES ── */
-.pg{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.pg{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;height:100%}
 .pg.on{display:flex}
 
 /* ── SEARCH ── */
@@ -2265,7 +2265,7 @@ function setupScrollSentinel(){
   const sentinel=document.getElementById('sent');if(!sentinel)return;
   scrollObserver=new IntersectionObserver(entries=>{
     if(entries[0].isIntersecting&&S.rendered<S.filtered.length)renderMore();
-  },{root:document.getElementById('gs'),rootMargin:'300px'});
+  },{rootMargin:'400px'});
   scrollObserver.observe(sentinel);
 }
 
@@ -2273,7 +2273,8 @@ function renderMore(){
   const batch=S.filtered.slice(S.rendered,S.rendered+S.PAGE);if(!batch.length)return;
   const eager=S.rendered===0;
   document.getElementById('grid').insertAdjacentHTML('beforeend',batch.map(p=>cardHTML(p,eager)).join(''));
-  S.rendered+=batch.length;if(!eager)setupImgObserver();
+  S.rendered+=batch.length;
+  setupImgObserver();
 }
 
 function getFiltered(){
