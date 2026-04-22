@@ -136,7 +136,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 
 /* ── GRID ── */
 .gscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 12px;padding-bottom:calc(12px + var(--sb));overscroll-behavior:contain}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:600px;margin:0 auto;width:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
 .sentinel{height:1px;width:100%}
 
 /* ── CARD ── */
