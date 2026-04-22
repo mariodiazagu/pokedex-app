@@ -2331,7 +2331,7 @@ function walkerMove(){
   }
 
   if(!_walkerState.paused){
-    const speed=0.12+Math.random()*0.06;
+    const speed=0.12+Math.random()*0.08;
     _walkerState.x+=_walkerState.dir*speed;
     if(_walkerState.x>=92){_walkerState.x=92;_walkerState.dir=-1;}
     else if(_walkerState.x<=2){_walkerState.x=2;_walkerState.dir=1;}
