@@ -708,6 +708,9 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
+    <button class="ibtn" onclick="toggleHelp(event)" title="Ayuda">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </button>
     <div id="hdr-trainer-avatar" onclick="toggleUserMenu(event)" style="
       width:38px;height:38px;border-radius:50%;
       background:var(--ac);border:2px solid var(--ac);
@@ -733,25 +736,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
       <span class="srch-x" id="sx" onclick="clearSearch()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
     </div>
   </div>
-  <div class="help-banner" id="help-banner">
-    <div class="help-banner-hdr" onclick="toggleHelp()">
-      <span class="help-banner-title">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        ¿Cómo usar PokéPlanner?
-      </span>
-      <svg class="help-banner-chev" id="help-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </div>
-    <div class="help-banner-body" id="help-body">
-      <div class="help-steps">
-        <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text"><b>Explora la Pokédex</b> — Busca por nombre, número o filtra por tipo, generación y rareza. Toca cualquier Pokémon para abrir su ficha completa.</div></div>
-        <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text"><b>Registra tus capturas</b> — Dentro de la ficha, despliega la generación que quieras y marca si lo has capturado, si tienes su shiny, si está en la caja, qué ball usaste y el nivel.</div></div>
-        <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text"><b>Variantes y formas</b> — Si el Pokémon tiene formas regionales (Alola, Galar…) o cosméticas, aparecen en la sección <b>Variantes</b>. Tócalas para previsualizarlas. Las versiones <b>Shiny ✦</b> están en su propio apartado.</div></div>
-        <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text"><b>Construye tu equipo</b> — En la pestaña <b>Equipo</b> selecciona un juego y tendrás 6 slots independientes. Desde la ficha de cada Pokémon puedes añadir cualquier variante o shiny a cualquier juego.</div></div>
-        <div class="help-step"><div class="help-step-num">5</div><div class="help-step-text"><b>Favoritos</b> — El corazón guarda el Pokémon (o su variante regional concreta) en tu lista de favoritos. Los shinies no cuentan como favorito independiente.</div></div>
-      </div>
-      <div class="help-tip">💡 Tus datos se guardan automáticamente en la nube y están disponibles en cualquier dispositivo donde inicies sesión con la misma cuenta de Google.</div>
-    </div>
-  </div>
+
   <div class="frow" id="grow"></div>
   <div class="frow" id="trow"></div>
   <div class="frow" id="rrow"></div>
@@ -844,12 +829,17 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
       <div class="cfg-sub" style="margin-bottom:12px">El color de acento de toda la app</div>
       <div id="theme-grid" style="display:flex;flex-wrap:wrap;gap:8px"></div>
     </div>
-
-    <!-- Banner selector -->
+    <!-- Walker toggle -->
     <div class="cfg-card">
-      <div class="cfg-label" style="margin-bottom:4px">Banner Trainer Card</div>
-      <div class="cfg-sub" style="margin-bottom:12px">El paisaje de fondo de tu tarjeta</div>
-      <div id="banner-grid" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="cfg-row">
+        <div>
+          <div class="cfg-label">Pokémon caminante</div>
+          <div class="cfg-sub">Un Pokémon del día pasea sobre el menú</div>
+        </div>
+        <button class="cfg-toggle" id="walker-toggle" onclick="toggleWalker()">
+          <div class="cfg-toggle-knob"></div>
+        </button>
+      </div>
     </div>
 
     <div class="cfg-card">
@@ -899,6 +889,10 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 
     <div style="height:20px"></div>
   </div>
+</div>
+
+<div id="walker-wrap" style="position:fixed;bottom:0;left:0;right:0;height:60px;pointer-events:none;z-index:150;overflow:hidden">
+  <img id="walker-img" style="position:absolute;bottom:4px;width:36px;height:36px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));pointer-events:all;cursor:pointer;transition:left 0.05s linear" onclick="walkerClick()">
 </div>
 
 <nav class="tabs">
@@ -964,6 +958,31 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
     </button>
     <div class="auth-loading" id="auth-loading">Iniciando sesión…</div>
     <div class="auth-note">Tus datos se sincronizarán en todos tus dispositivos.</div>
+  </div>
+</div>
+
+<!-- HELP MODAL -->
+<div id="help-modal" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-end" onclick="if(event.target.id==='help-modal')closeHelp()">
+  <div style="background:var(--bg);width:100%;max-height:85dvh;border-radius:var(--r-xl) var(--r-xl) 0 0;display:flex;flex-direction:column;animation:sup .3s cubic-bezier(.34,1.56,.64,1);padding-bottom:var(--sb)">
+    <div style="width:40px;height:4px;background:var(--s3);border-radius:2px;margin:12px auto 4px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 12px;border-bottom:1px solid var(--bd);flex-shrink:0">
+      <div style="font-size:18px;font-weight:800;color:var(--t1)">¿Cómo usar PokéPlanner?</div>
+      <button onclick="closeHelp()" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:4px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div class="help-steps">
+        <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text"><b>Explora la Pokédex</b> — Busca por nombre, número o filtra por tipo, generación y rareza. Toca cualquier Pokémon para abrir su ficha completa.</div></div>
+        <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text"><b>Registra tus capturas</b> — Dentro de la ficha, despliega la generación y marca si lo has capturado, si tienes su shiny, qué ball usaste y el nivel.</div></div>
+        <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text"><b>Variantes y formas</b> — Si el Pokémon tiene formas regionales o cosméticas aparecen en <b>Variantes</b>. La base ya está seleccionada por defecto.</div></div>
+        <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text"><b>Construye tu equipo</b> — En la pestaña <b>Equipo</b> selecciona un juego. Desde la ficha puedes añadir cualquier variante o shiny directamente.</div></div>
+        <div class="help-step"><div class="help-step-num">5</div><div class="help-step-text"><b>Favoritos</b> — El corazón guarda el Pokémon en favoritos. Desde favoritos puedes elegir cuál aparece en tu Trainer Card.</div></div>
+        <div class="help-step"><div class="help-step-num">6</div><div class="help-step-text"><b>Trainer Card</b> — Ábrela desde el menú de tu avatar. Muestra tus estadísticas, logros y el reto del día.</div></div>
+        <div class="help-step"><div class="help-step-num">7</div><div class="help-step-text"><b>Ajustes</b> — Cambia el tema de color, el número de columnas, selecciona tus juegos y personaliza tu perfil de entrenador.</div></div>
+      </div>
+      <div class="help-tip">💡 Tus datos se guardan en la nube y están disponibles en cualquier dispositivo donde inicies sesión con tu cuenta de Google.</div>
+    </div>
   </div>
 </div>
 
@@ -2132,13 +2151,6 @@ function applyTheme(themeId){
   if(avatar){avatar.style.background=t.ac;avatar.style.borderColor=t.ac;}
 }
 
-function setBanner(bannerId){
-  S.set.banner=bannerId;
-  scheduleSave();
-  renderSettings();
-  renderTrainerCard();
-}
-
 function setTheme(themeId){
   S.set.theme=themeId;
   applyTheme(themeId);
@@ -2146,194 +2158,7 @@ function setTheme(themeId){
   renderSettings();
 }
 
-// ── BANNERS ──
-const BANNERS={
-  route:{name:'Ruta Pallet',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-    <rect width="400" height="120" fill="#87CEEB"/>
-    <rect x="0" y="60" width="400" height="60" fill="#228B22"/>
-    <rect x="0" y="55" width="400" height="8" fill="#32CD32"/>
-    <rect x="20" y="30" width="16" height="30" fill="#8B4513"/>
-    <rect x="14" y="20" width="28" height="16" fill="#228B22"/>
-    <rect x="16" y="15" width="24" height="10" fill="#32CD32"/>
-    <rect x="60" y="35" width="12" height="25" fill="#8B4513"/>
-    <rect x="55" y="22" width="22" height="16" fill="#228B22"/>
-    <rect x="180" y="55" width="40" height="5" fill="#DEB887"/>
-    <rect x="220" y="55" width="40" height="5" fill="#DEB887"/>
-    <rect x="260" y="55" width="40" height="5" fill="#DEB887"/>
-    <rect x="350" y="25" width="20" height="35" fill="#CD853F"/>
-    <rect x="345" y="15" width="30" height="12" fill="#A0522D"/>
-    <rect x="348" y="40" width="4" height="20" fill="#FFD700"/>
-    <rect x="300" y="40" width="18" height="20" fill="#F5F5DC"/>
-    <rect x="298" y="36" width="22" height="6" fill="#A0522D"/>
-    <rect x="305" y="45" width="4" height="10" fill="#87CEEB"/>
-    <rect x="312" y="45" width="4" height="10" fill="#87CEEB"/>
-  </svg>`},
-  cave:{name:'Cueva',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-    <rect width="400" height="120" fill="#1a1a2e"/>
-    <rect x="0" y="0" width="400" height="120" fill="#16213e"/>
-    <rect x="0" y="70" width="400" height="50" fill="#0a0a0a"/>
-    <rect x="0" y="60" width="80" height="60" fill="#1a1a1a"/>
-    <rect x="320" y="55" width="80" height="65" fill="#1a1a1a"/>
-    <rect x="100" y="65" width="200" height="55" fill="#111"/>
-    <rect x="40" y="30" width="8" height="40" fill="#2a2a4a"/>
-    <rect x="44" y="26" width="4" height="8" fill="#3a3a6a"/>
-    <rect x="80" y="20" width="6" height="50" fill="#2a2a4a"/>
-    <rect x="200" y="15" width="10" height="55" fill="#2a2a4a"/>
-    <rect x="300" y="25" width="8" height="45" fill="#2a2a4a"/>
-    <rect x="160" y="70" width="80" height="10" fill="#1a1a3a"/>
-    <rect x="50" y="80" width="4" height="4" fill="#4444aa" opacity="0.8"/>
-    <rect x="120" y="75" width="3" height="3" fill="#4444aa" opacity="0.6"/>
-    <rect x="250" y="78" width="4" height="4" fill="#4444aa" opacity="0.7"/>
-    <rect x="320" y="82" width="3" height="3" fill="#4444aa" opacity="0.5"/>
-    <rect x="185" y="60" width="30" height="4" fill="#e8c84a" opacity="0.3"/>
-  </svg>`},
-  ocean:{name:'Océano',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-    <rect width="400" height="120" fill="#4FC3F7"/>
-    <rect x="0" y="0" width="400" height="50" fill="#0288D1"/>
-    <rect x="0" y="50" width="400" height="70" fill="#0277BD"/>
-    <rect x="0" y="65" width="400" height="55" fill="#01579B"/>
-    <rect x="0" y="80" width="400" height="40" fill="#003c8f"/>
-    <rect x="50" y="58" width="60" height="4" fill="#29B6F6" opacity="0.6"/>
-    <rect x="180" y="62" width="80" height="4" fill="#29B6F6" opacity="0.5"/>
-    <rect x="300" y="55" width="50" height="4" fill="#29B6F6" opacity="0.6"/>
-    <rect x="20" y="70" width="40" height="4" fill="#0288D1" opacity="0.7"/>
-    <rect x="200" y="72" width="60" height="4" fill="#0288D1" opacity="0.6"/>
-    <rect x="100" y="20" width="30" height="12" fill="#fff" opacity="0.7"/>
-    <rect x="95" y="24" width="40" height="8" fill="#fff" opacity="0.8"/>
-    <rect x="280" y="15" width="50" height="14" fill="#fff" opacity="0.7"/>
-    <rect x="275" y="19" width="60" height="10" fill="#fff" opacity="0.8"/>
-    <rect x="170" y="85" width="20" height="6" fill="#1E88E5" opacity="0.8"/>
-    <rect x="340" y="90" width="16" height="6" fill="#1E88E5" opacity="0.7"/>
-  </svg>`},
-  forest:{name:'Bosque',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-    <rect width="400" height="120" fill="#1B5E20"/>
-    <rect x="0" y="0" width="400" height="40" fill="#2E7D32"/>
-    <rect x="0" y="70" width="400" height="50" fill="#1B5E20"/>
-    <rect x="0" y="60" width="400" height="15" fill="#33691E"/>
-    <rect x="10" y="20" width="20" height="50" fill="#1B5E20"/>
-    <rect x="0" y="10" width="40" height="20" fill="#2E7D32"/>
-    <rect x="5" y="5" width="30" height="12" fill="#388E3C"/>
-    <rect x="50" y="15" width="22" height="55" fill="#1a5c1a"/>
-    <rect x="42" y="8" width="38" height="18" fill="#2E7D32"/>
-    <rect x="46" y="2" width="30" height="12" fill="#388E3C"/>
-    <rect x="120" y="25" width="18" height="45" fill="#1B5E20"/>
-    <rect x="113" y="14" width="32" height="16" fill="#2E7D32"/>
-    <rect x="117" y="7" width="24" height="10" fill="#43A047"/>
-    <rect x="200" y="18" width="20" height="52" fill="#1B5E20"/>
-    <rect x="192" y="8" width="36" height="16" fill="#388E3C"/>
-    <rect x="196" y="2" width="28" height="10" fill="#43A047"/>
-    <rect x="290" y="22" width="18" height="48" fill="#1B5E20"/>
-    <rect x="282" y="12" width="34" height="16" fill="#2E7D32"/>
-    <rect x="286" y="5" width="26" height="10" fill="#388E3C"/>
-    <rect x="360" y="20" width="20" height="50" fill="#1a5c1a"/>
-    <rect x="352" y="10" width="36" height="16" fill="#2E7D32"/>
-    <rect x="356" y="3" width="28" height="10" fill="#43A047"/>
-    <rect x="80" y="68" width="8" height="4" fill="#AED581" opacity="0.7"/>
-    <rect x="160" y="65" width="10" height="4" fill="#AED581" opacity="0.6"/>
-    <rect x="240" y="67" width="8" height="4" fill="#AED581" opacity="0.7"/>
-    <rect x="330" y="66" width="10" height="4" fill="#AED581" opacity="0.6"/>
-  </svg>`},
-  mountain:{name:'Montaña',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-    <rect width="400" height="120" fill="#B0BEC5"/>
-    <rect x="0" y="0" width="400" height="50" fill="#78909C"/>
-    <rect x="0" y="50" width="400" height="70" fill="#546E7A"/>
-    <polygon points="120,10 200,80 40,80" fill="#455A64"/>
-    <polygon points="220,5 320,80 120,80" fill="#37474F"/>
-    <polygon points="300,20 380,80 220,80" fill="#455A64"/>
-    <polygon points="0,30 80,80 -20,80" fill="#37474F"/>
-    <rect x="140" y="10" width="30" height="8" fill="#ECEFF1" opacity="0.9"/>
-    <rect x="240" y="5" width="24" height="6" fill="#ECEFF1" opacity="0.9"/>
-    <rect x="0" y="80" width="400" height="40" fill="#4CAF50"/>
-    <rect x="0" y="75" width="400" height="8" fill="#66BB6A"/>
-    <rect x="50" y="90" width="20" height="8" fill="#388E3C"/>
-    <rect x="300" y="85" width="24" height="10" fill="#388E3C"/>
-  </svg>`},
-  night:{name:'Ciudad Noche',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-    <rect width="400" height="120" fill="#0d0d2b"/>
-    <rect x="20" y="10" width="3" height="3" fill="#fff" opacity="0.8"/>
-    <rect x="80" y="5" width="2" height="2" fill="#fff" opacity="0.9"/>
-    <rect x="150" y="8" width="3" height="3" fill="#fff" opacity="0.7"/>
-    <rect x="220" y="3" width="2" height="2" fill="#fff" opacity="0.8"/>
-    <rect x="300" y="12" width="3" height="3" fill="#fff" opacity="0.6"/>
-    <rect x="370" y="6" width="2" height="2" fill="#fff" opacity="0.9"/>
-    <rect x="60" y="18" width="2" height="2" fill="#fff" opacity="0.5"/>
-    <rect x="180" y="20" width="2" height="2" fill="#fff" opacity="0.7"/>
-    <rect x="340" y="15" width="2" height="2" fill="#fff" opacity="0.6"/>
-    <rect x="0" y="50" width="400" height="70" fill="#1a1a3a"/>
-    <rect x="20" y="30" width="40" height="90" fill="#2d2d5e"/>
-    <rect x="25" y="35" width="6" height="6" fill="#FFD700" opacity="0.8"/>
-    <rect x="35" y="35" width="6" height="6" fill="#FFD700" opacity="0.6"/>
-    <rect x="45" y="35" width="6" height="6" fill="#FFD700" opacity="0.9"/>
-    <rect x="25" y="48" width="6" height="6" fill="#87CEEB" opacity="0.7"/>
-    <rect x="45" y="48" width="6" height="6" fill="#FFD700" opacity="0.5"/>
-    <rect x="80" y="20" width="55" height="100" fill="#1e1e4a"/>
-    <rect x="86" y="26" width="8" height="8" fill="#FFD700" opacity="0.9"/>
-    <rect x="100" y="26" width="8" height="8" fill="#87CEEB" opacity="0.7"/>
-    <rect x="114" y="26" width="8" height="8" fill="#FFD700" opacity="0.6"/>
-    <rect x="86" y="40" width="8" height="8" fill="#87CEEB" opacity="0.8"/>
-    <rect x="114" y="40" width="8" height="8" fill="#FFD700" opacity="0.9"/>
-    <rect x="86" y="54" width="8" height="8" fill="#FFD700" opacity="0.5"/>
-    <rect x="100" y="54" width="8" height="8" fill="#87CEEB" opacity="0.7"/>
-    <rect x="200" y="35" width="45" height="85" fill="#252550"/>
-    <rect x="206" y="42" width="8" height="8" fill="#FFD700" opacity="0.8"/>
-    <rect x="218" y="42" width="8" height="8" fill="#FFD700" opacity="0.6"/>
-    <rect x="230" y="42" width="8" height="8" fill="#87CEEB" opacity="0.9"/>
-    <rect x="206" y="56" width="8" height="8" fill="#87CEEB" opacity="0.7"/>
-    <rect x="230" y="56" width="8" height="8" fill="#FFD700" opacity="0.8"/>
-    <rect x="310" y="25" width="60" height="95" fill="#1e1e4a"/>
-    <rect x="316" y="32" width="8" height="8" fill="#FFD700" opacity="0.9"/>
-    <rect x="330" y="32" width="8" height="8" fill="#87CEEB" opacity="0.7"/>
-    <rect x="344" y="32" width="8" height="8" fill="#FFD700" opacity="0.5"/>
-    <rect x="358" y="32" width="8" height="8" fill="#FFD700" opacity="0.8"/>
-    <rect x="316" y="46" width="8" height="8" fill="#87CEEB" opacity="0.6"/>
-    <rect x="344" y="46" width="8" height="8" fill="#FFD700" opacity="0.9"/>
-    <rect x="160" y="85" width="50" height="35" fill="#111130"/>
-    <rect x="155" y="80" width="60" height="8" fill="#333366"/>
-  </svg>`},
-  volcano:{name:'Volcán',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-    <rect width="400" height="120" fill="#FF6B35" opacity="0.3"/>
-    <rect width="400" height="120" fill="#1a0a00"/>
-    <rect x="0" y="60" width="400" height="60" fill="#2d0800"/>
-    <polygon points="150,5 250,90 50,90" fill="#3d1200"/>
-    <polygon points="200,0 310,90 90,90" fill="#2d0e00"/>
-    <rect x="185" y="0" width="30" height="15" fill="#FF4500" opacity="0.8"/>
-    <rect x="190" y="0" width="20" height="8" fill="#FF6B00" opacity="0.9"/>
-    <rect x="193" y="0" width="14" height="5" fill="#FFD700" opacity="0.7"/>
-    <rect x="0" y="75" width="400" height="45" fill="#1a0500"/>
-    <rect x="20" y="78" width="60" height="6" fill="#FF4500" opacity="0.6"/>
-    <rect x="100" y="80" width="80" height="5" fill="#FF6B00" opacity="0.5"/>
-    <rect x="250" y="76" width="70" height="7" fill="#FF4500" opacity="0.7"/>
-    <rect x="340" y="79" width="60" height="5" fill="#FF6B00" opacity="0.4"/>
-    <rect x="0" y="90" width="400" height="30" fill="#110300"/>
-    <rect x="50" y="92" width="30" height="4" fill="#FF4500" opacity="0.4"/>
-    <rect x="200" y="93" width="50" height="4" fill="#FF4500" opacity="0.3"/>
-    <rect x="320" y="91" width="40" height="4" fill="#FF6B00" opacity="0.4"/>
-  </svg>`},
-  beach:{name:'Playa',svg:`<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-    <rect width="400" height="120" fill="#87CEEB"/>
-    <rect x="0" y="0" width="400" height="55" fill="#64B5F6"/>
-    <rect x="0" y="55" width="400" height="30" fill="#4FC3F7"/>
-    <rect x="0" y="75" width="400" height="45" fill="#F5DEB3"/>
-    <rect x="0" y="72" width="400" height="8" fill="#DEB887"/>
-    <rect x="60" y="55" width="80" height="6" fill="#81D4FA" opacity="0.6"/>
-    <rect x="260" y="58" width="60" height="5" fill="#81D4FA" opacity="0.5"/>
-    <rect x="50" y="78" width="12" height="3" fill="#C8A87A" opacity="0.7"/>
-    <rect x="200" y="80" width="16" height="3" fill="#C8A87A" opacity="0.6"/>
-    <rect x="320" y="79" width="12" height="3" fill="#C8A87A" opacity="0.7"/>
-    <rect x="20" y="40" width="16" height="18" fill="#8B4513"/>
-    <rect x="8" y="20" width="20" height="4" fill="#4CAF50"/>
-    <rect x="10" y="16" width="16" height="8" fill="#66BB6A"/>
-    <rect x="22" y="18" width="14" height="6" fill="#81C784"/>
-    <rect x="24" y="14" width="10" height="6" fill="#A5D6A7"/>
-    <rect x="350" y="35" width="14" height="23" fill="#8B4513"/>
-    <rect x="338" y="15" width="18" height="4" fill="#4CAF50"/>
-    <rect x="340" y="10" width="14" height="8" fill="#66BB6A"/>
-    <rect x="350" y="12" width="12" height="6" fill="#81C784"/>
-    <rect x="352" y="8" width="8" height="5" fill="#A5D6A7"/>
-    <rect x="100" y="20" width="30" height="10" fill="#fff" opacity="0.8"/>
-    <rect x="280" y="15" width="40" height="12" fill="#fff" opacity="0.7"/>
-  </svg>`},
-};
+// Banners removed — hero uses dynamic type color
 
 // ── ACHIEVEMENTS ──
 const ACHIEVEMENTS=[
@@ -2427,7 +2252,89 @@ function achievementIcon(id,size=20,color='currentColor'){
   return icons[id]||icons.star;
 }
 
-// ── DAILY CHALLENGE ──
+// ── POKÉMON WALKER ──
+let _walkerState={x:50,dir:1,paused:false,pauseTimer:null,moveTimer:null,pokeId:null};
+
+function getDailyWalkerPoke(){
+  const d=new Date();
+  const seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()+999;
+  const rng=s=>{let x=Math.sin(s+42)*99999;return x-Math.floor(x);};
+  // Pick from 1-649 (animated sprites available)
+  return Math.max(1,Math.floor(rng(seed)*649))+1;
+}
+
+function initWalker(){
+  if(!S.set.showWalker){
+    document.getElementById('walker-wrap').style.display='none';
+    return;
+  }
+  const id=getDailyWalkerPoke();
+  _walkerState.pokeId=id;
+  const img=document.getElementById('walker-img');
+  img.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${id}.gif`;
+  img.onerror=()=>{img.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;};
+  document.getElementById('walker-wrap').style.display='block';
+  _walkerState.x=10+Math.random()*80;
+  _walkerState.dir=Math.random()>0.5?1:-1;
+  walkerMove();
+}
+
+function walkerMove(){
+  if(!S.set.showWalker)return;
+  const img=document.getElementById('walker-img');
+  if(!img)return;
+
+  // Random pause chance
+  if(!_walkerState.paused&&Math.random()<0.008){
+    _walkerState.paused=true;
+    clearTimeout(_walkerState.pauseTimer);
+    _walkerState.pauseTimer=setTimeout(()=>{
+      _walkerState.paused=false;
+    },800+Math.random()*2200);
+  }
+
+  if(!_walkerState.paused){
+    // Move speed varies slightly
+    const speed=0.12+Math.random()*0.06;
+    _walkerState.x+=_walkerState.dir*speed;
+
+    // Bounce at edges with some randomness
+    if(_walkerState.x>=92){
+      _walkerState.x=92;
+      _walkerState.dir=-1;
+    } else if(_walkerState.x<=2){
+      _walkerState.x=2;
+      _walkerState.dir=1;
+    }
+
+    // Random direction flip occasionally
+    if(Math.random()<0.002) _walkerState.dir*=-1;
+
+    img.style.left=`${_walkerState.x}%`;
+    img.style.transform=`scaleX(${_walkerState.dir>0?1:-1})`;
+  }
+
+  _walkerState.moveTimer=requestAnimationFrame(walkerMove);
+}
+
+function walkerClick(){
+  if(_walkerState.pokeId) openMdl(_walkerState.pokeId);
+}
+
+function toggleWalker(){
+  S.set.showWalker=!S.set.showWalker;
+  scheduleSave();
+  if(S.set.showWalker){
+    cancelAnimationFrame(_walkerState.moveTimer);
+    initWalker();
+  } else {
+    cancelAnimationFrame(_walkerState.moveTimer);
+    document.getElementById('walker-wrap').style.display='none';
+  }
+  // Update toggle button
+  const tog=document.getElementById('walker-toggle');
+  if(tog)tog.className=`cfg-toggle${S.set.showWalker?' on':''}`;
+}
 function getDailyChallenge(){
   const today=new Date();
   const seed=today.getFullYear()*10000+(today.getMonth()+1)*100+today.getDate();
@@ -2582,7 +2489,7 @@ async function fetchTypesInBackground(){
 
 const S={
   poke:POKE,track:{},favs:new Set(),teams:{},
-  set:{modern:true, cols:3, myGames:[], trainerName:'', trainerGender:'male', cardFavKey:null, theme:'magenta', banner:'route', dailyDone:null},
+  set:{modern:true, cols:3, myGames:[], trainerName:'', trainerGender:'male', cardFavKey:null, theme:'magenta', dailyDone:null, showWalker:true},
   f:{q:'',types:[],gen:0,rar:null},
   tab:'dex',
   teamGame:null,
@@ -2671,9 +2578,9 @@ function scheduleSave() {
         cardFavKey: S.set.cardFavKey || null,
         myGames: S.set.myGames || [],
         theme: S.set.theme || 'magenta',
-        banner: S.set.banner || 'route',
         dailyDone: S.set.dailyDone || null,
         dailyCount: S.dailyCount || 0,
+        showWalker: S.set.showWalker !== false,
       };
       await db.collection('users').doc(currentUser.uid).set({
         track: S.track,
@@ -2718,9 +2625,9 @@ async function loadUserData(uid) {
         if (d.set.cardFavKey !== undefined) S.set.cardFavKey = d.set.cardFavKey;
         if (d.set.myGames !== undefined) S.set.myGames = d.set.myGames;
         if (d.set.theme !== undefined) { S.set.theme = d.set.theme; applyTheme(d.set.theme); }
-        if (d.set.banner !== undefined) S.set.banner = d.set.banner;
         if (d.set.dailyDone !== undefined) S.set.dailyDone = d.set.dailyDone;
         if (d.set.dailyCount !== undefined) S.dailyCount = d.set.dailyCount;
+        if (d.set.showWalker !== undefined) S.set.showWalker = d.set.showWalker;
       }
     } else {
       loadFromLocalStorage();
@@ -2786,6 +2693,7 @@ auth.onAuthStateChanged(async user => {
     }
     updateTrainerUI();
     setTimeout(fetchTypesInBackground, 1500);
+    setTimeout(initWalker, 500);
   } else if (user && !isPwUnlocked()) {
     // Google session exists but password not entered — ask for password
     currentUser = user;
@@ -3173,11 +3081,6 @@ function _renderTrainerCardInner(wrap){
   const heroText=luminance>0.6?'rgba(0,0,0,0.85)':'#fff';
   const heroSub=luminance>0.6?'rgba(0,0,0,0.55)':'rgba(255,255,255,0.75)';
 
-  // Banner
-  const bannerId=S.set.banner||'route';
-  const banner=BANNERS[bannerId]||BANNERS.route;
-  const bannerSVG=banner.svg.replace('viewBox="0 0 400 120"','viewBox="0 0 400 120" width="100%" height="140" preserveAspectRatio="xMidYMid slice"');
-
   // Achievements
   const unlocked=getUnlockedAchievements();
 
@@ -3188,12 +3091,12 @@ function _renderTrainerCardInner(wrap){
   wrap.innerHTML=`
   <div style="border-radius:24px;overflow:hidden;box-shadow:0 12px 40px rgba(${r},${g2},${b},0.3);margin-bottom:16px;border:2px solid rgba(${r},${g2},${b},0.25)">
 
-    <!-- HERO with pixel-art banner -->
+    <!-- HERO — dynamic gradient based on top type -->
     <div style="position:relative;overflow:hidden;min-height:140px">
-      <!-- Banner SVG background -->
-      <div style="position:absolute;inset:0;overflow:hidden">${bannerSVG}</div>
-      <!-- Color overlay -->
-      <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(${r},${g2},${b},0.75) 0%,rgba(${r},${g2},${b},0.4) 100%)"></div>
+      <!-- Gradient background -->
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,${topTypeColor} 0%,rgba(${r},${g2},${b},0.6) 100%)"></div>
+      <!-- Subtle pattern overlay -->
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 70% 50%,rgba(255,255,255,0.08) 0%,transparent 60%)"></div>
       <!-- Content -->
       <div style="position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;min-height:140px">
         <div style="padding:18px 18px 16px;flex:1">
@@ -3349,6 +3252,9 @@ function updateTrainerUI(){
 }
 
 function renderSettings(){
+  const walkerTog=document.getElementById('walker-toggle');
+  if(walkerTog)walkerTog.className=`cfg-toggle${S.set.showWalker?' on':''}`;
+
   // Theme grid
   const themeGrid=document.getElementById('theme-grid');
   if(themeGrid){
@@ -3364,26 +3270,6 @@ function renderSettings(){
       ">
         <div style="width:14px;height:14px;border-radius:50%;background:${t.ac};flex-shrink:0"></div>
         <span style="font-size:11px;font-weight:700;color:${t.ac}">${t.name}</span>
-      </button>`).join('');
-  }
-
-  // Banner grid
-  const bannerGrid=document.getElementById('banner-grid');
-  if(bannerGrid){
-    const cur=S.set.banner||'route';
-    bannerGrid.innerHTML=Object.entries(BANNERS).map(([id,b])=>`
-      <button onclick="setBanner('${id}')" style="
-        border-radius:var(--r-md);overflow:hidden;
-        border:3px solid ${cur===id?'var(--ac)':'transparent'};
-        cursor:pointer;padding:0;background:none;
-        box-shadow:${cur===id?'0 4px 12px rgba(0,0,0,.2)':'var(--shadow)'};
-        transition:all .15s;display:block;width:100%;
-      ">
-        <div style="position:relative">
-          ${b.svg.replace('viewBox="0 0 400 120"','viewBox="0 0 400 120" width="100%" height="80"')}
-          <div style="position:absolute;bottom:6px;left:8px;background:rgba(0,0,0,.5);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;color:#fff">${b.name}</div>
-          ${cur===id?'<div style="position:absolute;top:6px;right:6px;background:var(--ac);border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>':''}
-        </div>
       </button>`).join('');
   }
 
@@ -3448,11 +3334,16 @@ function toggleSprite(){
   if(S.tab==='cfg')renderSettings();
 }
 
-function toggleHelp(){
-  const body=document.getElementById('help-body');
-  const chev=document.getElementById('help-chev');
-  body?.classList.toggle('on');
-  chev?.classList.toggle('on');
+function toggleHelp(e){
+  if(e)e.stopPropagation();
+  const modal=document.getElementById('help-modal');
+  if(!modal)return;
+  const isOpen=modal.style.display==='flex';
+  modal.style.display=isOpen?'none':'flex';
+}
+function closeHelp(){
+  const modal=document.getElementById('help-modal');
+  if(modal)modal.style.display='none';
 }
 
 function goTab(t){
