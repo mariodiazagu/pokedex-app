@@ -79,7 +79,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 .tabs{
   display:flex;background:var(--bg);flex-shrink:0;
   padding:8px 12px calc(8px + var(--sb));
-  gap:6px;
+  gap:6px;position:relative;z-index:100;
 }
 .tab{
   flex:1;display:flex;flex-direction:column;
@@ -891,8 +891,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
   </div>
 </div>
 
-<div id="walker-wrap" style="position:fixed;bottom:0;left:0;right:0;height:60px;pointer-events:none;z-index:150;overflow:hidden">
-  <img id="walker-img" style="position:absolute;bottom:4px;width:36px;height:36px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));pointer-events:all;cursor:pointer;transition:left 0.05s linear" onclick="walkerClick()">
+<div id="walker-wrap" style="position:fixed;bottom:0;left:0;right:0;height:72px;pointer-events:none;z-index:200;overflow:hidden">
+  <img id="walker-img" style="position:absolute;bottom:18px;width:40px;height:40px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));pointer-events:all;cursor:pointer" onclick="walkerClick()">
 </div>
 
 <nav class="tabs">
@@ -2253,14 +2253,18 @@ function achievementIcon(id,size=20,color='currentColor'){
 }
 
 // ── POKÉMON WALKER ──
-let _walkerState={x:50,dir:1,paused:false,pauseTimer:null,moveTimer:null,pokeId:null};
+let _walkerState={x:50,dir:1,paused:false,pauseTimer:null,moveTimer:null,pokeId:null,shiny:false,jumping:false,jumpY:0,jumpVel:0};
 
 function getDailyWalkerPoke(){
   const d=new Date();
   const seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()+999;
   const rng=s=>{let x=Math.sin(s+42)*99999;return x-Math.floor(x);};
-  // Pick from 1-649 (animated sprites available)
   return Math.max(1,Math.floor(rng(seed)*649))+1;
+}
+
+function walkerSrc(id,shiny){
+  const base=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/`;
+  return shiny?`${base}shiny/${id}.gif`:`${base}${id}.gif`;
 }
 
 function initWalker(){
@@ -2270,12 +2274,16 @@ function initWalker(){
   }
   const id=getDailyWalkerPoke();
   _walkerState.pokeId=id;
+  _walkerState.shiny=false;
   const img=document.getElementById('walker-img');
-  img.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${id}.gif`;
+  img.src=walkerSrc(id,false);
   img.onerror=()=>{img.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;};
   document.getElementById('walker-wrap').style.display='block';
   _walkerState.x=10+Math.random()*80;
   _walkerState.dir=Math.random()>0.5?1:-1;
+  _walkerState.jumpY=0;
+  _walkerState.jumpVel=0;
+  _walkerState.jumping=false;
   walkerMove();
 }
 
@@ -2284,35 +2292,53 @@ function walkerMove(){
   const img=document.getElementById('walker-img');
   if(!img)return;
 
-  // Random pause chance
-  if(!_walkerState.paused&&Math.random()<0.008){
+  // Random pause
+  if(!_walkerState.paused&&!_walkerState.jumping&&Math.random()<0.008){
     _walkerState.paused=true;
     clearTimeout(_walkerState.pauseTimer);
-    _walkerState.pauseTimer=setTimeout(()=>{
-      _walkerState.paused=false;
-    },800+Math.random()*2200);
+    _walkerState.pauseTimer=setTimeout(()=>{_walkerState.paused=false;},800+Math.random()*2200);
+  }
+
+  // Random jump trigger
+  if(!_walkerState.jumping&&!_walkerState.paused&&Math.random()<0.004){
+    _walkerState.jumping=true;
+    _walkerState.jumpVel=4+Math.random()*3;
+  }
+
+  // Physics jump
+  if(_walkerState.jumping){
+    _walkerState.jumpY+=_walkerState.jumpVel;
+    _walkerState.jumpVel-=0.35;
+    if(_walkerState.jumpY<=0){
+      _walkerState.jumpY=0;
+      _walkerState.jumpVel=0;
+      _walkerState.jumping=false;
+    }
+  }
+
+  // Random shiny switch (rare, ~every ~20s at 60fps)
+  if(Math.random()<0.0008){
+    _walkerState.shiny=!_walkerState.shiny;
+    const newSrc=walkerSrc(_walkerState.pokeId,_walkerState.shiny);
+    img.src=newSrc;
+    // Sparkle effect when going shiny
+    if(_walkerState.shiny){
+      img.style.filter='drop-shadow(0 0 6px gold) drop-shadow(0 2px 4px rgba(0,0,0,.25))';
+      setTimeout(()=>{img.style.filter='drop-shadow(0 2px 4px rgba(0,0,0,.25))';},1500);
+    }
   }
 
   if(!_walkerState.paused){
-    // Move speed varies slightly
     const speed=0.12+Math.random()*0.06;
     _walkerState.x+=_walkerState.dir*speed;
-
-    // Bounce at edges with some randomness
-    if(_walkerState.x>=92){
-      _walkerState.x=92;
-      _walkerState.dir=-1;
-    } else if(_walkerState.x<=2){
-      _walkerState.x=2;
-      _walkerState.dir=1;
-    }
-
-    // Random direction flip occasionally
-    if(Math.random()<0.002) _walkerState.dir*=-1;
-
-    img.style.left=`${_walkerState.x}%`;
-    img.style.transform=`scaleX(${_walkerState.dir>0?1:-1})`;
+    if(_walkerState.x>=92){_walkerState.x=92;_walkerState.dir=-1;}
+    else if(_walkerState.x<=2){_walkerState.x=2;_walkerState.dir=1;}
+    if(Math.random()<0.002)_walkerState.dir*=-1;
   }
+
+  img.style.left=`${_walkerState.x}%`;
+  img.style.bottom=`${18+_walkerState.jumpY}px`;
+  img.style.transform=`scaleX(${_walkerState.dir>0?1:-1})`;
 
   _walkerState.moveTimer=requestAnimationFrame(walkerMove);
 }
