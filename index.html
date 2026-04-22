@@ -677,10 +677,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <button class="ibtn" id="tb-cfg" onclick="goTab('cfg')" title="Ajustes">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
-    <div id="hdr-trainer-avatar" onclick="toggleUserMenu()" style="
+    <div id="hdr-trainer-avatar" onclick="toggleUserMenu(event)" style="
       width:38px;height:38px;border-radius:50%;
       background:var(--ac);border:2px solid var(--ac);
       overflow:hidden;cursor:pointer;flex-shrink:0;
@@ -2195,7 +2192,8 @@ function signOut() {
   auth.signOut();
 }
 
-function toggleUserMenu() {
+function toggleUserMenu(e) {
+  if(e)e.stopPropagation();
   document.getElementById('user-menu').classList.toggle('on');
 }
 function closeUserMenu() {
@@ -2676,13 +2674,19 @@ function goBack(){goTab(_prevTab||'dex');}
 function renderTrainerCard(){
   const wrap=document.getElementById('trainer-card-wrap');
   if(!wrap)return;
+  try{
+    _renderTrainerCardInner(wrap);
+  }catch(e){
+    console.error('Trainer card error:',e);
+    wrap.innerHTML=`<div style="padding:20px;text-align:center;color:var(--t2)">${e.message}</div>`;
+  }
+}
 
+function _renderTrainerCardInner(wrap){
   const name=trainerDisplayName();
   const sprite=trainerSprite();
-  const gender=S.set.trainerGender||'male';
 
   // ── Compute stats ──
-  // Unique captured (any game counts)
   const capturedIds=new Set(
     Object.keys(S.track).filter(id=>{
       try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch{return false;}
@@ -2690,7 +2694,6 @@ function renderTrainerCard(){
   );
   const totalCap=capturedIds.size;
 
-  // Shinies
   const shinyIds=new Set(
     Object.keys(S.track).filter(id=>{
       try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch{return false;}
@@ -2712,97 +2715,58 @@ function renderTrainerCard(){
   const topTypeColor=topTypeInfo?.c||'#6060a0';
   const topTypeLabel=topTypeInfo?.n||topTypeName||'—';
 
-  // Card background color based on top type
-  const cardColor=topTypeColor;
-
-  // Completion %
   const pct=Math.round((totalCap/S.poke.length)*100);
 
-  // My games
   const myGames=activeGames();
   const gamesWithData=myGames.filter(g=>
     Object.values(S.track).some(pt=>pt[g.id]&&(pt[g.id].captured||pt[g.id].shiny))
   );
 
-  // Full teams
   const fullTeams=GAMES.filter(g=>(S.teams[g.id]||[]).length===6).length;
 
-  // Favourite pokemon (first in favs)
   const firstFav=[...S.favs][0];
   const favBaseId=firstFav?parseInt(String(firstFav).split('_')[0]):null;
-  const favPoke=favBaseId?S.poke.find(p=>p.id===favBaseId):null;
+  const favPoke=favBaseId&&!isNaN(favBaseId)?S.poke.find(p=>p.id===favBaseId):null;
   const favSprite=favPoke?spOf(favPoke.id,S.set.modern,false):null;
 
-  // Type medals (top 5 types)
   const topTypes=Object.entries(typeCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
-
-  // Trainer ID (deterministic from name)
   const trainerId=String(name).split('').reduce((a,c)=>a+c.charCodeAt(0),10000).toString().slice(-5);
 
   wrap.innerHTML=`
   <div class="tcard">
-    <div class="tcard-bg" style="background:linear-gradient(135deg,${cardColor}cc 0%,${cardColor}44 50%,#1a1025 100%)"></div>
+    <div class="tcard-bg" style="background:linear-gradient(135deg,${topTypeColor}cc 0%,${topTypeColor}44 50%,#1a1025 100%)"></div>
     <img class="tcard-sprite-bg" src="${sprite}" onerror="this.style.display='none'">
     <div class="tcard-gradient"></div>
     <div class="tcard-content">
       <div class="tcard-id">ID No. ${trainerId}</div>
-
       <div class="tcard-name-row">
         <div class="tcard-name">${name}</div>
         ${isShinyHunter?`<div class="tcard-shiny-badge">✦ Shiny Hunter</div>`:''}
       </div>
-
       ${topTypeName?`
       <div class="tcard-type-title">
-        <span class="tcard-type-badge" style="background:${topTypeColor}">
-          ${TYPE_EMOJI[topTypeName]||'◆'} ${topTypeLabel}
-        </span>
+        <span class="tcard-type-badge" style="background:${topTypeColor}">${TYPE_EMOJI[topTypeName]||'◆'} ${topTypeLabel}</span>
         Entrenador Maestro
-      </div>`:'<div class="tcard-type-title" style="opacity:.5">Sin datos aún</div>'}
-
-      <div class="tcard-medals">
-        ${topTypes.map(([t])=>{
-          const ti=TYPES.find(x=>x.id===t);
-          return`<div class="tcard-medal" style="background:${ti?.c||'#888'}33;border-color:${ti?.c||'#888'}66">${TYPE_EMOJI[t]||'◆'}</div>`;
-        }).join('')}
+      </div>`:`<div class="tcard-type-title" style="opacity:.5">Captura Pokémon para desbloquear tu tipo</div>`}
+      ${topTypes.length?`<div class="tcard-medals">
+        ${topTypes.map(([t])=>{const ti=TYPES.find(x=>x.id===t);return`<div class="tcard-medal" style="background:${ti?.c||'#888'}33;border-color:${ti?.c||'#888'}66">${TYPE_EMOJI[t]||'◆'}</div>`;}).join('')}
         ${isShinyHunter?`<div class="tcard-medal" style="background:rgba(255,215,0,.2);border-color:rgba(255,215,0,.5)">✦</div>`:''}
-      </div>
-
-      <div class="tcard-stats">
-        <div class="tcard-stat">
-          <div class="tcard-stat-val">${totalCap}</div>
-          <div class="tcard-stat-lbl">Capturados</div>
-        </div>
-        <div class="tcard-stat">
-          <div class="tcard-stat-val">${totalShiny}</div>
-          <div class="tcard-stat-lbl">Shiny</div>
-        </div>
-        <div class="tcard-stat">
-          <div class="tcard-stat-val">${gamesWithData.length}</div>
-          <div class="tcard-stat-lbl">Juegos</div>
-        </div>
-        ${fullTeams>0?`<div class="tcard-stat">
-          <div class="tcard-stat-val">${fullTeams}</div>
-          <div class="tcard-stat-lbl">Equipos completos</div>
-        </div>`:''}
-      </div>
-
-      <div class="tcard-progress-wrap">
-        <div class="tcard-progress-lbl">
-          <span>Pokédex</span><span>${pct}%</span>
-        </div>
-        <div class="tcard-progress-track">
-          <div class="tcard-progress-fill" style="width:${pct}%;background:${topTypeColor}"></div>
-        </div>
-      </div>
-
-      ${gamesWithData.length?`<div class="tcard-games">
-        ${gamesWithData.map(g=>`<div class="tcard-game-chip">
-          <span style="width:7px;height:7px;border-radius:50%;background:${g.c};flex-shrink:0;display:inline-block"></span>
-          ${g.n}
-        </div>`).join('')}
       </div>`:''}
-
+      <div class="tcard-stats">
+        <div class="tcard-stat"><div class="tcard-stat-val">${totalCap}</div><div class="tcard-stat-lbl">Capturados</div></div>
+        <div class="tcard-stat"><div class="tcard-stat-val">${totalShiny}</div><div class="tcard-stat-lbl">Shiny</div></div>
+        <div class="tcard-stat"><div class="tcard-stat-val">${gamesWithData.length}</div><div class="tcard-stat-lbl">Juegos</div></div>
+        ${fullTeams>0?`<div class="tcard-stat"><div class="tcard-stat-val">${fullTeams}</div><div class="tcard-stat-lbl">Equipos ✓</div></div>`:''}
+      </div>
+      <div class="tcard-progress-wrap">
+        <div class="tcard-progress-lbl"><span>Pokédex</span><span>${pct}%</span></div>
+        <div class="tcard-progress-track">
+          <div class="tcard-progress-fill" style="width:${pct}%;background:${topTypeColor||'var(--ac)'}"></div>
+        </div>
+      </div>
+      ${gamesWithData.length?`<div class="tcard-games">
+        ${gamesWithData.map(g=>`<div class="tcard-game-chip"><span style="width:7px;height:7px;border-radius:50%;background:${g.c};flex-shrink:0;display:inline-block"></span>${g.n}</div>`).join('')}
+      </div>`:''}
       ${favPoke?`<div class="tcard-fav-section">
         <img class="tcard-fav-img" src="${favSprite}" onerror="this.style.display='none'">
         <div class="tcard-fav-info">
