@@ -153,6 +153,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 .card-hdr{display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:3px}
 .card-id{font-size:9px;color:var(--t3);font-weight:700}
 .card-rdot{width:6px;height:6px;border-radius:50%}
+.card-badges{display:flex;align-items:center;gap:3px}
 .card-img{width:62px;height:62px;object-fit:contain;display:block}
 .card-img.px{width:54px;height:54px;image-rendering:pixelated;margin:4px 0}
 .card-img[data-src]{opacity:0;transition:opacity .2s}
@@ -160,8 +161,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 .card-name{font-size:10px;font-weight:700;text-align:center;margin:4px 0 3px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)}
 .card-types{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
 .tbadge{padding:2px 6px;border-radius:20px;font-size:8px;font-weight:700;color:#fff}
-.card-st{position:absolute;bottom:6px;right:6px;display:flex;gap:2px}
-.card-ov{position:absolute;top:6px;right:6px;display:flex;gap:2px}
+.card-st{display:none}
+.card-ov{display:none}
 .stDot{width:5px;height:5px;border-radius:50%}
 
 /* ── MODAL ── */
@@ -2268,13 +2269,19 @@ function cardHTML(p,eager){
   const imgAttrs=eager?`src="${imgUrl}" class="card-img${mod?'':' px'} loaded"`:
     `data-src="${imgUrl}" src="" class="card-img${mod?'':' px'}"`;
   return`<div class="card" style="${st}" data-id="${p.id}" onclick="openMdl(${p.id})">
-    <div class="card-hdr"><span class="card-id">#${pad(p.id)}</span><span class="card-rdot" style="background:${rar.d}" title="${rar.l}"></span></div>
-    ${ov?`<div class="card-ov">${ov}</div>`:''}
+    <div class="card-hdr">
+      <span class="card-id">#${pad(p.id)}</span>
+      <span class="card-badges">
+        ${fav?`<svg width="9" height="9" viewBox="0 0 24 24" fill="var(--red)" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`:''}
+        ${team?`<svg width="9" height="9" viewBox="0 0 24 24" fill="var(--blue)" stroke="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`:''}
+        ${caught?`<span class="stDot" style="background:var(--green)"></span>`:''}
+        ${shy?`<span class="stDot" style="background:var(--gold)"></span>`:''}
+        <span class="card-rdot" style="background:${rar.d}" title="${rar.l}"></span>
+      </span>
+    </div>
     <img ${imgAttrs} alt="${p.name}">
     <div class="card-name">${cap(p.name)}</div>
     <div class="card-types">${types}</div>
-    ${caught||shy?`<div class="card-st">${caught?`<span class="stDot" style="background:var(--green)"></span>`:''
-      }${shy?`<span class="stDot" style="background:var(--gold)"></span>`:''}</div>`:''}
   </div>`;
 }
 
@@ -3030,7 +3037,7 @@ function doNota(pid,gid,val){
 //  PASSWORD GATE
 // ═══════════════════════════════════════
 const PW_KEY='pkp_auth';
-const CORRECT_PW='tu_contraseña_aqui'; // ← cambia esto
+const CORRECT_PW='Pokemon2026'; // ← cambia esto
 
 function isPwUnlocked(){ return localStorage.getItem(PW_KEY)==='1'; }
 function setPwUnlocked(){ localStorage.setItem(PW_KEY,'1'); }
