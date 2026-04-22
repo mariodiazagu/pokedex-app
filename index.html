@@ -2765,88 +2765,99 @@ function _renderTrainerCardInner(wrap){
   const favPoke=favBaseId&&!isNaN(favBaseId)?S.poke.find(p=>p.id===favBaseId):null;
   const trainerId=String(name).split('').reduce((a,c)=>a+c.charCodeAt(0),10000).toString().slice(-5);
   const typeIconUrl=t=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-ix/scarlet-violet/${TYPE_ID[t]||1}.png`;
-
   const r=parseInt(topTypeColor.slice(1,3),16);
   const g2=parseInt(topTypeColor.slice(3,5),16);
   const b=parseInt(topTypeColor.slice(5,7),16);
 
-  wrap.innerHTML=`
-  <div style="
-    border-radius:24px;overflow:hidden;position:relative;
-    background:linear-gradient(160deg,rgba(${r},${g2},${b},0.18) 0%,rgba(${r},${g2},${b},0.06) 50%,#fff 100%);
-    background-color:var(--s1);
-    border:2px solid rgba(${r},${g2},${b},0.25);
-    box-shadow:0 8px 32px rgba(${r},${g2},${b},0.2),var(--shadow-lg);
-    margin-bottom:16px;
-  ">
+  // Determine if type color is light or dark to set text contrast
+  const luminance=(0.299*r+0.587*g2+0.114*b)/255;
+  const heroText=luminance>0.6?'rgba(0,0,0,0.85)':'#fff';
+  const heroSubText=luminance>0.6?'rgba(0,0,0,0.55)':'rgba(255,255,255,0.75)';
 
-    <!-- Floating sprites top-right -->
-    <div style="position:absolute;right:0;bottom:0;display:flex;align-items:flex-end;pointer-events:none;z-index:1">
-      ${favPoke?`<img src="${iPx(favPoke.id)}" style="width:100px;height:100px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15));opacity:.9" onerror="this.style.display='none'">`:''}
-      <img src="${sprite}" style="width:120px;height:120px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15))" onerror="this.style.display='none'">
+  wrap.innerHTML=`
+  <div style="border-radius:24px;overflow:hidden;box-shadow:0 12px 40px rgba(${r},${g2},${b},0.35),var(--shadow-lg);margin-bottom:16px;border:2px solid rgba(${r},${g2},${b},0.3)">
+
+    <!-- HERO — strong type color -->
+    <div style="
+      background:linear-gradient(135deg,${topTypeColor} 0%,rgba(${r},${g2},${b},0.75) 100%);
+      min-height:160px;position:relative;overflow:hidden;
+      display:flex;align-items:flex-end;justify-content:space-between;
+    ">
+      <!-- Big faded type icon watermark background -->
+      ${topTypeName?`<img src="${typeIconUrl(topTypeName)}"
+        style="position:absolute;right:130px;top:50%;transform:translateY(-50%);
+          width:160px;height:160px;object-fit:contain;
+          opacity:0.12;filter:brightness(10)"
+        onerror="this.style.display='none'">`:''}
+
+      <!-- Name area -->
+      <div style="padding:18px 18px 16px;flex:1;position:relative;z-index:2">
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${heroSubText};margin-bottom:6px">
+          Trainer Card &nbsp;·&nbsp; ID ${trainerId}
+        </div>
+        <div style="font-size:36px;font-weight:900;color:${heroText};letter-spacing:-.5px;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.15)">${name}</div>
+        ${isShinyHunter?`<div style="margin-top:8px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,215,0,0.25);border:1.5px solid rgba(255,215,0,0.6);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;color:#FFD700">✦ Shiny Hunter</div>`:''}
+      </div>
+
+      <!-- Sprites -->
+      <div style="display:flex;align-items:flex-end;flex-shrink:0;padding-right:8px;position:relative;z-index:2">
+        ${favPoke?`<img src="${iPx(favPoke.id)}" style="width:90px;height:90px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))" onerror="this.style.display='none'">`:''}
+        <img src="${sprite}" style="width:130px;height:130px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))" onerror="this.style.display='none'">
+      </div>
     </div>
 
-    <div style="position:relative;z-index:2;padding:18px 16px 16px">
+    <!-- BODY -->
+    <div style="background:var(--s1);padding:16px">
 
-      <!-- Top bar -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div style="font-size:11px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;color:rgba(${r},${g2},${b},0.8)">Trainer Card</div>
-        <div style="font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.5px">ID No. ${trainerId}</div>
-      </div>
-
-      <!-- Name + shiny badge -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-        <div style="font-size:32px;font-weight:900;color:var(--t1);letter-spacing:-.5px;line-height:1">${name}</div>
-        ${isShinyHunter?`<div style="background:linear-gradient(135deg,#FFD700,#FFA500);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:800;color:#fff;white-space:nowrap">✦ Shiny Hunter</div>`:''}
-      </div>
-
-      <!-- Maestro type section — BIG and prominent -->
+      <!-- Maestro tipo -->
       ${topTypeName?`
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:rgba(${r},${g2},${b},0.12);border-radius:16px;border:2px solid rgba(${r},${g2},${b},0.3)">
-        <img src="${typeIconUrl(topTypeName)}" style="width:40px;height:40px;border-radius:8px;object-fit:contain;flex-shrink:0" onerror="this.style.opacity='.3'">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(${r},${g2},${b},0.08);border-radius:16px;border:1.5px solid rgba(${r},${g2},${b},0.2);margin-bottom:14px">
+        <img src="${typeIconUrl(topTypeName)}" style="width:44px;height:44px;border-radius:10px;object-fit:contain;flex-shrink:0" onerror="this.style.opacity='.3'">
         <div>
           <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px">Entrenador Maestro</div>
-          <div style="font-size:20px;font-weight:900;color:${topTypeColor};line-height:1.2">Tipo ${topTypeLabel}</div>
+          <div style="font-size:22px;font-weight:900;color:${topTypeColor};line-height:1.2">Tipo ${topTypeLabel}</div>
         </div>
       </div>`:''}
 
-      <!-- Stats row -->
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <div style="flex:1;background:rgba(255,255,255,.7);border:1.5px solid rgba(${r},${g2},${b},0.2);border-radius:14px;padding:10px;text-align:center">
-          <div style="font-size:26px;font-weight:900;color:var(--t1);line-height:1">${totalCap}</div>
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        <div style="background:var(--bg);border-radius:14px;padding:12px 8px;text-align:center">
+          <div style="font-size:28px;font-weight:900;color:var(--t1);line-height:1">${totalCap}</div>
           <div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">Capturados</div>
         </div>
-        <div style="flex:1;background:rgba(255,255,255,.7);border:1.5px solid rgba(${r},${g2},${b},0.2);border-radius:14px;padding:10px;text-align:center">
-          <div style="font-size:26px;font-weight:900;color:var(--gold);line-height:1">${totalShiny}</div>
+        <div style="background:var(--bg);border-radius:14px;padding:12px 8px;text-align:center">
+          <div style="font-size:28px;font-weight:900;color:var(--gold);line-height:1">${totalShiny}</div>
           <div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">Shiny</div>
         </div>
-        <div style="flex:1;background:rgba(255,255,255,.7);border:1.5px solid rgba(${r},${g2},${b},0.2);border-radius:14px;padding:10px;text-align:center">
-          <div style="font-size:26px;font-weight:900;color:var(--t1);line-height:1">${gamesWithData.length}</div>
+        <div style="background:var(--bg);border-radius:14px;padding:12px 8px;text-align:center">
+          <div style="font-size:28px;font-weight:900;color:var(--t1);line-height:1">${gamesWithData.length}</div>
           <div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">Juegos</div>
         </div>
       </div>
 
       <!-- Pokédex progress -->
-      <div style="background:rgba(255,255,255,.7);border:1.5px solid rgba(${r},${g2},${b},0.2);border-radius:14px;padding:10px 14px;margin-bottom:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:11px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.5px">Pokédex</div>
-          <div style="font-size:13px;font-weight:800;color:${topTypeColor}">${pct}%</div>
+      <div style="background:var(--bg);border-radius:14px;padding:12px 14px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:800;color:var(--t2)">Pokédex</span>
+          <span style="font-size:11px;font-weight:800;color:${topTypeColor}">${totalCap} / ${S.poke.length} &nbsp;·&nbsp; ${pct}%</span>
         </div>
         <div style="height:10px;background:rgba(0,0,0,.07);border-radius:5px;overflow:hidden">
-          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${topTypeColor},rgba(${r},${g2},${b},0.6));border-radius:5px;transition:width .8s ease;min-width:${pct>0?'12px':'0'}"></div>
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${topTypeColor},rgba(${r},${g2},${b},0.5));border-radius:5px;min-width:${pct>0?'10px':'0'}"></div>
         </div>
       </div>
 
-      <!-- Type medals — bigger icons -->
+      <!-- Tipos capturados -->
       ${topTypes.length?`
-      <div style="background:rgba(255,255,255,.7);border:1.5px solid rgba(${r},${g2},${b},0.2);border-radius:14px;padding:10px 14px">
+      <div style="background:var(--bg);border-radius:14px;padding:12px 14px">
         <div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Tipos capturados</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
           ${topTypes.slice(0,9).map(([t,n])=>{
             const ti=TYPES.find(x=>x.id===t);
-            return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-              <img src="${typeIconUrl(t)}" style="width:36px;height:36px;border-radius:8px;object-fit:contain;border:2px solid ${ti?.c||'#888'}44" onerror="this.style.opacity='.3'">
-              <span style="font-size:9px;font-weight:800;color:${ti?.c||'var(--t2)'}">${n}</span>
+            const tc=ti?.c||'#888';
+            return `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;background:${tc}18;border:1.5px solid ${tc}44">
+              <img src="${typeIconUrl(t)}" style="width:22px;height:22px;object-fit:contain;border-radius:4px" onerror="this.style.display='none'">
+              <span style="font-size:12px;font-weight:800;color:${tc}">${ti?.n||t}</span>
+              <span style="font-size:11px;font-weight:700;color:${tc};opacity:.7">${n}</span>
             </div>`;
           }).join('')}
         </div>
@@ -2855,6 +2866,8 @@ function _renderTrainerCardInner(wrap){
     </div>
   </div>`;
 }
+
+
 
 
 
