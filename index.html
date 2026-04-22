@@ -1,503 +1,707 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="PokéPlanner">
-  <title>PokéPlanner</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PokéPlanner">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0a0a0f;
-  --surface: #12121a;
-  --surface2: #1a1a26;
-  --surface3: #22223a;
-  --accent: #7c6af6;
-  --accent2: #a89cf8;
-  --accent-glow: rgba(124,106,246,.18);
-  --red: #f06292;
-  --green: #66bb6a;
-  --blue: #42a5f5;
-  --gold: #ffd54f;
-  --text: #f0f0ff;
-  --text2: #8888b0;
-  --text3: #3a3a5a;
-  --border: #1e1e30;
-  --border2: #282840;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --r: 14px;
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+:root{
+  /* Palette — warm, playful, inspired by reference */
+  --bg:#FAF8F4;
+  --s1:#FFFFFF;
+  --s2:#F2EFE9;
+  --s3:#E8E3DA;
+  --ac:#F5C842;        /* yellow primary */
+  --ac2:#F4927A;       /* coral secondary */
+  --ac3:#C4B5F4;       /* lavender tertiary */
+  --acg:rgba(245,200,66,.15);
+  --red:#F4927A;
+  --green:#6BCB8B;
+  --blue:#7BB8F4;
+  --gold:#F5C842;
+  --t1:#1A1A1A;
+  --t2:#6B6560;
+  --t3:#A89F96;
+  --bd:#E8E3DA;
+  --bd2:#F2EFE9;
+  --st:env(safe-area-inset-top,0px);
+  --sb:env(safe-area-inset-bottom,0px);
+  --fn:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --r-sm:14px;
+  --r-md:20px;
+  --r-lg:26px;
+  --r-xl:32px;
+  --shadow:0 2px 8px rgba(0,0,0,.06);
+  --shadow-md:0 8px 24px rgba(0,0,0,.10);
+  --shadow-lg:0 16px 40px rgba(0,0,0,.14);
 }
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; }
-body { font-family: var(--font); background: var(--bg); color: var(--text); height: 100dvh; }
-
-/* ── SVG ICONS ── */
-.icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.icon svg { display: block; }
-
-/* ── APP SHELL ── */
-#app { display: flex; flex-direction: column; height: 100dvh; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
+#app{display:flex;flex-direction:column;height:100dvh}
 
 /* ── HEADER ── */
-.header {
-padding: calc(var(–safe-top) + 12px) 16px 12px;
-display: flex; align-items: center; justify-content: space-between;
-flex-shrink: 0; border-bottom: 1px solid var(–border);
-background: var(–bg);
+.hdr{
+  padding:calc(var(--st) + 14px) 18px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;background:var(--bg);
 }
-.header-brand { display: flex; align-items: center; gap: 10px; }
-.brand-logo {
-width: 32px; height: 32px; border-radius: 9px;
-background: var(–accent); display: flex; align-items: center; justify-content: center;
-flex-shrink: 0;
+.hdr-brand{display:flex;align-items:center;gap:11px}
+.hdr-logo{
+  width:38px;height:38px;border-radius:14px;
+  background:#1A1025;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;box-shadow:0 4px 12px rgba(26,16,37,.25);
+  overflow:hidden;
 }
-.brand-name { font-size: 18px; font-weight: 700; letter-spacing: -.3px; color: var(–text); }
-.brand-sub { font-size: 11px; color: var(–text2); font-weight: 500; margin-top: 0px; }
-.header-right { display: flex; gap: 8px; align-items: center; }
-.icon-btn {
-width: 36px; height: 36px; border-radius: 10px;
-border: 1px solid var(–border2); background: var(–surface);
-display: flex; align-items: center; justify-content: center;
-cursor: pointer; transition: background .15s, border-color .15s;
-flex-shrink: 0;
+.hdr-name{font-size:20px;font-weight:800;letter-spacing:-.5px;color:var(--t1)}
+.hdr-stat{font-size:11px;color:var(--t3);font-weight:500;margin-top:1px}
+.ibtn{
+  width:38px;height:38px;border-radius:14px;
+  border:none;background:var(--s1);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--t3);
+  box-shadow:var(--shadow);
 }
-.icon-btn:active { background: var(–surface3); }
-.icon-btn.active { background: var(–accent); border-color: var(–accent); }
-.icon-btn.active svg { color: #fff; }
+.ibtn.on{background:var(--ac);color:var(--t1)}
+.ibtn:active{transform:scale(.9)}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;background:var(--bg);flex-shrink:0;
+  padding:8px 12px calc(8px + var(--sb));
+  gap:6px;
+}
+.tab{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:8px 4px;cursor:pointer;gap:4px;
+  border:none;background:none;font-family:var(--fn);
+  color:var(--t3);border-radius:var(--r-md);
+  transition:all .15s;
+}
+.tab.on{background:var(--ac);color:var(--t1);box-shadow:0 4px 12px rgba(245,200,66,.4)}
+.tab svg{transition:color .15s}
+.tab-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;transition:color .15s}
+.tab.on svg,.tab.on .tab-lbl{color:var(--t1)}
+.tab:active{transform:scale(.93)}
 
 /* ── PAGES ── */
-.page { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
-.page.active { display: flex; }
+.pg{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.pg.on{display:flex}
 
 /* ── SEARCH ── */
-.search-bar { padding: 10px 14px 8px; flex-shrink: 0; }
-.search-inner {
-display: flex; align-items: center; gap: 8px;
-background: var(–surface); border: 1px solid var(–border2);
-border-radius: 12px; padding: 10px 12px;
+.srch{padding:10px 16px 8px;flex-shrink:0}
+.srch-box{
+  display:flex;align-items:center;gap:10px;
+  background:var(--s1);border:none;
+  border-radius:var(--r-lg);padding:12px 16px;
+  box-shadow:var(--shadow);transition:box-shadow .15s;
 }
-.search-inner svg { color: var(–text3); flex-shrink: 0; }
-.search-input {
-flex: 1; background: none; border: none; outline: none;
-color: var(–text); font-size: 15px; font-family: var(–font); font-weight: 500;
+.srch-box:focus-within{box-shadow:0 0 0 3px rgba(245,200,66,.35),var(--shadow)}
+.srch-box svg{color:var(--t3);flex-shrink:0}
+.srch-inp{
+  flex:1;background:none;border:none;outline:none;
+  color:var(--t1);font-size:15px;font-family:var(--fn);font-weight:500;
 }
-.search-input::placeholder { color: var(–text3); }
-.search-clear { color: var(–text3); cursor: pointer; padding: 2px; display: none; transition: color .15s; }
-.search-clear:active { color: var(–text2); }
-.search-clear.show { display: flex; }
+.srch-inp::placeholder{color:var(--t3)}
+.srch-x{color:var(--t3);cursor:pointer;padding:2px;display:none;align-items:center}
+.srch-x.on{display:flex}
 
 /* ── FILTER ROWS ── */
-.filter-row {
-overflow-x: auto; padding: 0 14px 6px;
-flex-shrink: 0; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+.frow{overflow-x:auto;padding:0 16px 6px;flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.frow::-webkit-scrollbar{display:none}
+.fi{display:flex;gap:6px;white-space:nowrap}
+.pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 14px;border-radius:var(--r-xl);
+  font-size:12px;font-weight:700;
+  border:none;background:var(--s1);color:var(--t2);
+  cursor:pointer;white-space:nowrap;font-family:var(--fn);
+  box-shadow:var(--shadow);transition:all .13s;
 }
-.filter-row::-webkit-scrollbar { display: none; }
-.filter-inner { display: flex; gap: 6px; white-space: nowrap; }
-.pill {
-display: inline-flex; align-items: center; gap: 5px;
-padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
-border: 1px solid var(–border2); background: var(–surface); color: var(–text2);
-cursor: pointer; white-space: nowrap; font-family: var(–font);
-transition: all .15s;
-}
-.pill.active { background: var(–accent); border-color: var(–accent); color: #fff; }
-.pill-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
-/* ── RESULT COUNT ── */
-.result-count { padding: 0 14px 5px; font-size: 11px; color: var(–text3); font-weight: 600; flex-shrink: 0; }
+.pill.on{background:var(--ac);color:var(--t1);box-shadow:0 4px 10px rgba(245,200,66,.4)}
+.pill.disabled{opacity:.3;pointer-events:none}
+.pdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rcount{padding:0 16px 5px;font-size:12px;color:var(--t3);font-weight:700;flex-shrink:0}
 
 /* ── GRID ── */
-.grid-scroll {
-flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-padding: 0 10px; padding-bottom: calc(8px + var(–safe-bottom));
-overscroll-behavior: contain;
-}
-.poke-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.gscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 12px;padding-bottom:calc(12px + var(--sb));overscroll-behavior:contain}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sentinel{height:1px;width:100%}
 
 /* ── CARD ── */
-.poke-card {
-background: var(–surface); border: 1px solid var(–border2);
-border-radius: var(–r); padding: 9px 7px 9px; cursor: pointer;
-display: flex; flex-direction: column; align-items: center;
-transition: transform .12s; position: relative; overflow: hidden;
-min-height: 126px;
+.card{
+  background:var(--s1);border:none;
+  border-radius:var(--r-lg);padding:10px 8px 8px;
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;position:relative;overflow:hidden;
+  min-height:128px;transition:transform .13s,box-shadow .13s;
+  box-shadow:var(--shadow);
 }
-.poke-card:active { transform: scale(.93); }
-.card-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; }
-.card-id { font-size: 9px; color: var(–text3); font-weight: 600; }
-.card-rar-dot { width: 6px; height: 6px; border-radius: 50%; }
-.card-img { width: 62px; height: 62px; object-fit: contain; }
-.card-img.px { width: 54px; height: 54px; image-rendering: pixelated; margin: 4px 0; }
-.card-name { font-size: 10px; font-weight: 600; text-align: center; margin: 4px 0 3px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(–text); }
-.card-types { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
-.type-badge { padding: 2px 5px; border-radius: 5px; font-size: 8px; font-weight: 700; color: #fff; }
-.card-status { position: absolute; bottom: 6px; right: 6px; display: flex; gap: 2px; align-items: center; }
-.card-overlays { position: absolute; top: 6px; right: 6px; display: flex; gap: 2px; }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; }
-
-/* ── TAB BAR ── */
-.tab-bar {
-display: flex; border-top: 1px solid var(–border); background: var(–surface);
-flex-shrink: 0; padding-bottom: var(–safe-bottom);
-}
-.tab {
-flex: 1; display: flex; flex-direction: column; align-items: center;
-justify-content: center; padding: 9px 4px 7px; cursor: pointer;
-gap: 4px; border: none; background: none; font-family: var(–font);
-transition: opacity .15s;
-}
-.tab svg { color: var(–text3); transition: color .15s; }
-.tab-label { font-size: 9px; font-weight: 600; color: var(–text3); text-transform: uppercase; letter-spacing: .4px; transition: color .15s; }
-.tab.active svg { color: var(–accent); }
-.tab.active .tab-label { color: var(–accent); }
+.card:active{transform:scale(.91)}
+.card:hover{box-shadow:var(--shadow-md)}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:3px}
+.card-id{font-size:9px;color:var(--t3);font-weight:700}
+.card-rdot{width:6px;height:6px;border-radius:50%}
+.card-img{width:62px;height:62px;object-fit:contain;display:block}
+.card-img.px{width:54px;height:54px;image-rendering:pixelated;margin:4px 0}
+.card-img[data-src]{opacity:0;transition:opacity .2s}
+.card-img.loaded{opacity:1}
+.card-name{font-size:10px;font-weight:700;text-align:center;margin:4px 0 3px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)}
+.card-types{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
+.tbadge{padding:2px 6px;border-radius:20px;font-size:8px;font-weight:700;color:#fff}
+.card-st{position:absolute;bottom:6px;right:6px;display:flex;gap:2px}
+.card-ov{position:absolute;top:6px;right:6px;display:flex;gap:2px}
+.stDot{width:5px;height:5px;border-radius:50%}
 
 /* ── MODAL ── */
-#overlay {
-position: fixed; inset: 0; background: rgba(0,0,0,.7);
-backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-z-index: 900; display: none; align-items: flex-end;
+#ov{position:fixed;inset:0;background:rgba(26,16,37,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:900;display:none;align-items:flex-end}
+#ov.on{display:flex}
+#mdl{
+  background:var(--bg);width:100%;max-height:93dvh;
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  display:flex;flex-direction:column;
+  animation:sup .3s cubic-bezier(.34,1.56,.64,1);
+  padding-bottom:var(--sb);
+  box-shadow:0 -12px 48px rgba(0,0,0,.18);
 }
-#overlay.open { display: flex; }
-#modal {
-background: var(–bg); width: 100%; max-height: 93dvh;
-border-radius: 24px 24px 0 0; display: flex; flex-direction: column;
-animation: slideUp .28s cubic-bezier(.4,1.3,.6,1);
-padding-bottom: var(–safe-bottom);
-border: 1px solid var(–border2); border-bottom: none;
+@keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mpull{width:40px;height:4px;background:var(--s3);border-radius:2px;margin:12px auto 4px}
+.mhdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:4px 16px 12px;border-bottom:1px solid var(--bd);flex-shrink:0;
 }
-@keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
-.modal-pull { width: 36px; height: 4px; background: var(–border2); border-radius: 2px; margin: 10px auto; }
-.modal-header {
-display: flex; align-items: center; justify-content: space-between;
-padding: 4px 14px 12px; border-bottom: 1px solid var(–border); flex-shrink: 0;
-}
-.modal-id { font-size: 13px; color: var(–text2); font-weight: 600; }
-.modal-hdr-btns { display: flex; gap: 6px; }
-.modal-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.mnum{font-size:13px;color:var(--t3);font-weight:700}
+.mbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 
-/* ── MODAL HERO ── */
-.hero {
-margin: 12px 14px; border-radius: 18px; padding: 18px 16px 14px;
-display: flex; flex-direction: column; align-items: center; position: relative;
+/* ── HERO ── */
+.hero{
+  margin:14px 16px;border-radius:var(--r-xl);
+  padding:20px 16px 16px;display:flex;flex-direction:column;
+  align-items:center;position:relative;
 }
-.hero-shiny-btn {
-position: absolute; top: 12px; right: 12px;
-width: 34px; height: 34px; border-radius: 9px;
-border: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.25);
-display: flex; align-items: center; justify-content: center;
-cursor: pointer; transition: all .2s;
+.shbtn{
+  position:absolute;top:14px;right:14px;width:36px;height:36px;
+  border-radius:var(--r-sm);border:none;background:rgba(255,255,255,.7);
+  backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;color:var(--t3);
+  box-shadow:var(--shadow);
 }
-.hero-shiny-btn svg { color: var(–text3); }
-.hero-shiny-btn.on { background: rgba(255,213,79,.15); border-color: var(–gold); }
-.hero-shiny-btn.on svg { color: var(–gold); }
-.hero-img-wrap { width: 130px; height: 130px; position: relative; flex-shrink: 0; }
-.hero-img { width: 130px; height: 130px; object-fit: contain; position: absolute; top: 0; left: 0; }
-.hero-img.px { image-rendering: pixelated; width: 110px; height: 110px; top: 10px; left: 10px; }
-.hero-img.shiny { filter: drop-shadow(0 0 14px rgba(255,213,79,.7)); }
-.hero-name { font-size: 24px; font-weight: 700; margin-top: 10px; text-transform: capitalize; letter-spacing: -.2px; }
-.hero-form-label { font-size: 12px; color: var(–text2); font-weight: 500; margin-top: 2px; text-transform: capitalize; }
-.hero-rar {
-display: inline-flex; align-items: center; gap: 6px;
-padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
-margin: 8px 0; border: 1px solid;
+.shbtn.on{background:var(--gold);color:#fff;box-shadow:0 4px 12px rgba(245,200,66,.5)}
+.shbtn.on svg{color:#fff}
+.hwrap{width:140px;height:140px;position:relative;flex-shrink:0}
+.himg{width:140px;height:140px;object-fit:contain;position:absolute;top:0;left:0}
+.himg.px{image-rendering:pixelated;width:120px;height:120px;top:10px;left:10px}
+.hname{font-size:26px;font-weight:800;margin-top:10px;text-transform:capitalize;letter-spacing:-.5px;color:var(--t1)}
+.hform{font-size:13px;color:var(--t2);font-weight:600;margin-top:3px;text-transform:capitalize}
+.hrar{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;border-radius:var(--r-xl);
+  font-size:11px;font-weight:700;margin:8px 0;border:none;
+  background:rgba(255,255,255,.6);
 }
-.hero-rar-dot { width: 7px; height: 7px; border-radius: 50%; }
-.hero-types { display: flex; gap: 7px; margin-bottom: 14px; }
-.hero-type-pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #fff; }
-.hero-stats { display: flex; gap: 20px; align-items: center; }
-.hstat { text-align: center; }
-.hstat-val { font-size: 17px; font-weight: 700; }
-.hstat-lbl { font-size: 10px; color: var(–text2); font-weight: 500; margin-top: 1px; }
-.hstat-div { width: 1px; height: 28px; background: var(–border2); }
+.hrardot{width:7px;height:7px;border-radius:50%}
+.htypes{display:flex;gap:8px;margin-bottom:14px}
+.htype{padding:6px 16px;border-radius:var(--r-xl);font-size:12px;font-weight:700;color:#fff}
+.hstats{display:flex;gap:0;align-items:stretch;background:rgba(255,255,255,.55);border-radius:var(--r-md);overflow:hidden}
+.hs{text-align:center;padding:10px 18px;flex:1}
+.hs-val{font-size:17px;font-weight:800;color:var(--t1)}
+.hs-lbl{font-size:10px;color:var(--t2);font-weight:600;margin-top:2px}
+.hsdiv{width:1px;background:var(--bd)}
 
 /* ── QUICK ACTIONS ── */
-.quick-btns { display: flex; gap: 8px; padding: 0 14px 10px; }
-.qbtn {
-flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-padding: 10px; border-radius: 11px; border: 1px solid var(–border2);
-background: var(–surface); cursor: pointer; font-size: 12px; font-weight: 600;
-color: var(–text2); font-family: var(–font); transition: all .15s;
+.qrow{display:flex;gap:8px;padding:0 16px 10px}
+.qbtn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px;border-radius:var(--r-md);border:none;
+  background:var(--s1);cursor:pointer;
+  font-size:13px;font-weight:700;color:var(--t2);
+  font-family:var(--fn);transition:all .13s;
+  box-shadow:var(--shadow);
 }
-.qbtn svg { flex-shrink: 0; }
-.qbtn.fav { background: rgba(240,98,146,.1); border-color: var(–red); color: var(–red); }
-.qbtn.fav svg { color: var(–red); }
-.qbtn.team { background: rgba(66,165,245,.1); border-color: var(–blue); color: var(–blue); }
-.qbtn.team svg { color: var(–blue); }
+.qbtn.fav{background:#FFF0EE;color:var(--red)}
+.qbtn.team{background:#EEF5FF;color:var(--blue)}
+.qbtn:active{transform:scale(.95)}
 
-/* ── FORMS ── */
-.forms-section { margin: 0 14px 10px; }
-.section-label { font-size: 10px; font-weight: 700; color: var(–text2); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 7px; }
-.forms-scroll { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-.forms-scroll::-webkit-scrollbar { display: none; }
-.forms-inner { display: flex; gap: 7px; padding-bottom: 2px; }
-.form-chip {
-display: flex; flex-direction: column; align-items: center; gap: 4px;
-padding: 7px 10px; background: var(–surface); border-radius: 11px;
-border: 1px solid var(–border2); cursor: pointer; flex-shrink: 0;
-min-width: 66px; max-width: 80px; transition: all .15s;
+/* ── FORMS / VARIANTS ── */
+.fsec{margin:0 16px 10px}
+.slbl{font-size:11px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.fscroll{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.fscroll::-webkit-scrollbar{display:none}
+.finner{display:flex;gap:7px;padding-bottom:2px}
+.fchip{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 10px;background:var(--s1);border-radius:var(--r-md);
+  border:2px solid transparent;cursor:pointer;flex-shrink:0;
+  min-width:68px;max-width:80px;transition:all .13s;
+  box-shadow:var(--shadow);
 }
-.form-chip.active { border-color: var(–accent); background: var(–accent-glow); }
-.form-chip img { width: 46px; height: 46px; object-fit: contain; }
-.form-chip img.px { image-rendering: pixelated; width: 38px; height: 38px; }
-.form-chip-name { font-size: 9px; font-weight: 600; color: var(–text2); text-align: center; text-transform: capitalize; max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.form-chip.active .form-chip-name { color: var(–accent2); }
+.fchip.on{border-color:var(--ac);background:#FFFBEE}
+.fchip img{width:46px;height:46px;object-fit:contain}
+.fchip img.px{image-rendering:pixelated;width:40px;height:40px}
+.fcname{font-size:9px;font-weight:700;color:var(--t2);text-align:center;text-transform:capitalize;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fchip.on .fcname{color:var(--t1)}
 
 /* ── LEGEND ── */
-.modal-legend {
-margin: 0 14px 10px; padding: 9px 12px;
-background: var(–surface); border-radius: 11px;
-font-size: 11px; color: var(–text2); text-align: center; font-weight: 500;
-line-height: 1.8; border: 1px solid var(–border);
+.mleg{margin:0 16px 10px;padding:10px 14px;background:var(--s2);border-radius:var(--r-md);font-size:11px;color:var(--t2);text-align:center;font-weight:600;line-height:2}
+
+/* ── GEN / GAME ROWS ── */
+.gsec{margin:0 16px 8px;background:var(--s1);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow)}
+.ghdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none}
+.ghdrl{display:flex;align-items:center;gap:7px}
+.gchev{transition:transform .2s;color:var(--t3)}
+.gchev.on{transform:rotate(90deg)}
+.gtitle{font-size:14px;font-weight:700;color:var(--t1)}
+.gbadge{background:rgba(107,203,139,.15);color:var(--green);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
+.ggames{padding:0 10px 10px;display:none;flex-direction:column;gap:6px}
+.ggames.on{display:flex}
+.grow{background:var(--bg);border-radius:var(--r-sm);padding:9px 10px;border:1.5px solid var(--bd)}
+.grow.hd{border-color:rgba(107,203,139,.4);background:rgba(107,203,139,.04)}
+.gtop{display:flex;align-items:center;gap:7px}
+.gdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.gname{flex:1;font-size:12px;font-weight:700;color:var(--t1)}
+.gacts{display:flex;gap:4px}
+.abtn{
+  width:32px;height:32px;border-radius:10px;
+  background:var(--s2);border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;opacity:.35;transition:all .12s;color:var(--t2);
 }
+.abtn.on{opacity:1}
+.abtn.cap.on{background:rgba(107,203,139,.15);color:var(--green)}
+.abtn.shy.on{background:rgba(245,200,66,.15);color:var(--gold)}
+.abtn.box.on{background:rgba(123,184,244,.15);color:var(--blue)}
+.abtn.ball.on{background:var(--acg);color:var(--t1)}
+.abtn.note.on{background:rgba(196,181,244,.15);color:var(--ac3)}
 
-/* ── GEN SECTIONS ── */
-.gen-section { margin: 0 14px 8px; background: var(–surface); border-radius: 12px; border: 1px solid var(–border2); overflow: hidden; }
-.gen-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; cursor: pointer; user-select: none; }
-.gen-header-left { display: flex; align-items: center; gap: 7px; }
-.gen-chevron { transition: transform .2s; color: var(–text3); }
-.gen-chevron.open { transform: rotate(90deg); }
-.gen-title { font-size: 13px; font-weight: 600; }
-.gen-badge { background: rgba(102,187,106,.1); color: var(–green); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 8px; border: 1px solid rgba(102,187,106,.25); }
-.gen-games { padding: 0 10px 10px; display: none; flex-direction: column; gap: 5px; }
-.gen-games.open { display: flex; }
-
-/* ── GAME ROWS ── */
-.game-row { background: var(–bg); border-radius: 10px; padding: 9px 10px; border: 1px solid var(–border); }
-.game-row.has-data { border-color: rgba(102,187,106,.3); background: rgba(102,187,106,.04); }
-.game-row-top { display: flex; align-items: center; gap: 7px; }
-.game-color-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.game-row-name { flex: 1; font-size: 12px; font-weight: 600; color: var(–text); }
-.game-actions { display: flex; gap: 4px; }
-.act-btn {
-width: 31px; height: 31px; border-radius: 8px; background: var(–surface2);
-border: 1px solid var(–border); display: flex; align-items: center;
-justify-content: center; cursor: pointer; transition: all .15s; opacity: .35;
+/* ── BALLS ── */
+.bsec{margin-top:7px;display:none}
+.bsec.on{display:block}
+.bslbl{font-size:10px;color:var(--t2);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.bgrid{display:flex;flex-wrap:wrap;gap:4px}
+.bchip{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px;border-radius:var(--r-sm);background:var(--s2);
+  border:2px solid transparent;cursor:pointer;min-width:44px;transition:all .12s;
 }
-.act-btn svg { color: var(–text2); }
-.act-btn.on { opacity: 1; }
-.act-btn.cap.on { background: rgba(102,187,106,.12); border-color: rgba(102,187,106,.4); }
-.act-btn.cap.on svg { color: var(–green); }
-.act-btn.shy.on { background: rgba(255,213,79,.1); border-color: rgba(255,213,79,.4); }
-.act-btn.shy.on svg { color: var(–gold); }
-.act-btn.box.on { background: rgba(66,165,245,.1); border-color: rgba(66,165,245,.3); }
-.act-btn.box.on svg { color: var(–blue); }
-.act-btn.ball.on { opacity: 1; background: var(–accent-glow); border-color: var(–accent); }
-.act-btn.ball.on svg { color: var(–accent); }
-.act-btn.note.on { background: rgba(168,156,248,.1); border-color: rgba(168,156,248,.3); opacity: 1; }
-.act-btn.note.on svg { color: var(–accent2); }
-
-/* ── BALL SELECTOR ── */
-.ball-section { margin-top: 7px; display: none; }
-.ball-section.open { display: block; }
-.ball-section-label { font-size: 10px; color: var(–text2); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .4px; }
-.ball-grid { display: flex; flex-wrap: wrap; gap: 4px; }
-.ball-chip {
-display: flex; flex-direction: column; align-items: center; gap: 2px;
-padding: 5px 6px; border-radius: 9px; background: var(–surface2);
-border: 1px solid transparent; cursor: pointer; min-width: 44px; transition: all .15s;
+.bchip.on{border-color:var(--ac);background:#FFFBEE}
+.bico{font-size:15px;line-height:1.2}
+.bnm{font-size:8px;color:var(--t2);font-weight:700;text-align:center}
+.nota{margin-top:7px;display:none}
+.nota.on{display:block}
+.nta{
+  width:100%;background:var(--s2);border:2px solid var(--bd);
+  border-radius:var(--r-sm);padding:9px;color:var(--t1);
+  font-size:14px;font-family:var(--fn);font-weight:500;
+  min-height:54px;resize:none;outline:none;
 }
-.ball-chip.selected { border-color: var(–gold); background: rgba(255,213,79,.08); }
-.ball-chip-icon { font-size: 16px; line-height: 1.2; }
-.ball-chip-name { font-size: 8px; color: var(–text2); font-weight: 600; text-align: center; }
+.nta:focus{border-color:var(--ac)}
+.nta::placeholder{color:var(--t3)}
+.msp{height:28px}
 
-/* ── NOTES ── */
-.notes-area { margin-top: 7px; display: none; }
-.notes-area.open { display: block; }
-.notes-ta {
-width: 100%; background: var(–surface2); border: 1px solid var(–border2);
-border-radius: 9px; padding: 9px; color: var(–text); font-size: 14px;
-font-family: var(–font); font-weight: 400; min-height: 56px; resize: none; outline: none;
+/* ── FAV / TEAM PAGE HEADER ── */
+.phdr{padding:18px 16px 8px;flex-shrink:0}
+.ptitle{font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--t1)}
+.psub{font-size:12px;color:var(--t3);font-weight:600;margin-top:3px}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:40px;text-align:center}
+.empty svg{color:var(--s3)}
+.etitle{font-size:18px;font-weight:800;color:var(--t2);margin-top:6px}
+.esub{font-size:13px;color:var(--t3);font-weight:500}
+
+/* ── TEAM GAME SELECTOR ── */
+.tgsel-wrap{flex-shrink:0;padding:0 16px 10px;overflow-y:auto;max-height:220px;-webkit-overflow-scrolling:touch}
+.tgsel-gen{margin-bottom:10px}
+.tgsel-gen:last-child{margin-bottom:0}
+.tgsel-gen-lbl{font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.tgsel-row{display:flex;gap:6px;flex-wrap:wrap}
+.tgcard{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 12px;border-radius:var(--r-md);
+  border:none;background:var(--s1);
+  cursor:pointer;font-family:var(--fn);
+  transition:all .15s;box-shadow:var(--shadow);
 }
-.notes-ta:focus { border-color: var(–accent); }
-.notes-ta::placeholder { color: var(–text3); }
-.modal-spacer { height: 28px; }
-
-/* ── FAV / TEAM ── */
-.page-header { padding: 12px 14px 8px; flex-shrink: 0; }
-.page-title { font-size: 20px; font-weight: 700; letter-spacing: -.2px; }
-.page-subtitle { font-size: 11px; color: var(–text2); font-weight: 500; margin-top: 2px; }
-.empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px; text-align: center; }
-.empty-icon svg { color: var(–text3); }
-.empty-title { font-size: 16px; font-weight: 600; color: var(–text2); margin-top: 4px; }
-.empty-sub { font-size: 13px; color: var(–text3); font-weight: 500; }
+.tgcard:active{transform:scale(.94)}
+.tgcard.on{background:color-mix(in srgb,var(--tgc,var(--ac)) 18%,#fff);box-shadow:0 4px 12px color-mix(in srgb,var(--tgc,var(--ac)) 35%,transparent)}
+.tgcard-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.tgcard-name{font-size:11px;font-weight:700;color:var(--t2);white-space:nowrap}
+.tgcard.on .tgcard-name{color:var(--t1)}
+.tgcard-cnt{font-size:9px;font-weight:800;color:var(--t1);background:var(--ac);border-radius:10px;padding:1px 6px;margin-left:1px;min-width:16px;text-align:center}
+.tgcard-cnt.empty{background:var(--s3);color:var(--t3)}
 
 /* ── TEAM SLOTS ── */
-.team-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; padding: 0 14px 10px; flex-shrink: 0; }
-.team-slot {
-background: var(–surface); border: 1px solid var(–border2); border-radius: 12px;
-display: flex; flex-direction: column; align-items: center; justify-content: center;
-padding: 9px 5px; min-height: 90px; cursor: pointer; position: relative; transition: all .15s;
+.tslot-lvl{font-size:8px;font-weight:800;color:var(--t3);position:absolute;bottom:5px;left:6px}
+.tslot-shy{position:absolute;top:5px;left:5px;opacity:.9}
+.tslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 10px;flex-shrink:0}
+.tslot{
+  background:var(--s1);border:none;border-radius:var(--r-lg);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:10px 6px;min-height:96px;
+  cursor:pointer;position:relative;transition:all .13s;
+  box-shadow:var(--shadow);
 }
-.team-slot.filled { border-color: rgba(66,165,245,.4); background: rgba(66,165,245,.05); }
-.team-slot.empty { border-style: dashed; opacity: .4; }
-.team-slot:active { transform: scale(.95); }
-.team-slot img { width: 50px; height: 50px; object-fit: contain; }
-.team-slot-name { font-size: 9px; font-weight: 600; text-align: center; margin-top: 4px; text-transform: capitalize; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; padding: 0 4px; }
-.team-slot-num { font-size: 20px; font-weight: 700; color: var(–text3); }
-.team-slot-rm { position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.team-slot-rm svg { color: var(–text2); }
+.tslot.f{background:#EEF5FF;box-shadow:0 4px 14px rgba(123,184,244,.25)}
+.tslot.e{border:2px dashed var(--bd);box-shadow:none;background:transparent;opacity:.5}
+.tslot:active{transform:scale(.94)}
+.tslot img{width:52px;height:52px;object-fit:contain}
+.tsname{font-size:9px;font-weight:700;text-align:center;margin-top:4px;text-transform:capitalize;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;padding:0 4px;color:var(--t1)}
+.tsnum{font-size:20px;font-weight:800;color:var(--s3)}
+.tsrm{
+  position:absolute;top:5px;right:5px;width:18px;height:18px;
+  border-radius:50%;background:rgba(0,0,0,.1);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--t2);
+}
+
+/* ── TEAM GAME PICKER (modal) ── */
+.tgpicker{
+  margin:0 16px 12px;border:none;border-radius:var(--r-lg);
+  overflow:hidden;background:var(--s1);box-shadow:var(--shadow);
+}
+.tgpicker-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid var(--bd);
+}
+.tgpicker-title{font-size:13px;font-weight:800;color:var(--t1)}
+.tgpicker-body{display:none;padding:10px}
+.tgpicker-body.on{display:block}
+.tgpicker-gen{margin-bottom:9px}
+.tgpicker-gen:last-child{margin-bottom:0}
+.tgpicker-gen-lbl{font-size:9px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.tgpicker-row{display:flex;gap:5px;flex-wrap:wrap}
+.tgpchip{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 10px;border-radius:var(--r-md);
+  border:none;background:var(--bg);
+  cursor:pointer;font-family:var(--fn);transition:all .13s;
+  box-shadow:var(--shadow);
+}
+.tgpchip:active{transform:scale(.92)}
+.tgpchip.on{background:color-mix(in srgb,var(--tgc,var(--ac)) 18%,#fff);box-shadow:0 3px 8px color-mix(in srgb,var(--tgc,var(--ac)) 30%,transparent)}
+.tgpchip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tgpchip-name{font-size:11px;font-weight:700;color:var(--t2)}
+.tgpchip.on .tgpchip-name{color:var(--t1)}
+.tgpchip-check{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid var(--bd);display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;transition:all .13s;
+}
+.tgpchip.on .tgpchip-check{background:var(--tgc,var(--ac));border-color:var(--tgc,var(--ac))}
+.tgpchip-full{opacity:.4;pointer-events:none}
+
+/* ── GAME ROW LEVEL ── */
+.glvl{display:flex;align-items:center;gap:5px;margin-top:5px}
+.glvl-lbl{font-size:10px;color:var(--t2);font-weight:700;flex-shrink:0}
+.glvl-inp{
+  width:54px;background:var(--bg);border:2px solid var(--bd);
+  border-radius:var(--r-sm);padding:3px 7px;color:var(--t1);
+  font-size:12px;font-family:var(--fn);font-weight:700;outline:none;text-align:center;
+}
+.glvl-inp:focus{border-color:var(--ac)}
 
 /* ── STATS ── */
-.stats-header { padding: 12px 14px 8px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; }
-.stats-title { font-size: 20px; font-weight: 700; letter-spacing: -.2px; flex-shrink: 0; }
-.stats-game-select {
-flex: 1; background: var(–surface); border: 1px solid var(–border2);
-border-radius: 10px; padding: 8px 10px; color: var(–text);
-font-size: 13px; font-family: var(–font); font-weight: 500; outline: none;
--webkit-appearance: none; appearance: none;
+.sthdr{padding:18px 16px 8px;flex-shrink:0;display:flex;align-items:center;gap:10px}
+.sttitle{font-size:26px;font-weight:800;letter-spacing:-.5px;flex-shrink:0;color:var(--t1)}
+.stsel{
+  flex:1;background:var(--s1);border:none;border-radius:var(--r-md);
+  padding:9px 12px;color:var(--t1);font-size:13px;font-family:var(--fn);
+  font-weight:700;outline:none;-webkit-appearance:none;appearance:none;
+  box-shadow:var(--shadow);
 }
-.stats-scroll { flex: 1; overflow-y: auto; padding: 0 14px; padding-bottom: calc(14px + var(–safe-bottom)); overscroll-behavior: contain; }
-.stats-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(–text2); margin-bottom: 8px; padding-top: 14px; }
-.big-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
-.big-card { background: var(–surface); border: 1px solid var(–border2); border-radius: 12px; padding: 12px; text-align: center; }
-.big-val { font-size: 28px; font-weight: 700; line-height: 1; }
-.big-lbl { font-size: 10px; color: var(–text2); font-weight: 500; margin-top: 4px; }
-.bar-card { background: var(–surface); border: 1px solid var(–border2); border-radius: 12px; padding: 12px; }
-.bar-row { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
-.bar-row:last-child { margin-bottom: 0; }
-.bar-lbl { font-size: 10px; font-weight: 600; width: 70px; flex-shrink: 0; color: var(–text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar-track { flex: 1; height: 14px; background: var(–surface3); border-radius: 7px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 7px; transition: width .5s ease; min-width: 3px; }
-.bar-num { font-size: 10px; font-weight: 700; width: 26px; text-align: right; flex-shrink: 0; }
-.poke-list { display: flex; flex-direction: column; gap: 5px; }
-.poke-list-row {
-display: flex; align-items: center; gap: 8px;
-background: var(–surface); border: 1px solid var(–border); border-radius: 10px;
-padding: 7px 10px; cursor: pointer; transition: all .12s;
+.stscroll{flex:1;overflow-y:auto;padding:0 16px;padding-bottom:calc(16px + var(--sb));overscroll-behavior:contain}
+.stlbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--t2);margin-bottom:8px;padding-top:16px}
+.bnums{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.bcard{
+  background:var(--s1);border:none;border-radius:var(--r-lg);
+  padding:16px;text-align:center;box-shadow:var(--shadow);
 }
-.poke-list-row:active { transform: scale(.97); }
-.poke-list-row img { width: 38px; height: 38px; object-fit: contain; }
-.poke-list-info { flex: 1; min-width: 0; }
-.poke-list-name { font-size: 12px; font-weight: 600; text-transform: capitalize; }
-.poke-list-sub { font-size: 10px; color: var(–text3); font-weight: 500; }
-.poke-list-badge { font-size: 12px; font-weight: 700; flex-shrink: 0; }
-</style>
+.bval{font-size:32px;font-weight:800;line-height:1;color:var(--t1)}
+.blbl{font-size:11px;color:var(--t2);font-weight:600;margin-top:4px}
+.barc{background:var(--s1);border:none;border-radius:var(--r-lg);padding:14px;box-shadow:var(--shadow)}
+.brow{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.brow:last-child{margin-bottom:0}
+.brlbl{font-size:10px;font-weight:700;width:70px;flex-shrink:0;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brtrack{flex:1;height:12px;background:var(--s2);border-radius:20px;overflow:hidden}
+.brfill{height:100%;border-radius:20px;transition:width .45s ease;min-width:4px}
+.brnum{font-size:10px;font-weight:800;width:26px;text-align:right;flex-shrink:0;color:var(--t1)}
+.plist{display:flex;flex-direction:column;gap:5px}
+.prow{
+  display:flex;align-items:center;gap:10px;background:var(--s1);
+  border:none;border-radius:var(--r-md);padding:8px 12px;
+  cursor:pointer;transition:all .1s;box-shadow:var(--shadow);
+}
+.prow:active{transform:scale(.97)}
+.prow img{width:38px;height:38px;object-fit:contain}
+.prinfo{flex:1;min-width:0}
+.prname{font-size:12px;font-weight:700;text-transform:capitalize;color:var(--t1)}
+.prsub{font-size:10px;color:var(--t3);font-weight:600}
+.prbadge{font-size:13px;font-weight:800;flex-shrink:0}
 
+/* ── VARIANTS SECTION ── */
+.vsec{margin:0 16px 10px}
+.vsec-shiny{background:rgba(245,200,66,.06);border-radius:var(--r-md);padding:10px;margin:0 16px 10px}
+.vrow{display:flex;gap:7px;flex-wrap:wrap}
+.vchip{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 9px;background:var(--s1);border-radius:var(--r-md);
+  border:2px solid transparent;cursor:pointer;flex-shrink:0;
+  min-width:70px;max-width:86px;transition:all .13s;
+  box-shadow:var(--shadow);position:relative;
+}
+.vchip:active{transform:scale(.92)}
+.vchip.in-team{border-color:var(--blue);background:#EEF5FF}
+.vchip img{width:48px;height:48px;object-fit:contain}
+.vchip img.px{image-rendering:pixelated;width:42px;height:42px}
+.vchip-name{font-size:9px;font-weight:700;color:var(--t2);text-align:center;text-transform:capitalize;max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vchip.in-team .vchip-name{color:var(--blue)}
+.vchip-types{display:flex;gap:2px;justify-content:center;flex-wrap:wrap}
+.vchip-tbadge{padding:1px 5px;border-radius:20px;font-size:7px;font-weight:700;color:#fff}
+.vchip-badge{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.vchip-badge.team{background:rgba(123,184,244,.2)}
+
+/* ── FLAVOR TEXT ── */
+.hdesc{
+  margin:12px 16px 0;padding:12px 14px;
+  background:rgba(255,255,255,.6);border-radius:var(--r-md);
+  font-size:13px;line-height:1.6;color:var(--t2);
+  font-weight:500;font-style:italic;text-align:center;
+}
+.hdesc-src{display:block;font-size:9px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-top:5px;font-style:normal}
+.hdesc-skel{height:12px;background:var(--s2);border-radius:20px;margin:4px 0;animation:skelp .9s ease infinite alternate}
+.hdesc-skel.w2{width:65%}
+@keyframes skelp{from{opacity:.3}to{opacity:.8}}
+
+/* ── HELP BANNER ── */
+.help-banner{
+  margin:8px 16px 6px;
+  background:linear-gradient(135deg,#FFFBEE 0%,#FFF8F6 100%);
+  border:2px solid var(--ac);border-radius:var(--r-lg);overflow:hidden;
+}
+.help-banner-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none}
+.help-banner-title{font-size:13px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:8px}
+.help-banner-chev{transition:transform .2s;color:var(--t2)}
+.help-banner-chev.on{transform:rotate(180deg)}
+.help-banner-body{display:none;padding:0 14px 14px;border-top:1px solid rgba(245,200,66,.3)}
+.help-banner-body.on{display:block}
+.help-steps{display:flex;flex-direction:column;gap:9px;padding-top:12px}
+.help-step{display:flex;gap:11px;align-items:flex-start}
+.help-step-num{
+  width:24px;height:24px;border-radius:50%;
+  background:var(--ac);color:var(--t1);
+  font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.help-step-text{font-size:12px;color:var(--t2);line-height:1.55;font-weight:500}
+.help-step-text b{color:var(--t1);font-weight:800}
+.help-tip{
+  margin-top:11px;padding:9px 11px;
+  background:rgba(245,200,66,.12);border-radius:var(--r-sm);
+  font-size:11px;color:var(--t2);line-height:1.5;
+  border-left:3px solid var(--ac);
+}
+
+/* ── AUTH SCREEN ── */
+#auth-screen{
+  position:fixed;inset:0;z-index:9999;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px;padding-top:calc(32px + var(--st));text-align:center;
+}
+#auth-screen.hidden{display:none}
+.auth-logo{
+  width:72px;height:72px;border-radius:24px;background:#1A1025;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 24px;box-shadow:0 8px 24px rgba(26,16,37,.3);
+  overflow:hidden;
+}
+.auth-title{font-size:34px;font-weight:900;letter-spacing:-.8px;margin-bottom:8px;color:var(--t1)}
+.auth-sub{font-size:15px;color:var(--t2);font-weight:500;margin-bottom:44px;line-height:1.5;max-width:280px}
+.auth-btn{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  width:100%;max-width:300px;padding:16px 24px;border-radius:var(--r-lg);
+  background:var(--s1);border:none;cursor:pointer;
+  font-size:15px;font-weight:700;color:var(--t1);
+  font-family:var(--fn);transition:all .15s;
+  box-shadow:var(--shadow-md);
+}
+.auth-btn:active{transform:scale(.97)}
+.auth-btn svg{flex-shrink:0}
+.auth-note{font-size:11px;color:var(--t3);margin-top:18px;font-weight:500;max-width:260px}
+.auth-loading{font-size:13px;color:var(--t2);margin-top:16px;display:none;font-weight:600}
+.auth-loading.on{display:block}
+
+/* ── USER MENU ── */
+.user-avatar{width:34px;height:34px;border-radius:50%;border:3px solid var(--ac);object-fit:cover;cursor:pointer;flex-shrink:0}
+.user-menu{
+  position:fixed;top:calc(var(--st) + 62px);right:16px;
+  background:var(--s1);border:none;border-radius:var(--r-lg);
+  padding:8px;min-width:210px;z-index:800;display:none;
+  box-shadow:var(--shadow-lg);
+}
+.user-menu.on{display:block}
+.user-menu-name{font-size:14px;font-weight:800;padding:9px 11px 4px;color:var(--t1)}
+.user-menu-email{font-size:11px;color:var(--t2);padding:0 11px 11px;border-bottom:1px solid var(--bd);font-weight:500}
+.user-menu-btn{
+  display:flex;align-items:center;gap:9px;padding:11px;
+  border-radius:var(--r-sm);cursor:pointer;font-size:13px;
+  font-weight:700;color:var(--t2);margin-top:4px;transition:background .12s;
+}
+.user-menu-btn:active{background:var(--s2)}
+.sync-status{font-size:10px;color:var(--t3);font-weight:600;margin-top:1px;display:flex;align-items:center;gap:4px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.sync-dot.syncing{background:var(--gold);animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
 </head>
 <body>
 <div id="app">
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-brand">
-      <div class="brand-logo">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
-          <line x1="2" y1="12" x2="22" y2="12" stroke="white" stroke-width="2"/>
-          <circle cx="12" cy="12" r="3" fill="white"/>
-        </svg>
-      </div>
-      <div>
-        <div class="brand-name">PokéPlanner</div>
-        <div class="brand-sub" id="app-stats">0 / 1025 capturados</div>
-      </div>
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">
+      <img src="favicon.png" style="width:24px;height:24px;object-fit:contain;image-rendering:pixelated">
     </div>
-    <div class="header-right">
-      <button class="icon-btn" id="sprite-btn" onclick="toggleSprite()" title="Cambiar sprite">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      </button>
+    <div>
+      <div class="hdr-name">PokéPlanner</div>
+      <div class="hdr-stat" id="hstat">Cargando…</div>
     </div>
-  </header>
-
-  <!-- DEX PAGE -->
-
-  <div class="page active" id="page-dex">
-    <div class="search-bar">
-      <div class="search-inner">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input class="search-input" id="search-input" placeholder="Nombre o número…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-        <span class="search-clear icon" id="search-clear" onclick="clearSearch()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </span>
-      </div>
-    </div>
-    <div class="filter-row" id="gen-row"></div>
-    <div class="filter-row" id="type-row"></div>
-    <div class="filter-row" id="rarity-row"></div>
-    <div class="result-count" id="result-count"></div>
-    <div class="grid-scroll"><div class="poke-grid" id="poke-grid"></div></div>
   </div>
+  <button class="ibtn" id="sprbtn" onclick="toggleSprite()" title="Modo sprite">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+  </button>
+</header>
 
-  <!-- FAV PAGE -->
-
-  <div class="page" id="page-fav">
-    <div class="page-header">
-      <div class="page-title">Favoritos</div>
-      <div class="page-subtitle" id="fav-sub">0 Pokémon</div>
+<div class="pg on" id="pg-dex">
+  <div class="srch">
+    <div class="srch-box">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="srch-inp" id="si" placeholder="Nombre o número…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <span class="srch-x" id="sx" onclick="clearSearch()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
     </div>
-    <div class="grid-scroll" id="fav-scroll"></div>
   </div>
-
-  <!-- TEAM PAGE -->
-
-  <div class="page" id="page-team">
-    <div class="page-header">
-      <div class="page-title">Mi Equipo</div>
-      <div class="page-subtitle" id="team-sub">0 / 6</div>
+  <div class="help-banner" id="help-banner">
+    <div class="help-banner-hdr" onclick="toggleHelp()">
+      <span class="help-banner-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        ¿Cómo usar PokéPlanner?
+      </span>
+      <svg class="help-banner-chev" id="help-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
-    <div class="team-slots" id="team-slots"></div>
-    <div class="grid-scroll" id="team-scroll"></div>
-  </div>
-
-  <!-- STATS PAGE -->
-
-  <div class="page" id="page-stats">
-    <div class="stats-header">
-      <div class="stats-title">Estadísticas</div>
-      <select class="stats-game-select" id="stats-game" onchange="drawStats()">
-        <option value="all">Todos los juegos</option>
-      </select>
-    </div>
-    <div class="stats-scroll" id="stats-body"></div>
-  </div>
-
-  <!-- TAB BAR -->
-
-  <nav class="tab-bar">
-    <button class="tab active" id="tab-dex" onclick="goTab('dex')">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      <span class="tab-label">Pokédex</span>
-    </button>
-    <button class="tab" id="tab-fav" onclick="goTab('fav')">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      <span class="tab-label">Favoritos</span>
-    </button>
-    <button class="tab" id="tab-team" onclick="goTab('team')">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <span class="tab-label">Equipo</span>
-    </button>
-    <button class="tab" id="tab-stats" onclick="goTab('stats')">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span class="tab-label">Stats</span>
-    </button>
-  </nav>
-</div>
-
-<!-- MODAL -->
-
-<div id="overlay" onclick="overlayClick(event)">
-  <div id="modal">
-    <div class="modal-pull"></div>
-    <div class="modal-header">
-      <button class="icon-btn" onclick="closeModal()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <span class="modal-id" id="modal-num">#001</span>
-      <div class="modal-hdr-btns">
-        <button class="icon-btn" id="modal-sprite-btn" onclick="toggleModalSprite()" title="Cambiar sprite">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2"/></svg>
-        </button>
+    <div class="help-banner-body" id="help-body">
+      <div class="help-steps">
+        <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text"><b>Explora la Pokédex</b> — Busca por nombre, número o filtra por tipo, generación y rareza. Toca cualquier Pokémon para abrir su ficha completa.</div></div>
+        <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text"><b>Registra tus capturas</b> — Dentro de la ficha, despliega la generación que quieras y marca si lo has capturado, si tienes su shiny, si está en la caja, qué ball usaste y el nivel.</div></div>
+        <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text"><b>Variantes y formas</b> — Si el Pokémon tiene formas regionales (Alola, Galar…) o cosméticas, aparecen en la sección <b>Variantes</b>. Tócalas para previsualizarlas. Las versiones <b>Shiny ✦</b> están en su propio apartado.</div></div>
+        <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text"><b>Construye tu equipo</b> — En la pestaña <b>Equipo</b> selecciona un juego y tendrás 6 slots independientes. Desde la ficha de cada Pokémon puedes añadir cualquier variante o shiny a cualquier juego.</div></div>
+        <div class="help-step"><div class="help-step-num">5</div><div class="help-step-text"><b>Favoritos</b> — El corazón guarda el Pokémon (o su variante regional concreta) en tu lista de favoritos. Los shinies no cuentan como favorito independiente.</div></div>
       </div>
+      <div class="help-tip">💡 Tus datos se guardan automáticamente en la nube y están disponibles en cualquier dispositivo donde inicies sesión con la misma cuenta de Google.</div>
     </div>
-    <div class="modal-body" id="modal-body"></div>
+  </div>
+  <div class="frow" id="grow"></div>
+  <div class="frow" id="trow"></div>
+  <div class="frow" id="rrow"></div>
+  <div class="rcount" id="rc"></div>
+  <div class="gscroll" id="gs">
+    <div class="grid" id="grid"></div>
+    <div class="sentinel" id="sent"></div>
   </div>
 </div>
 
+<div class="pg" id="pg-fav">
+  <div class="phdr"><div class="ptitle">Favoritos</div><div class="psub" id="fsub">0 Pokémon</div></div>
+  <div class="gscroll" id="fscroll"></div>
+</div>
+
+<div class="pg" id="pg-team">
+  <div class="phdr"><div class="ptitle">Mi Equipo</div><div class="psub" id="tsub">0 / 6</div></div>
+  <div class="tgsel-wrap" id="tgsel"></div>
+  <div class="tslots" id="tslots"></div>
+  <div class="gscroll" id="tscroll"></div>
+</div>
+
+<div class="pg" id="pg-stats">
+  <div class="sthdr">
+    <div class="sttitle">Estadísticas</div>
+    <select class="stsel" id="stsel" onchange="drawStats()">
+      <option value="all">Todos los juegos</option>
+    </select>
+  </div>
+  <div class="stscroll" id="stbody"></div>
+</div>
+
+<nav class="tabs">
+  <button class="tab on" id="tb-dex" onclick="goTab('dex')">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    <span class="tab-lbl">Pokédex</span>
+  </button>
+  <button class="tab" id="tb-fav" onclick="goTab('fav')">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <span class="tab-lbl">Favoritos</span>
+  </button>
+  <button class="tab" id="tb-team" onclick="goTab('team')">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span class="tab-lbl">Equipo</span>
+  </button>
+  <button class="tab" id="tb-stats" onclick="goTab('stats')">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span class="tab-lbl">Stats</span>
+  </button>
+</nav>
+</div>
+
+<div id="ov" onclick="ovClick(event)">
+<div id="mdl">
+  <div class="mpull"></div>
+  <div class="mhdr">
+    <button class="ibtn" onclick="closeMdl()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <span class="mnum" id="mnum">#001</span>
+    <button class="ibtn" id="msprbtn" onclick="toggleMSprite()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07"/></svg></button>
+  </div>
+  <div class="mbody" id="mbody"></div>
+</div>
+</div>
+
+
+<!-- ═══ FIREBASE ═══ -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-logo">
+    <img src="favicon.png" style="width:36px;height:36px;object-fit:contain;image-rendering:pixelated">
+  </div>
+  <div class="auth-title">PokéPlanner</div>
+  <div class="auth-sub">Tu Pokédex personal. Guarda tus capturas, equipo y favoritos en la nube.</div>
+  <button class="auth-btn" onclick="signInWithGoogle()">
+    <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    Continuar con Google
+  </button>
+  <div class="auth-loading" id="auth-loading">Iniciando sesión…</div>
+  <div class="auth-note">Tus datos se sincronizarán automáticamente en todos tus dispositivos.</div>
+</div>
+
+<div class="user-menu" id="user-menu">
+  <div class="user-menu-name" id="um-name">—</div>
+  <div class="user-menu-email" id="um-email">—</div>
+  <div class="user-menu-btn" onclick="forceRefreshTypes()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    Actualizar tipos Pokémon
+  </div>
+  <div class="user-menu-btn" onclick="signOut()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Cerrar sesión
+  </div>
+</div>
 <script>
 const POKE_DB=[
 [1,"bulbasaur","grass","poison"],
@@ -672,7 +876,7 @@ const POKE_DB=[
 [170,"chinchou","water","electric"],
 [171,"lanturn","water","electric"],
 [172,"pichu","electric",""],
-[173,"cleffa","normal","fairy"],
+[173,"cleffa","fairy"],
 [174,"igglybuff","normal","fairy"],
 [175,"togepi","normal","fairy"],
 [176,"togetic","normal","fairy"],
@@ -1253,7 +1457,7 @@ const POKE_DB=[
 [751,"dewpider","bug","water"],
 [752,"araquanid","bug","water"],
 [753,"fomantis","grass",""],
-[754,"lurantis","grass","fire"],
+[754,"lurantis","grass",""],
 [755,"morelull","grass","fairy"],
 [756,"shiinotic","grass","fairy"],
 [757,"salandit","poison","fire"],
@@ -1483,18 +1687,18 @@ const POKE_DB=[
 [981,"farigiraf","dragon","normal"],
 [982,"dudunsparce","normal",""],
 [983,"kingambit","fire","ghost"],
-[984,"great-tusk","ground","dark"],
-[985,"scream-tail","grass","dark"],
-[986,"brute-bonnet","fire","psychic"],
-[987,"flutter-mane","water","fighting"],
-[988,"slither-wing","rock","fighting"],
-[989,"sandy-shocks","steel","fighting"],
-[990,"iron-treads","electric","fighting"],
-[991,"iron-bundle","ice","fighting"],
-[992,"iron-hands","dragon","fighting"],
-[993,"iron-jugulis","normal","fighting"],
-[994,"iron-moth","ghost","fighting"],
-[995,"iron-thorns","dark","fighting"],
+[984,"great-tusk","ground","fighting"],
+[985,"scream-tail","fairy","psychic"],
+[986,"brute-bonnet","grass","dark"],
+[987,"flutter-mane","ghost","fairy"],
+[988,"slither-wing","bug","fighting"],
+[989,"sandy-shocks","electric","ground"],
+[990,"iron-treads","ground","steel"],
+[991,"iron-bundle","ice","water"],
+[992,"iron-hands","fighting","electric"],
+[993,"iron-jugulis","dark","flying"],
+[994,"iron-moth","fire","poison"],
+[995,"iron-thorns","rock","electric"],
 [996,"frigibax","dragon","electric"],
 [997,"arctibax","steel","dragon"],
 [998,"baxcalibur","water","dragon"],
@@ -1504,12 +1708,12 @@ const POKE_DB=[
 [1002,"chien-pao","poison",""],
 [1003,"ting-lu","ground",""],
 [1004,"chi-yu","steel",""],
-[1005,"roaring-moon","grass","psychic"],
-[1006,"iron-valiant","fire","psychic"],
+[1005,"roaring-moon","dragon","dark"],
+[1006,"iron-valiant","fairy","fighting"],
 [1007,"koraidon","fighting","dragon"],
-[1008,"miraidon","ghost","dragon"],
-[1009,"walking-wake","fire","dark"],
-[1010,"iron-leaves","water","dark"],
+[1008,"miraidon","electric","dragon"],
+[1009,"walking-wake","water","dragon"],
+[1010,"iron-leaves","grass","psychic"],
 [1011,"dipplin","normal",""],
 [1012,"poltchageist","normal",""],
 [1013,"sinistcha","normal","poison"],
@@ -1518,591 +1722,1233 @@ const POKE_DB=[
 [1016,"fezandipiti","normal","fairy"],
 [1017,"ogerpon","grass","fairy"],
 [1018,"archaludon","electric","fairy"],
-[1019,"hydrapple","grass","normal"],
-[1020,"gouging-fire","water","normal"],
-[1021,"raging-bolt","fire","normal"],
-[1022,"iron-boulder","water","fire"],
-[1023,"iron-crown","ground","rock"],
-[1024,"terapagos","dragon","normal"],
+[1019,"hydrapple","grass","dragon"],
+[1020,"gouging-fire","fire","dragon"],
+[1021,"raging-bolt","electric","dragon"],
+[1022,"iron-boulder","rock","psychic"],
+[1023,"iron-crown","steel","psychic"],
+[1024,"terapagos","normal"],
 [1025,"pecharunt","poison","fairy"],
 ];
 
-// ── CDN: jsDelivr works on GitHub Pages, raw.githubusercontent doesn't ──
-const CDN = 'https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
-const imgArt   = id => `${CDN}/other/official-artwork/${id}.png`;
-const imgShiny = id => `${CDN}/other/official-artwork/shiny/${id}.png`;
-const imgPx    = id => `${CDN}/${id}.png`;
-const imgPxShy = id => `${CDN}/shiny/${id}.png`;
-const spriteOf = (id, modern, shiny) =>
-  modern ? (shiny ? imgShiny(id) : imgArt(id)) : (shiny ? imgPxShy(id) : imgPx(id));
-const formSprite = (f, modern, shiny) => {
-  if (!f) return '';
-  if (modern) return shiny ? (f.sprites?.official_shiny || imgShiny(f.id)) : (f.sprites?.official || imgArt(f.id));
-  return shiny ? (f.sprites?.front_shiny || imgPxShy(f.id)) : (f.sprites?.front_default || imgPx(f.id));
+
+const CDN='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
+const iArt=id=>`${CDN}/other/official-artwork/${id}.png`;
+const iShy=id=>`${CDN}/other/official-artwork/shiny/${id}.png`;
+const iPx=id=>`${CDN}/${id}.png`;
+const iPxS=id=>`${CDN}/shiny/${id}.png`;
+const spOf=(id,mod,shy)=>mod?(shy?iShy(id):iArt(id)):(shy?iPxS(id):iPx(id));
+const fmSp=(f,mod,shy)=>{
+  if(!f)return'';
+  if(mod)return shy?(f.sprites?.official_shiny||iShy(f.id)):(f.sprites?.official||iArt(f.id));
+  return shy?(f.sprites?.front_shiny||iPxS(f.id)):(f.sprites?.front_default||iPx(f.id));
 };
-
-// ── STATIC DATA ──
-const GAMES = [
-  {id:'red',name:'Rojo',gen:1,c:'#E53935'},{id:'blue',name:'Azul',gen:1,c:'#1E88E5'},
-  {id:'yellow',name:'Amarillo',gen:1,c:'#FDD835'},{id:'firered',name:'Rojo Fuego',gen:1,c:'#F4511E'},
-  {id:'leafgreen',name:'Verde Hoja',gen:1,c:'#43A047'},{id:'gold',name:'Oro',gen:2,c:'#FFB300'},
-  {id:'silver',name:'Plata',gen:2,c:'#90A4AE'},{id:'crystal',name:'Cristal',gen:2,c:'#26C6DA'},
-  {id:'heartgold',name:'HeartGold',gen:2,c:'#FFB300'},{id:'soulsilver',name:'SoulSilver',gen:2,c:'#78909C'},
-  {id:'ruby',name:'Rubí',gen:3,c:'#E53935'},{id:'sapphire',name:'Zafiro',gen:3,c:'#1565C0'},
-  {id:'emerald',name:'Esmeralda',gen:3,c:'#2E7D32'},{id:'diamond',name:'Diamante',gen:4,c:'#42A5F5'},
-  {id:'pearl',name:'Perla',gen:4,c:'#F48FB1'},{id:'platinum',name:'Platino',gen:4,c:'#78909C'},
-  {id:'black',name:'Negro',gen:5,c:'#37474F'},{id:'white',name:'Blanco',gen:5,c:'#90A4AE'},
-  {id:'black2',name:'Negro 2',gen:5,c:'#263238'},{id:'white2',name:'Blanco 2',gen:5,c:'#B0BEC5'},
-  {id:'x',name:'X',gen:6,c:'#1565C0'},{id:'y',name:'Y',gen:6,c:'#C62828'},
-  {id:'omegaruby',name:'Rubí Omega',gen:6,c:'#B71C1C'},{id:'alphasapphire',name:'Zafiro Alfa',gen:6,c:'#0D47A1'},
-  {id:'sun',name:'Sol',gen:7,c:'#FB8C00'},{id:'moon',name:'Luna',gen:7,c:'#5E35B1'},
-  {id:'ultrasun',name:'Ultra Sol',gen:7,c:'#EF6C00'},{id:'ultramoon',name:'Ultra Luna',gen:7,c:'#4527A0'},
-  {id:'letsgopikachu',name:"Let's Go Pikachu",gen:7,c:'#FDD835'},{id:'letsgoeevee',name:"Let's Go Eevee",gen:7,c:'#8D6E63'},
-  {id:'sword',name:'Espada',gen:8,c:'#1E88E5'},{id:'shield',name:'Escudo',gen:8,c:'#E53935'},
-  {id:'brilliantdiamond',name:'Diamante Brillante',gen:8,c:'#29B6F6'},{id:'shiningpearl',name:'Perla Reluciente',gen:8,c:'#F48FB1'},
-  {id:'legendsarceus',name:'Leyendas: Arceus',gen:8,c:'#8D6E63'},
-  {id:'scarlet',name:'Escarlata',gen:9,c:'#D32F2F'},{id:'violet',name:'Púrpura',gen:9,c:'#6A1B9A'},
-  {id:'legendsza',name:'Leyendas: Z-A',gen:9,c:'#37474F'},
+const GAMES=[
+  {id:'red',n:'Rojo',gen:1,c:'#E53935'},{id:'blue',n:'Azul',gen:1,c:'#1E88E5'},
+  {id:'yellow',n:'Amarillo',gen:1,c:'#FDD835'},{id:'firered',n:'Rojo Fuego',gen:1,c:'#F4511E'},
+  {id:'leafgreen',n:'Verde Hoja',gen:1,c:'#43A047'},{id:'gold',n:'Oro',gen:2,c:'#FFB300'},
+  {id:'silver',n:'Plata',gen:2,c:'#90A4AE'},{id:'crystal',n:'Cristal',gen:2,c:'#26C6DA'},
+  {id:'heartgold',n:'HeartGold',gen:2,c:'#FFB300'},{id:'soulsilver',n:'SoulSilver',gen:2,c:'#78909C'},
+  {id:'ruby',n:'Rubí',gen:3,c:'#E53935'},{id:'sapphire',n:'Zafiro',gen:3,c:'#1565C0'},
+  {id:'emerald',n:'Esmeralda',gen:3,c:'#2E7D32'},{id:'diamond',n:'Diamante',gen:4,c:'#42A5F5'},
+  {id:'pearl',n:'Perla',gen:4,c:'#F48FB1'},{id:'platinum',n:'Platino',gen:4,c:'#78909C'},
+  {id:'black',n:'Negro',gen:5,c:'#37474F'},{id:'white',n:'Blanco',gen:5,c:'#90A4AE'},
+  {id:'black2',n:'Negro 2',gen:5,c:'#263238'},{id:'white2',n:'Blanco 2',gen:5,c:'#B0BEC5'},
+  {id:'x',n:'X',gen:6,c:'#1565C0'},{id:'y',n:'Y',gen:6,c:'#C62828'},
+  {id:'omegaruby',n:'Rubí Omega',gen:6,c:'#B71C1C'},{id:'alphasapphire',n:'Zafiro Alfa',gen:6,c:'#0D47A1'},
+  {id:'sun',n:'Sol',gen:7,c:'#FB8C00'},{id:'moon',n:'Luna',gen:7,c:'#5E35B1'},
+  {id:'ultrasun',n:'Ultra Sol',gen:7,c:'#EF6C00'},{id:'ultramoon',n:'Ultra Luna',gen:7,c:'#4527A0'},
+  {id:'letsgopikachu',n:"Let's Go Pikachu",gen:7,c:'#FDD835'},{id:'letsgoeevee',n:"Let's Go Eevee",gen:7,c:'#8D6E63'},
+  {id:'sword',n:'Espada',gen:8,c:'#1E88E5'},{id:'shield',n:'Escudo',gen:8,c:'#E53935'},
+  {id:'brilliantdiamond',n:'Diamante Brillante',gen:8,c:'#29B6F6'},{id:'shiningpearl',n:'Perla Reluciente',gen:8,c:'#F48FB1'},
+  {id:'legendsarceus',n:'Leyendas: Arceus',gen:8,c:'#8D6E63'},
+  {id:'scarlet',n:'Escarlata',gen:9,c:'#D32F2F'},{id:'violet',n:'Púrpura',gen:9,c:'#6A1B9A'},
+  {id:'legendsza',n:'Leyendas: Z-A',gen:9,c:'#37474F'},
 ];
-
-const TYPES = [
-  {id:'normal',name:'Normal',c:'#A8A878'},{id:'fire',name:'Fuego',c:'#F08030'},
-  {id:'water',name:'Agua',c:'#6890F0'},{id:'electric',name:'Eléctrico',c:'#F8D030'},
-  {id:'grass',name:'Planta',c:'#78C850'},{id:'ice',name:'Hielo',c:'#98D8D8'},
-  {id:'fighting',name:'Lucha',c:'#C03028'},{id:'poison',name:'Veneno',c:'#A040A0'},
-  {id:'ground',name:'Tierra',c:'#E0C068'},{id:'flying',name:'Volador',c:'#A890F0'},
-  {id:'psychic',name:'Psíquico',c:'#F85888'},{id:'bug',name:'Bicho',c:'#A8B820'},
-  {id:'rock',name:'Roca',c:'#B8A038'},{id:'ghost',name:'Fantasma',c:'#705898'},
-  {id:'dragon',name:'Dragón',c:'#7038F8'},{id:'dark',name:'Siniestro',c:'#705848'},
-  {id:'steel',name:'Acero',c:'#B8B8D0'},{id:'fairy',name:'Hada',c:'#EE99AC'},
+const TYPES=[
+  {id:'normal',n:'Normal',c:'#A8A878'},{id:'fire',n:'Fuego',c:'#F08030'},
+  {id:'water',n:'Agua',c:'#6890F0'},{id:'electric',n:'Eléctrico',c:'#F8D030'},
+  {id:'grass',n:'Planta',c:'#78C850'},{id:'ice',n:'Hielo',c:'#98D8D8'},
+  {id:'fighting',n:'Lucha',c:'#C03028'},{id:'poison',n:'Veneno',c:'#A040A0'},
+  {id:'ground',n:'Tierra',c:'#E0C068'},{id:'flying',n:'Volador',c:'#A890F0'},
+  {id:'psychic',n:'Psíquico',c:'#F85888'},{id:'bug',n:'Bicho',c:'#A8B820'},
+  {id:'rock',n:'Roca',c:'#B8A038'},{id:'ghost',n:'Fantasma',c:'#705898'},
+  {id:'dragon',n:'Dragón',c:'#7038F8'},{id:'dark',n:'Siniestro',c:'#705848'},
+  {id:'steel',n:'Acero',c:'#B8B8D0'},{id:'fairy',n:'Hada',c:'#EE99AC'},
 ];
-const tc = id => TYPES.find(t => t.id === id)?.c || '#A8A878';
-
-const GNAMES = {1:'Gen I',2:'Gen II',3:'Gen III',4:'Gen IV',5:'Gen V',6:'Gen VI',7:'Gen VII',8:'Gen VIII',9:'Gen IX'};
-const GNAMES_LONG = {1:'Generación I',2:'Generación II',3:'Generación III',4:'Generación IV',5:'Generación V',6:'Generación VI',7:'Generación VII',8:'Generación VIII',9:'Generación IX'};
-
-const RARITY = {
-  normal:    { l:'Normal',     dot:'#6b7280' },
-  singular:  { l:'Singular',   dot:'#fbbf24' },
-  legendary: { l:'Legendario', dot:'#f97316' },
-  mythical:  { l:'Mítico',     dot:'#a855f7' },
-  ultrabeast:{ l:'Ultra Ente', dot:'#22d3ee' },
-  paradox:   { l:'Paradoja',   dot:'#ef4444' },
+const tc=id=>TYPES.find(t=>t.id===id)?.c||'#A8A878';
+const GNLONG={1:'Generación I',2:'Generación II',3:'Generación III',4:'Generación IV',5:'Generación V',6:'Generación VI',7:'Generación VII',8:'Generación VIII',9:'Generación IX'};
+const GNS={1:'Gen I',2:'Gen II',3:'Gen III',4:'Gen IV',5:'Gen V',6:'Gen VI',7:'Gen VII',8:'Gen VIII',9:'Gen IX'};
+const RAR={
+  normal:{l:'Normal',d:'#6b7280'},
+  legendary:{l:'Legendario',d:'#f97316'},mythical:{l:'Mítico',d:'#a855f7'},
+  ultrabeast:{l:'Ultra Ente',d:'#22d3ee'},paradox:{l:'Paradoja',d:'#ef4444'},
 };
 const S_IDS=new Set([144,145,146,150,243,244,245,249,250,377,378,379,380,381,382,383,384,480,481,482,483,484,485,486,487,488,638,639,640,641,642,643,644,645,646,716,717,718,772,773,785,786,787,788,789,790,791,792,800,888,889,890,894,895,896,897,898,905]);
 const MY_IDS=new Set([151,251,385,386,489,490,491,492,493,494,647,648,649,719,720,721,801,802,807,808,809,893,999,1000,1001,1002,1003,1004,1014,1015,1016,1017,1025]);
 const UB_IDS=new Set([793,794,795,796,797,798,799,803,804,805,806]);
 const PX_IDS=new Set([984,985,986,987,988,989,990,991,992,993,994,995,1005,1006,1007,1008,1009,1010]);
-const rarOf = id => PX_IDS.has(id)?'paradox':UB_IDS.has(id)?'ultrabeast':MY_IDS.has(id)?'mythical':S_IDS.has(id)?'legendary':'normal';
-const genOf = id => id<=151?1:id<=251?2:id<=386?3:id<=493?4:id<=649?5:id<=721?6:id<=809?7:id<=905?8:9;
-
-const BALLS = [
-  {id:'poke',n:'Poké',e:'🔴'},{id:'great',n:'Super',e:'🔵'},{id:'ultra',n:'Ultra',e:'🟡'},
-  {id:'master',n:'Master',e:'⚫'},{id:'safari',n:'Safari',e:'🟢'},{id:'fast',n:'Rápida',e:'🔶'},
-  {id:'level',n:'Nivel',e:'🟠'},{id:'lure',n:'Señuelo',e:'💙'},{id:'moon',n:'Luna',e:'🌙'},
-  {id:'love',n:'Amor',e:'💗'},{id:'friend',n:'Amigo',e:'💚'},{id:'heavy',n:'Pesada',e:'⚙️'},
-  {id:'dusk',n:'Noche',e:'🌑'},{id:'heal',n:'Cura',e:'🩷'},{id:'quick',n:'Veloz',e:'⚡'},
-  {id:'net',n:'Red',e:'🕸️'},{id:'dive',n:'Buceo',e:'🌊'},{id:'nest',n:'Nido',e:'🌿'},
-  {id:'repeat',n:'Repetir',e:'🔁'},{id:'timer',n:'Tiempo',e:'⏱️'},{id:'luxury',n:'Lujo',e:'✨'},
-  {id:'premier',n:'Premio',e:'🎁'},{id:'dream',n:'Sueño',e:'💭'},{id:'beast',n:'Ultra',e:'🫙'},
-  {id:'sport',n:'Torneo',e:'🏆'},{id:'cherish',n:'Preciada',e:'❤️'},{id:'gs',n:'GS',e:'🌟'},
-  {id:'wing',n:'Pluma',e:'🪶'},{id:'park',n:'Parque',e:'🌲'},
+const rarOf=id=>PX_IDS.has(id)?'paradox':UB_IDS.has(id)?'ultrabeast':MY_IDS.has(id)?'mythical':S_IDS.has(id)?'legendary':'normal';
+const genOf=id=>id<=151?1:id<=251?2:id<=386?3:id<=493?4:id<=649?5:id<=721?6:id<=809?7:id<=905?8:9;
+// Pokéball icons — use official sprites from PokeAPI sprites repo
+const BALL_IMG=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${id}-ball.png`;
+const BALLS=[
+  {id:'poke',n:'Pokéball'},{id:'great',n:'Superball'},{id:'ultra',n:'Ultraball'},
+  {id:'master',n:'Masterball'},{id:'safari',n:'Safariball'},{id:'fast',n:'Velozball'},
+  {id:'level',n:'Nivelball'},{id:'lure',n:'Señuelo'},{id:'moon',n:'Lunaball'},
+  {id:'love',n:'Amorball'},{id:'friend',n:'Amigoball'},{id:'heavy',n:'Pesaball'},
+  {id:'dusk',n:'Oscuball'},{id:'heal',n:'Curaball'},{id:'quick',n:'Rapidball'},
+  {id:'net',n:'Redball'},{id:'dive',n:'Buceob.'},{id:'nest',n:'Nidoball'},
+  {id:'repeat',n:'Repetball'},{id:'timer',n:'Tempball'},{id:'luxury',n:'Lujoball'},
+  {id:'premier',n:'Premioball'},{id:'dream',n:'Sueñoball'},{id:'beast',n:'Ultraente'},
+  {id:'sport',n:'Torneoball'},{id:'cherish',n:'Preciadaball'},
+  {id:'wing',n:'Alaball'},{id:'park',n:'Parqueball'},
 ];
+const POKE=POKE_DB.map(([id,name,t1,t2])=>({id,name,types:t2?[t1,t2]:[t1],generation:genOf(id),rarity:rarOf(id)}));
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):'';
+const pad=n=>String(n).padStart(3,'0');
+const fmtF=(f,sp)=>{if(!f||f===sp)return'Normal';return f.replace(sp+'-','').split('-').map(cap).join(' ');};
 
-// ── BUILD POKE LIST ──
-const POKE_LIST = POKE_DB.map(([id,name,t1,t2]) => ({
-  id, name,
-  types: t2 ? [t1,t2] : [t1],
-  generation: genOf(id),
-  rarity: rarOf(id),
-}));
+// ── TYPES CACHE (from PokéAPI) ──
+const TC_KEY='pokeTypes_v2';
+const TC_TTL=7*24*60*60*1000; // 7 days
 
-// ── STATE ──
-const S = {
-  poke: POKE_LIST,
-  tracking: {}, favs: new Set(), team: [],
-  settings: { modern: true },
-  filters: { q: '', type: null, gen: 0, rarity: null },
-  tab: 'dex',
-  mId: null, mForms: [], mFormIdx: 0, mModern: true, mShiny: false,
-  formsCache: {},
-};
-
-// ── UTILS ──
-const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
-const pad = n => String(n).padStart(3, '0');
-const fmtForm = (name, species) => {
-  if (!name || name === species) return 'Forma normal';
-  return name.replace(species + '-', '').split('-').map(cap).join(' ');
-};
-
-// ── STORAGE ──
-const LS = {
-  save() {
-    try {
-      localStorage.setItem('pp_track', JSON.stringify(S.tracking));
-      localStorage.setItem('pp_favs', JSON.stringify([...S.favs]));
-      localStorage.setItem('pp_team', JSON.stringify(S.team));
-      localStorage.setItem('pp_set', JSON.stringify(S.settings));
-    } catch(e) { console.warn('Storage:', e); }
-  },
-  load() {
-    try { S.tracking = JSON.parse(localStorage.getItem('pp_track')) || {}; } catch { S.tracking = {}; }
-    try { S.favs = new Set(JSON.parse(localStorage.getItem('pp_favs')) || []); } catch { S.favs = new Set(); }
-    try { S.team = JSON.parse(localStorage.getItem('pp_team')) || []; } catch { S.team = []; }
-    try { const d = localStorage.getItem('pp_set'); if (d) Object.assign(S.settings, JSON.parse(d)); } catch {}
-  },
-  saveForms() { try { localStorage.setItem('pp_forms_v4', JSON.stringify(S.formsCache)); } catch {} },
-  loadForms() { try { const d = localStorage.getItem('pp_forms_v4'); if (d) S.formsCache = JSON.parse(d); } catch {} },
-};
-
-// ── FORMS (lazy from API, sprites adjusted to jsDelivr) ──
-async function fetchForms(baseId) {
-  if (S.formsCache[baseId]) return S.formsCache[baseId];
-  const base = S.poke.find(p => p.id === baseId);
-  const fallback = [{
-    id: baseId, name: base?.name || '', speciesName: base?.name || '',
-    types: base?.types || [], isDefault: true,
-    sprites: { official: imgArt(baseId), official_shiny: imgShiny(baseId), front_default: imgPx(baseId), front_shiny: imgPxShy(baseId) }
-  }];
+function loadTypesCache(){
   try {
-    const r = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${baseId}`);
-    if (!r.ok) throw 0;
-    const spec = await r.json();
-    if (!spec.varieties || spec.varieties.length <= 1) {
-      S.formsCache[baseId] = fallback; LS.saveForms(); return fallback;
-    }
-    const fs = await Promise.allSettled(spec.varieties.map(v =>
-      fetch(v.pokemon.url).then(r => r.json()).then(d => ({
-        id: d.id, name: d.name, speciesName: spec.name,
-        types: d.types.map(t => t.type.name), isDefault: v.is_default,
-        sprites: {
-          official: d.sprites?.other?.['official-artwork']?.front_default || null,
-          official_shiny: d.sprites?.other?.['official-artwork']?.front_shiny || null,
-          front_default: d.sprites?.front_default || null,
-          front_shiny: d.sprites?.front_shiny || null,
-        }
-      }))
-    ));
-    const valid = fs.filter(f => f.status === 'fulfilled').map(f => f.value)
-      .sort((a, b) => a.isDefault ? -1 : b.isDefault ? 1 : a.id - b.id);
-    S.formsCache[baseId] = valid.length ? valid : fallback;
-    LS.saveForms();
-    return S.formsCache[baseId];
-  } catch {
-    S.formsCache[baseId] = fallback;
-    return fallback;
+    const raw=localStorage.getItem(TC_KEY);
+    if(!raw)return null;
+    const {ts,data}=JSON.parse(raw);
+    if(Date.now()-ts>TC_TTL)return null; // stale
+    return data; // {[id]: [type1, type2?]}
+  } catch { return null; }
+}
+
+function saveTypesCache(data){
+  try { localStorage.setItem(TC_KEY,JSON.stringify({ts:Date.now(),data})); } catch {}
+}
+
+function applyTypesData(data){
+  // data = {[id]: ['fire','flying']}
+  let changed=false;
+  S.poke.forEach(p=>{
+    const t=data[p.id];
+    if(t&&JSON.stringify(t)!==JSON.stringify(p.types)){p.types=t;changed=true;}
+  });
+  if(changed){
+    renderGrid();
+    if(S.tab==='fav')renderFav();
+    if(S.tab==='team')renderTeam();
+    renderFilters();
   }
 }
 
-// ── CARD ──
-const isCap = id => { const t = S.tracking[id]; return t && Object.values(t).some(g => g.captured); };
-const isShiny = id => { const t = S.tracking[id]; return t && Object.values(t).some(g => g.shiny); };
-const isFav = id => S.favs.has(id);
-const inTeam = id => S.team.includes(id);
-const tDef = () => ({ captured: false, shiny: false, inBox: false, notes: '', ball: null });
+async function fetchTypesInBackground(){
+  // Check cache first
+  const cached=loadTypesCache();
+  if(cached){applyTypesData(cached);return;}
 
-function cardHTML(p) {
-  const caught = isCap(p.id), shiny = isShiny(p.id), fav = isFav(p.id), team = inTeam(p.id);
-  const modern = S.settings.modern;
-  const rar = RARITY[p.rarity] || RARITY.normal;
-  const types = p.types.map(t => `<span class="type-badge" style="background:${tc(t)}">${cap(t)}</span>`).join('');
-  const typeClr = p.types[0] ? tc(p.types[0]) : '#888';
-  let style = '';
-  if (caught) style = `border-color:${typeClr}80;background:${typeClr}12;`;
-  else if (shiny) style = 'border-color:#ffd54f60;';
-  else if (fav) style = 'border-color:#f0629260;';
-  const overlays = (fav ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="#f06292" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>` : '') +
-    (team ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="#42a5f5" stroke="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>` : '');
-  return `<div class="poke-card" style="${style}" data-id="${p.id}" onclick="openModal(${p.id})">
-    <div class="card-header">
-      <span class="card-id">#${pad(p.id)}</span>
-      <span class="card-rar-dot" style="background:${rar.dot}" title="${rar.l}"></span>
-    </div>
-    ${overlays ? `<div class="card-overlays">${overlays}</div>` : ''}
-    <img class="card-img${modern ? '' : ' px'}" src="${spriteOf(p.id, modern, false)}" alt="${p.name}" loading="lazy" onerror="this.style.opacity='.15'">
+  // Show subtle indicator
+  const syncEl=document.querySelector('.sync-status');
+  if(syncEl){syncEl.innerHTML='<span class="sync-dot syncing"></span> Actualizando tipos…';}
+
+  try {
+    // Step 1: get all pokemon list (single request)
+    const listRes=await fetch('https://pokeapi.co/api/v2/pokemon?limit=1025&offset=0');
+    if(!listRes.ok)throw new Error('list fetch failed');
+    const listJson=await listRes.json();
+    const results=listJson.results; // [{name,url}]
+
+    // Step 2: fetch all pokemon data in parallel batches of 50
+    const BATCH=50;
+    const typeMap={};
+    for(let i=0;i<results.length;i+=BATCH){
+      const batch=results.slice(i,i+BATCH);
+      const responses=await Promise.allSettled(
+        batch.map(r=>fetch(r.url).then(x=>x.json()))
+      );
+      responses.forEach(res=>{
+        if(res.status!=='fulfilled')return;
+        const d=res.value;
+        const types=d.types
+          .sort((a,b)=>a.slot-b.slot)
+          .map(t=>t.type.name);
+        typeMap[d.id]=types;
+      });
+      // Patch S.poke progressively every 2 batches
+      if((i/BATCH)%2===1) applyTypesData(typeMap);
+    }
+    // Final apply + save cache
+    applyTypesData(typeMap);
+    saveTypesCache(typeMap);
+    if(syncEl){syncEl.innerHTML='<span class="sync-dot"></span> Sincronizado';}
+    console.log(`[PokéPlanner] Types updated from API for ${Object.keys(typeMap).length} Pokémon`);
+  } catch(e){
+    if(syncEl){syncEl.innerHTML='<span class="sync-dot"></span> Sincronizado';}
+    console.warn('[PokéPlanner] Could not fetch types from API:',e);
+  }
+}
+
+const S={
+  poke:POKE,track:{},favs:new Set(),teams:{},
+  set:{modern:true},
+  f:{q:'',types:[],gen:0,rar:null},
+  tab:'dex',
+  teamGame:null,
+  mId:null,mForms:[],mFi:0,mMod:true,mShy:false,
+  fc:{},filtered:[],rendered:0,PAGE:60,
+  desc:{},
+  mPreviewForm:null, // currently previewed form object in modal
+  mPreviewShiny:false,
+};
+
+// ═══════════════════════════════════════
+//  FIREBASE + AUTH
+// ═══════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyCEbQsGmgOUyOmUfr2uJe-chzNIENqgdok",
+  authDomain: "pokeplanner-b6321.firebaseapp.com",
+  projectId: "pokeplanner-b6321",
+  storageBucket: "pokeplanner-b6321.firebasestorage.app",
+  messagingSenderId: "271473943519",
+  appId: "1:271473943519:web:dd19d57e54086b72981a6a"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+let syncTimeout = null;
+
+// ── AUTH FUNCTIONS ──
+function signInWithGoogle() {
+  document.getElementById('auth-loading').classList.add('on');
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => {
+    console.error('Sign-in error:', err);
+    document.getElementById('auth-loading').classList.remove('on');
+    alert('Error al iniciar sesión. Inténtalo de nuevo.');
+  });
+}
+
+function signOut() {
+  closeUserMenu();
+  auth.signOut();
+}
+
+function toggleUserMenu() {
+  document.getElementById('user-menu').classList.toggle('on');
+}
+function closeUserMenu() {
+  document.getElementById('user-menu').classList.remove('on');
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('#user-menu') && !e.target.closest('.user-avatar')) {
+    closeUserMenu();
+  }
+});
+
+// ── SYNC STATUS ──
+function setSyncing(on) {
+  const dot = document.querySelector('.sync-dot');
+  if (dot) dot.classList.toggle('syncing', on);
+}
+
+// ── FIRESTORE SAVE (debounced 600ms to avoid hammering) ──
+function scheduleSave() {
+  if (!currentUser) { saveToLocalStorage(); return; }
+  setSyncing(true);
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(async () => {
+    try {
+      await db.collection('users').doc(currentUser.uid).set({
+        track: S.track,
+        favs: [...S.favs],
+        teams: S.teams,
+        set: S.set,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      setSyncing(false);
+    } catch(e) {
+      console.error('Save error:', e);
+      saveToLocalStorage();
+      setSyncing(false);
+    }
+  }, 600);
+}
+
+function saveToLocalStorage() {
+  try {
+    localStorage.setItem('t', JSON.stringify(S.track));
+    localStorage.setItem('fv', JSON.stringify([...S.favs]));
+    localStorage.setItem('tms', JSON.stringify(S.teams));
+    localStorage.setItem('st', JSON.stringify(S.set));
+  } catch(e) {}
+}
+
+// ── LOAD USER DATA ──
+async function loadUserData(uid) {
+  try {
+    const doc = await db.collection('users').doc(uid).get();
+    if (doc.exists) {
+      const d = doc.data();
+      S.track = d.track || {};
+      S.favs = new Set(d.favs || []);
+      S.teams = sanitizeTeams(d.teams || {});
+      if (d.set) Object.assign(S.set, d.set);
+    } else {
+      // New user — check if there's local data to migrate
+      loadFromLocalStorage();
+      if (Object.keys(S.track).length > 0 || S.favs.size > 0) {
+        scheduleSave(); // migrate to cloud
+      }
+    }
+  } catch(e) {
+    console.error('Load error:', e);
+    loadFromLocalStorage();
+  }
+}
+
+// Sanitize teams: ensure new format {gameId:[{pokeId,formId,isShiny}]}, reset old
+function sanitizeTeams(raw){
+  const out={};
+  if(!raw||typeof raw!=='object')return out;
+  Object.entries(raw).forEach(([gid,slots])=>{
+    if(!Array.isArray(slots))return;
+    const valid=slots.filter(s=>s&&typeof s==='object'&&typeof s.pokeId==='number');
+    if(valid.length)out[gid]=valid;
+  });
+  return out;
+}
+
+function loadFromLocalStorage() {
+  try { S.track = JSON.parse(localStorage.getItem('t')) || {}; } catch { S.track = {}; }
+  try { S.favs = new Set(JSON.parse(localStorage.getItem('fv')) || []); } catch { S.favs = new Set(); }
+  try { S.teams = sanitizeTeams(JSON.parse(localStorage.getItem('tms')||'{}')); } catch { S.teams = {}; }
+  try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch {}
+}
+
+function forceRefreshTypes(){
+  try { localStorage.removeItem(TC_KEY); } catch {}
+  document.getElementById('user-menu').classList.remove('on');
+  fetchTypesInBackground();
+}
+
+function saveFormsCache() {
+  try { localStorage.setItem('fc5', JSON.stringify(S.fc)); } catch(e) {}
+}
+
+function loadFormsCache() {
+  try { const d = localStorage.getItem('fc5'); if(d) S.fc = JSON.parse(d); } catch {}
+}
+
+// ── AUTH STATE LISTENER ── (this is the main entry point)
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    currentUser = user;
+    // Load data
+    await loadUserData(user.uid);
+    // Show app
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('app').style.display = 'flex';
+    // Update header avatar
+    updateHeaderUser(user);
+    // Render
+    renderFilters();
+    renderGrid();
+    document.getElementById('sprbtn').classList.toggle('on', !S.set.modern);
+    const sel = document.getElementById('stsel');
+    if (!sel.options.length || sel.options[0].value !== 'all') {
+      sel.innerHTML = '<option value="all">Todos los juegos</option>';
+      GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
+    }
+    // Fetch correct types from PokéAPI in background (non-blocking)
+    setTimeout(fetchTypesInBackground, 1500);
+  } else {
+    currentUser = null;
+    document.getElementById('auth-screen').classList.remove('hidden');
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+function updateHeaderUser(user) {
+  const hdr = document.querySelector('.hdr-brand');
+  // Replace sprite btn with avatar
+  const sprBtn = document.getElementById('sprbtn');
+  // Add avatar next to sprite btn
+  let avatar = document.getElementById('user-avatar-btn');
+  if (!avatar) {
+    avatar = document.createElement('img');
+    avatar.id = 'user-avatar-btn';
+    avatar.className = 'user-avatar';
+    avatar.onclick = toggleUserMenu;
+    avatar.title = user.displayName || 'Mi cuenta';
+    sprBtn.parentElement.insertBefore(avatar, sprBtn.nextSibling);
+  }
+  avatar.src = user.photoURL || '';
+  avatar.alt = user.displayName || '';
+
+  // Sync status dot in header stat
+  const stat = document.getElementById('hstat');
+  if (!stat.querySelector('.sync-dot')) {
+    const syncEl = document.createElement('span');
+    syncEl.className = 'sync-status';
+    syncEl.innerHTML = '<span class="sync-dot"></span> Sincronizado';
+    stat.after(syncEl);
+  }
+
+  // User menu
+  document.getElementById('um-name').textContent = user.displayName || 'Usuario';
+  document.getElementById('um-email').textContent = user.email || '';
+}
+
+// ═══════════════════════════════════════
+//  SAVE WRAPPERS (replace old LS calls)
+// ═══════════════════════════════════════
+const isCap=id=>{const t=S.track[id];return t&&Object.values(t).some(g=>g.captured);};
+const isShy=id=>{const t=S.track[id];return t&&Object.values(t).some(g=>g.shiny);};
+const isFav=key=>S.favs.has(String(key));
+const isAnyFav=id=>[...S.favs].some(k=>parseInt(k.split('_')[0])===id);
+// Team slot = {pokeId, formId, isShiny}  formId=pokeApi form id (int), isShiny=bool
+const slotKey=(slot)=>`${slot.pokeId}_${slot.formId||slot.pokeId}_${slot.isShiny?'s':'n'}`;
+const inTm=id=>GAMES.some(g=>(S.teams[g.id]||[]).some(s=>s.pokeId===id));
+const inTmSlot=(pokeId,formId,isShiny)=>GAMES.some(g=>(S.teams[g.id]||[]).some(s=>s.pokeId===pokeId&&String(s.formId||s.pokeId)===String(formId||pokeId)&&!!s.isShiny===!!isShiny));
+const tDef=()=>({captured:false,shiny:false,inBox:false,notes:'',ball:null,level:null});
+
+async function fetchForms(bid){
+  if(S.fc[bid])return S.fc[bid];
+  const base=S.poke.find(p=>p.id===bid);
+  const fb=[{id:bid,name:base?.name||'',speciesName:base?.name||'',types:base?.types||[],isDefault:true,isCostume:false,
+    sprites:{official:iArt(bid),official_shiny:iShy(bid),front_default:iPx(bid),front_shiny:iPxS(bid)}}];
+  try{
+    const r=await fetch(`https://pokeapi.co/api/v2/pokemon-species/${bid}`);
+    if(!r.ok)throw 0;
+    const spec=await r.json();
+
+    // Extract best Spanish flavor text
+    if(!S.desc[bid]){
+      const esEntries=(spec.flavor_text_entries||[]).filter(e=>e.language.name==='es');
+      if(esEntries.length){
+        const entry=esEntries[esEntries.length-1];
+        S.desc[bid]={
+          text:entry.flavor_text.replace(/\f|\n/g,' ').replace(/\s+/g,' ').trim(),
+          game:entry.version?.name||''
+        };
+      }
+    }
+
+    // Fetch all varieties (regional forms like Alolan, Galarian, etc.)
+    const varietyResults=await Promise.allSettled(
+      (spec.varieties||[]).map(v=>fetch(v.pokemon.url).then(r=>r.json()).then(d=>({
+        pokeData:d, isDefault:v.is_default
+      })))
+    );
+    const varieties=varietyResults
+      .filter(r=>r.status==='fulfilled').map(r=>r.value)
+      .sort((a,b)=>a.isDefault?-1:b.isDefault?1:a.pokeData.id-b.pokeData.id);
+
+    if(!varieties.length){S.fc[bid]=fb;saveFormsCache();return fb;}
+
+    // For each variety, also fetch its alternate forms (cosmetic: Furfrou trims, Vivillon patterns, etc.)
+    const allForms=[];
+    for(const {pokeData, isDefault} of varieties){
+      const d=pokeData;
+      const baseEntry={
+        id:d.id, name:d.name, speciesName:spec.name,
+        types:d.types.sort((a,b)=>a.slot-b.slot).map(t=>t.type.name),
+        isDefault, isCostume:false,
+        sprites:{
+          official:d.sprites?.other?.['official-artwork']?.front_default||null,
+          official_shiny:d.sprites?.other?.['official-artwork']?.front_shiny||null,
+          front_default:d.sprites?.front_default||null,
+          front_shiny:d.sprites?.front_shiny||null
+        }
+      };
+      allForms.push(baseEntry);
+
+      // Fetch alternate forms of this variety (e.g. Furfrou-heart, Furfrou-star…)
+      const formUrls=(d.forms||[]).filter(f=>f.url&&!f.url.includes(`/pokemon-form/${d.id}`));
+      if(formUrls.length){
+        const formResults=await Promise.allSettled(
+          formUrls.map(f=>fetch(f.url).then(r=>r.json()))
+        );
+        for(const fr of formResults){
+          if(fr.status!=='fulfilled')continue;
+          const fd=fr.value;
+          // Only include non-default forms (skip if it's the same as the base)
+          if(fd.is_default)continue;
+          allForms.push({
+            id:d.id, // same pokémon id, just a different form
+            formName:fd.name, // e.g. "furfrou-heart"
+            name:fd.name, speciesName:spec.name,
+            types:baseEntry.types, // cosmetic forms share types
+            isDefault:false, isCostume:true,
+            sprites:{
+              official:fd.sprites?.front_default||baseEntry.sprites.official,
+              official_shiny:fd.sprites?.front_shiny||baseEntry.sprites.official_shiny,
+              front_default:fd.sprites?.front_default||baseEntry.sprites.front_default,
+              front_shiny:fd.sprites?.front_shiny||baseEntry.sprites.front_shiny
+            }
+          });
+        }
+      }
+    }
+
+    S.fc[bid]=allForms.length?allForms:fb;
+    saveFormsCache();
+    return S.fc[bid];
+  }catch(e){
+    console.warn('fetchForms error:',e);
+    S.fc[bid]=fb;return fb;
+  }
+}
+
+function cardHTML(p,eager){
+  const caught=isCap(p.id),shy=isShy(p.id),fav=isAnyFav(p.id),team=inTm(p.id);
+  const mod=S.set.modern;
+  const rar=RAR[p.rarity]||RAR.normal;
+  const types=p.types.map(t=>`<span class="tbadge" style="background:${tc(t)}">${cap(t)}</span>`).join('');
+  const typeClr=p.types[0]?tc(p.types[0]):'#888';
+  let st='';
+  if(caught)st=`border-color:${typeClr}80;background:${typeClr}12;`;
+  else if(shy)st='border-color:#ffd54f55;';
+  else if(fav)st='border-color:#f0629255;';
+  const ov=(fav?`<svg width="9" height="9" viewBox="0 0 24 24" fill="#f06292" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`:'')+
+    (team?`<svg width="9" height="9" viewBox="0 0 24 24" fill="#42a5f5" stroke="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`:'');
+  const imgUrl=spOf(p.id,mod,false);
+  const imgAttrs=eager?`src="${imgUrl}" class="card-img${mod?'':' px'} loaded"`:
+    `data-src="${imgUrl}" src="" class="card-img${mod?'':' px'}"`;
+  return`<div class="card" style="${st}" data-id="${p.id}" onclick="openMdl(${p.id})">
+    <div class="card-hdr"><span class="card-id">#${pad(p.id)}</span><span class="card-rdot" style="background:${rar.d}" title="${rar.l}"></span></div>
+    ${ov?`<div class="card-ov">${ov}</div>`:''}
+    <img ${imgAttrs} alt="${p.name}">
     <div class="card-name">${cap(p.name)}</div>
     <div class="card-types">${types}</div>
-    ${caught || shiny ? `<div class="card-status">
-      ${caught ? `<span class="status-dot" style="background:var(--green)" title="Capturado"></span>` : ''}
-      ${shiny ? `<span class="status-dot" style="background:var(--gold)" title="Shiny"></span>` : ''}
-    </div>` : ''}
+    ${caught||shy?`<div class="card-st">${caught?`<span class="stDot" style="background:var(--green)"></span>`:''
+      }${shy?`<span class="stDot" style="background:var(--gold)"></span>`:''}</div>`:''}
   </div>`;
 }
 
-// ── GRID ──
-function getFiltered() {
-  const { q, type, gen, rarity } = S.filters;
-  return S.poke.filter(p => {
-    if (q) { const lq = q.toLowerCase(); if (!p.name.includes(lq) && !String(p.id).startsWith(q)) return false; }
-    if (type && !p.types.includes(type)) return false;
-    if (gen && p.generation !== gen) return false;
-    if (rarity && p.rarity !== rarity) return false;
+let imgObserver;
+function setupImgObserver(){
+  if(imgObserver)imgObserver.disconnect();
+  imgObserver=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){const img=e.target;const src=img.dataset.src;
+        if(src){img.src=src;img.classList.add('loaded');delete img.dataset.src;imgObserver.unobserve(img);}
+      }
+    });
+  },{rootMargin:'200px'});
+  document.querySelectorAll('img[data-src]').forEach(img=>imgObserver.observe(img));
+}
+
+let scrollObserver;
+function setupScrollSentinel(){
+  if(scrollObserver)scrollObserver.disconnect();
+  const sentinel=document.getElementById('sent');if(!sentinel)return;
+  scrollObserver=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting&&S.rendered<S.filtered.length)renderMore();
+  },{root:document.getElementById('gs'),rootMargin:'300px'});
+  scrollObserver.observe(sentinel);
+}
+
+function renderMore(){
+  const batch=S.filtered.slice(S.rendered,S.rendered+S.PAGE);if(!batch.length)return;
+  const eager=S.rendered===0;
+  document.getElementById('grid').insertAdjacentHTML('beforeend',batch.map(p=>cardHTML(p,eager)).join(''));
+  S.rendered+=batch.length;if(!eager)setupImgObserver();
+}
+
+function getFiltered(){
+  const{q,types,gen,rar}=S.f;
+  return S.poke.filter(p=>{
+    if(q){const lq=q.toLowerCase();if(!p.name.includes(lq)&&!String(p.id).startsWith(q))return false;}
+    if(gen&&p.generation!==gen)return false;
+    if(rar&&p.rarity!==rar)return false;
+    if(types.length>0){
+      // Check base types first
+      const baseMatch=types.every(t=>p.types.includes(t));
+      if(!baseMatch){
+        // Check if any cached form has the types (regional variants)
+        const forms=S.fc[p.id];
+        const formMatch=forms&&forms.some(f=>types.every(t=>f.types.includes(t)));
+        if(!formMatch)return false;
+      }
+    }
     return true;
   });
 }
-function renderGrid() {
-  const list = getFiltered();
-  document.getElementById('poke-grid').innerHTML = list.map(cardHTML).join('');
-  document.getElementById('result-count').textContent = `${list.length} Pokémon`;
-  updateHeaderStats();
-}
-function updateHeaderStats() {
-  const cap = Object.keys(S.tracking).filter(id => Object.values(S.tracking[id]).some(g => g.captured)).length;
-  const shy = Object.keys(S.tracking).filter(id => Object.values(S.tracking[id]).some(g => g.shiny)).length;
-  document.getElementById('app-stats').textContent = `${cap} / ${S.poke.length} capturados · ${shy} ✦ shiny`;
-}
-function updateCard(id) {
-  const p = S.poke.find(x => x.id === id); if (!p) return;
-  document.querySelectorAll(`.poke-card[data-id="${id}"]`).forEach(el => { el.outerHTML = cardHTML(p); });
+
+function renderGrid(){
+  S.filtered=getFiltered();S.rendered=0;
+  document.getElementById('grid').innerHTML='';
+  document.getElementById('rc').textContent=`${S.filtered.length} Pokémon`;
+  renderMore();setupScrollSentinel();updateStat();
 }
 
-// ── FILTERS ──
-function renderFilters() {
-  document.getElementById('gen-row').innerHTML = `<div class="filter-inner">
-    <button class="pill${S.filters.gen===0?' active':''}" onclick="setGen(0)">Todas</button>
-    ${[1,2,3,4,5,6,7,8,9].map(g=>`<button class="pill${S.filters.gen===g?' active':''}" onclick="setGen(${g})">${GNAMES[g]}</button>`).join('')}
-  </div>`;
-  document.getElementById('type-row').innerHTML = `<div class="filter-inner">
-    <button class="pill${!S.filters.type?' active':''}" onclick="setType(null)">Todos</button>
-    ${TYPES.map(t => { const a = S.filters.type === t.id;
-      return `<button class="pill" onclick="setType('${t.id}')" style="background:${a?t.c:t.c+'22'};border-color:${a?t.c:t.c+'55'};color:${a?'#fff':'#ccc'}"><span class="pill-dot" style="background:${t.c}"></span>${t.name}</button>`;
-    }).join('')}
-  </div>`;
-  document.getElementById('rarity-row').innerHTML = `<div class="filter-inner">
-    <button class="pill${!S.filters.rarity?' active':''}" onclick="setRarity(null)">Todos</button>
-    ${Object.entries(RARITY).map(([k,r]) => { const a = S.filters.rarity === k;
-      return `<button class="pill${a?' active':''}" onclick="setRarity('${k}')"><span class="pill-dot" style="background:${r.dot}"></span>${r.l}</button>`;
-    }).join('')}
-  </div>`;
-}
-function setGen(g) { S.filters.gen = g; renderFilters(); renderGrid(); }
-function setType(t) { S.filters.type = t; renderFilters(); renderGrid(); }
-function setRarity(r) { S.filters.rarity = r; renderFilters(); renderGrid(); }
-function clearSearch() {
-  S.filters.q = '';
-  document.getElementById('search-input').value = '';
-  document.getElementById('search-clear').classList.remove('show');
-  renderGrid();
+function updateStat(){
+  const c=Object.keys(S.track).filter(id=>Object.values(S.track[id]).some(g=>g.captured)).length;
+  const s=Object.keys(S.track).filter(id=>Object.values(S.track[id]).some(g=>g.shiny)).length;
+  document.getElementById('hstat').textContent=`${c} / ${S.poke.length} capturados · ${s} shiny`;
 }
 
-// ── SPRITE TOGGLE ──
-function toggleSprite() {
-  S.settings.modern = !S.settings.modern;
-  const btn = document.getElementById('sprite-btn');
-  btn.classList.toggle('active', !S.settings.modern);
-  LS.save(); renderGrid();
-  if (S.tab === 'fav') renderFavPage();
-  if (S.tab === 'team') renderTeamPage();
-}
-
-// ── TABS ──
-function goTab(t) {
-  S.tab = t;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + t).classList.add('active');
-  document.getElementById('tab-' + t).classList.add('active');
-  if (t === 'fav') renderFavPage();
-  if (t === 'team') renderTeamPage();
-  if (t === 'stats') drawStats();
-}
-
-// ── FAVORITES ──
-function toggleFav(id) {
-  S.favs.has(id) ? S.favs.delete(id) : S.favs.add(id);
-  LS.save(); updateCard(id);
-  if (S.tab === 'fav') renderFavPage();
-}
-function renderFavPage() {
-  const list = S.poke.filter(p => S.favs.has(p.id));
-  document.getElementById('fav-sub').textContent = `${list.length} Pokémon`;
-  const w = document.getElementById('fav-scroll');
-  if (!list.length) {
-    w.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="empty-title">Sin favoritos aún</div><div class="empty-sub">Abre cualquier Pokémon y toca el corazón</div></div>`;
-  } else {
-    w.innerHTML = `<div class="poke-grid">${list.map(cardHTML).join('')}</div>`;
-  }
-}
-
-// ── TEAM ──
-function toggleTeam(id) {
-  if (S.team.includes(id)) S.team = S.team.filter(x => x !== id);
-  else { if (S.team.length >= 6) { alert('El equipo ya tiene 6 Pokémon'); return; } S.team.push(id); }
-  LS.save(); updateCard(id); if (S.tab === 'team') renderTeamPage();
-}
-function removeFromTeam(id) { S.team = S.team.filter(x => x !== id); LS.save(); updateCard(id); renderTeamPage(); }
-function renderTeamPage() {
-  let slots = '';
-  for (let i = 0; i < 6; i++) {
-    const id = S.team[i];
-    if (id) {
-      const p = S.poke.find(x => x.id === id);
-      slots += `<div class="team-slot filled" onclick="openModal(${id})">
-        <div class="team-slot-rm" onclick="event.stopPropagation();removeFromTeam(${id})">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </div>
-        <img src="${spriteOf(id, S.settings.modern, false)}" alt="" onerror="this.style.opacity='.1'">
-        <div class="team-slot-name">${cap(p?.name || '')}</div>
-      </div>`;
-    } else {
-      slots += `<div class="team-slot empty"><div class="team-slot-num">${i + 1}</div></div>`;
-    }
-  }
-  document.getElementById('team-slots').innerHTML = slots;
-  document.getElementById('team-sub').textContent = `${S.team.length} / 6`;
-  const list = S.poke.filter(p => S.team.includes(p.id));
-  const w = document.getElementById('team-scroll');
-  if (!list.length) {
-    w.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="empty-title">Equipo vacío</div><div class="empty-sub">Añade hasta 6 Pokémon desde su ficha</div></div>`;
-  } else {
-    w.innerHTML = `<div class="poke-grid">${list.map(cardHTML).join('')}</div>`;
-  }
-}
-
-// ── STATS ──
-function drawStats() {
-  if (S.tab !== 'stats') return;
-  const gid = document.getElementById('stats-game').value;
-  const total = S.poke.length;
-  const capIds = new Set(), shyIds = new Set(), neverCap = [], alwaysCap = [];
-  const typeC = {}; TYPES.forEach(t => { typeC[t.id] = 0; });
-  const rarC = {}; Object.keys(RARITY).forEach(k => { rarC[k] = 0; });
-  const ballC = {}; BALLS.forEach(b => { ballC[b.id] = 0; });
-  S.poke.forEach(p => {
-    const t = S.tracking[p.id];
-    if (gid === 'all') {
-      const any = t && Object.values(t).some(g => g.captured);
-      if (any) { capIds.add(p.id); p.types.forEach(tp => { if (tp in typeC) typeC[tp]++; }); rarC[p.rarity] = (rarC[p.rarity]||0)+1; }
-      if (!any) neverCap.push(p);
-      if (t && GAMES.every(g => t[g.id]?.captured)) alwaysCap.push(p);
-      if (t && Object.values(t).some(g => g.shiny)) shyIds.add(p.id);
-      if (t) Object.values(t).forEach(g => { if (g?.ball && g.ball in ballC) ballC[g.ball]++; });
-    } else {
-      const c = !!(t && t[gid]?.captured);
-      if (c) { capIds.add(p.id); p.types.forEach(tp => { if (tp in typeC) typeC[tp]++; }); rarC[p.rarity] = (rarC[p.rarity]||0)+1; }
-      if (!c) neverCap.push(p);
-      if (t && t[gid]?.shiny) shyIds.add(p.id);
-      if (t && t[gid]?.ball && t[gid].ball in ballC) ballC[t[gid].ball]++;
-    }
+function updateCard(id){
+  const p=S.poke.find(x=>x.id===id);if(!p)return;
+  document.querySelectorAll(`.card[data-id="${id}"]`).forEach(el=>{
+    el.outerHTML=cardHTML(p,!el.querySelector('img[data-src]'));
   });
-  const pct = total ? Math.round((capIds.size / total) * 100) : 0;
-  const tSorted = TYPES.map(t => ({...t, c: typeC[t.id]})).sort((a,b) => b.c - a.c);
-  const maxT = Math.max(1, ...tSorted.map(t => t.c));
-  const topBalls = BALLS.filter(b => ballC[b.id] > 0).sort((a,b) => ballC[b.id] - ballC[a.id]).reverse().slice(0,10);
-  const maxBall = topBalls.length ? ballC[topBalls[0].id] : 1;
-  const perGame = gid === 'all' ? GAMES.map(g => ({...g, count: Object.values(S.tracking).filter(t => t[g.id]?.captured).length})).sort((a,b) => b.count - a.count).slice(0,12) : [];
-  const maxGame = perGame.length ? perGame[0].count : 1;
-  const gName = gid === 'all' ? 'global' : (GAMES.find(g => g.id === gid)?.name || gid);
-  const el = document.getElementById('stats-body');
-  el.innerHTML = `
-    <div class="stats-section-title">Resumen ${gName}</div>
-    <div class="big-grid">
-      <div class="big-card"><div class="big-val" style="color:var(--green)">${capIds.size}</div><div class="big-lbl">Capturados</div></div>
-      <div class="big-card"><div class="big-val" style="color:var(--gold)">${shyIds.size}</div><div class="big-lbl">Shiny</div></div>
-      <div class="big-card"><div class="big-val" style="color:var(--accent)">${pct}%</div><div class="big-lbl">Completado</div></div>
-      <div class="big-card"><div class="big-val" style="color:var(--text2)">${neverCap.length}</div><div class="big-lbl">Sin capturar</div></div>
-    </div>
-    <div class="stats-section-title">Por tipo</div>
-    <div class="bar-card">${tSorted.map(t=>`<div class="bar-row"><div class="bar-lbl">${t.name}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round((t.c/maxT)*100)}%;background:${t.c}"></div></div><div class="bar-num">${t.c}</div></div>`).join('')}</div>
-    <div class="stats-section-title">Por rareza</div>
-    <div class="bar-card">${Object.entries(RARITY).map(([k,r])=>{const tot=S.poke.filter(p=>p.rarity===k).length;const got=rarC[k]||0;return`<div class="bar-row"><div class="bar-lbl"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${r.dot};margin-right:4px;vertical-align:middle"></span>${r.l}</div><div class="bar-track"><div class="bar-fill" style="width:${tot?Math.round((got/tot)*100):0}%;background:${r.dot}"></div></div><div class="bar-num">${got}/${tot}</div></div>`;}).join('')}</div>
-    ${perGame.length?`<div class="stats-section-title">Top juegos</div><div class="bar-card">${perGame.map(g=>`<div class="bar-row"><div class="bar-lbl">${g.name}</div><div class="bar-track"><div class="bar-fill" style="width:${maxGame?Math.round((g.count/maxGame)*100):0}%;background:${g.c}"></div></div><div class="bar-num">${g.count}</div></div>`).join('')}</div>`:''}
-    ${topBalls.length?`<div class="stats-section-title">Pokéballs usadas</div><div class="bar-card">${topBalls.map(b=>`<div class="bar-row"><div class="bar-lbl">${b.e} ${b.n}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round((ballC[b.id]/maxBall)*100)}%;background:var(--accent)"></div></div><div class="bar-num">${ballC[b.id]}</div></div>`).join('')}</div>`:''}
-    ${neverCap.length?`<div class="stats-section-title">Nunca capturado (${Math.min(30,neverCap.length)} de ${neverCap.length})</div><div class="poke-list">${neverCap.slice(0,30).map(p=>`<div class="poke-list-row" onclick="openModal(${p.id})"><img src="${spriteOf(p.id,S.settings.modern,false)}" onerror="this.style.opacity='.1'"><div class="poke-list-info"><div class="poke-list-name">${cap(p.name)}</div><div class="poke-list-sub">#${pad(p.id)} · ${RARITY[p.rarity].l}</div></div><div class="poke-list-badge" style="color:var(--red)">–</div></div>`).join('')}</div>`:''}
-    ${alwaysCap.length?`<div class="stats-section-title">Capturado en todos los juegos (${alwaysCap.length})</div><div class="poke-list">${alwaysCap.slice(0,30).map(p=>`<div class="poke-list-row" onclick="openModal(${p.id})"><img src="${spriteOf(p.id,S.settings.modern,false)}" onerror="this.style.opacity='.1'"><div class="poke-list-info"><div class="poke-list-name">${cap(p.name)}</div><div class="poke-list-sub">#${pad(p.id)}</div></div><div class="poke-list-badge" style="color:var(--green)">✦</div></div>`).join('')}</div>`:''}
-    <div style="height:20px"></div>`;
 }
 
-// ── MODAL ──
-async function openModal(id) {
-  S.mId = id; S.mFormIdx = 0; S.mModern = S.settings.modern; S.mShiny = false; S.mForms = [];
-  const base = S.poke.find(p => p.id === id); if (!base) return;
-  buildModal(base, []);
-  document.getElementById('overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  const forms = await fetchForms(id);
-  if (S.mId === id) { S.mForms = forms; buildModal(base, forms); }
-}
-function closeModal() { document.getElementById('overlay').classList.remove('open'); document.body.style.overflow = ''; }
-function overlayClick(e) { if (e.target.id === 'overlay') closeModal(); }
+function renderFilters(){
+  document.getElementById('grow').innerHTML=`<div class="fi">
+    <button class="pill${S.f.gen===0?' on':''}" onclick="setGen(0)">Todas</button>
+    ${[1,2,3,4,5,6,7,8,9].map(g=>`<button class="pill${S.f.gen===g?' on':''}" onclick="setGen(${g})">${GNS[g]}</button>`).join('')}
+  </div>`;
 
-function buildModal(base, forms) {
-  const id = base.id;
-  const rar = RARITY[base.rarity] || RARITY.normal;
-  const fav = isFav(id), team = inTeam(id);
-  const typeClr = base.types[0] ? tc(base.types[0]) : '#6060a0';
-  const caughtC = GAMES.filter(g => S.tracking?.[id]?.[g.id]?.captured).length;
-  const curForm = forms[S.mFormIdx] || null;
-  const imgSrc = curForm ? formSprite(curForm, S.mModern, S.mShiny) : spriteOf(id, S.mModern, S.mShiny);
-  const formLabel = curForm && S.mFormIdx > 0 ? fmtForm(curForm.name, curForm.speciesName) : null;
-  document.getElementById('modal-num').textContent = `#${pad(id)}`;
-  document.getElementById('modal-sprite-btn').classList.toggle('active', !S.mModern);
-  const typePills = base.types.map(t => { const ti = TYPES.find(x => x.id === t); return `<span class="hero-type-pill" style="background:${tc(t)}">${ti?.name||t}</span>`; }).join('');
-  const formsHTML = forms.length > 1 ? `<div class="forms-section">
-    <div class="section-label">Formas (${forms.length})</div>
-    <div class="forms-scroll"><div class="forms-inner">${forms.map((f,i)=>{
-      const sp = S.mModern ? (f.sprites.official || imgArt(f.id)) : (f.sprites.front_default || imgPx(f.id));
-      return `<div class="form-chip${i===S.mFormIdx?' active':''}" onclick="selectForm(${i})">
-        <img src="${sp}" class="${S.mModern?'':'px'}" onerror="this.style.opacity='.1'">
-        <div class="form-chip-name">${fmtForm(f.name,f.speciesName)}</div>
-      </div>`;
-    }).join('')}</div></div>
-  </div>` : '';
-  const gens = [1,2,3,4,5,6,7,8,9].map(gen => {
-    const gGs = GAMES.filter(g => g.gen === gen);
-    const active = gGs.some(g => { const d = S.tracking?.[id]?.[g.id]; return d && (d.captured||d.shiny||d.inBox||d.notes||d.ball); });
-    return `<div class="gen-section">
-      <div class="gen-header" onclick="tGen(${gen})">
-        <div class="gen-header-left">
-          <svg class="gen-chevron" id="ga-${gen}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-          <span class="gen-title">${GNAMES_LONG[gen]}</span>
-        </div>
-        ${active ? '<span class="gen-badge">✦ activo</span>' : ''}
-      </div>
-      <div class="gen-games" id="gg-${gen}">${gGs.map(g => gameRowHTML(id, g)).join('')}</div>
+  // Compute available types based on selected types
+  let availableTypes=new Set();
+  if(S.f.types.length===0){
+    TYPES.forEach(t=>availableTypes.add(t.id));
+  } else {
+    // Only show types that co-exist with ALL currently selected types
+    S.poke.forEach(p=>{
+      if(S.f.types.every(t=>p.types.includes(t))){
+        p.types.forEach(t=>availableTypes.add(t));
+      }
+    });
+  }
+
+  document.getElementById('trow').innerHTML=`<div class="fi">
+    <button class="pill${S.f.types.length===0?' on':''}" onclick="clearTypes()">Todos</button>
+    ${TYPES.map(t=>{
+      const sel=S.f.types.includes(t.id);
+      const avail=availableTypes.has(t.id);
+      const dis=!avail&&!sel;
+      return`<button class="pill${sel?' on':''}${dis?' disabled':''}" onclick="toggleType('${t.id}')" style="background:${sel?t.c:t.c+'22'};border-color:${sel?t.c:t.c+'55'};color:${sel?'#fff':dis?t.c+'66':t.c+'cc'}"><span class="pdot" style="background:${t.c}"></span>${t.n}</button>`;
+    }).join('')}
+  </div>`;
+
+  document.getElementById('rrow').innerHTML=`<div class="fi">
+    <button class="pill${!S.f.rar?' on':''}" onclick="setRar(null)">Todos</button>
+    ${Object.entries(RAR).map(([k,r])=>`<button class="pill${S.f.rar===k?' on':''}" onclick="setRar('${k}')"><span class="pdot" style="background:${r.d}"></span>${r.l}</button>`).join('')}
+  </div>`;
+}
+function toggleType(t){
+  const idx=S.f.types.indexOf(t);
+  if(idx>=0){S.f.types.splice(idx,1);}
+  else if(S.f.types.length<2){S.f.types.push(t);}
+  renderFilters();renderGrid();
+}
+function clearTypes(){S.f.types=[];renderFilters();renderGrid();}
+function setGen(g){S.f.gen=g;renderFilters();renderGrid();}
+function setRar(r){S.f.rar=r;renderFilters();renderGrid();}
+function clearSearch(){S.f.q='';document.getElementById('si').value='';document.getElementById('sx').classList.remove('on');renderGrid();}
+
+function toggleSprite(){
+  S.set.modern=!S.set.modern;
+  document.getElementById('sprbtn').classList.toggle('on',!S.set.modern);
+  scheduleSave();renderGrid();
+  if(S.tab==='fav')renderFav();if(S.tab==='team')renderTeam();
+}
+
+function toggleHelp(){
+  const body=document.getElementById('help-body');
+  const chev=document.getElementById('help-chev');
+  body?.classList.toggle('on');
+  chev?.classList.toggle('on');
+}
+
+function goTab(t){
+  S.tab=t;
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+t).classList.add('on');
+  document.getElementById('tb-'+t).classList.add('on');
+  if(t==='fav')renderFav();if(t==='team')renderTeam();if(t==='stats')drawStats();
+}
+
+function toggleFav(key){
+  const k=String(key);
+  S.favs.has(k)?S.favs.delete(k):S.favs.add(k);
+  // Extract baseId (always first part before _)
+  const baseId=parseInt(k.split('_')[0]);
+  scheduleSave();
+  if(!isNaN(baseId))updateCard(baseId);
+  if(S.tab==='fav')renderFav();
+}
+function renderFav(){
+  // Parse fav keys: "123" = base, "123_456" = regional form (formId=456), "123_name" = costume
+  const entries=[...S.favs].map(k=>{
+    const parts=k.split('_');
+    const baseId=parseInt(parts[0]);
+    if(isNaN(baseId))return null;
+    const formPart=parts.slice(1).join('_')||null;
+    return{key:k, baseId, formPart};
+  }).filter(Boolean);
+
+  document.getElementById('fsub').textContent=`${entries.length} favorito${entries.length!==1?'s':''}`;
+  const w=document.getElementById('fscroll');
+  if(!entries.length){
+    w.innerHTML=`<div class="empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><div class="etitle">Sin favoritos</div><div class="esub">Abre un Pokémon y toca el corazón</div></div>`;
+    return;
+  }
+  // Build cards — for variants use the form sprite/name if available in cache
+  const cards=entries.map(({key,baseId,formPart})=>{
+    const p=S.poke.find(x=>x.id===baseId);
+    if(!p)return'';
+    if(!formPart)return cardHTML(p,true);
+    // Try to find form in cache
+    const forms=S.fc[baseId]||[];
+    const formId=parseInt(formPart);
+    const form=isNaN(formId)
+      ?forms.find(f=>f.isCostume&&(f.formName||f.name)===formPart)
+      :forms.find(f=>f.id===formId);
+    if(!form)return cardHTML(p,true); // fallback to base card
+    // Build a variant card
+    const mod=S.set.modern;
+    const sp=mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id));
+    const fname=form.isCostume?fmtF(form.formName||form.name,form.speciesName):fmtF(form.name,form.speciesName);
+    const types=(form.types||p.types).map(t=>`<span class="tbadge" style="background:${tc(t)}">${cap(t)}</span>`).join('');
+    const rar=RAR[p.rarity]||RAR.normal;
+    return`<div class="card" style="border-color:${tc(form.types?.[0]||p.types[0])}80;background:${tc(form.types?.[0]||p.types[0])}12" data-id="${baseId}" onclick="openMdl(${baseId})">
+      <div class="card-hdr"><span class="card-id">#${pad(baseId)}</span><span class="card-rdot" style="background:${rar.d}"></span></div>
+      <img src="${sp}" class="card-img${mod?'':' px'} loaded" alt="${fname}">
+      <div class="card-name">${fname}</div>
+      <div class="card-types">${types}</div>
     </div>`;
   }).join('');
-  document.getElementById('modal-body').innerHTML = `
-    <div class="hero" id="mhero" style="background:${S.mShiny?'rgba(255,213,79,.1)':typeClr+'15'}">
-      <button class="hero-shiny-btn${S.mShiny?' on':''}" onclick="toggleShiny()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="${S.mShiny?'var(--gold)':'none'}" stroke="${S.mShiny?'var(--gold)':'currentColor'}" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      </button>
-      <div class="hero-img-wrap">
-        <img id="mimg" class="hero-img${S.mModern?'':' px'}${S.mShiny?' shiny':''}" src="${imgSrc}" alt="${base.name}" onerror="this.style.opacity='.2'">
-      </div>
-      <div class="hero-name">${cap(base.name)}</div>
-      ${formLabel ? `<div class="hero-form-label">${formLabel}</div>` : ''}
-      <div class="hero-rar" style="background:${rar.dot}18;border-color:${rar.dot}60;color:${rar.dot}">
-        <span class="hero-rar-dot" style="background:${rar.dot}"></span>${rar.l}
-      </div>
-      <div class="hero-types">${typePills}</div>
-      <div class="hero-stats">
-        <div class="hstat"><div class="hstat-val">${caughtC}/${GAMES.length}</div><div class="hstat-lbl">Juegos</div></div>
-        <div class="hstat-div"></div>
-        <div class="hstat"><div class="hstat-val">Gen ${base.generation}</div><div class="hstat-lbl">Generación</div></div>
-        <div class="hstat-div"></div>
-        <div class="hstat"><div class="hstat-val">#${pad(id)}</div><div class="hstat-lbl">Número</div></div>
-      </div>
-    </div>
-    <div class="quick-btns">
-      <button class="qbtn${fav?' fav':''}" id="qfav" onclick="doFav(${id})">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        ${fav ? 'Favorito' : 'Añadir favorito'}
-      </button>
-      <button class="qbtn${team?' team':''}" id="qteam" onclick="doTeam(${id})">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="${team?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        ${team ? 'En equipo' : 'Al equipo'}
-      </button>
-    </div>
-    ${formsHTML}
-    <div class="modal-legend">
-      <span style="color:var(--green)">✦</span> Capturado &nbsp;
-      <span style="color:var(--gold)">★</span> Shiny &nbsp;
-      <span style="color:var(--blue)">▣</span> En caja &nbsp;
-      <span style="color:var(--accent2)">◎</span> Poké Ball &nbsp;
-      <span style="color:var(--text2)">✎</span> Notas
-    </div>
-    ${gens}
-    <div class="modal-spacer"></div>`;
+  w.innerHTML=`<div class="grid">${cards}</div>`;
+  setupImgObserver();
 }
 
-function selectForm(i) { S.mFormIdx = i; const b = S.poke.find(p => p.id === S.mId); if (b) buildModal(b, S.mForms); }
-function toggleModalSprite() { S.mModern = !S.mModern; const b = S.poke.find(p => p.id === S.mId); if (b) buildModal(b, S.mForms); }
-function toggleShiny() { S.mShiny = !S.mShiny; const b = S.poke.find(p => p.id === S.mId); if (b) buildModal(b, S.mForms); }
-function doFav(id) { toggleFav(id); const f = isFav(id); const btn = document.getElementById('qfav'); if (btn) { btn.className = `qbtn${f?' fav':''}`; btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="${f?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>${f?'Favorito':'Añadir favorito'}`; } }
-function doTeam(id) { toggleTeam(id); const t = inTeam(id); const btn = document.getElementById('qteam'); if (btn) { btn.className = `qbtn${t?' team':''}`; btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="${t?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${t?'En equipo':'Al equipo'}`; } }
-function tGen(gen) { const gg = document.getElementById(`gg-${gen}`); const ga = document.getElementById(`ga-${gen}`); const open = gg.classList.toggle('open'); if (ga) ga.classList.toggle('open', open); }
-function tNotes(key) { document.getElementById(`nw-${key}`)?.classList.toggle('open'); }
-function tBalls(key) { document.getElementById(`bs-${key}`)?.classList.toggle('open'); }
+function toggleTeam(id){
+  // Called from old code paths — adds base form, non-shiny
+  toggleTeamForGame(id, id, false, S.teamGame||GAMES[0]?.id);
+}
+function rmTeam(slotIdx){
+  const gid=S.teamGame||GAMES[0]?.id;
+  if(!gid||!S.teams[gid])return;
+  S.teams[gid].splice(slotIdx,1);
+  scheduleSave();renderTeam();
+}
+function toggleTeamForGame(pokeId,formId,isShiny,gid){
+  if(!gid)gid=S.teamGame||GAMES[0]?.id;
+  if(!gid)return;
+  if(!S.teams[gid])S.teams[gid]=[];
+  const idx=S.teams[gid].findIndex(s=>s.pokeId===pokeId&&String(s.formId||s.pokeId)===String(formId||pokeId)&&!!s.isShiny===!!isShiny);
+  if(idx>=0){
+    S.teams[gid].splice(idx,1);
+  } else {
+    if(S.teams[gid].length>=6){alert(`Equipo de ${GAMES.find(g=>g.id===gid)?.n||gid} lleno (máx. 6)`);return;}
+    S.teams[gid].push({pokeId,formId:formId||pokeId,isShiny:!!isShiny});
+  }
+  scheduleSave();updateCard(pokeId);
+  if(S.tab==='team')renderTeam();
+  // Refresh variant section in modal
+  const vsec=document.getElementById('modal-variants');
+  if(vsec){
+    const base=S.poke.find(p=>p.id===S.mId);
+    if(base)vsec.outerHTML=buildVariantSection(base,S.mForms);
+  }
+}
+function renderTeamGameSel(){
+  const el=document.getElementById('tgsel');if(!el)return;
+  const gens=[1,2,3,4,5,6,7,8,9];
+  el.innerHTML=gens.map(gen=>{
+    const gs=GAMES.filter(g=>g.gen===gen);
+    if(!gs.length)return'';
+    const cards=gs.map(g=>{
+      const cnt=(S.teams[g.id]||[]).length;
+      const on=S.teamGame===g.id;
+      return`<button class="tgcard${on?' on':''}" style="--tgc:${g.c}" onclick="setTeamGame('${g.id}')">
+        <span class="tgcard-dot" style="background:${g.c}"></span>
+        <span class="tgcard-name">${g.n}</span>
+        <span class="tgcard-cnt${cnt===0?' empty':''}">${cnt}</span>
+      </button>`;
+    }).join('');
+    return`<div class="tgsel-gen">
+      <div class="tgsel-gen-lbl">${GNS[gen]}</div>
+      <div class="tgsel-row">${cards}</div>
+    </div>`;
+  }).join('');
+}
+function setTeamGame(gid){S.teamGame=gid;renderTeam();}
 
-function gameRowHTML(pid, game) {
-  const d = { ...tDef(), ...(S.tracking?.[pid]?.[game.id] || {}) };
-  const hasData = d.captured || d.shiny || d.inBox || d.notes || d.ball;
-  const bObj = d.ball ? BALLS.find(b => b.id === d.ball) : null;
-  return `<div class="game-row${hasData?' has-data':''}" id="gr-${pid}-${game.id}">
-    <div class="game-row-top">
-      <div class="game-color-dot" style="background:${game.c}"></div>
-      <span class="game-row-name">${game.name}</span>
-      <div class="game-actions">
-        <button class="act-btn cap${d.captured?' on':''}" onclick="doTrack(${pid},'${game.id}','captured')" title="Capturado">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </button>
-        <button class="act-btn shy${d.shiny?' on':''}" onclick="doTrack(${pid},'${game.id}','shiny')" title="Shiny">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="${d.shiny?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </button>
-        <button class="act-btn box${d.inBox?' on':''}" onclick="doTrack(${pid},'${game.id}','inBox')" title="En caja">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-        </button>
-        <button class="act-btn ball${d.ball?' on':''}" onclick="tBalls('${pid}-${game.id}')" title="Poké Ball" style="${d.ball?'opacity:1':''}">
-          ${bObj ? `<span style="font-size:12px;line-height:1">${bObj.e}</span>` : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>`}
-        </button>
-        <button class="act-btn note${d.notes?' on':''}" onclick="tNotes('${pid}-${game.id}')" title="Nota">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
+function renderTeam(){
+  if(!S.teamGame||!GAMES.find(g=>g.id===S.teamGame))S.teamGame=GAMES[0]?.id||null;
+  renderTeamGameSel();
+  const game=GAMES.find(g=>g.id===S.teamGame)||null;
+  const slots=game?(S.teams[game.id]||[]):[];
+  let sl='';
+  for(let i=0;i<6;i++){
+    const slot=slots[i];
+    if(slot){
+      const p=S.poke.find(x=>x.id===slot.pokeId);
+      // Get sprite: use form sprite if formId differs from pokeId
+      const fData=S.fc[slot.pokeId]?.find(f=>f.id===slot.formId);
+      const imgSrc=fData?fmSp(fData,S.set.modern,slot.isShiny):spOf(slot.pokeId,S.set.modern,slot.isShiny);
+      const fname=fData&&fData.id!==slot.pokeId?fmtF(fData.name,fData.speciesName):cap(p?.name||'');
+      const shyEl=slot.isShiny?`<div class="tslot-shy"><svg width="11" height="11" viewBox="0 0 24 24" fill="#b08000" stroke="none"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg></div>`:'';
+      const lvl=game?S.track?.[slot.pokeId]?.[game.id]?.level||null:null;
+      const lvlEl=lvl?`<div class="tslot-lvl">Nv.${lvl}</div>`:'';
+      sl+=`<div class="tslot f" onclick="openMdl(${slot.pokeId})">${shyEl}<div class="tsrm" onclick="event.stopPropagation();rmTeam(${i})"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><img src="${imgSrc}" alt="" onerror="this.src=''"><div class="tsname">${fname}</div>${lvlEl}</div>`;
+    }else sl+=`<div class="tslot e"><div class="tsnum">${i+1}</div></div>`;
+  }
+  document.getElementById('tslots').innerHTML=sl;
+  document.getElementById('tsub').textContent=`${game?.n||''} · ${slots.length} / 6`;
+  const pokeIds=[...new Set(slots.map(s=>s.pokeId))];
+  const list=S.poke.filter(p=>pokeIds.includes(p.id));
+  const w=document.getElementById('tscroll');
+  if(!list.length){w.innerHTML=`<div class="empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><div class="etitle">Equipo vacío</div><div class="esub">Añade Pokémon desde su ficha</div></div>`;}
+  else{w.innerHTML=`<div class="grid">${list.map(p=>cardHTML(p,true)).join('')}</div>`;setupImgObserver();}
+}
+
+function drawStats(){
+  if(S.tab!=='stats')return;
+  const gid=document.getElementById('stsel').value;
+  const tot=S.poke.length;
+  const capIds=new Set(),shyIds=new Set(),never=[],always=[];
+  const tC={};TYPES.forEach(t=>{tC[t.id]=0;});
+  const rC={};Object.keys(RAR).forEach(k=>{rC[k]=0;});
+  const bC={};BALLS.forEach(b=>{bC[b.id]=0;});
+  S.poke.forEach(p=>{
+    const t=S.track[p.id];
+    if(gid==='all'){
+      const any=t&&Object.values(t).some(g=>g.captured);
+      if(any){capIds.add(p.id);p.types.forEach(tp=>{if(tp in tC)tC[tp]++;});rC[p.rarity]=(rC[p.rarity]||0)+1;}
+      if(!any)never.push(p);
+      if(t&&GAMES.every(g=>t[g.id]?.captured))always.push(p);
+      if(t&&Object.values(t).some(g=>g.shiny))shyIds.add(p.id);
+      if(t)Object.values(t).forEach(g=>{if(g?.ball&&g.ball in bC)bC[g.ball]++;});
+    }else{
+      const c=!!(t&&t[gid]?.captured);
+      if(c){capIds.add(p.id);p.types.forEach(tp=>{if(tp in tC)tC[tp]++;});rC[p.rarity]=(rC[p.rarity]||0)+1;}
+      if(!c)never.push(p);
+      if(t&&t[gid]?.shiny)shyIds.add(p.id);
+      if(t&&t[gid]?.ball&&t[gid].ball in bC)bC[t[gid].ball]++;
+    }
+  });
+  const pct=tot?Math.round((capIds.size/tot)*100):0;
+  const tS=TYPES.map(t=>({...t,c:tC[t.id]})).sort((a,b)=>b.c-a.c);
+  const mT=Math.max(1,...tS.map(t=>t.c));
+  const topB=BALLS.filter(b=>bC[b.id]>0).sort((a,b)=>bC[b.id]-bC[a.id]).reverse().slice(0,10);
+  const mB=topB.length?bC[topB[0].id]:1;
+  const pg=gid==='all'?GAMES.map(g=>({...g,count:Object.values(S.track).filter(t=>t[g.id]?.captured).length})).sort((a,b)=>b.count-a.count).slice(0,12):[];
+  const mG=pg.length?pg[0].count:1;
+  const gn=gid==='all'?'global':(GAMES.find(g=>g.id===gid)?.n||gid);
+  document.getElementById('stbody').innerHTML=`
+    <div class="stlbl">Resumen ${gn}</div>
+    <div class="bnums">
+      <div class="bcard"><div class="bval" style="color:var(--green)">${capIds.size}</div><div class="blbl">Capturados</div></div>
+      <div class="bcard"><div class="bval" style="color:var(--gold)">${shyIds.size}</div><div class="blbl">Shiny</div></div>
+      <div class="bcard"><div class="bval" style="color:var(--ac)">${pct}%</div><div class="blbl">Completado</div></div>
+      <div class="bcard"><div class="bval" style="color:var(--t2)">${never.length}</div><div class="blbl">Sin capturar</div></div>
+    </div>
+    <div class="stlbl">Por tipo</div>
+    <div class="barc">${tS.map(t=>`<div class="brow"><div class="brlbl">${t.n}</div><div class="brtrack"><div class="brfill" style="width:${Math.round((t.c/mT)*100)}%;background:${t.c}"></div></div><div class="brnum">${t.c}</div></div>`).join('')}</div>
+    <div class="stlbl">Por rareza</div>
+    <div class="barc">${Object.entries(RAR).map(([k,r])=>{const tot2=S.poke.filter(p=>p.rarity===k).length;const got=rC[k]||0;return`<div class="brow"><div class="brlbl"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${r.d};margin-right:4px;vertical-align:middle"></span>${r.l}</div><div class="brtrack"><div class="brfill" style="width:${tot2?Math.round((got/tot2)*100):0}%;background:${r.d}"></div></div><div class="brnum">${got}/${tot2}</div></div>`;}).join('')}</div>
+    ${pg.length?`<div class="stlbl">Top juegos</div><div class="barc">${pg.map(g=>`<div class="brow"><div class="brlbl">${g.n}</div><div class="brtrack"><div class="brfill" style="width:${mG?Math.round((g.count/mG)*100):0}%;background:${g.c}"></div></div><div class="brnum">${g.count}</div></div>`).join('')}</div>`:''}
+    ${topB.length?`<div class="stlbl">Pokéballs usadas</div><div class="barc">${topB.map(b=>`<div class="brow"><div class="brlbl">${b.e} ${b.n}</div><div class="brtrack"><div class="brfill" style="width:${Math.round((bC[b.id]/mB)*100)}%;background:var(--ac)"></div></div><div class="brnum">${bC[b.id]}</div></div>`).join('')}</div>`:''}
+    ${never.length?`<div class="stlbl">Nunca capturado (${Math.min(30,never.length)} de ${never.length})</div><div class="plist">${never.slice(0,30).map(p=>`<div class="prow" onclick="openMdl(${p.id})"><img src="${spOf(p.id,S.set.modern,false)}" style="width:36px;height:36px" onerror="this.src=''"><div class="prinfo"><div class="prname">${cap(p.name)}</div><div class="prsub">#${pad(p.id)}</div></div><div class="prbadge" style="color:var(--red)">–</div></div>`).join('')}</div>`:''}
+    ${always.length?`<div class="stlbl">En todos los juegos (${always.length})</div><div class="plist">${always.slice(0,30).map(p=>`<div class="prow" onclick="openMdl(${p.id})"><img src="${spOf(p.id,S.set.modern,false)}" style="width:36px;height:36px" onerror="this.src=''"><div class="prinfo"><div class="prname">${cap(p.name)}</div><div class="prsub">#${pad(p.id)}</div></div><div class="prbadge" style="color:var(--green)">✦</div></div>`).join('')}</div>`:''}
+    <div style="height:18px"></div>`;
+}
+
+async function openMdl(id){
+  S.mId=id;S.mMod=S.set.modern;S.mShy=false;S.mForms=[];
+  S.mPreviewForm=null;S.mPreviewShiny=false;
+  _vpPoke=id;_vpForm=id;_vpShiny=false;
+  const base=S.poke.find(p=>p.id===id);if(!base)return;
+  buildMdl(base,[]);
+  document.getElementById('ov').classList.add('on');
+  document.body.style.overflow='hidden';
+  const forms=await fetchForms(id);
+  if(S.mId===id){
+    S.mForms=forms;
+    buildMdl(base,forms);
+    // Init picker on base form without changing preview
+    _vpPoke=id;_vpForm=id;_vpShiny=false;
+    _refreshPickerButtons(id,id,false);
+  }
+}
+function closeMdl(){document.getElementById('ov').classList.remove('on');document.body.style.overflow='';}
+function ovClick(e){if(e.target.id==='ov')closeMdl();}
+
+function buildMdl(base,forms){
+  const id=base.id;
+  const rar=RAR[base.rarity]||RAR.normal;
+  // Per-variant favorite key: "id" for base, "id_formName" for regional/costume
+  const pf=S.mPreviewForm;
+  const ps=S.mPreviewShiny;
+  const favKey=pf&&(pf.id!==id||pf.isCostume)
+    ?(pf.isCostume?`${id}_${pf.formName||pf.name}`:`${id}_${pf.id}`)
+    :String(id);
+  const fav=isFav(favKey),team=inTm(id);
+  // Hero display: use preview form if selected
+  const dispForm=pf||null;
+  const dispTypes=dispForm?(dispForm.types||base.types):base.types;
+  const tClr=dispTypes[0]?tc(dispTypes[0]):'#6060a0';
+  const capC=GAMES.filter(g=>S.track?.[id]?.[g.id]?.captured).length;
+  const imgSrc=dispForm
+    ?(ps?(S.mMod?(dispForm.sprites.official_shiny||iShy(dispForm.id)):(dispForm.sprites.front_shiny||iPxS(dispForm.id)))
+        :(S.mMod?(dispForm.sprites.official||iArt(dispForm.id)):(dispForm.sprites.front_default||iPx(dispForm.id))))
+    :spOf(id,S.mMod,ps);
+  const dispName=dispForm&&(dispForm.id!==id||dispForm.isCostume)
+    ?fmtF(dispForm.isCostume?(dispForm.formName||dispForm.name):dispForm.name,dispForm.speciesName)
+    :null;
+  document.getElementById('mnum').textContent=`#${pad(id)}`;
+  document.getElementById('msprbtn').classList.toggle('on',!S.mMod);
+  const tPills=dispTypes.map(t=>{const ti=TYPES.find(x=>x.id===t);return`<span class="htype" style="background:${tc(t)}">${ti?.n||t}</span>`;}).join('');
+  const gens=[1,2,3,4,5,6,7,8,9].map(gen=>{
+    const gGs=GAMES.filter(g=>g.gen===gen);
+    const act=gGs.some(g=>{const d=S.track?.[id]?.[g.id];return d&&(d.captured||d.shiny||d.inBox||d.notes||d.ball);});
+    return`<div class="gsec"><div class="ghdr" onclick="tGen(${gen})"><div class="ghdrl"><svg class="gchev" id="gc${gen}" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg><span class="gtitle">${GNLONG[gen]}</span></div>${act?'<span class="gbadge">✦ activo</span>':''}</div><div class="ggames" id="gg${gen}">${gGs.map(g=>gRow(id,g)).join('')}</div></div>`;
+  }).join('');
+  const descData=S.desc[id];
+  const descHTML=descData
+    ?`<div class="hdesc">${descData.text}${descData.game?`<span class="hdesc-src">${cap(descData.game.replace(/-/g,' '))}</span>`:''}</div>`
+    :(forms.length===0?`<div class="hdesc"><div class="hdesc-skel"></div><div class="hdesc-skel w2"></div></div>`:'');
+  document.getElementById('mbody').innerHTML=`
+    <div class="hero" id="mhero" style="background:${ps?'rgba(176,128,0,.08)':tClr+'10'}">
+      <button class="shbtn${ps?' on':''}" id="shbtn-hero" onclick="toggleShy()" title="Ver forma shiny">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="${ps?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="${ps?'currentColor':'none'}"/></svg>
+      </button>
+      <div class="hwrap"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="this.src=''"></div>
+      <div class="hname">${cap(base.name)}</div>
+      ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}${ps?' ✦':''}</div>`:ps?`<div class="hform" style="color:var(--gold)">✦ Shiny</div>`:''}
+      <div class="hrar" style="background:${rar.d}18;border-color:${rar.d}55;color:${rar.d}"><span class="hrardot" style="background:${rar.d}"></span>${rar.l}</div>
+      <div class="htypes">${tPills}</div>
+      <div class="hstats">
+        <div class="hs"><div class="hs-val">${capC}/${GAMES.length}</div><div class="hs-lbl">Juegos</div></div>
+        <div class="hsdiv"></div>
+        <div class="hs"><div class="hs-val">Gen ${base.generation}</div><div class="hs-lbl">Generación</div></div>
+        <div class="hsdiv"></div>
+        <div class="hs"><div class="hs-val">#${pad(id)}</div><div class="hs-lbl">Número</div></div>
       </div>
     </div>
-    <div class="ball-section" id="bs-${pid}-${game.id}">
-      <div class="ball-section-label">Elegir Poké Ball</div>
-      <div class="ball-grid">${BALLS.map(b=>`<div class="ball-chip${d.ball===b.id?' selected':''}" onclick="doBall(${pid},'${game.id}','${b.id}')"><div class="ball-chip-icon">${b.e}</div><div class="ball-chip-name">${b.n}</div></div>`).join('')}</div>
+    ${descHTML}
+    <div class="qrow">
+      <button class="qbtn${fav?' fav':''}" id="qfav" onclick="doFav(${JSON.stringify(favKey)})">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        ${fav?'Favorito':'Añadir favorito'}
+      </button>
     </div>
-    <div class="notes-area${d.notes?' open':''}" id="nw-${pid}-${game.id}">
-      <textarea class="notes-ta" placeholder="Añadir nota…" onchange="doNote(${pid},'${game.id}',this.value)">${d.notes||''}</textarea>
+    ${buildVariantSection(base,forms)}
+    <div class="mleg">
+      <span style="color:var(--green)">✓</span> Capturado &nbsp;
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="#b08000" stroke="none" style="vertical-align:middle"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> Shiny &nbsp;
+      <span style="color:var(--blue)">▣</span> En caja &nbsp;
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;color:var(--t2)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ball &nbsp;
+      <span style="color:var(--t2)">✎</span> Notas
+    </div>
+    ${gens}<div class="msp"></div>`;
+}
 
-```
-</div>
-```
+function toggleMSprite(){S.mMod=!S.mMod;const b=S.poke.find(p=>p.id===S.mId);if(b)buildMdl(b,S.mForms);}
 
+function toggleShy(){
+  S.mPreviewShiny=!S.mPreviewShiny;
+  const pf=S.mPreviewForm;
+  const base=S.poke.find(p=>p.id===S.mId);
+  if(!base)return;
+  // Update shiny button appearance
+  const btn=document.getElementById('shbtn-hero');
+  if(btn){
+    btn.className=`shbtn${S.mPreviewShiny?' on':''}`;
+    btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="${S.mPreviewShiny?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="${S.mPreviewShiny?'currentColor':'none'}"/></svg>`;
+  }
+  // Reuse previewVariant to update image/colors
+  const formId=pf?(pf.isCostume?(pf.formName||pf.name):pf.id):base.id;
+  previewVariant(base.id, formId, S.mPreviewShiny);
+  _refreshPickerButtons(base.id, formId, S.mPreviewShiny);
+  _vpShiny=S.mPreviewShiny;
+}
+function doFav(key){
+  toggleFav(key);
+  const f=isFav(key);
+  const btn=document.getElementById('qfav');
+  if(btn){btn.className=`qbtn${f?' fav':''}`;btn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="${f?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>${f?'Favorito':'Añadir favorito'}`;}
+}
+
+function previewVariant(pokeId, formId, isShiny){
+  // Update preview state and refresh hero only (no full rebuild)
+  const form=S.mForms.find(f=>{
+    if(f.isCostume)return String(f.formName||f.name)===String(formId);
+    return f.id===formId;
+  })||null;
+  S.mPreviewForm=form;
+  S.mPreviewShiny=!!isShiny;
+  const base=S.poke.find(p=>p.id===pokeId);
+  if(!base)return;
+  // Only rebuild hero + qrow, not whole modal (perf)
+  const hero=document.getElementById('mhero');
+  const qfav=document.getElementById('qfav');
+  if(!hero){buildMdl(base,S.mForms);return;}
+  // Update image
+  const img=document.getElementById('mimg');
+  const mod=S.mMod;
+  if(img&&form){
+    const sp=isShiny
+      ?(mod?(form.sprites.official_shiny||iShy(form.id)):(form.sprites.front_shiny||iPxS(form.id)))
+      :(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id)));
+    img.src=sp;
+    img.className=`himg${mod?'':' px'}`;
+  } else if(img){
+    img.src=spOf(pokeId,mod,isShiny);
+  }
+  // Update hero background
+  const dispTypes=form?(form.types||base.types):base.types;
+  const tClr=dispTypes[0]?tc(dispTypes[0]):'#6060a0';
+  hero.style.background=isShiny?'rgba(176,128,0,.08)':tClr+'10';
+  // Update form label
+  const hform=hero.querySelector('.hform');
+  const dispName=form&&(form.id!==pokeId||form.isCostume)
+    ?fmtF(form.isCostume?(form.formName||form.name):form.name,form.speciesName):null;
+  const labelText=dispName?(isShiny?`${dispName} ✦`:dispName):(isShiny?'✦ Shiny':null);
+  if(hform){hform.textContent=labelText||'';hform.style.color=isShiny?'var(--gold)':'';}
+  else if(labelText){
+    const nameEl=hero.querySelector('.hname');
+    if(nameEl){const d=document.createElement('div');d.className='hform';d.style.color=isShiny?'var(--gold)':'';d.textContent=labelText;nameEl.after(d);}
+  }
+  // Update types pills
+  const htypes=hero.querySelector('.htypes');
+  if(htypes){htypes.innerHTML=dispTypes.map(t=>{const ti=TYPES.find(x=>x.id===t);return`<span class="htype" style="background:${tc(t)}">${ti?.n||t}</span>`;}).join('');}
+  // Update fav button for this variant
+  const favKey=form&&(form.id!==pokeId||form.isCostume)
+    ?(form.isCostume?`${pokeId}_${form.formName||form.name}`:`${pokeId}_${form.id}`)
+    :String(pokeId);
+  const f=isFav(favKey);
+  if(qfav){
+    qfav.className=`qbtn${f?' fav':''}`;
+    qfav.setAttribute('onclick',`doFav(${JSON.stringify(favKey)})`);
+    qfav.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="${f?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>${f?'Favorito':'Añadir favorito'}`;
+  }
+}
+// Each form (including shiny version) is an independent team slot
+function buildVariantSection(base, forms){
+  const id=base.id;
+  const mod=S.set.modern;
+  const allForms=forms.length?forms:[{id,name:base.name,speciesName:base.name,types:base.types,isDefault:true,sprites:{official:iArt(id),official_shiny:iShy(id),front_default:iPx(id),front_shiny:iPxS(id)}}];
+  const gensWithGames=[1,2,3,4,5,6,7,8,9].map(gen=>({gen,gs:GAMES.filter(g=>g.gen===gen)})).filter(x=>x.gs.length);
+  const loading=forms.length===0?'<span style="font-size:10px;color:var(--t3);font-weight:500;margin-left:5px">Cargando…</span>':'';
+
+  function makeChip(f){
+    const slotFormId=f.isCostume?f.formName:f.id;
+    const inAnyTeam=inTmSlot(id, slotFormId, false)||inTmSlot(id, slotFormId, true);
+    const sp=mod?(f.sprites.official||iArt(f.id)):(f.sprites.front_default||iPx(f.id));
+    const fname=f.isCostume
+      ?fmtF(f.formName||f.name,f.speciesName)
+      :(f.id!==id?fmtF(f.name,f.speciesName):'Normal');
+    const chipTypes=(f.types||base.types).map(t=>`<span class="vchip-tbadge" style="background:${tc(t)}">${cap(t)}</span>`).join('');
+    const teamBadge=inAnyTeam?`<div class="vchip-badge team"><svg width="8" height="8" viewBox="0 0 24 24" fill="#1E88E5" stroke="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>`:'';
+    const eid=`vc_${id}_${String(slotFormId).replace(/[^a-z0-9]/g,'_')}`;
+    const slotFormIdAttr=String(slotFormId).replace(/"/g,'&quot;');
+    return`<div class="vchip${inAnyTeam?' in-team':''}" id="${eid}"
+      data-pokeid="${id}" data-formid="${slotFormIdAttr}" data-shiny="0"
+      onclick="handleVChipClick(this)">
+      ${teamBadge}
+      <img src="${sp}" class="${mod?'':'px'}" onerror="this.src=''">
+      <div class="vchip-name">${fname}</div>
+      <div class="vchip-types">${chipTypes}</div>
+    </div>`;
+  }
+
+  // Only form chips — no shiny section
+  const formChips=allForms.map(f=>makeChip(f)).join('');
+  const formSection=`<div class="vsec">
+    <div class="slbl">Variantes${loading}</div>
+    <div class="vrow">${formChips}</div>
+  </div>`;
+
+  // Shared game picker (hidden, updated dynamically)
+  const pickerRows=gensWithGames.map(({gen,gs})=>{
+    const row=gs.map(g=>`<button class="tgpchip" style="--tgc:${g.c}" data-gid="${g.id}">
+      <span class="tgpchip-dot" style="background:${g.c}"></span>
+      <span class="tgpchip-name">${g.n}</span>
+      <span class="tgpchip-check"></span>
+    </button>`).join('');
+    return`<div class="tgpicker-gen"><div class="tgpicker-gen-lbl">${GNS[gen]}</div><div class="tgpicker-row">${row}</div></div>`;
+  }).join('');
+
+  return`<div id="modal-variants">
+    ${formSection}
+    <div class="tgpicker" id="variant-picker">
+      <div class="tgpicker-hdr" style="justify-content:space-between">
+        <span class="tgpicker-title" id="vp-title">Añadir al equipo</span>
+        <button onclick="closeVariantPicker()" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:2px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="tgpicker-body on" id="vp-body">${pickerRows}</div>
+    </div>
   </div>`;
 }
 
-function refreshRow(pid, gid) {
-const no = document.getElementById(`nw-${pid}-${gid}`)?.classList.contains(‘open’);
-const bo = document.getElementById(`bs-${pid}-${gid}`)?.classList.contains(‘open’);
-const row = document.getElementById(`gr-${pid}-${gid}`);
-const game = GAMES.find(g => g.id === gid);
-if (row && game) {
-row.outerHTML = gameRowHTML(pid, game);
-if (no) document.getElementById(`nw-${pid}-${gid}`)?.classList.add(‘open’);
-if (bo) document.getElementById(`bs-${pid}-${gid}`)?.classList.add(‘open’);
-}
-}
-function doTrack(pid, gid, field) {
-if (!S.tracking[pid]) S.tracking[pid] = {};
-if (!S.tracking[pid][gid]) S.tracking[pid][gid] = tDef();
-S.tracking[pid][gid][field] = !S.tracking[pid][gid][field];
-LS.save(); refreshRow(pid, gid); updateCard(pid); updateHeaderStats();
-}
-function doBall(pid, gid, ballId) {
-if (!S.tracking[pid]) S.tracking[pid] = {};
-if (!S.tracking[pid][gid]) S.tracking[pid][gid] = tDef();
-S.tracking[pid][gid].ball = S.tracking[pid][gid].ball === ballId ? null : ballId;
-LS.save(); refreshRow(pid, gid);
-}
-function doNote(pid, gid, value) {
-if (!S.tracking[pid]) S.tracking[pid] = {};
-if (!S.tracking[pid][gid]) S.tracking[pid][gid] = tDef();
-S.tracking[pid][gid].notes = value;
-LS.save(); updateCard(pid);
+// Current variant picker state
+let _vpPoke=null,_vpForm=null,_vpShiny=false;
+
+function _refreshPickerButtons(pokeId,formId,isShiny){
+  const picker=document.getElementById('variant-picker');
+  if(!picker)return;
+  const form=S.mForms.find(f=>f.isCostume?String(f.formName||f.name)===String(formId):f.id===formId)||null;
+  const fname=form&&(form.id!==pokeId||form.isCostume)
+    ?fmtF(form.isCostume?(form.formName||form.name):form.name,form.speciesName):'Normal';
+  const label=isShiny?`${fname} ✦`:fname;
+  const titleEl=document.getElementById('vp-title');
+  if(titleEl)titleEl.textContent=label;
+  picker.querySelectorAll('.tgpchip[data-gid]').forEach(btn=>{
+    const gid=btn.dataset.gid;
+    const inTeam=(S.teams[gid]||[]).some(s=>s.pokeId===pokeId&&String(s.formId||s.pokeId)===String(formId||pokeId)&&!!s.isShiny===!!isShiny);
+    const full=(S.teams[gid]||[]).length>=6&&!inTeam;
+    btn.className=`tgpchip${inTeam?' on':''}${full?' tgpchip-full':''}`;
+    btn.style.cssText=`--tgc:${GAMES.find(g=>g.id===gid)?.c||'var(--ac)'}`;
+    btn.disabled=full;
+    btn.querySelector('.tgpchip-check').innerHTML=inTeam?`<svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`:'';
+    btn.onclick=()=>doVariantGame(pokeId,formId,isShiny,gid);
+  });
 }
 
-// ── INIT — runs synchronously, no DOMContentLoaded needed ──
-(function init() {
-LS.load(); LS.loadForms();
-document.getElementById(‘sprite-btn’).classList.toggle(‘active’, !S.settings.modern);
-// Populate stats game selector
-const sel = document.getElementById(‘stats-game’);
-GAMES.forEach(g => { const o = document.createElement(‘option’); o.value = g.id; o.textContent = g.name; sel.appendChild(o); });
-// Wire up search input
-document.getElementById(‘search-input’).addEventListener(‘input’, e => {
-S.filters.q = e.target.value.trim();
-document.getElementById(‘search-clear’).classList.toggle(‘show’, !!S.filters.q);
-renderGrid();
-});
-renderFilters();
-renderGrid();
+function openVariantPicker(pokeId,formId,isShiny){
+  _vpPoke=pokeId;_vpForm=formId;_vpShiny=isShiny;
+  previewVariant(pokeId,formId,isShiny);
+  _refreshPickerButtons(pokeId,formId,isShiny);
+  const picker=document.getElementById('variant-picker');
+  if(picker){picker.style.display='';picker.scrollIntoView({behavior:'smooth',block:'nearest'});}
+}
+
+function closeVariantPicker(){
+  const p=document.getElementById('variant-picker');
+  if(p)p.style.display='none';
+}
+
+function doVariantGame(pokeId,formId,isShiny,gid){
+  if(!S.teams[gid])S.teams[gid]=[];
+  const idx=S.teams[gid].findIndex(s=>s.pokeId===pokeId&&String(s.formId||s.pokeId)===String(formId||pokeId)&&!!s.isShiny===!!isShiny);
+  if(idx>=0){
+    S.teams[gid].splice(idx,1);
+  } else {
+    if(S.teams[gid].length>=6){alert(`Equipo de ${GAMES.find(g=>g.id===gid)?.n||gid} lleno (máx. 6)`);return;}
+    S.teams[gid].push({pokeId,formId:formId||pokeId,isShiny:!!isShiny});
+  }
+  scheduleSave();updateCard(pokeId);
+  if(S.tab==='team')renderTeam();
+  const vsec=document.getElementById('modal-variants');
+  if(vsec){
+    const base=S.poke.find(p=>p.id===S.mId);
+    if(base){vsec.outerHTML=buildVariantSection(base,S.mForms);openVariantPicker(pokeId,formId,isShiny);}
+  }
+}
+
+function handleVChipClick(el){
+  const pokeId=parseInt(el.dataset.pokeid);
+  const formIdRaw=el.dataset.formid;
+  const formId=isNaN(Number(formIdRaw))?formIdRaw:Number(formIdRaw);
+  // Reset shiny when switching form, keep current shiny state
+  const isShiny=S.mPreviewShiny;
+  openVariantPicker(pokeId,formId,isShiny);
+}
+
+function toggleTeamPickerBody(){
+  document.getElementById('tgpicker-body')?.classList.toggle('on');
+}
+
+function doTeam(id){toggleTeamForGame(id,id,false,S.teamGame||GAMES[0]?.id);}
+function tGen(gen){const gg=document.getElementById(`gg${gen}`);const gc=document.getElementById(`gc${gen}`);const on=gg.classList.toggle('on');if(gc)gc.classList.toggle('on',on);}
+function tNota(k){document.getElementById(`nw${k}`)?.classList.toggle('on');}
+function tBalls(k){document.getElementById(`bs${k}`)?.classList.toggle('on');}
+
+function gRow(pid,game){
+  const d={...tDef(),...(S.track?.[pid]?.[game.id]||{})};
+  const hd=d.captured||d.shiny||d.inBox||d.notes||d.ball;
+  const bObj=d.ball?BALLS.find(b=>b.id===d.ball):null;
+  const ballImg=bObj?`<img src="${BALL_IMG(bObj.id)}" style="width:14px;height:14px;object-fit:contain" onerror="this.style.display='none'">`
+    :`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>`;
+  // Shiny icon = sparkle/diamond shape (distinct from star=favorite)
+  const shinyIcon=`<svg width="12" height="12" viewBox="0 0 24 24" fill="${d.shiny?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2" fill="${d.shiny?'currentColor':'none'}"/></svg>`;
+  return`<div class="grow${hd?' hd':''}" id="gr${pid}${game.id}">
+    <div class="gtop">
+      <div class="gdot" style="background:${game.c}"></div>
+      <span class="gname">${game.n}</span>
+      <div class="gacts">
+        <button class="abtn cap${d.captured?' on':''}" onclick="doTrk(${pid},'${game.id}','captured')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <button class="abtn shy${d.shiny?' on':''}" title="Shiny" onclick="doTrk(${pid},'${game.id}','shiny')">${shinyIcon}</button>
+        <button class="abtn box${d.inBox?' on':''}" onclick="doTrk(${pid},'${game.id}','inBox')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></button>
+        <button class="abtn ball${d.ball?' on':''}" onclick="tBalls('${pid}${game.id}')" style="${d.ball?'opacity:1':''}">${ballImg}</button>
+        <button class="abtn note${d.notes?' on':''}" onclick="tNota('${pid}${game.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+      </div>
+    </div>
+    ${d.captured?`<div class="glvl"><span class="glvl-lbl">Nivel:</span><input class="glvl-inp" type="number" min="1" max="100" placeholder="–" value="${d.level||''}" onchange="doLevel(${pid},'${game.id}',this.value)" onclick="event.stopPropagation()"></div>`:''}
+    <div class="bsec" id="bs${pid}${game.id}">
+      <div class="bslbl">Elegir Poké Ball</div>
+      <div class="bgrid">${BALLS.map(b=>`<div class="bchip${d.ball===b.id?' on':''}" onclick="doBall(${pid},'${game.id}','${b.id}')"><div class="bico"><img src="${BALL_IMG(b.id)}" style="width:18px;height:18px;object-fit:contain" onerror="this.style.opacity='.3'"></div><div class="bnm">${b.n}</div></div>`).join('')}</div>
+    </div>
+    <div class="nota${d.notes?' on':''}" id="nw${pid}${game.id}">
+      <textarea class="nta" placeholder="Añadir nota…" onchange="doNota(${pid},'${game.id}',this.value)">${d.notes||''}</textarea>
+    </div>
+  </div>`;
+}
+
+function refRow(pid,gid){
+  const no=document.getElementById(`nw${pid}${gid}`)?.classList.contains('on');
+  const bo=document.getElementById(`bs${pid}${gid}`)?.classList.contains('on');
+  const row=document.getElementById(`gr${pid}${gid}`);
+  const game=GAMES.find(g=>g.id===gid);
+  if(row&&game){row.outerHTML=gRow(pid,game);
+    if(no)document.getElementById(`nw${pid}${gid}`)?.classList.add('on');
+    if(bo)document.getElementById(`bs${pid}${gid}`)?.classList.add('on');}
+}
+function doLevel(pid,gid,val){
+  if(!S.track[pid])S.track[pid]={};
+  if(!S.track[pid][gid])S.track[pid][gid]=tDef();
+  const n=parseInt(val);
+  S.track[pid][gid].level=(n>=1&&n<=100)?n:null;
+  scheduleSave();if(S.tab==='team')renderTeam();
+}
+function doTrk(pid,gid,field){
+  if(!S.track[pid])S.track[pid]={};
+  if(!S.track[pid][gid])S.track[pid][gid]=tDef();
+  S.track[pid][gid][field]=!S.track[pid][gid][field];
+  scheduleSave();refRow(pid,gid);updateCard(pid);updateStat();
+  if(S.tab==='team')renderTeam();
+}
+function doBall(pid,gid,bid){
+  if(!S.track[pid])S.track[pid]={};
+  if(!S.track[pid][gid])S.track[pid][gid]=tDef();
+  S.track[pid][gid].ball=S.track[pid][gid].ball===bid?null:bid;
+  scheduleSave();refRow(pid,gid);
+}
+function doNota(pid,gid,val){
+  if(!S.track[pid])S.track[pid]={};
+  if(!S.track[pid][gid])S.track[pid][gid]=tDef();
+  S.track[pid][gid].notes=val;
+  scheduleSave();updateCard(pid);
+}
+
+// ═══════════════════════════════════════
+//  INIT (no auth here — handled by onAuthStateChanged)
+// ═══════════════════════════════════════
+(function(){
+  // Load forms cache and settings from local immediately (no auth needed)
+  loadFormsCache();
+  try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch {}
+
+  // Populate stats selector (will also be done after auth but safe to do early)
+  const sel = document.getElementById('stsel');
+  sel.innerHTML = '<option value="all">Todos los juegos</option>';
+  GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
+
+  document.getElementById('si').addEventListener('input', e => {
+    S.f.q = e.target.value.trim();
+    document.getElementById('sx').classList.toggle('on', !!S.f.q);
+    renderGrid();
+  });
+
+  // Hide app until auth
+  document.getElementById('app').style.display = 'none';
 })();
-</script>
 
+</script>
 </body>
 </html>
