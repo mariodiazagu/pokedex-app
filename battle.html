@@ -203,27 +203,27 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--fn)
   <p class="diff-sub">El equipo rival se ajusta a tu BST promedio</p>
   <div class="diff-cards">
     <div class="diff-card easy" onclick="startBattle('easy')">
-      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/youngster.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
+      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/youngster.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/19.png'">
       <div class="diff-info">
         <div class="diff-name easy">FÁCIL</div>
         <div class="diff-trainer-name">Joven Joey</div>
-        <div class="diff-desc">BST rival −25% · IA básica</div>
+        <div class="diff-desc">BST rival −25% · Stats −15% · IA básica</div>
       </div>
     </div>
     <div class="diff-card medium" onclick="startBattle('medium')">
-      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/acetrainer-gen4.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/149.png'">
+      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/red.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png'">
       <div class="diff-info">
         <div class="diff-name medium">MEDIO</div>
-        <div class="diff-trainer-name">As Trainer</div>
-        <div class="diff-desc">BST rival similar · IA normal</div>
+        <div class="diff-trainer-name">Red</div>
+        <div class="diff-desc">BST rival similar · Stats normales · IA normal</div>
       </div>
     </div>
     <div class="diff-card hard" onclick="startBattle('hard')">
-      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/champion.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png'">
+      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/cynthia.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/445.png'">
       <div class="diff-info">
         <div class="diff-name hard">DIFÍCIL</div>
-        <div class="diff-trainer-name">Campeón</div>
-        <div class="diff-desc">BST rival +25% · IA agresiva</div>
+        <div class="diff-trainer-name">Cynthia</div>
+        <div class="diff-desc">BST rival +15% · Stats +20% · IA agresiva</div>
       </div>
     </div>
   </div>
@@ -306,9 +306,9 @@ const POKE_ART = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master
 const POKE_PX = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
 
 const DIFFICULTY = {
-  easy:   {name:'Joven Joey',   bstMult:.75, aiLevel:1, sprite:'https://play.pokemonshowdown.com/sprites/trainers/youngster.png'},
-  medium: {name:'As Trainer',   bstMult:1.0, aiLevel:2, sprite:'https://play.pokemonshowdown.com/sprites/trainers/acetrainer-gen4.png'},
-  hard:   {name:'Campeón',      bstMult:1.25,aiLevel:3, sprite:'https://play.pokemonshowdown.com/sprites/trainers/champion.png'},
+  easy:   {name:'Joven Joey',   bstMult:.75, bstTol:.2, aiLevel:1, statMult:0.85, sprite:'https://play.pokemonshowdown.com/sprites/trainers/youngster.png'},
+  medium: {name:'Red',   bstMult:1.0, bstTol:.15, aiLevel:2, statMult:1.0,  sprite:'https://play.pokemonshowdown.com/sprites/trainers/acetrainer-gen4.png'},
+  hard:   {name:'Cynthia',      bstMult:1.15, bstTol:.12, aiLevel:3, statMult:1.2, sprite:'https://play.pokemonshowdown.com/sprites/trainers/champion.png'},
 };
 
 // Type effectiveness chart
@@ -575,33 +575,54 @@ async function generateEnemyTeam(difficulty){
   const diff = DIFFICULTY[difficulty];
   const playerBST = G.battleTeam.reduce((a,p) => a + p.bst, 0) / G.battleTeam.length;
   const targetBST = playerBST * diff.bstMult;
-  const tolerance = targetBST * 0.3;
+  const tolerance = targetBST * diff.bstTol;
 
-  // Fetch random pokemon and filter by BST
-  // Use a random pool of pokemon IDs
-  const pool = [];
-  const tried = new Set();
-  while(pool.length < 6){
-    const id = Math.floor(Math.random() * 649) + 1;
-    if(tried.has(id)) continue;
-    tried.add(id);
-    const p = await fetchPokemon(id);
-    if(p && Math.abs(p.bst - targetBST) <= tolerance) pool.push(p);
-    if(tried.size > 200) break; // safety
-  }
+  // IDs the player has — avoid exact duplicates for unique legendaries
+  const playerIds = new Set(G.battleTeam.map(p => p.id));
 
-  // Fill remaining with best matches
-  if(pool.length < 6){
-    const all = Object.values(apiCache)
-      .filter(p => !pool.some(e => e.id === p.id))
-      .sort((a,b) => Math.abs(a.bst-targetBST) - Math.abs(b.bst-targetBST));
-    for(const p of all){
-      if(pool.length >= 6) break;
-      pool.push(p);
+  // Build a large candidate pool from already-cached pokemon first
+  let candidates = Object.values(apiCache)
+    .filter(p => !playerIds.has(p.id) && Math.abs(p.bst - targetBST) <= tolerance);
+
+  // If not enough, fetch more random ones
+  if(candidates.length < 12){
+    const tried = new Set(Object.keys(apiCache).map(Number));
+    let attempts = 0;
+    while(candidates.length < 12 && attempts < 150){
+      const id = Math.floor(Math.random() * 898) + 1; // up to gen 8 for variety
+      if(tried.has(id)){ attempts++; continue; }
+      tried.add(id);
+      const p = await fetchPokemon(id);
+      if(p && !playerIds.has(p.id) && Math.abs(p.bst - targetBST) <= tolerance){
+        candidates.push(p);
+      }
+      attempts++;
     }
   }
 
-  return pool.slice(0,6);
+  // If still not enough, relax tolerance
+  if(candidates.length < 6){
+    const relaxed = Object.values(apiCache)
+      .filter(p => !playerIds.has(p.id) && !candidates.some(c=>c.id===p.id))
+      .sort((a,b) => Math.abs(a.bst-targetBST) - Math.abs(b.bst-targetBST));
+    candidates = [...candidates, ...relaxed];
+  }
+
+  // Shuffle and pick 6 with variety (avoid same BST cluster)
+  candidates.sort(() => Math.random() - 0.5);
+  const team = candidates.slice(0,6);
+
+  // Apply stat multiplier for difficulty
+  return team.map(p => ({
+    ...p,
+    atk:   Math.round(p.atk   * diff.statMult),
+    def:   Math.round(p.def   * diff.statMult),
+    spatk: Math.round(p.spatk * diff.statMult),
+    spdef: Math.round(p.spdef * diff.statMult),
+    spd:   Math.round(p.spd   * diff.statMult),
+    hp:    Math.round(p.hp    * diff.statMult),
+    _statInflated: diff.statMult > 1,
+  }));
 }
 
 // ─────────────────────────────────────────
@@ -835,9 +856,55 @@ function enemyTurn(cb){
   const e = G.enemyTeam[G.enemyIdx];
   const p = G.battleTeam[G.playerIdx];
   const diff = DIFFICULTY[selectedDifficulty];
-  let move;
 
-  // AI levels
+  // AI level 2+: consider switching if at type disadvantage
+  if(diff.aiLevel >= 2){
+    const currentEff = getEffectiveness(p.types[0], e.types);
+    const wouldSwitch = currentEff > 1 && diff.aiLevel >= 2;
+
+    if(wouldSwitch){
+      // Find a better pokemon
+      const betterIdx = G.enemyTeam.findIndex((ep, i) => {
+        if(i === G.enemyIdx || G.enemyHPs[i] <= 0) return false;
+        const eff = getEffectiveness(p.types[0], ep.types);
+        return eff < currentEff;
+      });
+
+      if(betterIdx >= 0 && (diff.aiLevel >= 3 || Math.random() < 0.6)){
+        const next = G.enemyTeam[betterIdx];
+        setLog(`¡${cap(DIFFICULTY[selectedDifficulty].name)} retira a <span>${cap(e.name)}</span>!`);
+        setTimeout(()=>{
+          G.enemyIdx = betterIdx;
+          updateBattleUI();
+          setLog(`¡${cap(next.name)} sale al campo!`);
+          setTimeout(()=>{ if(cb) cb(); else {G.busy=false;enableActions();updateAttackBtn();} }, 1000);
+        }, 1000);
+        return;
+      }
+    }
+  }
+
+  // Hard mode: also switch if HP is low and has a healthier option
+  if(diff.aiLevel >= 3){
+    const eMaxHP = calcMaxHP(e);
+    const eHPpct = G.enemyHPs[G.enemyIdx] / eMaxHP;
+    if(eHPpct < 0.25 && Math.random() < 0.5){
+      const healthyIdx = G.enemyTeam.findIndex((_,i) => i !== G.enemyIdx && G.enemyHPs[i] > 0 && G.enemyHPs[i]/calcMaxHP(G.enemyTeam[i]) > 0.5);
+      if(healthyIdx >= 0){
+        setLog(`¡${cap(DIFFICULTY[selectedDifficulty].name)} retira a <span>${cap(e.name)}</span> a tiempo!`);
+        setTimeout(()=>{
+          G.enemyIdx = healthyIdx;
+          updateBattleUI();
+          setLog(`¡${cap(G.enemyTeam[healthyIdx].name)} sale fresco al campo!`);
+          setTimeout(()=>{ if(cb) cb(); else {G.busy=false;enableActions();updateAttackBtn();} }, 1000);
+        }, 1000);
+        return;
+      }
+    }
+  }
+
+  // Choose move
+  let move;
   if(diff.aiLevel >= 2){
     move = getBestMove(e, p);
   } else {
