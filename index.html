@@ -3700,7 +3700,7 @@ async function openMdl(id){
 
     // If coming from fav tab, pre-select the matching fav variant
     if(S.tab==='fav'&&forms.length>0){
-      // Find if there's a fav with a formId for this pokemon
+      // Find fav key for this pokemon that has a specific form
       const favKey=[...S.favs].find(k=>{
         const parts=String(k).split('_');
         return parseInt(parts[0])===id && parts.length>1;
@@ -3712,6 +3712,10 @@ async function openMdl(id){
           S.mPreviewForm=form;
           _vpPoke=id;_vpForm=formId;_vpShiny=false;
         }
+      } else {
+        // No variant fav — keep base form selected
+        S.mPreviewForm=null;
+        _vpPoke=id;_vpForm=id;_vpShiny=false;
       }
     }
 
