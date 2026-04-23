@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>PokéPlanner — Combate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ac:#E8184A;--ac2:#FF6B8A;--bg:#0a0a1a;--s1:#12122a;--s2:#1a1a3a;
+  --t1:#ffffff;--t2:#c0c0e0;--t3:#7070a0;--bd:#2a2a4a;
+  --green:#4ade80;--gold:#fbbf24;--red:#f87171;--blue:#60a5fa;
+  --fn:'Inter',sans-serif;--px:'Press Start 2P',monospace;
+  --r:12px;--shadow:0 4px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--fn);overflow:hidden;}
+
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden;}
+.screen.on{display:flex;}
+
+/* ── LOADING ── */
+#s-load{align-items:center;justify-content:center;gap:16px;background:var(--bg);}
+.load-title{font-family:var(--px);font-size:12px;color:var(--ac);animation:pulse 1.5s infinite;}
+.load-bar{width:200px;height:6px;background:var(--s2);border-radius:3px;overflow:hidden;}
+.load-fill{height:100%;background:var(--ac);border-radius:3px;transition:width .3s;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── TEAM BUILDER ── */
+#s-team{background:var(--bg);}
+.tb-header{padding:16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.tb-title{font-family:var(--px);font-size:10px;color:var(--t1);}
+.tb-back{background:none;border:1.5px solid var(--bd);border-radius:8px;padding:6px 12px;color:var(--t3);font-family:var(--fn);font-size:12px;font-weight:700;cursor:pointer;}
+.tb-scroll{flex:1;overflow-y:auto;padding:12px 16px;}
+.tb-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.tb-slot{aspect-ratio:1;border-radius:12px;border:2px dashed var(--bd);background:var(--s1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;cursor:pointer;}
+.tb-slot.filled{border-style:solid;border-color:var(--ac)44;}
+.tb-slot img{width:52px;height:52px;object-fit:contain;image-rendering:pixelated;}
+.tb-slot-name{font-size:8px;font-weight:700;color:var(--t2);text-align:center;}
+.tb-slot-rm{position:absolute;top:4px;right:4px;width:16px;height:16px;border-radius:50%;background:var(--s2);border:none;color:var(--t3);font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.tb-section-title{font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.tb-captured{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.tb-cap-chip{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:10px;border:2px solid var(--bd);background:var(--s1);cursor:pointer;transition:all .13s;}
+.tb-cap-chip.selected{border-color:var(--ac);background:rgba(232,24,74,.1);}
+.tb-cap-chip img{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;}
+.tb-cap-chip span{font-size:8px;font-weight:700;color:var(--t2);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+.tb-footer{padding:12px 16px;border-top:1px solid var(--bd);flex-shrink:0;}
+.tb-start{width:100%;padding:14px;border-radius:var(--r);border:none;background:var(--ac);color:#fff;font-family:var(--px);font-size:10px;cursor:pointer;transition:opacity .15s;}
+.tb-start:disabled{opacity:.3;cursor:not-allowed;}
+
+/* ── DIFFICULTY ── */
+#s-diff{align-items:center;justify-content:center;padding:24px;background:var(--bg);}
+.diff-title{font-family:var(--px);font-size:11px;color:var(--t1);margin-bottom:8px;text-align:center;}
+.diff-sub{font-size:12px;color:var(--t3);margin-bottom:28px;text-align:center;}
+.diff-cards{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;}
+.diff-card{border-radius:14px;border:2px solid var(--bd);background:var(--s1);padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .15s;}
+.diff-card:active{transform:scale(.97);}
+.diff-card.easy{border-color:#4ade8044;}
+.diff-card.medium{border-color:#fbbf2444;}
+.diff-card.hard{border-color:#f8717144;}
+.diff-trainer-img{width:64px;height:64px;object-fit:contain;image-rendering:pixelated;flex-shrink:0;}
+.diff-info{flex:1;}
+.diff-name{font-family:var(--px);font-size:8px;margin-bottom:4px;}
+.diff-name.easy{color:#4ade80;}
+.diff-name.medium{color:#fbbf24;}
+.diff-name.hard{color:#f87171;}
+.diff-trainer-name{font-size:12px;font-weight:700;color:var(--t1);margin-bottom:2px;}
+.diff-desc{font-size:10px;color:var(--t3);}
+.diff-back{margin-top:16px;background:none;border:1.5px solid var(--bd);border-radius:8px;padding:8px 20px;color:var(--t3);font-family:var(--fn);font-size:12px;font-weight:700;cursor:pointer;}
+
+/* ── BATTLE ── */
+#s-battle{background:linear-gradient(180deg,#1a1a3a 0%,#0a0a1a 100%);}
+.battle-field{flex:1;position:relative;display:flex;flex-direction:column;min-height:0;}
+
+/* HP bars area */
+.battle-hparea{display:flex;justify-content:space-between;padding:10px 16px 0;gap:8px;}
+.hp-box{flex:1;background:var(--s1);border-radius:10px;padding:8px 10px;border:1.5px solid var(--bd);}
+.hp-box.enemy{text-align:right;}
+.hp-name{font-size:10px;font-weight:800;color:var(--t1);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hp-lv{font-size:8px;color:var(--t3);margin-bottom:5px;}
+.hp-bar-wrap{height:6px;background:var(--s2);border-radius:3px;overflow:hidden;}
+.hp-bar{height:100%;border-radius:3px;transition:width .5s ease;}
+.hp-num{font-size:9px;color:var(--t3);margin-top:3px;}
+
+/* Sprites */
+.battle-sprites{flex:1;position:relative;display:flex;align-items:flex-end;justify-content:space-between;padding:0 20px;min-height:140px;}
+.sprite-wrap{display:flex;flex-direction:column;align-items:center;position:relative;}
+.sprite-wrap.enemy{align-self:flex-start;margin-top:10px;}
+.battle-sprite{width:96px;height:96px;object-fit:contain;image-rendering:pixelated;transition:transform .1s;}
+.battle-sprite.shake{animation:shake .3s ease;}
+.battle-sprite.faint{animation:faint .5s forwards;}
+.sprite-status{font-size:8px;font-weight:700;padding:2px 6px;border-radius:6px;margin-top:2px;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes faint{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(30px)}}
+@keyframes attackRight{0%,100%{transform:translateX(0)}50%{transform:translateX(20px)}}
+@keyframes attackLeft{0%,100%{transform:translateX(0)}50%{transform:translateX(-20px)}}
+.battle-sprite.attack-r{animation:attackRight .3s ease;}
+.battle-sprite.attack-l{animation:attackLeft .3s ease;}
+
+/* Damage number */
+.dmg-num{position:absolute;font-family:var(--px);font-size:10px;color:var(--gold);animation:dmgFloat .8s forwards;pointer-events:none;z-index:10;}
+.dmg-num.effective{color:#f87171;font-size:13px;}
+.dmg-num.miss{color:var(--t3);}
+@keyframes dmgFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
+
+/* Battle log */
+.battle-log{margin:0 12px 8px;background:var(--s1);border:1.5px solid var(--bd);border-radius:10px;padding:10px 12px;min-height:52px;max-height:52px;overflow:hidden;}
+.battle-log p{font-size:11px;color:var(--t2);line-height:1.5;font-weight:600;}
+.battle-log p span{color:var(--t1);font-weight:800;}
+.battle-log p.eff{color:var(--red);}
+.battle-log p.weak{color:var(--t3);}
+
+/* Action buttons */
+.battle-actions{padding:0 12px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0;}
+.battle-btn{padding:12px;border-radius:10px;border:2px solid var(--bd);background:var(--s1);color:var(--t1);font-family:var(--fn);font-size:12px;font-weight:800;cursor:pointer;transition:all .13s;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.battle-btn:active:not(:disabled){transform:scale(.96);}
+.battle-btn:disabled{opacity:.3;cursor:not-allowed;}
+.battle-btn.attack{border-color:var(--ac)55;background:rgba(232,24,74,.1);}
+.battle-btn.switch{border-color:var(--blue)55;background:rgba(96,165,250,.08);}
+.battle-btn.forfeit{border-color:var(--bd);grid-column:span 2;}
+.battle-btn-sub{font-size:9px;color:var(--t3);font-weight:600;}
+
+/* Switch screen overlay */
+#s-switch{background:rgba(0,0,0,.85);backdrop-filter:blur(8px);padding:20px 16px;align-items:stretch;}
+.switch-title{font-family:var(--px);font-size:9px;color:var(--t1);margin-bottom:16px;text-align:center;}
+.switch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.switch-chip{border-radius:10px;border:2px solid var(--bd);background:var(--s1);padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .13s;}
+.switch-chip.active{border-color:var(--green);background:rgba(74,222,128,.1);}
+.switch-chip.fainted{opacity:.3;pointer-events:none;}
+.switch-chip img{width:48px;height:48px;object-fit:contain;image-rendering:pixelated;}
+.switch-chip span{font-size:8px;font-weight:700;color:var(--t2);text-align:center;}
+.switch-chip .shp{font-size:8px;color:var(--t3);}
+.switch-cancel{width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--bd);background:none;color:var(--t3);font-family:var(--fn);font-size:13px;font-weight:700;cursor:pointer;}
+
+/* Result screen */
+#s-result{align-items:center;justify-content:center;padding:24px;background:var(--bg);}
+.result-icon{font-size:64px;margin-bottom:12px;}
+.result-title{font-family:var(--px);font-size:14px;margin-bottom:8px;}
+.result-title.win{color:var(--gold);}
+.result-title.lose{color:var(--red);}
+.result-sub{font-size:13px;color:var(--t3);margin-bottom:28px;text-align:center;}
+.result-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;}
+.result-btn{padding:14px;border-radius:var(--r);border:none;font-family:var(--fn);font-size:14px;font-weight:800;cursor:pointer;}
+.result-btn.primary{background:var(--ac);color:#fff;}
+.result-btn.secondary{background:var(--s1);color:var(--t2);border:1.5px solid var(--bd);}
+
+/* Type colors */
+.type-normal{background:#919aa2}
+.type-fire{background:#ff9c54}
+.type-water{background:#4d90d5}
+.type-grass{background:#63bb5b}
+.type-electric{background:#f3d23b}
+.type-ice{background:#74cec0}
+.type-fighting{background:#ce4069}
+.type-poison{background:#ab6ac8}
+.type-ground{background:#d97746}
+.type-flying{background:#89aae3}
+.type-psychic{background:#f97176}
+.type-bug{background:#90c12c}
+.type-rock{background:#c9bb8a}
+.type-ghost{background:#5269ac}
+.type-dragon{background:#0a6dc4}
+.type-dark{background:#5a5366}
+.type-steel{background:#5a8ea2}
+.type-fairy{background:#ec8fe6}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="screen on" id="s-load">
+  <p class="load-title">CARGANDO...</p>
+  <div class="load-bar"><div class="load-fill" id="load-fill" style="width:0%"></div></div>
+  <p style="font-size:10px;color:var(--t3);margin-top:8px" id="load-msg">Leyendo datos...</p>
+</div>
+
+<!-- TEAM BUILDER -->
+<div class="screen" id="s-team">
+  <div class="tb-header">
+    <span class="tb-title">EQUIPO DE BATALLA</span>
+    <button class="tb-back" onclick="goBack()">← Volver</button>
+  </div>
+  <div class="tb-scroll">
+    <div style="margin-bottom:14px">
+      <div class="tb-section-title" style="margin-bottom:8px">Tu equipo (max. 6)</div>
+      <div class="tb-slots" id="tb-slots"></div>
+    </div>
+    <div class="tb-section-title">Pokémon capturados</div>
+    <div class="tb-captured" id="tb-captured"></div>
+  </div>
+  <div class="tb-footer">
+    <button class="tb-start" id="tb-start" onclick="goToDifficulty()" disabled>
+      ELEGIR RIVAL →
+    </button>
+  </div>
+</div>
+
+<!-- DIFFICULTY -->
+<div class="screen" id="s-diff">
+  <p class="diff-title">ELIGE TU RIVAL</p>
+  <p class="diff-sub">El equipo rival se ajusta a tu BST promedio</p>
+  <div class="diff-cards">
+    <div class="diff-card easy" onclick="startBattle('easy')">
+      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/youngster.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
+      <div class="diff-info">
+        <div class="diff-name easy">FÁCIL</div>
+        <div class="diff-trainer-name">Joven Joey</div>
+        <div class="diff-desc">BST rival −25% · IA básica</div>
+      </div>
+    </div>
+    <div class="diff-card medium" onclick="startBattle('medium')">
+      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/acetrainer-gen4.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/149.png'">
+      <div class="diff-info">
+        <div class="diff-name medium">MEDIO</div>
+        <div class="diff-trainer-name">As Trainer</div>
+        <div class="diff-desc">BST rival similar · IA normal</div>
+      </div>
+    </div>
+    <div class="diff-card hard" onclick="startBattle('hard')">
+      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/champion.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png'">
+      <div class="diff-info">
+        <div class="diff-name hard">DIFÍCIL</div>
+        <div class="diff-trainer-name">Campeón</div>
+        <div class="diff-desc">BST rival +25% · IA agresiva</div>
+      </div>
+    </div>
+  </div>
+  <button class="diff-back" onclick="showScreen('s-team')">← Volver</button>
+</div>
+
+<!-- BATTLE -->
+<div class="screen" id="s-battle">
+  <div class="battle-field">
+    <div class="battle-hparea">
+      <div class="hp-box enemy" id="hp-enemy">
+        <div class="hp-name" id="hp-enemy-name">???</div>
+        <div class="hp-lv" id="hp-enemy-lv">Nv.50</div>
+        <div class="hp-bar-wrap"><div class="hp-bar" id="hp-bar-enemy" style="width:100%;background:var(--green)"></div></div>
+        <div class="hp-num" id="hp-num-enemy">100/100</div>
+      </div>
+      <div class="hp-box" id="hp-player">
+        <div class="hp-name" id="hp-player-name">???</div>
+        <div class="hp-lv" id="hp-player-lv">Nv.50</div>
+        <div class="hp-bar-wrap"><div class="hp-bar" id="hp-bar-player" style="width:100%;background:var(--green)"></div></div>
+        <div class="hp-num" id="hp-num-player">100/100</div>
+      </div>
+    </div>
+
+    <div class="battle-sprites">
+      <div class="sprite-wrap enemy">
+        <div id="dmg-enemy" style="position:absolute;top:-10px;left:50%;transform:translateX(-50%)"></div>
+        <img id="spr-enemy" class="battle-sprite" src="" style="transform:scaleX(-1)">
+      </div>
+      <div class="sprite-wrap">
+        <div id="dmg-player" style="position:absolute;top:-10px;left:50%;transform:translateX(-50%)"></div>
+        <img id="spr-player" class="battle-sprite" src="">
+      </div>
+    </div>
+
+    <div class="battle-log" id="battle-log">
+      <p>¡El combate está a punto de comenzar!</p>
+    </div>
+  </div>
+
+  <div class="battle-actions" id="battle-actions">
+    <button class="battle-btn attack" onclick="playerAttack()" id="btn-attack">
+      ⚔️ Atacar
+      <span class="battle-btn-sub" id="btn-attack-sub">—</span>
+    </button>
+    <button class="battle-btn switch" onclick="openSwitch()" id="btn-switch">
+      🔄 Cambiar
+      <span class="battle-btn-sub" id="btn-switch-sub">— Pokémon</span>
+    </button>
+    <button class="battle-btn forfeit" onclick="forfeit()">
+      🏳️ Rendirse
+    </button>
+  </div>
+</div>
+
+<!-- SWITCH OVERLAY -->
+<div class="screen" id="s-switch">
+  <p class="switch-title">¿A QUIÉN ENVÍAS?</p>
+  <div class="switch-grid" id="switch-grid"></div>
+  <button class="switch-cancel" onclick="closeSwitch()">Cancelar</button>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="s-result">
+  <div class="result-icon" id="result-icon">🏆</div>
+  <div class="result-title" id="result-title">¡VICTORIA!</div>
+  <p class="result-sub" id="result-sub">Has derrotado al rival</p>
+  <div class="result-btns">
+    <button class="result-btn primary" onclick="rematch()">Revancha</button>
+    <button class="result-btn secondary" onclick="goBack()">Volver</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// DATA & STATE
+// ─────────────────────────────────────────
+const POKE_SPRITES = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${id}.gif`;
+const POKE_ART = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+const POKE_PX = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+
+const DIFFICULTY = {
+  easy:   {name:'Joven Joey',   bstMult:.75, aiLevel:1, sprite:'https://play.pokemonshowdown.com/sprites/trainers/youngster.png'},
+  medium: {name:'As Trainer',   bstMult:1.0, aiLevel:2, sprite:'https://play.pokemonshowdown.com/sprites/trainers/acetrainer-gen4.png'},
+  hard:   {name:'Campeón',      bstMult:1.25,aiLevel:3, sprite:'https://play.pokemonshowdown.com/sprites/trainers/champion.png'},
+};
+
+// Type effectiveness chart
+const TYPE_EFF = {
+  normal:   {rock:.5,ghost:0,steel:.5},
+  fire:     {fire:.5,water:.5,rock:.5,dragon:.5,grass:2,ice:2,bug:2,steel:2},
+  water:    {water:.5,grass:.5,dragon:.5,fire:2,ground:2,rock:2},
+  grass:    {fire:.5,grass:.5,poison:.5,flying:.5,bug:.5,dragon:.5,steel:.5,water:2,ground:2,rock:2},
+  electric: {grass:.5,electric:.5,dragon:.5,ground:0,water:2,flying:2},
+  ice:      {water:.5,ice:.5,fire:.5,steel:.5,grass:2,ground:2,flying:2,dragon:2},
+  fighting: {poison:.5,bug:.5,psychic:.5,flying:.5,fairy:.5,ghost:0,normal:2,ice:2,rock:2,dark:2,steel:2},
+  poison:   {poison:.5,ground:.5,rock:.5,ghost:.5,steel:0,grass:2,fairy:2},
+  ground:   {grass:.5,bug:.5,flying:0,fire:2,electric:2,poison:2,rock:2,steel:2},
+  flying:   {electric:.5,rock:.5,steel:.5,grass:2,fighting:2,bug:2},
+  psychic:  {psychic:.5,steel:.5,dark:0,fighting:2,poison:2},
+  bug:      {fire:.5,fighting:.5,flying:.5,ghost:.5,steel:.5,fairy:.5,grass:2,psychic:2,dark:2},
+  rock:     {fighting:.5,ground:.5,steel:.5,fire:2,ice:2,flying:2,bug:2},
+  ghost:    {normal:0,psychic:0,dark:.5,ghost:2},
+  dragon:   {steel:.5,fairy:0,dragon:2},
+  dark:     {fighting:.5,dark:.5,fairy:.5,psychic:2,ghost:2},
+  steel:    {fire:.5,water:.5,electric:.5,steel:.5,ice:2,rock:2,fairy:2},
+  fairy:    {fire:.5,poison:.5,steel:.5,fighting:2,dragon:2,dark:2},
+};
+
+function getEffectiveness(moveType, defTypes){
+  let eff = 1;
+  for(const dt of defTypes){
+    const row = TYPE_EFF[moveType] || {};
+    eff *= (row[dt] !== undefined ? row[dt] : 1);
+  }
+  return eff;
+}
+
+// All Pokémon from PokeAPI (basic stats)
+const apiCache = {};
+async function fetchPokemon(id){
+  if(apiCache[id]) return apiCache[id];
+  try{
+    const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    const d = await r.json();
+    const statsMap = {};
+    d.stats.forEach(s => statsMap[s.stat.name] = s.base_stat);
+    const moves = d.moves
+      .filter(m => m.version_group_details.some(v => v.move_learn_method.name === 'level-up'))
+      .slice(0,4)
+      .map(m => m.move.name);
+    apiCache[id] = {
+      id: d.id,
+      name: d.name,
+      types: d.types.map(t => t.type.name),
+      hp: statsMap.hp || 45,
+      atk: statsMap.attack || 50,
+      def: statsMap.defense || 50,
+      spatk: statsMap['special-attack'] || 50,
+      spdef: statsMap['special-defense'] || 50,
+      spd: statsMap.speed || 45,
+      bst: Object.values(statsMap).reduce((a,b)=>a+b,0),
+      moves,
+    };
+    return apiCache[id];
+  } catch(e){
+    return null;
+  }
+}
+
+async function fetchMove(name){
+  try{
+    const r = await fetch(`https://pokeapi.co/api/v2/move/${name}`);
+    const d = await r.json();
+    return {
+      name: d.name,
+      type: d.type.name,
+      power: d.power || 40,
+      accuracy: d.accuracy || 100,
+      category: d.damage_class.name, // physical/special/status
+    };
+  } catch(e){
+    return {name, type:'normal', power:40, accuracy:100, category:'physical'};
+  }
+}
+
+// ─────────────────────────────────────────
+// GAME STATE
+// ─────────────────────────────────────────
+let G = {
+  battleTeam: [],       // player's 6 pokemon (full data)
+  enemyTeam: [],        // enemy's 6 pokemon
+  playerIdx: 0,         // current player pokemon index
+  enemyIdx: 0,          // current enemy pokemon index
+  playerHPs: [],        // current HPs
+  enemyHPs: [],
+  difficulty: 'medium',
+  busy: false,          // prevent double-clicks during animation
+  wins: 0,
+  losses: 0,
+};
+
+// ─────────────────────────────────────────
+// LOCAL STORAGE
+// ─────────────────────────────────────────
+function loadFromStorage(){
+  try{
+    const track = JSON.parse(localStorage.getItem('t') || '{}');
+    const favs = JSON.parse(localStorage.getItem('fv') || '[]');
+    const teams = JSON.parse(localStorage.getItem('tms') || '{}');
+    const set = JSON.parse(localStorage.getItem('st') || '{}');
+    return { track, favs, teams, set };
+  } catch(e){ 
+    console.error('Storage error:', e);
+    return null; 
+  }
+}
+
+function saveBattleTeam(ids){
+  const bt = JSON.parse(localStorage.getItem('pkp_battleTeam')||'[]');
+  localStorage.setItem('pkp_battleTeam', JSON.stringify(ids));
+}
+
+function loadBattleTeamIds(){
+  return JSON.parse(localStorage.getItem('pkp_battleTeam')||'[]');
+}
+
+function saveStats(){
+  localStorage.setItem('pkp_battleStats', JSON.stringify({wins:G.wins,losses:G.losses}));
+}
+
+function loadStats(){
+  const s = JSON.parse(localStorage.getItem('pkp_battleStats')||'{"wins":0,"losses":0}');
+  G.wins = s.wins; G.losses = s.losses;
+}
+
+// ─────────────────────────────────────────
+// SCREENS
+// ─────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+function goBack(){
+  window.history.back();
+}
+
+// ─────────────────────────────────────────
+// INIT & LOADING
+// ─────────────────────────────────────────
+let allCaptured = []; // {id, name, types}
+
+async function init(){
+  loadStats();
+  setLoad(10, 'Leyendo Pokédex...');
+
+  const S = loadFromStorage();
+  console.log('Storage loaded:', S ? 'OK' : 'NULL');
+  if(!S){ setLoad(100,'Error: no hay datos'); return; }
+
+  // Gather captured pokemon ids
+  const capturedIds = new Set();
+  Object.keys(S.track||{}).forEach(pid => {
+    const baseId = parseInt(String(pid).split('_')[0]);
+    if(Object.values(S.track[pid]).some(g => g?.captured)) capturedIds.add(baseId);
+  });
+
+  console.log('Captured IDs:', capturedIds.size);
+
+  if(capturedIds.size === 0){
+    setLoad(100, 'Sin Pokémon capturados');
+    setTimeout(()=>{ alert('¡Necesitas capturar Pokémon primero!'); goBack(); }, 800);
+    return;
+  }
+
+  setLoad(30, `Cargando ${capturedIds.size} Pokémon...`);
+
+  // Fetch all captured pokemon data
+  const ids = [...capturedIds].slice(0, 80); // limit for perf
+  let loaded = 0;
+  for(const id of ids){
+    await fetchPokemon(id);
+    loaded++;
+    if(loaded % 5 === 0) setLoad(30 + Math.round((loaded/ids.length)*50), `Cargando datos (${loaded}/${ids.length})...`);
+  }
+
+  allCaptured = ids.map(id => apiCache[id]).filter(Boolean);
+  setLoad(90, 'Preparando equipo...');
+
+  // Load saved battle team
+  const savedIds = loadBattleTeamIds().filter(id => apiCache[id]);
+  G.battleTeam = savedIds.map(id => apiCache[id]);
+
+  setLoad(100, '¡Listo!');
+  setTimeout(() => {
+    renderTeamBuilder();
+    showScreen('s-team');
+  }, 400);
+}
+
+function setLoad(pct, msg){
+  document.getElementById('load-fill').style.width = pct + '%';
+  document.getElementById('load-msg').textContent = msg;
+}
+
+// ─────────────────────────────────────────
+// TEAM BUILDER
+// ─────────────────────────────────────────
+function renderTeamBuilder(){
+  renderSlots();
+  renderCaptured();
+  document.getElementById('tb-start').disabled = G.battleTeam.length === 0;
+}
+
+function renderSlots(){
+  const el = document.getElementById('tb-slots');
+  el.innerHTML = Array.from({length:6}, (_,i) => {
+    const p = G.battleTeam[i];
+    if(!p) return `<div class="tb-slot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bd)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>`;
+    return `<div class="tb-slot filled">
+      <button class="tb-slot-rm" onclick="removeFromTeam(${i})">✕</button>
+      <img src="${POKE_PX(p.id)}" onerror="this.src='${POKE_ART(p.id)}'">
+      <div class="tb-slot-name">${cap(p.name)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderCaptured(){
+  const el = document.getElementById('tb-captured');
+  el.innerHTML = allCaptured.map(p => {
+    const inTeam = G.battleTeam.some(t => t.id === p.id);
+    return `<div class="tb-cap-chip${inTeam?' selected':''}" onclick="toggleTeamMember(${p.id})">
+      <img src="${POKE_PX(p.id)}" onerror="this.src='${POKE_ART(p.id)}'">
+      <span>${cap(p.name)}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleTeamMember(id){
+  const p = apiCache[id];
+  if(!p) return;
+  const idx = G.battleTeam.findIndex(t => t.id === id);
+  if(idx >= 0){
+    G.battleTeam.splice(idx, 1);
+  } else {
+    if(G.battleTeam.length >= 6){ showToast('Equipo lleno (máx. 6)'); return; }
+    G.battleTeam.push(p);
+  }
+  saveBattleTeam(G.battleTeam.map(t => t.id));
+  renderTeamBuilder();
+}
+
+function removeFromTeam(i){
+  G.battleTeam.splice(i, 1);
+  saveBattleTeam(G.battleTeam.map(t => t.id));
+  renderTeamBuilder();
+}
+
+function goToDifficulty(){
+  if(G.battleTeam.length === 0) return;
+  showScreen('s-diff');
+}
+
+// ─────────────────────────────────────────
+// ENEMY GENERATION
+// ─────────────────────────────────────────
+async function generateEnemyTeam(difficulty){
+  const diff = DIFFICULTY[difficulty];
+  const playerBST = G.battleTeam.reduce((a,p) => a + p.bst, 0) / G.battleTeam.length;
+  const targetBST = playerBST * diff.bstMult;
+  const tolerance = targetBST * 0.3;
+
+  // Fetch random pokemon and filter by BST
+  // Use a random pool of pokemon IDs
+  const pool = [];
+  const tried = new Set();
+  while(pool.length < 6){
+    const id = Math.floor(Math.random() * 649) + 1;
+    if(tried.has(id)) continue;
+    tried.add(id);
+    const p = await fetchPokemon(id);
+    if(p && Math.abs(p.bst - targetBST) <= tolerance) pool.push(p);
+    if(tried.size > 200) break; // safety
+  }
+
+  // Fill remaining with best matches
+  if(pool.length < 6){
+    const all = Object.values(apiCache)
+      .filter(p => !pool.some(e => e.id === p.id))
+      .sort((a,b) => Math.abs(a.bst-targetBST) - Math.abs(b.bst-targetBST));
+    for(const p of all){
+      if(pool.length >= 6) break;
+      pool.push(p);
+    }
+  }
+
+  return pool.slice(0,6);
+}
+
+// ─────────────────────────────────────────
+// BATTLE START
+// ─────────────────────────────────────────
+let selectedDifficulty = 'medium';
+
+async function startBattle(diff){
+  selectedDifficulty = diff;
+  showScreen('s-load');
+  setLoad(20, 'Generando equipo rival...');
+
+  // Fetch moves for player team
+  for(const p of G.battleTeam){
+    if(!p._movesLoaded){
+      p._moves = [];
+      const moveNames = p.moves.slice(0,4);
+      for(const mn of moveNames){
+        const m = await fetchMove(mn);
+        if(m.power > 0 && m.category !== 'status') p._moves.push(m);
+      }
+      // Ensure at least one move
+      if(p._moves.length === 0) p._moves.push({name:'tackle',type:p.types[0],power:40,accuracy:100,category:'physical'});
+      p._movesLoaded = true;
+    }
+  }
+  setLoad(60, 'Preparando rival...');
+
+  G.enemyTeam = await generateEnemyTeam(diff);
+  // Load moves for enemy
+  for(const p of G.enemyTeam){
+    if(!p._movesLoaded){
+      p._moves = [];
+      const moveNames = p.moves.slice(0,4);
+      for(const mn of moveNames.slice(0,2)){
+        const m = await fetchMove(mn);
+        if(m.power > 0) p._moves.push(m);
+      }
+      if(p._moves.length === 0) p._moves.push({name:'tackle',type:p.types[0],power:40,accuracy:100,category:'physical'});
+      p._movesLoaded = true;
+    }
+  }
+
+  setLoad(100, '¡A combatir!');
+
+  // Init HPs
+  G.playerIdx = 0;
+  G.enemyIdx = 0;
+  G.playerHPs = G.battleTeam.map(p => calcMaxHP(p));
+  G.enemyHPs = G.enemyTeam.map(p => calcMaxHP(p));
+  G.busy = false;
+
+  setTimeout(() => {
+    showScreen('s-battle');
+    updateBattleUI();
+    setLog(`¡${cap(DIFFICULTY[diff].name)} quiere combatir!`);
+    setTimeout(() => setLog(`¡${cap(G.enemyTeam[0].name)} ha salido al campo!`), 800);
+    setTimeout(() => {
+      setLog(`¡Vamos, ${cap(G.battleTeam[0].name)}!`);
+      updateAttackBtn();
+    }, 1600);
+  }, 400);
+}
+
+// ─────────────────────────────────────────
+// BATTLE MECHANICS
+// ─────────────────────────────────────────
+const LVL = 50;
+
+function calcMaxHP(p){
+  return Math.floor((2 * p.hp * LVL / 100) + LVL + 10);
+}
+
+function calcDamage(attacker, defender, move){
+  const isPhysical = move.category === 'physical';
+  const atk = isPhysical ? attacker.atk : attacker.spatk;
+  const def = isPhysical ? defender.def : defender.spdef;
+  const base = Math.floor((2*LVL/5+2) * move.power * atk / def / 50) + 2;
+  // STAB
+  const stab = attacker.types.includes(move.type) ? 1.5 : 1;
+  // Type effectiveness
+  const eff = getEffectiveness(move.type, defender.types);
+  // Random factor 0.85-1.0
+  const rnd = (85 + Math.random()*15) / 100;
+  return {dmg: Math.max(1, Math.floor(base * stab * eff * rnd)), eff};
+}
+
+function getBestMove(attacker, defender){
+  if(!attacker._moves || attacker._moves.length === 0)
+    return {name:'tackle', type:attacker.types[0], power:40, accuracy:100, category:'physical'};
+  return attacker._moves.reduce((best, m) => {
+    const {dmg} = calcDamage(attacker, defender, m);
+    const {dmg: bdmg} = calcDamage(attacker, defender, best);
+    return dmg > bdmg ? m : best;
+  }, attacker._moves[0]);
+}
+
+function updateAttackBtn(){
+  const p = G.battleTeam[G.playerIdx];
+  const e = G.enemyTeam[G.enemyIdx];
+  const move = getBestMove(p, e);
+  document.getElementById('btn-attack-sub').textContent = cap(move.name.replace(/-/g,' '));
+  const aliveCount = G.battleTeam.filter((_, i) => G.playerHPs[i] > 0 && i !== G.playerIdx).length;
+  document.getElementById('btn-switch-sub').textContent = `${aliveCount} restantes`;
+}
+
+function updateBattleUI(){
+  const p = G.battleTeam[G.playerIdx];
+  const e = G.enemyTeam[G.enemyIdx];
+  const pmaxHP = calcMaxHP(p);
+  const emaxHP = calcMaxHP(e);
+  const php = G.playerHPs[G.playerIdx];
+  const ehp = G.enemyHPs[G.enemyIdx];
+
+  // Sprites
+  document.getElementById('spr-player').src = POKE_SPRITES(p.id);
+  document.getElementById('spr-player').onerror = function(){ this.src = POKE_PX(p.id); };
+  document.getElementById('spr-enemy').src = POKE_SPRITES(e.id);
+  document.getElementById('spr-enemy').onerror = function(){ this.src = POKE_PX(e.id); };
+
+  // Names
+  document.getElementById('hp-player-name').textContent = cap(p.name);
+  document.getElementById('hp-enemy-name').textContent = cap(e.name);
+  document.getElementById('hp-player-lv').textContent = `Nv.${LVL} · ${p.types.map(cap).join('/')}`;
+  document.getElementById('hp-enemy-lv').textContent = `Nv.${LVL} · ${e.types.map(cap).join('/')}`;
+
+  // HP bars
+  updateHP('player', php, pmaxHP);
+  updateHP('enemy', ehp, emaxHP);
+}
+
+function updateHP(who, cur, max){
+  const pct = Math.max(0, cur/max*100);
+  const bar = document.getElementById(`hp-bar-${who}`);
+  bar.style.width = pct + '%';
+  bar.style.background = pct > 50 ? 'var(--green)' : pct > 20 ? 'var(--gold)' : 'var(--red)';
+  document.getElementById(`hp-num-${who}`).textContent = `${Math.max(0,cur)}/${max}`;
+}
+
+function setLog(msg, cls=''){
+  const log = document.getElementById('battle-log');
+  const p = document.createElement('p');
+  p.innerHTML = msg;
+  if(cls) p.className = cls;
+  log.innerHTML = '';
+  log.appendChild(p);
+}
+
+function showDmg(who, dmg, eff){
+  const el = document.getElementById(`dmg-${who}`);
+  const span = document.createElement('span');
+  span.className = 'dmg-num' + (eff > 1 ? ' effective' : eff === 0 ? ' miss' : '');
+  span.textContent = eff === 0 ? 'Inmune' : dmg;
+  el.innerHTML = '';
+  el.appendChild(span);
+  setTimeout(() => el.innerHTML = '', 900);
+}
+
+function disableActions(){ document.getElementById('battle-actions').querySelectorAll('button').forEach(b => b.disabled = true); }
+function enableActions(){ document.getElementById('battle-actions').querySelectorAll('button').forEach(b => b.disabled = false); }
+
+// ─────────────────────────────────────────
+// PLAYER ACTIONS
+// ─────────────────────────────────────────
+function playerAttack(){
+  if(G.busy) return;
+  G.busy = true;
+  disableActions();
+
+  const p = G.battleTeam[G.playerIdx];
+  const e = G.enemyTeam[G.enemyIdx];
+  const move = getBestMove(p, e);
+  const {dmg, eff} = calcDamage(p, e, move);
+
+  // Accuracy check
+  const hit = Math.random() * 100 < (move.accuracy || 100);
+
+  // Determine who goes first based on speed
+  const playerFirst = p.spd >= e.spd;
+
+  if(playerFirst){
+    executePlayerAttack(p, e, move, dmg, eff, hit, () => {
+      if(G.enemyHPs[G.enemyIdx] > 0) enemyTurn();
+      else handleEnemyFaint();
+    });
+  } else {
+    // Enemy attacks first
+    enemyAttackFirst(() => {
+      if(G.playerHPs[G.playerIdx] > 0){
+        executePlayerAttack(p, e, move, dmg, eff, hit, () => {
+          if(G.enemyHPs[G.enemyIdx] > 0){G.busy=false;enableActions();updateAttackBtn();}
+          else handleEnemyFaint();
+        });
+      } else handlePlayerFaint();
+    });
+  }
+}
+
+function executePlayerAttack(p, e, move, dmg, eff, hit, cb){
+  const moveName = cap(move.name.replace(/-/g,' '));
+  // Animate
+  const spr = document.getElementById('spr-player');
+  spr.classList.add('attack-r');
+  setTimeout(()=>spr.classList.remove('attack-r'),350);
+
+  if(!hit){
+    setLog(`<span>${cap(p.name)}</span> usa <span>${moveName}</span>... ¡Falló!`);
+    setTimeout(cb, 1200);
+    return;
+  }
+
+  G.enemyHPs[G.enemyIdx] = Math.max(0, G.enemyHPs[G.enemyIdx] - dmg);
+  updateHP('enemy', G.enemyHPs[G.enemyIdx], calcMaxHP(e));
+  showDmg('enemy', dmg, eff);
+
+  // Shake enemy
+  setTimeout(()=>{
+    const es = document.getElementById('spr-enemy');
+    es.classList.add('shake');
+    setTimeout(()=>es.classList.remove('shake'),350);
+  }, 150);
+
+  const effMsg = eff > 1 ? ' <span style="color:var(--red)">¡Es súper efectivo!</span>' :
+                 eff < 1 && eff > 0 ? ' <span style="color:var(--t3)">No es muy efectivo...</span>' :
+                 eff === 0 ? ' <span style="color:var(--t3)">No afecta...</span>' : '';
+  setLog(`<span>${cap(p.name)}</span> usa <span>${moveName}</span>!${effMsg}`, eff>1?'eff':'');
+  setTimeout(cb, 1400);
+}
+
+function enemyTurn(cb){
+  const e = G.enemyTeam[G.enemyIdx];
+  const p = G.battleTeam[G.playerIdx];
+  const diff = DIFFICULTY[selectedDifficulty];
+  let move;
+
+  // AI levels
+  if(diff.aiLevel >= 2){
+    move = getBestMove(e, p);
+  } else {
+    move = e._moves[Math.floor(Math.random()*e._moves.length)] || getBestMove(e,p);
+  }
+
+  const {dmg, eff} = calcDamage(e, p, move);
+  const hit = Math.random() * 100 < (move.accuracy || 100);
+  const moveName = cap(move.name.replace(/-/g,' '));
+
+  const spr = document.getElementById('spr-enemy');
+  spr.classList.add('attack-l');
+  setTimeout(()=>spr.classList.remove('attack-l'),350);
+
+  if(!hit){
+    setLog(`<span>${cap(e.name)}</span> usa <span>${moveName}</span>... ¡Falló!`);
+    setTimeout(()=>{ if(cb) cb(); else {G.busy=false;enableActions();updateAttackBtn();} }, 1200);
+    return;
+  }
+
+  G.playerHPs[G.playerIdx] = Math.max(0, G.playerHPs[G.playerIdx] - dmg);
+  updateHP('player', G.playerHPs[G.playerIdx], calcMaxHP(p));
+  showDmg('player', dmg, eff);
+
+  setTimeout(()=>{
+    const ps = document.getElementById('spr-player');
+    ps.classList.add('shake');
+    setTimeout(()=>ps.classList.remove('shake'),350);
+  },150);
+
+  const effMsg = eff > 1 ? ' ¡Es súper efectivo!' : eff < 1 && eff > 0 ? ' No es muy efectivo...' : '';
+  setLog(`¡<span>${cap(e.name)}</span> usa <span>${moveName}</span>!${effMsg}`);
+
+  setTimeout(()=>{
+    if(G.playerHPs[G.playerIdx] <= 0) handlePlayerFaint();
+    else{ if(cb) cb(); else {G.busy=false;enableActions();updateAttackBtn();} }
+  }, 1400);
+}
+
+function enemyAttackFirst(cb){
+  const e = G.enemyTeam[G.enemyIdx];
+  const p = G.battleTeam[G.playerIdx];
+  const move = getBestMove(e, p);
+  const {dmg, eff} = calcDamage(e, p, move);
+  const hit = Math.random() * 100 < (move.accuracy || 100);
+  const moveName = cap(move.name.replace(/-/g,' '));
+
+  setLog(`¡<span>${cap(e.name)}</span> es más rápido y usa <span>${moveName}</span>!`);
+  const spr = document.getElementById('spr-enemy');
+  spr.classList.add('attack-l');
+  setTimeout(()=>spr.classList.remove('attack-l'),350);
+
+  if(hit){
+    G.playerHPs[G.playerIdx] = Math.max(0, G.playerHPs[G.playerIdx] - dmg);
+    updateHP('player', G.playerHPs[G.playerIdx], calcMaxHP(p));
+    showDmg('player', dmg, eff);
+    setTimeout(()=>{
+      const ps = document.getElementById('spr-player');
+      ps.classList.add('shake');
+      setTimeout(()=>ps.classList.remove('shake'),350);
+    },150);
+  }
+  setTimeout(cb, 1400);
+}
+
+// ─────────────────────────────────────────
+// FAINT HANDLING
+// ─────────────────────────────────────────
+function handleEnemyFaint(){
+  const e = G.enemyTeam[G.enemyIdx];
+  const sprE = document.getElementById('spr-enemy');
+  sprE.classList.add('faint');
+  setLog(`¡<span>${cap(e.name)}</span> se ha debilitado!`);
+
+  setTimeout(()=>{
+    sprE.classList.remove('faint');
+    // Find next enemy
+    let next = -1;
+    for(let i = G.enemyIdx+1; i < G.enemyTeam.length; i++){
+      if(G.enemyHPs[i] > 0){ next = i; break; }
+    }
+    if(next === -1){
+      // Player wins
+      endBattle(true);
+    } else {
+      G.enemyIdx = next;
+      updateBattleUI();
+      setLog(`¡${cap(DIFFICULTY[selectedDifficulty].name)} envía a <span>${cap(G.enemyTeam[next].name)}</span>!`);
+      setTimeout(()=>{ G.busy=false;enableActions();updateAttackBtn(); }, 1200);
+    }
+  }, 600);
+}
+
+function handlePlayerFaint(){
+  const p = G.battleTeam[G.playerIdx];
+  const sprP = document.getElementById('spr-player');
+  sprP.classList.add('faint');
+  setLog(`¡<span>${cap(p.name)}</span> se ha debilitado!`);
+
+  setTimeout(()=>{
+    sprP.classList.remove('faint');
+    // Check if any pokemon alive
+    const alive = G.battleTeam.filter((_,i) => G.playerHPs[i] > 0 && i !== G.playerIdx);
+    if(alive.length === 0){
+      endBattle(false);
+    } else {
+      // Force switch
+      setLog('¡Debes enviar otro Pokémon!');
+      setTimeout(()=>{ G.busy=false; openSwitch(true); }, 800);
+    }
+  }, 600);
+}
+
+// ─────────────────────────────────────────
+// SWITCH
+// ─────────────────────────────────────────
+let forcedSwitch = false;
+
+function openSwitch(forced=false){
+  forcedSwitch = forced;
+  const grid = document.getElementById('switch-grid');
+  grid.innerHTML = G.battleTeam.map((p,i) => {
+    const hp = G.playerHPs[i];
+    const maxHP = calcMaxHP(p);
+    const isFainted = hp <= 0;
+    const isActive = i === G.playerIdx;
+    return `<div class="switch-chip${isActive?' active':''}${isFainted?' fainted':''}" onclick="${isFainted||isActive?'':''}" 
+      ${!isFainted&&!isActive?`onclick="doSwitch(${i})"`:''}>
+      <img src="${POKE_PX(p.id)}" onerror="this.src='${POKE_ART(p.id)}'">
+      <span>${cap(p.name)}</span>
+      <span class="shp">${Math.max(0,hp)}/${maxHP}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('switch-cancel').style.display = forced ? 'none' : 'block';
+  showScreen('s-switch');
+}
+
+function closeSwitch(){
+  if(forcedSwitch) return;
+  showScreen('s-battle');
+}
+
+function doSwitch(idx){
+  G.playerIdx = idx;
+  showScreen('s-battle');
+  updateBattleUI();
+  const p = G.battleTeam[idx];
+  setLog(`¡Vamos, <span>${cap(p.name)}</span>!`);
+  // After forced switch enemy doesn't attack again
+  if(!forcedSwitch){
+    // Enemy attacks on switch
+    setTimeout(()=>{
+      enemyTurn();
+    }, 1000);
+  } else {
+    forcedSwitch = false;
+    G.busy = false;
+    enableActions();
+    updateAttackBtn();
+  }
+}
+
+// ─────────────────────────────────────────
+// END BATTLE
+// ─────────────────────────────────────────
+function endBattle(playerWon){
+  if(playerWon){ G.wins++; } else { G.losses++; }
+  saveStats();
+
+  // Save battle stats to dedicated key
+  localStorage.setItem('pkp_battleStats', JSON.stringify({wins:G.wins, losses:G.losses}));
+
+  setTimeout(()=>{
+    document.getElementById('result-icon').textContent = playerWon ? '🏆' : '💀';
+    document.getElementById('result-title').textContent = playerWon ? '¡VICTORIA!' : '¡DERROTA!';
+    document.getElementById('result-title').className = `result-title ${playerWon?'win':'lose'}`;
+    document.getElementById('result-sub').textContent = playerWon
+      ? `¡Has derrotado a ${DIFFICULTY[selectedDifficulty].name}!\nVictorias: ${G.wins} · Derrotas: ${G.losses}`
+      : `${DIFFICULTY[selectedDifficulty].name} te ha vencido.\nVictorias: ${G.wins} · Derrotas: ${G.losses}`;
+    showScreen('s-result');
+  }, 1000);
+}
+
+function forfeit(){
+  if(!confirm('¿Seguro que quieres rendirte?')) return;
+  endBattle(false);
+}
+
+function rematch(){
+  G.playerIdx = 0;
+  G.enemyIdx = 0;
+  G.playerHPs = G.battleTeam.map(p => calcMaxHP(p));
+  showScreen('s-diff');
+}
+
+// ─────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────
+function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+function showToast(msg){
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--s1);color:var(--t1);padding:10px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;white-space:nowrap;border:1.5px solid var(--bd);animation:pulse 2s forwards';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2000);
+}
+
+// ─────────────────────────────────────────
+// START
+// ─────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
