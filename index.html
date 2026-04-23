@@ -355,7 +355,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 }
 .tslot.filled{border-style:solid;border-color:var(--bd);}
 .tslot.filled:active{transform:scale(.97);}
-.tslot-img{width:60px;height:60px;object-fit:contain;image-rendering:pixelated;}
+.tslot-img{width:44px;height:44px;object-fit:contain;image-rendering:pixelated;}
 .tslot-name{font-size:9px;font-weight:700;color:var(--t2);text-align:center;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
 .tslot-rm{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;
   background:var(--s3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -3256,6 +3256,12 @@ function _renderTrainerCardInner(wrap){
   const favKey=S.set.cardFavKey&&S.favs.has(S.set.cardFavKey)?S.set.cardFavKey:[...S.favs][0];
   const favBaseId=favKey?parseInt(String(favKey).split('_')[0]):null;
   const favPoke=favBaseId&&!isNaN(favBaseId)?S.poke.find(p=>p.id===favBaseId):null;
+  // For variant favs, get the form sprite
+  const favFormId=favKey&&String(favKey).includes('_')?parseInt(String(favKey).split('_')[1]):null;
+  const favForm=favFormId?(S.fc?.[favBaseId]||[]).find(f=>f.id===favFormId):null;
+  const favSpriteId=favForm?favForm.id:favBaseId;
+  const favAnimUrl=favSpriteId&&favSpriteId<=649?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${favSpriteId}.gif`:null;
+  const favStaticUrl=favSpriteId?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${favSpriteId}.png`:null;
   const trainerId=String(name).split('').reduce((a,c)=>a+c.charCodeAt(0),10000).toString().slice(-5);
   const typeIconUrl=t=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-viii/sword-shield/${TYPE_ID[t]||1}.png`;
   const r=parseInt(topTypeColor.slice(1,3),16);
@@ -3287,9 +3293,9 @@ function _renderTrainerCardInner(wrap){
       <!-- Subtle pattern overlay -->
       <div style="position:absolute;inset:0;background:radial-gradient(circle at 70% 50%,rgba(255,255,255,0.08) 0%,transparent 60%)"></div>
       <!-- Fav pokemon BIG in background -->
-      ${favPoke?`<img src="${favPoke.id<=649?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${favPoke.id}.gif`:iPx(favPoke.id)}"
+      ${favPoke?`<img src="${favAnimUrl||(favSpriteId<=649?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${favSpriteId}.gif`:iPx(favSpriteId))}"
         style="position:absolute;right:-10px;bottom:0;width:170px;height:170px;object-fit:contain;image-rendering:pixelated;opacity:0.92;z-index:1"
-        onerror="this.src='${iPx(favPoke.id)}';this.onerror=null">`:''}
+        onerror="this.src='${favStaticUrl||iPx(favPoke.id)}';this.onerror=null">`:''}
       <!-- Content -->
       <div style="position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;min-height:160px">
         <div style="padding:18px 18px 16px;flex:1">
@@ -4037,7 +4043,7 @@ function buildMdl(base,forms){
         <svg width="13" height="13" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         ${fav?'Favorito':'Añadir favorito'}
       </button>
-      ${S.tab==='fav'&&fav?`<button class="qbtn" id="qcard" onclick="setCardFavFromModal(${JSON.stringify(favKey)})" style="${S.set.cardFavKey===favKey?'background:#FFF8EE;color:var(--gold)':''}">
+      ${S.tab==='fav'&&fav?`<button class="qbtn" id="qcard" onclick="setCardFavFromModal('${favKey}')" style="${S.set.cardFavKey===favKey?'background:#FFF8EE;color:var(--gold)':''}">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="${S.set.cardFavKey===favKey?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         ${S.set.cardFavKey===favKey?'En Trainer Card':'Trainer Card'}
       </button>`:''}
@@ -4146,12 +4152,12 @@ function previewVariant(pokeId, formId, isShiny){
         btn.className='qbtn';
         btn.style.cssText=isOnCard?'background:#FFF8EE;color:var(--gold)':'';
         btn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="${isOnCard?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg> ${isOnCard?'En Trainer Card':'Trainer Card'}`;
-        btn.setAttribute('onclick',`setCardFavFromModal(${JSON.stringify(favKey)})`);
+        btn.setAttribute('onclick',`setCardFavFromModal('${favKey}')`);
         qrow.appendChild(btn);
       } else if(qcard){
         qcard.style.cssText=isOnCard?'background:#FFF8EE;color:var(--gold)':'';
         qcard.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="${isOnCard?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg> ${isOnCard?'En Trainer Card':'Trainer Card'}`;
-        qcard.setAttribute('onclick',`setCardFavFromModal(${JSON.stringify(favKey)})`);
+        qcard.setAttribute('onclick',`setCardFavFromModal('${favKey}')`);
       }
     } else {
       // Not a fav — remove trainer card button

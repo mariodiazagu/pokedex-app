@@ -1095,16 +1095,24 @@ function openSwitch(forced=false){
     const hp = G.playerHPs[i];
     const maxHP = calcMaxHP(p);
     const isFainted = hp <= 0;
-    // When forced (after faint), current slot is now empty — don't mark as active
     const isActive = !forced && i === G.playerIdx;
     const disabled = isFainted || isActive;
-    return `<div class="switch-chip${isActive?' active':''}${isFainted?' fainted':''}" 
-      ${!disabled?`onclick="doSwitch(${i})"`:''}>
+    return `<div class="switch-chip${isActive?' active':''}${isFainted?' fainted':''}" data-idx="${i}" data-disabled="${disabled}">
       <img src="${POKE_PX(p.id)}" onerror="this.src='${POKE_ART(p.id)}'">
       <span>${cap(p.name)}</span>
       <span class="shp">${isFainted?'Debilitado':Math.max(0,hp)+'/'+maxHP}</span>
     </div>`;
   }).join('');
+
+  // Use event delegation — more reliable on mobile
+  grid.onclick = (e) => {
+    const chip = e.target.closest('.switch-chip');
+    if(!chip) return;
+    if(chip.dataset.disabled === 'true') return;
+    const idx = parseInt(chip.dataset.idx);
+    if(!isNaN(idx)) doSwitch(idx);
+  };
+
   document.getElementById('switch-cancel').style.display = forced ? 'none' : 'block';
   showScreen('s-switch');
 }
