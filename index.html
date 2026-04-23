@@ -2455,7 +2455,7 @@ const BALLS=[
   {id:'repeat',n:'Repetball'},{id:'timer',n:'Tempball'},{id:'luxury',n:'Lujoball'},
   {id:'premier',n:'Premioball'},{id:'dream',n:'Sueñoball'},{id:'beast',n:'Ultraente'},
   {id:'sport',n:'Torneoball'},{id:'cherish',n:'Preciadaball'},
-  {id:'wing',n:'Alaball'},{id:'park',n:'Parqueball'},
+  {id:'park',n:'Parqueball'},
 ];
 const POKE=POKE_DB.map(([id,name,t1,t2])=>({id,name,types:t2?[t1,t2]:[t1],generation:genOf(id),rarity:rarOf(id)}));
 const cap=s=>s?s[0].toUpperCase()+s.slice(1):'';
@@ -3199,7 +3199,7 @@ function _renderTrainerCardInner(wrap){
           </div>
         </div>
         <div style="display:flex;align-items:flex-end;flex-shrink:0;padding-right:8px">
-          ${favPoke?`<img src="${favPoke.id<=649?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${favPoke.id}.gif`:iPx(favPoke.id)}" style="width:90px;height:90px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))" onerror="this.src='${iPx(favPoke.id)}';this.onerror=null">`:''}
+          ${favPoke?`<img src="${favPoke.id<=649?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${favPoke.id}.gif`:iPx(favPoke.id)}" style="width:90px;height:90px;object-fit:contain;image-rendering:pixelated" onerror="this.src='${iPx(favPoke.id)}';this.onerror=null">`:''}
           <img src="${sprite}" style="width:130px;height:130px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))" onerror="this.style.display='none'">
         </div>
       </div>
@@ -3893,6 +3893,30 @@ function previewVariant(pokeId, formId, isShiny){
     qfav.setAttribute('onclick',`doFav(${JSON.stringify(favKey)})`);
     qfav.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="${f?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>${f?'Favorito':'Añadir favorito'}`;
   }
+  // Update Trainer Card button — only show when this variant is a fav and we're in fav tab
+  const qcard=document.getElementById('qcard');
+  const qrow=qfav?.parentElement;
+  if(S.tab==='fav'){
+    if(f){
+      const isOnCard=S.set.cardFavKey===favKey;
+      if(!qcard&&qrow){
+        const btn=document.createElement('button');
+        btn.id='qcard';
+        btn.className='qbtn';
+        btn.style.cssText=isOnCard?'background:#FFF8EE;color:var(--gold)':'';
+        btn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="${isOnCard?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg> ${isOnCard?'En Trainer Card':'Trainer Card'}`;
+        btn.setAttribute('onclick',`setCardFavFromModal(${JSON.stringify(favKey)})`);
+        qrow.appendChild(btn);
+      } else if(qcard){
+        qcard.style.cssText=isOnCard?'background:#FFF8EE;color:var(--gold)':'';
+        qcard.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="${isOnCard?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg> ${isOnCard?'En Trainer Card':'Trainer Card'}`;
+        qcard.setAttribute('onclick',`setCardFavFromModal(${JSON.stringify(favKey)})`);
+      }
+    } else {
+      // Not a fav — remove trainer card button
+      qcard?.remove();
+    }
+  }
   // Rebuild game rows for the active variant tracking key
   const dispNameForLabel=form&&(form.id!==pokeId||form.isCostume)
     ?fmtF(form.isCostume?(form.formName||form.name):form.name,form.speciesName):null;
@@ -4065,15 +4089,15 @@ function gRow(pid,game){
     </div>
     <!-- Status buttons -->
     <div class="grow-btns">
-      <button class="grow-btn${d.captured?' on':''}" onclick="doTrk(${pid},'${game.id}','captured')" style="${d.captured?`--gbg:rgba(107,203,139,.15);--gc:var(--green)`:''}">
+      <button class="grow-btn${d.captured?' on':''}" onclick="doTrk('${pid}','${game.id}','captured')" style="${d.captured?`--gbg:rgba(107,203,139,.15);--gc:var(--green)`:''}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
         Capturado
       </button>
-      <button class="grow-btn${d.shiny?' on':''}" onclick="doTrk(${pid},'${game.id}','shiny')" style="${d.shiny?`--gbg:rgba(245,200,66,.15);--gc:var(--gold)`:''}">
+      <button class="grow-btn${d.shiny?' on':''}" onclick="doTrk('${pid}','${game.id}','shiny')" style="${d.shiny?`--gbg:rgba(245,200,66,.15);--gc:var(--gold)`:''}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="${d.shiny?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
         Shiny
       </button>
-      <button class="grow-btn${d.inBox?' on':''}" onclick="doTrk(${pid},'${game.id}','inBox')" style="${d.inBox?`--gbg:rgba(123,184,244,.15);--gc:var(--blue)`:''}">
+      <button class="grow-btn${d.inBox?' on':''}" onclick="doTrk('${pid}','${game.id}','inBox')" style="${d.inBox?`--gbg:rgba(123,184,244,.15);--gc:var(--blue)`:''}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
         En caja
       </button>
@@ -4082,7 +4106,7 @@ function gRow(pid,game){
     ${d.captured?`<div class="grow-level">
       <span class="grow-level-lbl">Nivel</span>
       <input class="glvl-inp" type="number" min="1" max="100" placeholder="–" value="${d.level||''}"
-        onchange="doLevel(${pid},'${game.id}',this.value)" onclick="event.stopPropagation()">
+        onchange="doLevel('${pid}','${game.id}',this.value)" onclick="event.stopPropagation()">
     </div>`:''}
     <!-- Ball picker toggle -->
     <div class="grow-extras">
@@ -4098,11 +4122,11 @@ function gRow(pid,game){
     <!-- Ball selector -->
     <div class="bsec" id="bs${pid}${game.id}">
       <div class="bslbl">Elegir Poké Ball</div>
-      <div class="bgrid">${BALLS.map(b=>`<div class="bchip${d.ball===b.id?' on':''}" onclick="doBall(${pid},'${game.id}','${b.id}')"><div class="bico"><img src="${BALL_IMG(b.id)}" style="width:18px;height:18px;object-fit:contain" onerror="this.style.opacity='.3'"></div><div class="bnm">${b.n}</div></div>`).join('')}</div>
+      <div class="bgrid">${BALLS.map(b=>`<div class="bchip${d.ball===b.id?' on':''}" onclick="doBall('${pid}','${game.id}','${b.id}')"><div class="bico"><img src="${BALL_IMG(b.id)}" style="width:18px;height:18px;object-fit:contain" onerror="this.style.opacity='.3'"></div><div class="bnm">${b.n}</div></div>`).join('')}</div>
     </div>
     <!-- Notes -->
     <div class="nota${d.notes?' on':''}" id="nw${pid}${game.id}">
-      <textarea class="nta" placeholder="Añadir nota…" onchange="doNota(${pid},'${game.id}',this.value)">${d.notes||''}</textarea>
+      <textarea class="nta" placeholder="Añadir nota…" onchange="doNota('${pid}','${game.id}',this.value)">${d.notes||''}</textarea>
     </div>
   </div>`;
 }
@@ -4143,7 +4167,7 @@ function doNota(pid,gid,val){
   if(!S.track[pid])S.track[pid]={};
   if(!S.track[pid][gid])S.track[pid][gid]=tDef();
   S.track[pid][gid].notes=val;
-  scheduleSave();updateCard(pid);
+  scheduleSave();updateCard(parseInt(String(pid).split('_')[0]));
 }
 
 function applyColsSetting(){
