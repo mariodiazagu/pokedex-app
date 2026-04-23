@@ -1091,27 +1091,34 @@ let forcedSwitch = false;
 function openSwitch(forced=false){
   forcedSwitch = forced;
   const grid = document.getElementById('switch-grid');
-  grid.innerHTML = G.battleTeam.map((p,i) => {
+  if(!grid) return;
+
+  const chips = G.battleTeam.map((p,i) => {
     const hp = G.playerHPs[i];
     const maxHP = calcMaxHP(p);
     const isFainted = hp <= 0;
     const isActive = !forced && i === G.playerIdx;
-    const disabled = isFainted || isActive;
-    return `<div class="switch-chip${isActive?' active':''}${isFainted?' fainted':''}" data-idx="${i}" data-disabled="${disabled}">
+    const canSelect = !isFainted && !isActive;
+    return {p, i, hp, maxHP, isFainted, isActive, canSelect};
+  });
+
+  grid.innerHTML = chips.map(({p,i,hp,maxHP,isFainted,isActive,canSelect}) => `
+    <div class="switch-chip${isActive?' active':''}${isFainted?' fainted':''}"
+      style="cursor:${canSelect?'pointer':'not-allowed'};opacity:${isFainted?'.35':'1'}"
+      data-switch-idx="${i}" data-can-select="${canSelect}">
       <img src="${POKE_PX(p.id)}" onerror="this.src='${POKE_ART(p.id)}'">
       <span>${cap(p.name)}</span>
-      <span class="shp">${isFainted?'Debilitado':Math.max(0,hp)+'/'+maxHP}</span>
-    </div>`;
-  }).join('');
+      <span class="shp">${isFainted?'Debilitado':hp+'/'+maxHP}</span>
+    </div>`).join('');
 
-  // Use event delegation — more reliable on mobile
-  grid.onclick = (e) => {
-    const chip = e.target.closest('.switch-chip');
-    if(!chip) return;
-    if(chip.dataset.disabled === 'true') return;
-    const idx = parseInt(chip.dataset.idx);
-    if(!isNaN(idx)) doSwitch(idx);
-  };
+  // Clear old handler and add fresh one
+  const newGrid = grid.cloneNode(true);
+  grid.parentNode.replaceChild(newGrid, grid);
+  newGrid.addEventListener('click', e => {
+    const chip = e.target.closest('[data-switch-idx]');
+    if(!chip || chip.dataset.canSelect !== 'true') return;
+    doSwitch(parseInt(chip.dataset.switchIdx));
+  });
 
   document.getElementById('switch-cancel').style.display = forced ? 'none' : 'block';
   showScreen('s-switch');
@@ -1123,17 +1130,15 @@ function closeSwitch(){
 }
 
 function doSwitch(idx){
+  if(isNaN(idx) || idx < 0 || idx >= G.battleTeam.length) return;
+  if(G.playerHPs[idx] <= 0) return; // can't switch to fainted
   G.playerIdx = idx;
   showScreen('s-battle');
   updateBattleUI();
   const p = G.battleTeam[idx];
   setLog(`¡Vamos, <span>${cap(p.name)}</span>!`);
-  // After forced switch enemy doesn't attack again
   if(!forcedSwitch){
-    // Enemy attacks on switch
-    setTimeout(()=>{
-      enemyTurn();
-    }, 1000);
+    setTimeout(()=>{ enemyTurn(); }, 1000);
   } else {
     forcedSwitch = false;
     G.busy = false;
