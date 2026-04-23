@@ -48,7 +48,7 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
 body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
-#app{display:flex;flex-direction:column;height:100dvh}
+#app{display:none;flex-direction:column;height:100dvh}
 
 /* ── HEADER ── */
 .hdr{
@@ -4002,9 +4002,7 @@ document.getElementById(‘sx’).classList.toggle(‘on’, !!S.f.q);
 renderGrid();
 });
 
-// Always start with password gate — onAuthStateChanged handles the rest
-document.getElementById(‘app’).style.display=‘none’;
-document.getElementById(‘auth-screen’).classList.remove(‘hidden’);
+// App is hidden by CSS default, auth screen visible by CSS default
 setTimeout(()=>document.getElementById(‘pw-input’)?.focus(),100);
 })();
 
