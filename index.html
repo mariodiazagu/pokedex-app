@@ -3697,10 +3697,26 @@ async function openMdl(id){
   const forms=await fetchForms(id);
   if(S.mId===id){
     S.mForms=forms;
+
+    // If coming from fav tab, pre-select the matching fav variant
+    if(S.tab==='fav'&&forms.length>0){
+      // Find if there's a fav with a formId for this pokemon
+      const favKey=[...S.favs].find(k=>{
+        const parts=String(k).split('_');
+        return parseInt(parts[0])===id && parts.length>1;
+      });
+      if(favKey){
+        const formId=parseInt(String(favKey).split('_')[1]);
+        const form=forms.find(f=>f.id===formId);
+        if(form){
+          S.mPreviewForm=form;
+          _vpPoke=id;_vpForm=formId;_vpShiny=false;
+        }
+      }
+    }
+
     buildMdl(base,forms);
-    // Init picker on base form without changing preview
-    _vpPoke=id;_vpForm=id;_vpShiny=false;
-    _refreshPickerButtons(id,id,false);
+    _refreshPickerButtons(id,_vpForm,false);
   }
 }
 function closeMdl(){document.getElementById('ov').classList.remove('on');document.body.style.overflow='';}
