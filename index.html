@@ -2935,7 +2935,109 @@ const inTm=id=>GAMES.some(g=>(S.teams[g.id]||[]).some(s=>s.pokeId===id));
 const inTmSlot=(pokeId,formId,isShiny)=>GAMES.some(g=>(S.teams[g.id]||[]).some(s=>s.pokeId===pokeId&&String(s.formId||s.pokeId)===String(formId||pokeId)&&!!s.isShiny===!!isShiny));
 const tDef=()=>({captured:false,shiny:false,inBox:false,notes:'',ball:null,level:null});
 
-// ── EVOLUTION CHAIN ──
+// ── MEW EASTER EGG ──
+let _mewTaps = 0;
+let _mewTimer = null;
+
+function mewTap(){
+  _mewTaps++;
+  clearTimeout(_mewTimer);
+  _mewTimer = setTimeout(()=>{ _mewTaps=0; }, 2000);
+
+  // Wiggle on each tap
+  const img = document.getElementById('mimg');
+  if(img){ img.style.transform='scale(1.15)'; setTimeout(()=>img.style.transform='',150); }
+
+  if(_mewTaps >= 10){
+    _mewTaps = 0;
+    clearTimeout(_mewTimer);
+    triggerMewEgg();
+  }
+}
+
+async function triggerMewEgg(){
+  const img = document.getElementById('mimg');
+  if(!img) return;
+
+  // Flash white
+  const flash = document.createElement('div');
+  flash.style.cssText = 'position:fixed;inset:0;background:white;z-index:9999;opacity:0;transition:opacity .15s;pointer-events:none';
+  document.body.appendChild(flash);
+  requestAnimationFrame(()=>{ flash.style.opacity='1'; });
+  await new Promise(r=>setTimeout(r,200));
+  flash.style.opacity='0';
+  setTimeout(()=>flash.remove(), 300);
+
+  // Transform into random captured pokemon
+  const capturedIds = Object.keys(S.track).filter(id=>{
+    try{ return Object.values(S.track[id]).some(g=>g?.captured) && parseInt(id)!==151; }catch{ return false; }
+  }).map(id=>parseInt(id)).filter(id=>!isNaN(id));
+
+  if(capturedIds.length > 0){
+    const randId = capturedIds[Math.floor(Math.random()*capturedIds.length)];
+    const randPoke = S.poke.find(p=>p.id===randId);
+    img.style.transition = 'all .3s';
+    img.style.filter = 'brightness(0) invert(1)';
+    await new Promise(r=>setTimeout(r,300));
+    img.src = iPx(randId);
+    img.style.filter = '';
+    img.style.transform = 'scale(1.3)';
+
+    // Show transformation message
+    const tMsg = document.createElement('div');
+    tMsg.style.cssText = 'position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;color:var(--t3);white-space:nowrap;animation:fadeout 2s forwards';
+    tMsg.textContent = `Transformado en ${randPoke?cap(randPoke.name):'???'}`;
+    img.parentElement.style.position='relative';
+    img.parentElement.appendChild(tMsg);
+
+    await new Promise(r=>setTimeout(r,2000));
+
+    // Transform back to Mew
+    img.style.filter = 'brightness(0) invert(1)';
+    await new Promise(r=>setTimeout(r,300));
+    img.src = iPx(151);
+    img.style.filter = '';
+    img.style.transform = '';
+    tMsg.remove();
+
+    // Golden particles
+    for(let i=0;i<12;i++){
+      const p=document.createElement('div');
+      const angle=Math.random()*360;
+      const dist=40+Math.random()*60;
+      p.style.cssText=`position:absolute;width:6px;height:6px;border-radius:50%;background:var(--gold);top:50%;left:50%;pointer-events:none;transition:all .8s ease-out;transform:translate(-50%,-50%);z-index:10`;
+      img.parentElement.appendChild(p);
+      requestAnimationFrame(()=>{
+        p.style.transform=`translate(calc(-50% + ${Math.cos(angle)*dist}px),calc(-50% + ${Math.sin(angle)*dist}px))`;
+        p.style.opacity='0';
+      });
+      setTimeout(()=>p.remove(), 900);
+    }
+  }
+
+  // Secret message
+  await new Promise(r=>setTimeout(r,500));
+  const msg = document.createElement('div');
+  msg.style.cssText = `
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.8);
+    background:var(--s1);border:2px solid var(--gold);border-radius:20px;
+    padding:24px 32px;z-index:9999;text-align:center;
+    box-shadow:0 8px 40px rgba(0,0,0,.3);
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);opacity:0;
+  `;
+  msg.innerHTML = `
+    <div style="font-size:32px;margin-bottom:8px">✨</div>
+    <div style="font-family:'Press Start 2P',monospace;font-size:9px;color:var(--gold);margin-bottom:12px;letter-spacing:1px">DATOS ANCESTRALES<br>DESBLOQUEADOS</div>
+    <div style="font-size:16px;font-weight:900;color:var(--t1);line-height:1.5">Enhorabuena,<br>eres perfectx</div>
+    <div style="font-size:11px;color:var(--t3);margin-top:8px">— Mew 🌟</div>
+    <button onclick="this.parentElement.remove()" style="margin-top:16px;padding:8px 20px;border-radius:20px;border:none;background:var(--gold);color:#fff;font-weight:800;font-size:12px;cursor:pointer;font-family:var(--fn)">✨ Gracias</button>
+  `;
+  document.body.appendChild(msg);
+  requestAnimationFrame(()=>{
+    msg.style.opacity='1';
+    msg.style.transform='translate(-50%,-50%) scale(1)';
+  });
+}
 const evoCache = {};
 
 async function fetchEvoChain(pokeId){
@@ -4137,7 +4239,7 @@ function buildMdl(base,forms){
       <button class="shbtn${ps?' on':''}" id="shbtn-hero" onclick="toggleShy()" title="Ver forma shiny">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="${ps?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="${ps?'currentColor':'none'}"/></svg>
       </button>
-      <div class="hwrap"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="this.src=''"></div>
+      <div class="hwrap"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="this.src=''" onclick="${base.id===151?'mewTap()':''}"></div>
       <div class="hname">${cap(base.name)}</div>
       ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}${ps?' ✦':''}</div>`:ps?`<div class="hform" style="color:var(--gold)">✦ Shiny</div>`:''}
       <div class="hrar" style="background:${rar.d}18;border-color:${rar.d}55;color:${rar.d}"><span class="hrardot" style="background:${rar.d}"></span>${rar.l}</div>
