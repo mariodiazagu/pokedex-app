@@ -2952,10 +2952,13 @@ async function fetchEvoChain(pokeId){
 
     // Parse chain into flat array of stages
     const stages = [];
-    function parseChain(node, stage=0){
+    function parseChain(node, stage=0, minLevel=null){
       const id = parseInt(node.species.url.split('/').filter(Boolean).pop());
-      stages.push({id, name: node.species.name, stage});
-      (node.evolves_to||[]).forEach(n => parseChain(n, stage+1));
+      stages.push({id, name: node.species.name, stage, minLevel});
+      (node.evolves_to||[]).forEach(n => {
+        const lvl = n.evolution_details?.[0]?.min_level || null;
+        parseChain(n, stage+1, lvl);
+      });
     }
     parseChain(cd.chain);
     evoCache[pokeId] = stages;
@@ -2966,7 +2969,6 @@ async function fetchEvoChain(pokeId){
 function renderEvoChain(stages, currentId){
   if(!stages || stages.length <= 1) return '';
 
-  // Group by stage
   const byStage = {};
   stages.forEach(s => {
     if(!byStage[s.stage]) byStage[s.stage] = [];
@@ -2975,42 +2977,51 @@ function renderEvoChain(stages, currentId){
   const stageGroups = Object.values(byStage);
 
   const nodes = stageGroups.map((group, gi) => {
-    const pokes = group.map(({id, name}) => {
+    const pokes = group.map(({id, name, minLevel}) => {
       const isCurrent = id === currentId;
       const isCap = Object.keys(S.track).some(k =>
         parseInt(String(k).split('_')[0]) === id &&
         Object.values(S.track[k]).some(g => g?.captured)
       );
       const isFav = [...S.favs].some(k => parseInt(String(k).split('_')[0]) === id);
-      return `<div onclick="if(${id}!==${currentId})openMdl(${id})" style="
-        display:flex;flex-direction:column;align-items:center;gap:4px;
+      const p = S.poke.find(x => x.id === id);
+      const typeColor = p ? tc(p.types[0]) : 'var(--ac)';
+      const r2=parseInt(typeColor.slice(1,3)||'7B',16);
+      const g3=parseInt(typeColor.slice(3,5)||'52',16);
+      const b2=parseInt(typeColor.slice(5,7)||'AB',16);
+
+      return `<div onclick="if(${id}!==${currentId}){closeMdl();setTimeout(()=>openMdl(${id}),150)}" style="
+        display:flex;flex-direction:column;align-items:center;gap:6px;
         cursor:${isCurrent?'default':'pointer'};
       ">
         <div style="
-          border-radius:12px;padding:6px;
-          background:${isCap?'rgba(107,203,139,.12)':'var(--bg)'};
-          border:2px solid ${isCurrent?'var(--ac)':isCap?'var(--green)':'var(--bd)'};
-          position:relative;
+          border-radius:16px;padding:10px;width:80px;height:80px;
+          display:flex;align-items:center;justify-content:center;
+          background:linear-gradient(135deg,rgba(${r2},${g3},${b2},0.25),rgba(${r2},${g3},${b2},0.08));
+          border:2.5px solid ${isCurrent?typeColor:isCap?'var(--green)':'var(--bd)'};
+          box-shadow:${isCurrent?`0 4px 16px rgba(${r2},${g3},${b2},0.35)`:'none'};
+          position:relative;transition:all .15s;
         ">
-          <img src="${iPx(id)}" style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated" onerror="this.src='${iArt(id)}'">
-          ${isFav?`<div style="position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center"><svg width="8" height="8" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>`:''}
-          ${isCap?`<div style="position:absolute;bottom:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>`:''}
+          <img src="${iPx(id)}" style="width:58px;height:58px;object-fit:contain;image-rendering:pixelated" onerror="this.src='${iArt(id)}'">
+          ${isCap?`<div style="position:absolute;bottom:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--green);border:2px solid var(--s1);display:flex;align-items:center;justify-content:center"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>`:''}
+          ${isFav?`<div style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid var(--s1);display:flex;align-items:center;justify-content:center"><svg width="9" height="9" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>`:''}
         </div>
-        <span style="font-size:9px;font-weight:700;color:${isCurrent?'var(--ac)':'var(--t2)'};text-align:center">${cap(name)}</span>
+        <span style="font-size:10px;font-weight:${isCurrent?'900':'700'};color:${isCurrent?typeColor:'var(--t2)'};text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cap(name)}</span>
       </div>`;
-    }).join('<div style="display:flex;align-items:center;color:var(--t3);font-size:16px;padding:0 2px;margin-bottom:16px">›</div>');
+    }).join('<div style="display:flex;align-items:center;color:var(--t3);font-size:20px;padding:0 4px;margin-top:-16px">›</div>');
 
     const arrow = gi < stageGroups.length-1 ? `
-      <div style="display:flex;align-items:center;padding:0 6px;margin-bottom:16px">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 8px;margin-top:-16px">
+        <span style="font-size:9px;font-weight:700;color:var(--t3)">${stages[gi+1]?.minLevel?'Nv.'+stages[gi+1].minLevel:''}</span>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>` : '';
 
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px">${pokes}</div>${arrow}`;
+    return `<div style="display:flex;flex-direction:column;align-items:center">${pokes}</div>${arrow}`;
   }).join('');
 
-  return `<div style="padding:12px 16px 0">
-    <div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Cadena evolutiva</div>
-    <div style="display:flex;align-items:flex-end;overflow-x:auto;padding-bottom:4px;gap:4px">
+  return `<div style="padding:14px 16px 0">
+    <div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Cadena evolutiva</div>
+    <div style="display:flex;align-items:center;overflow-x:auto;padding-bottom:8px;gap:0;scrollbar-width:none">
       ${nodes}
     </div>
   </div>`;
