@@ -349,14 +349,14 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 .tslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 10px;flex-shrink:0}
 .tslot{
   border-radius:var(--r-lg);border:2px dashed var(--bd);
-  background:var(--bg);aspect-ratio:1;
+  background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  cursor:pointer;position:relative;transition:all .15s;padding:6px;
-  max-height:120px;
+  cursor:pointer;position:relative;transition:all .15s;padding:10px 6px 8px;
+  min-height:110px;
 }
 .tslot.filled{border-style:solid;border-color:var(--bd);}
 .tslot.filled:active{transform:scale(.97);}
-.tslot-img{width:44px;height:44px;object-fit:contain;image-rendering:pixelated;}
+.tslot-img{width:56px;height:56px;object-fit:contain;image-rendering:pixelated;}
 .tslot-name{font-size:9px;font-weight:700;color:var(--t2);text-align:center;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
 .tslot-rm{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;
   background:var(--s3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -824,7 +824,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
   <!-- 3x2 team slots -->
   <div class="gscroll" style="flex:1;min-height:0">
   <div style="padding:0 16px;margin-bottom:4px">
-    <div id="tslots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:400px"></div>
+    <div id="tslots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
   </div>
 
   <!-- Captured pokemon toggle -->
@@ -2935,6 +2935,87 @@ const inTm=id=>GAMES.some(g=>(S.teams[g.id]||[]).some(s=>s.pokeId===id));
 const inTmSlot=(pokeId,formId,isShiny)=>GAMES.some(g=>(S.teams[g.id]||[]).some(s=>s.pokeId===pokeId&&String(s.formId||s.pokeId)===String(formId||pokeId)&&!!s.isShiny===!!isShiny));
 const tDef=()=>({captured:false,shiny:false,inBox:false,notes:'',ball:null,level:null});
 
+// ── EVOLUTION CHAIN ──
+const evoCache = {};
+
+async function fetchEvoChain(pokeId){
+  if(evoCache[pokeId]) return evoCache[pokeId];
+  try{
+    // First get species to find evo chain URL
+    const sr = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokeId}`);
+    const sd = await sr.json();
+    const chainUrl = sd.evolution_chain?.url;
+    if(!chainUrl) return [];
+
+    const cr = await fetch(chainUrl);
+    const cd = await cr.json();
+
+    // Parse chain into flat array of stages
+    const stages = [];
+    function parseChain(node, stage=0){
+      const id = parseInt(node.species.url.split('/').filter(Boolean).pop());
+      stages.push({id, name: node.species.name, stage});
+      (node.evolves_to||[]).forEach(n => parseChain(n, stage+1));
+    }
+    parseChain(cd.chain);
+    evoCache[pokeId] = stages;
+    return stages;
+  } catch(e){ return []; }
+}
+
+function renderEvoChain(stages, currentId){
+  if(!stages || stages.length <= 1) return '';
+
+  // Group by stage
+  const byStage = {};
+  stages.forEach(s => {
+    if(!byStage[s.stage]) byStage[s.stage] = [];
+    byStage[s.stage].push(s);
+  });
+  const stageGroups = Object.values(byStage);
+
+  const nodes = stageGroups.map((group, gi) => {
+    const pokes = group.map(({id, name}) => {
+      const isCurrent = id === currentId;
+      const isCap = Object.keys(S.track).some(k =>
+        parseInt(String(k).split('_')[0]) === id &&
+        Object.values(S.track[k]).some(g => g?.captured)
+      );
+      const isFav = [...S.favs].some(k => parseInt(String(k).split('_')[0]) === id);
+      return `<div onclick="if(${id}!==${currentId})openMdl(${id})" style="
+        display:flex;flex-direction:column;align-items:center;gap:4px;
+        cursor:${isCurrent?'default':'pointer'};
+      ">
+        <div style="
+          border-radius:12px;padding:6px;
+          background:${isCap?'rgba(107,203,139,.12)':'var(--bg)'};
+          border:2px solid ${isCurrent?'var(--ac)':isCap?'var(--green)':'var(--bd)'};
+          position:relative;
+        ">
+          <img src="${iPx(id)}" style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated" onerror="this.src='${iArt(id)}'">
+          ${isFav?`<div style="position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center"><svg width="8" height="8" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>`:''}
+          ${isCap?`<div style="position:absolute;bottom:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>`:''}
+        </div>
+        <span style="font-size:9px;font-weight:700;color:${isCurrent?'var(--ac)':'var(--t2)'};text-align:center">${cap(name)}</span>
+      </div>`;
+    }).join('<div style="display:flex;align-items:center;color:var(--t3);font-size:16px;padding:0 2px;margin-bottom:16px">›</div>');
+
+    const arrow = gi < stageGroups.length-1 ? `
+      <div style="display:flex;align-items:center;padding:0 6px;margin-bottom:16px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>` : '';
+
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px">${pokes}</div>${arrow}`;
+  }).join('');
+
+  return `<div style="padding:12px 16px 0">
+    <div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Cadena evolutiva</div>
+    <div style="display:flex;align-items:flex-end;overflow-x:auto;padding-bottom:4px;gap:4px">
+      ${nodes}
+    </div>
+  </div>`;
+}
+
 async function fetchForms(bid){
   if(S.fc[bid])return S.fc[bid];
   const base=S.poke.find(p=>p.id===bid);
@@ -3791,13 +3872,23 @@ function renderTeam(){
           :(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id))))
         :spOf(slot.pokeId,mod,slot.isShiny);
       const bg=tc(form?.types?.[0]||p.types[0]);
+      const types=(form?.types||p.types).map(t=>`<span class="tbadge" style="background:${tc(t)};font-size:8px;padding:2px 6px">${cap(t)}</span>`).join('');
+      const isFav=[...S.favs].some(k=>parseInt(String(k).split('_')[0])===p.id);
+      const isCap=Object.keys(S.track).some(k=>parseInt(String(k).split('_')[0])===p.id&&Object.values(S.track[k]).some(g=>g?.captured));
+      const icons=(isFav?'♥ ':'')+''+(isCap?'● ':'○ ');
       return`<div class="tslot filled" style="background:${bg}12;border-color:${bg}50">
         <button class="tslot-rm" onclick="event.stopPropagation();rmTeamSlot(${i},'${gid}')">
           <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-        ${slot.isShiny?`<div style="position:absolute;top:4px;left:4px;font-size:8px;color:var(--gold)">✦</div>`:''}
+        <div style="position:absolute;top:6px;left:8px;font-size:8px;font-weight:700;color:var(--t3)">#${pad(p.id)}</div>
+        <div style="position:absolute;top:5px;right:24px;display:flex;gap:3px;align-items:center">
+          ${isFav?`<svg width="9" height="9" viewBox="0 0 24 24" fill="var(--red)" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`:''}
+          ${isCap?`<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="var(--t3)"/></svg>`:''}
+        </div>
+        ${slot.isShiny?`<div style="position:absolute;top:5px;left:28px;font-size:8px;color:var(--gold)">✦</div>`:''}
         <img class="tslot-img" src="${sp}" onerror="this.src='${iPx(slot.pokeId)}'">
         <div class="tslot-name">${cap(p.name)}</div>
+        <div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;justify-content:center">${types}</div>
       </div>`;
     }).join('');
   }
@@ -3941,13 +4032,18 @@ async function openMdl(id){
   buildMdl(base,[]);
   document.getElementById('ov').classList.add('on');
   document.body.style.overflow='hidden';
-  const forms=await fetchForms(id);
+
+  // Fetch forms and evo chain in parallel
+  const [forms, evoStages] = await Promise.all([
+    fetchForms(id),
+    fetchEvoChain(id),
+  ]);
+
   if(S.mId===id){
     S.mForms=forms;
 
-    // If coming from fav tab, pre-select the matching fav variant
+    // Pre-select fav variant if coming from fav tab
     if(S.tab==='fav'&&forms.length>0){
-      // Find fav key for this pokemon that has a specific form
       const favKey=[...S.favs].find(k=>{
         const parts=String(k).split('_');
         return parseInt(parts[0])===id && parts.length>1;
@@ -3955,19 +4051,25 @@ async function openMdl(id){
       if(favKey){
         const formId=parseInt(String(favKey).split('_')[1]);
         const form=forms.find(f=>f.id===formId);
-        if(form){
-          S.mPreviewForm=form;
-          _vpPoke=id;_vpForm=formId;_vpShiny=false;
-        }
+        if(form){ S.mPreviewForm=form; _vpPoke=id; _vpForm=formId; _vpShiny=false; }
       } else {
-        // No variant fav — keep base form selected
-        S.mPreviewForm=null;
-        _vpPoke=id;_vpForm=id;_vpShiny=false;
+        S.mPreviewForm=null; _vpPoke=id; _vpForm=id; _vpShiny=false;
       }
     }
 
-    buildMdl(base,forms);
-    _refreshPickerButtons(id,_vpForm,false);
+    buildMdl(base, forms);
+    _refreshPickerButtons(id, _vpForm, false);
+
+    // Inject evo chain
+    const evoHTML = renderEvoChain(evoStages, id);
+    if(evoHTML){
+      const descEl = document.querySelector('#mbody .hdesc');
+      if(descEl) descEl.insertAdjacentHTML('afterend', evoHTML);
+      else{
+        const qrow = document.getElementById('qfav')?.closest('.qrow');
+        if(qrow) qrow.insertAdjacentHTML('beforebegin', evoHTML);
+      }
+    }
   }
 }
 function closeMdl(){document.getElementById('ov').classList.remove('on');document.body.style.overflow='';}
