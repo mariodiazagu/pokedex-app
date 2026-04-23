@@ -351,7 +351,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
   border-radius:var(--r-lg);border:2px dashed var(--bd);
   background:var(--bg);aspect-ratio:1;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  cursor:pointer;position:relative;transition:all .15s;padding:8px;
+  cursor:pointer;position:relative;transition:all .15s;padding:6px;
+  max-height:120px;
 }
 .tslot.filled{border-style:solid;border-color:var(--bd);}
 .tslot.filled:active{transform:scale(.97);}
@@ -823,7 +824,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
   <!-- 3x2 team slots -->
   <div class="gscroll" style="flex:1;min-height:0">
   <div style="padding:0 16px;margin-bottom:4px">
-    <div id="tslots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+    <div id="tslots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:400px"></div>
   </div>
 
   <!-- Captured pokemon toggle -->
