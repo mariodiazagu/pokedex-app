@@ -411,9 +411,12 @@ let G = {
 // ─────────────────────────────────────────
 function loadFromStorage(){
   try{
-    const raw = localStorage.getItem('pkp_S');
-    if(!raw) return null;
-    return JSON.parse(raw);
+    const track = JSON.parse(localStorage.getItem('t') || '{}');
+    const favs = JSON.parse(localStorage.getItem('fv') || '[]');
+    const teams = JSON.parse(localStorage.getItem('tms') || '{}');
+    const set = JSON.parse(localStorage.getItem('st') || '{}');
+    if(Object.keys(track).length === 0 && favs.length === 0) return null;
+    return { track, favs, teams, set };
   } catch(e){ return null; }
 }
 
@@ -999,16 +1002,8 @@ function endBattle(playerWon){
   if(playerWon){ G.wins++; } else { G.losses++; }
   saveStats();
 
-  // Save back to main storage
-  try{
-    const raw = localStorage.getItem('pkp_S');
-    if(raw){
-      const S = JSON.parse(raw);
-      S.battleWins = G.wins;
-      S.battleLosses = G.losses;
-      localStorage.setItem('pkp_S', JSON.stringify(S));
-    }
-  } catch(e){}
+  // Save battle stats to dedicated key
+  localStorage.setItem('pkp_battleStats', JSON.stringify({wins:G.wins, losses:G.losses}));
 
   setTimeout(()=>{
     document.getElementById('result-icon').textContent = playerWon ? '🏆' : '💀';
