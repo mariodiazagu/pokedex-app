@@ -117,7 +117,25 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--fn)
 .battle-btn{padding:12px;border-radius:10px;border:2px solid var(--bd);background:var(--s1);color:var(--t1);font-family:var(--fn);font-size:12px;font-weight:800;cursor:pointer;transition:all .13s;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .battle-btn:active:not(:disabled){transform:scale(.96);}
 .battle-btn:disabled{opacity:.3;cursor:not-allowed;}
-.battle-btn.attack{border-color:var(--ac)55;background:rgba(232,24,74,.1);}
+.battle-btn.attack{border-color:var(--move-color, var(--ac))55;background:rgba(var(--move-rgb, 232,24,74),.1);color:var(--move-color, var(--t1));}
+.battle-btn.m-normal{--move-color:#919aa2;--move-rgb:145,154,162}
+.battle-btn.m-fire{--move-color:#ff9c54;--move-rgb:255,156,84}
+.battle-btn.m-water{--move-color:#4d90d5;--move-rgb:77,144,213}
+.battle-btn.m-grass{--move-color:#63bb5b;--move-rgb:99,187,91}
+.battle-btn.m-electric{--move-color:#f3d23b;--move-rgb:243,210,59}
+.battle-btn.m-ice{--move-color:#74cec0;--move-rgb:116,206,192}
+.battle-btn.m-fighting{--move-color:#ce4069;--move-rgb:206,64,105}
+.battle-btn.m-poison{--move-color:#ab6ac8;--move-rgb:171,106,200}
+.battle-btn.m-ground{--move-color:#d97746;--move-rgb:217,119,70}
+.battle-btn.m-flying{--move-color:#89aae3;--move-rgb:137,170,227}
+.battle-btn.m-psychic{--move-color:#f97176;--move-rgb:249,113,118}
+.battle-btn.m-bug{--move-color:#90c12c;--move-rgb:144,193,44}
+.battle-btn.m-rock{--move-color:#c9bb8a;--move-rgb:201,187,138}
+.battle-btn.m-ghost{--move-color:#5269ac;--move-rgb:82,105,172}
+.battle-btn.m-dragon{--move-color:#0a6dc4;--move-rgb:10,109,196}
+.battle-btn.m-dark{--move-color:#5a5366;--move-rgb:90,83,102}
+.battle-btn.m-steel{--move-color:#5a8ea2;--move-rgb:90,142,162}
+.battle-btn.m-fairy{--move-color:#ec8fe6;--move-rgb:236,143,230}
 .battle-btn.switch{border-color:var(--blue)55;background:rgba(96,165,250,.08);}
 .battle-btn.forfeit{border-color:var(--bd);grid-column:span 2;}
 .battle-btn-sub{font-size:9px;color:var(--t3);font-weight:600;}
@@ -203,27 +221,27 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--fn)
   <p class="diff-sub">El equipo rival se ajusta a tu BST promedio</p>
   <div class="diff-cards">
     <div class="diff-card easy" onclick="startBattle('easy')">
-      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/youngster.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/19.png'">
+      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/youngster.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/19.png'">
       <div class="diff-info">
         <div class="diff-name easy">FÁCIL</div>
         <div class="diff-trainer-name">Joven Joey</div>
-        <div class="diff-desc">BST rival −25% · Stats −15% · IA básica</div>
+        <div class="diff-desc">BST −25% · Stats −15% · IA básica</div>
       </div>
     </div>
     <div class="diff-card medium" onclick="startBattle('medium')">
-      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/red.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png'">
+      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/red.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png'">
       <div class="diff-info">
         <div class="diff-name medium">MEDIO</div>
         <div class="diff-trainer-name">Red</div>
-        <div class="diff-desc">BST rival similar · Stats normales · IA normal</div>
+        <div class="diff-desc">BST similar · Stats normales · IA inteligente</div>
       </div>
     </div>
     <div class="diff-card hard" onclick="startBattle('hard')">
-      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/cynthia.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/445.png'">
+      <img class="diff-trainer-img" src="https://play.pokemonshowdown.com/sprites/trainers/cynthia.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/445.png'">
       <div class="diff-info">
         <div class="diff-name hard">DIFÍCIL</div>
         <div class="diff-trainer-name">Cynthia</div>
-        <div class="diff-desc">BST rival +15% · Stats +20% · IA agresiva</div>
+        <div class="diff-desc">BST +15% · Stats +20% · IA muy agresiva</div>
       </div>
     </div>
   </div>
@@ -264,18 +282,23 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--fn)
     </div>
   </div>
 
-  <div class="battle-actions" id="battle-actions">
-    <button class="battle-btn attack" onclick="playerAttack()" id="btn-attack">
-      ⚔️ Atacar
-      <span class="battle-btn-sub" id="btn-attack-sub">—</span>
-    </button>
-    <button class="battle-btn switch" onclick="openSwitch()" id="btn-switch">
-      🔄 Cambiar
-      <span class="battle-btn-sub" id="btn-switch-sub">— Pokémon</span>
-    </button>
-    <button class="battle-btn forfeit" onclick="forfeit()">
-      🏳️ Rendirse
-    </button>
+  <!-- Mode selector: moves or switch/forfeit -->
+  <div id="battle-actions" style="padding:0 12px 12px;flex-shrink:0">
+    <!-- 4 move buttons -->
+    <div id="move-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+      <button class="battle-btn attack" id="move-0" onclick="playerAttackMove(0)">—<span class="battle-btn-sub" id="move-type-0"></span></button>
+      <button class="battle-btn attack" id="move-1" onclick="playerAttackMove(1)">—<span class="battle-btn-sub" id="move-type-1"></span></button>
+      <button class="battle-btn attack" id="move-2" onclick="playerAttackMove(2)">—<span class="battle-btn-sub" id="move-type-2"></span></button>
+      <button class="battle-btn attack" id="move-3" onclick="playerAttackMove(3)">—<span class="battle-btn-sub" id="move-type-3"></span></button>
+    </div>
+    <!-- Switch + Forfeit row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <button class="battle-btn switch" onclick="openSwitch()" id="btn-switch">
+        🔄 Cambiar
+        <span class="battle-btn-sub" id="btn-switch-sub">— Pokémon</span>
+      </button>
+      <button class="battle-btn forfeit" onclick="forfeit()">🏳️ Rendirse</button>
+    </div>
   </div>
 </div>
 
@@ -374,19 +397,27 @@ async function fetchPokemon(id){
   }
 }
 
+const moveCache = {};
 async function fetchMove(name){
+  if(moveCache[name]) return moveCache[name];
   try{
     const r = await fetch(`https://pokeapi.co/api/v2/move/${name}`);
     const d = await r.json();
-    return {
-      name: d.name,
+    // Get Spanish name
+    const esName = d.names?.find(n => n.language.name === 'es')?.name || 
+                   d.names?.find(n => n.language.name === 'en')?.name ||
+                   name;
+    moveCache[name] = {
+      name,
+      nameEs: esName,
       type: d.type.name,
       power: d.power || 40,
       accuracy: d.accuracy || 100,
-      category: d.damage_class.name, // physical/special/status
+      category: d.damage_class.name,
     };
+    return moveCache[name];
   } catch(e){
-    return {name, type:'normal', power:40, accuracy:100, category:'physical'};
+    return {name, nameEs:name, type:'normal', power:40, accuracy:100, category:'physical'};
   }
 }
 
@@ -639,13 +670,14 @@ async function startBattle(diff){
   for(const p of G.battleTeam){
     if(!p._movesLoaded){
       p._moves = [];
-      const moveNames = p.moves.slice(0,4);
+      // Try more moves to find 4 good ones
+      const moveNames = p.moves.slice(0, 12);
       for(const mn of moveNames){
+        if(p._moves.length >= 4) break;
         const m = await fetchMove(mn);
         if(m.power > 0 && m.category !== 'status') p._moves.push(m);
       }
-      // Ensure at least one move
-      if(p._moves.length === 0) p._moves.push({name:'tackle',type:p.types[0],power:40,accuracy:100,category:'physical'});
+      if(p._moves.length === 0) p._moves.push({name:'tackle',nameEs:'Placaje',type:p.types[0],power:40,accuracy:100,category:'physical'});
       p._movesLoaded = true;
     }
   }
@@ -723,11 +755,42 @@ function getBestMove(attacker, defender){
 function updateAttackBtn(){
   const p = G.battleTeam[G.playerIdx];
   const e = G.enemyTeam[G.enemyIdx];
-  const move = getBestMove(p, e);
-  document.getElementById('btn-attack-sub').textContent = cap(move.name.replace(/-/g,' '));
-  const aliveCount = G.battleTeam.filter((_, i) => G.playerHPs[i] > 0 && i !== G.playerIdx).length;
+  const moves = p._moves || [];
+
+  // Render 4 move buttons
+  for(let i = 0; i < 4; i++){
+    const btn = document.getElementById(`move-${i}`);
+    const typeEl = document.getElementById(`move-type-${i}`);
+    if(!btn) continue;
+    if(moves[i]){
+      const m = moves[i];
+      const capName = m.nameEs || cap(m.name.replace(/-/g,' '));
+      btn.childNodes[0].textContent = capName;
+      typeEl.textContent = `${cap(m.type)} · ${m.power}`;
+      btn.className = `battle-btn attack m-${m.type}`;
+      btn.style.display = '';
+    } else {
+      btn.style.display = moves.length > 0 ? 'none' : '';
+      if(btn.style.display !== 'none'){
+        btn.childNodes[0].textContent = '—';
+        typeEl.textContent = '';
+      }
+    }
+  }
+  const aliveCount = G.battleTeam.filter((_,i) => G.playerHPs[i] > 0 && i !== G.playerIdx).length;
   document.getElementById('btn-switch-sub').textContent = `${aliveCount} restantes`;
 }
+
+function playerAttackMove(moveIdx){
+  if(G.busy) return;
+  const p = G.battleTeam[G.playerIdx];
+  const moves = p._moves || [];
+  const move = moves[moveIdx] || getBestMove(p, G.enemyTeam[G.enemyIdx]);
+  _executePlayerTurn(move);
+}
+
+// Keep old playerAttack as fallback
+function playerAttack(){ playerAttackMove(0); }
 
 function updateBattleUI(){
   const p = G.battleTeam[G.playerIdx];
@@ -787,20 +850,15 @@ function enableActions(){ document.getElementById('battle-actions').querySelecto
 // ─────────────────────────────────────────
 // PLAYER ACTIONS
 // ─────────────────────────────────────────
-function playerAttack(){
-  if(G.busy) return;
+function _executePlayerTurn(move){
   G.busy = true;
   disableActions();
 
   const p = G.battleTeam[G.playerIdx];
   const e = G.enemyTeam[G.enemyIdx];
-  const move = getBestMove(p, e);
   const {dmg, eff} = calcDamage(p, e, move);
 
-  // Accuracy check
   const hit = Math.random() * 100 < (move.accuracy || 100);
-
-  // Determine who goes first based on speed
   const playerFirst = p.spd >= e.spd;
 
   if(playerFirst){
@@ -809,7 +867,6 @@ function playerAttack(){
       else handleEnemyFaint();
     });
   } else {
-    // Enemy attacks first
     enemyAttackFirst(() => {
       if(G.playerHPs[G.playerIdx] > 0){
         executePlayerAttack(p, e, move, dmg, eff, hit, () => {
@@ -822,7 +879,7 @@ function playerAttack(){
 }
 
 function executePlayerAttack(p, e, move, dmg, eff, hit, cb){
-  const moveName = cap(move.name.replace(/-/g,' '));
+  const moveName = cap((move.nameEs||move.name).replace(/-/g,' '));
   // Animate
   const spr = document.getElementById('spr-player');
   spr.classList.add('attack-r');
@@ -913,7 +970,7 @@ function enemyTurn(cb){
 
   const {dmg, eff} = calcDamage(e, p, move);
   const hit = Math.random() * 100 < (move.accuracy || 100);
-  const moveName = cap(move.name.replace(/-/g,' '));
+  const moveName = cap((move.nameEs||move.name).replace(/-/g,' '));
 
   const spr = document.getElementById('spr-enemy');
   spr.classList.add('attack-l');
@@ -950,7 +1007,7 @@ function enemyAttackFirst(cb){
   const move = getBestMove(e, p);
   const {dmg, eff} = calcDamage(e, p, move);
   const hit = Math.random() * 100 < (move.accuracy || 100);
-  const moveName = cap(move.name.replace(/-/g,' '));
+  const moveName = cap((move.nameEs||move.name).replace(/-/g,' '));
 
   setLog(`¡<span>${cap(e.name)}</span> es más rápido y usa <span>${moveName}</span>!`);
   const spr = document.getElementById('spr-enemy');
@@ -1011,9 +1068,8 @@ function handlePlayerFaint(){
     if(alive.length === 0){
       endBattle(false);
     } else {
-      // Force switch
       setLog('¡Debes enviar otro Pokémon!');
-      setTimeout(()=>{ G.busy=false; openSwitch(true); }, 800);
+      setTimeout(()=>{ openSwitch(true); }, 1000);
     }
   }, 600);
 }
@@ -1031,8 +1087,9 @@ function openSwitch(forced=false){
     const maxHP = calcMaxHP(p);
     const isFainted = hp <= 0;
     const isActive = i === G.playerIdx;
-    return `<div class="switch-chip${isActive?' active':''}${isFainted?' fainted':''}" onclick="${isFainted||isActive?'':''}" 
-      ${!isFainted&&!isActive?`onclick="doSwitch(${i})"`:''}>
+    const disabled = isFainted || isActive;
+    return `<div class="switch-chip${isActive?' active':''}${isFainted?' fainted':''}" 
+      ${!disabled?`onclick="doSwitch(${i})"`:''} style="${disabled?'cursor:not-allowed':''}">
       <img src="${POKE_PX(p.id)}" onerror="this.src='${POKE_ART(p.id)}'">
       <span>${cap(p.name)}</span>
       <span class="shp">${Math.max(0,hp)}/${maxHP}</span>
