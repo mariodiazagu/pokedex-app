@@ -141,7 +141,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--fn)
 .battle-btn-sub{font-size:9px;color:var(--t3);font-weight:600;}
 
 /* Switch screen overlay */
-#s-switch{background:rgba(0,0,0,.85);backdrop-filter:blur(8px);padding:20px 16px;align-items:stretch;}
+#s-switch{background:rgba(0,0,0,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:20px 16px;align-items:stretch;position:fixed;inset:0;z-index:500;display:none;flex-direction:column;}
 .switch-title{font-family:var(--px);font-size:9px;color:var(--t1);margin-bottom:16px;text-align:center;}
 .switch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
 .switch-chip{border-radius:10px;border:2px solid var(--bd);background:var(--s1);padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .13s;}
@@ -303,7 +303,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--fn)
 </div>
 
 <!-- SWITCH OVERLAY -->
-<div class="screen" id="s-switch">
+<div id="s-switch">
   <p class="switch-title">¿A QUIÉN ENVÍAS?</p>
   <div class="switch-grid" id="switch-grid"></div>
   <button class="switch-cancel" onclick="closeSwitch()">Cancelar</button>
@@ -1121,19 +1121,19 @@ function openSwitch(forced=false){
   });
 
   document.getElementById('switch-cancel').style.display = forced ? 'none' : 'block';
-  showScreen('s-switch');
+  document.getElementById('s-switch').style.display = 'flex';
 }
 
 function closeSwitch(){
   if(forcedSwitch) return;
-  showScreen('s-battle');
+  document.getElementById('s-switch').style.display = 'none';
 }
 
 function doSwitch(idx){
   if(isNaN(idx) || idx < 0 || idx >= G.battleTeam.length) return;
   if(G.playerHPs[idx] <= 0) return; // can't switch to fainted
   G.playerIdx = idx;
-  showScreen('s-battle');
+  document.getElementById('s-switch').style.display = 'none';
   updateBattleUI();
   const p = G.battleTeam[idx];
   setLog(`¡Vamos, <span>${cap(p.name)}</span>!`);
