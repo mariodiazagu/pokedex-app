@@ -85,10 +85,10 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--fn)
 .hp-num{font-size:9px;color:var(--t3);margin-top:3px;}
 
 /* Sprites */
-.battle-sprites{flex:1;position:relative;display:flex;align-items:flex-end;justify-content:space-between;padding:0 20px;min-height:140px;}
+.battle-sprites{flex:1;position:relative;display:flex;align-items:flex-end;justify-content:space-between;padding:0 20px;min-height:200px;}
 .sprite-wrap{display:flex;flex-direction:column;align-items:center;position:relative;}
 .sprite-wrap.enemy{align-self:flex-start;margin-top:10px;}
-.battle-sprite{width:96px;height:96px;object-fit:contain;image-rendering:pixelated;transition:transform .1s;}
+.battle-sprite{width:160px;height:160px;object-fit:contain;image-rendering:pixelated;transition:transform .1s;}
 .battle-sprite.shake{animation:shake .3s ease;}
 .battle-sprite.faint{animation:faint .5s forwards;}
 .sprite-status{font-size:8px;font-weight:700;padding:2px 6px;border-radius:6px;margin-top:2px;}
@@ -670,14 +670,23 @@ async function startBattle(diff){
   for(const p of G.battleTeam){
     if(!p._movesLoaded){
       p._moves = [];
-      // Try more moves to find 4 good ones
-      const moveNames = p.moves.slice(0, 12);
+      const moveNames = p.moves.slice(0, 30);
       for(const mn of moveNames){
         if(p._moves.length >= 4) break;
         const m = await fetchMove(mn);
         if(m.power > 0 && m.category !== 'status') p._moves.push(m);
       }
-      if(p._moves.length === 0) p._moves.push({name:'tackle',nameEs:'Placaje',type:p.types[0],power:40,accuracy:100,category:'physical'});
+      // Fill remaining slots with type-based fallbacks
+      const fallbacks = [
+        {name:'tackle',nameEs:'Placaje',type:'normal',power:40,accuracy:100,category:'physical'},
+        {name:'swift',nameEs:'Rapidez',type:'normal',power:60,accuracy:null,category:'special'},
+        {name:'hyper-beam',nameEs:'Hiperrayo',type:'normal',power:150,accuracy:90,category:'special'},
+        {name:'body-slam',nameEs:'Golpe Cuerpo',type:'normal',power:85,accuracy:100,category:'physical'},
+      ];
+      for(const fb of fallbacks){
+        if(p._moves.length >= 4) break;
+        if(!p._moves.some(m => m.name === fb.name)) p._moves.push(fb);
+      }
       p._movesLoaded = true;
     }
   }
@@ -1063,13 +1072,13 @@ function handlePlayerFaint(){
 
   setTimeout(()=>{
     sprP.classList.remove('faint');
-    // Check if any pokemon alive
     const alive = G.battleTeam.filter((_,i) => G.playerHPs[i] > 0 && i !== G.playerIdx);
     if(alive.length === 0){
       endBattle(false);
     } else {
-      setLog('¡Debes enviar otro Pokémon!');
-      setTimeout(()=>{ openSwitch(true); }, 1000);
+      setLog('¡Elige tu siguiente Pokémon!');
+      G.busy = false;
+      setTimeout(()=>{ openSwitch(true); }, 800);
     }
   }, 600);
 }
@@ -1086,13 +1095,14 @@ function openSwitch(forced=false){
     const hp = G.playerHPs[i];
     const maxHP = calcMaxHP(p);
     const isFainted = hp <= 0;
-    const isActive = i === G.playerIdx;
+    // When forced (after faint), current slot is now empty — don't mark as active
+    const isActive = !forced && i === G.playerIdx;
     const disabled = isFainted || isActive;
     return `<div class="switch-chip${isActive?' active':''}${isFainted?' fainted':''}" 
-      ${!disabled?`onclick="doSwitch(${i})"`:''} style="${disabled?'cursor:not-allowed':''}">
+      ${!disabled?`onclick="doSwitch(${i})"`:''}>
       <img src="${POKE_PX(p.id)}" onerror="this.src='${POKE_ART(p.id)}'">
       <span>${cap(p.name)}</span>
-      <span class="shp">${Math.max(0,hp)}/${maxHP}</span>
+      <span class="shp">${isFainted?'Debilitado':Math.max(0,hp)+'/'+maxHP}</span>
     </div>`;
   }).join('');
   document.getElementById('switch-cancel').style.display = forced ? 'none' : 'block';
@@ -1154,6 +1164,8 @@ function rematch(){
   G.playerIdx = 0;
   G.enemyIdx = 0;
   G.playerHPs = G.battleTeam.map(p => calcMaxHP(p));
+  // Reset moves so they reload with fresh data
+  G.battleTeam.forEach(p => { p._movesLoaded = false; p._moves = []; });
   showScreen('s-diff');
 }
 
