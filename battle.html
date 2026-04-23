@@ -415,9 +415,11 @@ function loadFromStorage(){
     const favs = JSON.parse(localStorage.getItem('fv') || '[]');
     const teams = JSON.parse(localStorage.getItem('tms') || '{}');
     const set = JSON.parse(localStorage.getItem('st') || '{}');
-    if(Object.keys(track).length === 0 && favs.length === 0) return null;
     return { track, favs, teams, set };
-  } catch(e){ return null; }
+  } catch(e){ 
+    console.error('Storage error:', e);
+    return null; 
+  }
 }
 
 function saveBattleTeam(ids){
@@ -460,6 +462,7 @@ async function init(){
   setLoad(10, 'Leyendo Pokédex...');
 
   const S = loadFromStorage();
+  console.log('Storage loaded:', S ? 'OK' : 'NULL');
   if(!S){ setLoad(100,'Error: no hay datos'); return; }
 
   // Gather captured pokemon ids
@@ -468,6 +471,8 @@ async function init(){
     const baseId = parseInt(String(pid).split('_')[0]);
     if(Object.values(S.track[pid]).some(g => g?.captured)) capturedIds.add(baseId);
   });
+
+  console.log('Captured IDs:', capturedIds.size);
 
   if(capturedIds.size === 0){
     setLoad(100, 'Sin Pokémon capturados');
