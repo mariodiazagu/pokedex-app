@@ -794,6 +794,14 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
       </div>
     </div>
   </div>
+  <!-- Search bar -->
+  <div style="padding:0 16px 8px;position:relative">
+    <svg style="position:absolute;left:26px;top:50%;transform:translateY(-50%);color:var(--t3)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="fav-search" type="search" placeholder="Buscar favorito..." oninput="renderFav()"
+      style="width:100%;padding:9px 12px 9px 34px;border-radius:var(--r-md);border:1.5px solid var(--bd);background:var(--s1);font-family:var(--fn);font-size:13px;color:var(--t1);outline:none">
+  </div>
+  <!-- Rarity filter -->
+  <div class="frow" id="fav-rrow" style="padding:0 16px 4px;gap:6px;display:flex;flex-wrap:wrap"></div>
   <div class="frow" id="fav-grow"></div>
   <div class="frow" id="fav-trow"></div>
   <div class="gscroll" id="fscroll"></div>
@@ -2649,7 +2657,7 @@ const S={
   desc:{},
   mPreviewForm:null,
   mPreviewShiny:false,
-  ff:{gen:0,types:[]}, // fav filters
+  ff:{gen:0,types:[],rarity:''}, // fav filters
 };
 
 // ═══════════════════════════════════════
@@ -3786,6 +3794,7 @@ function toggleFav(key){
 function renderFavFilters(){
   const grow=document.getElementById('fav-grow');
   const trow=document.getElementById('fav-trow');
+  const rrow=document.getElementById('fav-rrow');
   if(!grow||!trow)return;
 
   grow.innerHTML=`<div class="fi">
@@ -3803,9 +3812,15 @@ function renderFavFilters(){
       </button>`;
     }).join('')}
   </div>`;
+
+  if(rrow){
+    const rars=[{id:'',l:'Todos'},{id:'normal',l:'Normal'},{id:'legendary',l:'Legendario'},{id:'mythical',l:'Mítico'},{id:'paradox',l:'Paradoja'},{id:'ultrabeast',l:'Ultra Ente'}];
+    rrow.innerHTML=`<div class="fi">${rars.map(r=>`<button class="pill${(S.ff.rarity||'')===(r.id)?' on':''}" onclick="setFavRarity('${r.id}')">${r.l}</button>`).join('')}</div>`;
+  }
 }
 
 function setFavGen(g){S.ff.gen=g;renderFav();}
+function setFavRarity(r){S.ff.rarity=r;renderFav();}
 function setFavTypes(arr){S.ff.types=arr;}
 function toggleFavType(t){
   const idx=S.ff.types.indexOf(t);
@@ -3840,9 +3855,12 @@ function renderFav(){
   }).filter(Boolean);
 
   // Apply filters
+  const favQ=(document.getElementById('fav-search')?.value||'').trim().toLowerCase();
   const filtered=withTypes.filter(({p,types})=>{
     if(S.ff.gen&&p.generation!==S.ff.gen)return false;
     if(S.ff.types.length&&!S.ff.types.every(t=>types.includes(t)))return false;
+    if(S.ff.rarity&&p.rarity!==S.ff.rarity)return false;
+    if(favQ&&!p.name.toLowerCase().includes(favQ))return false;
     return true;
   });
 
