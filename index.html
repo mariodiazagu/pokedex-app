@@ -155,17 +155,23 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 
 /* ── CARD ── */
 .card{
-  background:rgba(255,255,255,0.75);
-  border:1px solid rgba(255,255,255,0.9);
+  background:linear-gradient(145deg,rgba(255,255,255,0.92) 0%,rgba(255,255,255,0.72) 100%);
+  border:1px solid rgba(255,255,255,0.95);
   border-radius:var(--r-lg);padding:10px 8px 8px;
   cursor:pointer;display:flex;flex-direction:column;
   align-items:center;position:relative;overflow:hidden;
-  min-height:128px;transition:transform .13s,box-shadow .13s;
-  box-shadow:0 2px 12px rgba(0,0,0,.07);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  min-height:128px;transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s;
+  box-shadow:0 2px 16px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,1);
+  backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
 }
-.card:active{transform:scale(.91)}
-.card:hover{box-shadow:0 8px 32px rgba(0,0,0,.12);transform:translateY(-1px)}
+.card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(145deg,rgba(255,255,255,0.5) 0%,transparent 60%);
+  border-radius:inherit;pointer-events:none;z-index:0;
+}
+.card>*{position:relative;z-index:1}
+.card:active{transform:scale(.94)}
+.card:hover{box-shadow:0 8px 32px rgba(0,0,0,.13),inset 0 1px 0 rgba(255,255,255,1);transform:translateY(-2px) scale(1.01)}
 .card-hdr{display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:3px}
 .card-id{font-size:9px;color:var(--t3);font-weight:700}
 .card-rdot{width:6px;height:6px;border-radius:50%}
@@ -367,13 +373,20 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .tslot-shy{position:absolute;top:5px;left:5px;opacity:.9}
 .tslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 10px;flex-shrink:0}
 .tslot{
-  border-radius:var(--r-lg);border:2px dashed var(--bd);
-  background:var(--bg);
+  border-radius:var(--r-lg);
+  border:1.5px dashed rgba(0,0,0,0.15);
+  background:rgba(255,255,255,0.45);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   cursor:pointer;position:relative;transition:all .15s;padding:10px 6px 8px;
   min-height:110px;
 }
-.tslot.filled{border-style:solid;border-color:var(--bd);}
+.tslot.filled{
+  border-style:solid;
+  border-color:rgba(255,255,255,0.95);
+  background:linear-gradient(145deg,rgba(255,255,255,0.88),rgba(255,255,255,0.65));
+  box-shadow:0 2px 12px rgba(0,0,0,.07),inset 0 1px 0 rgba(255,255,255,1);
+}
 .tslot.filled:active{transform:scale(.97);}
 .tslot-img{width:56px;height:56px;object-fit:contain;image-rendering:pixelated;}
 .tslot-name{font-size:9px;font-weight:700;color:var(--t2);text-align:center;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
@@ -4073,11 +4086,11 @@ function renderTeam(){
             ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/shiny/${animId}.gif`
             : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${animId}.gif`)
         : sp;
+      const bg2=tc(form?.types?.[0]||p.types[0]);
       const types=(form?.types||p.types).map(t=>`<span class="tbadge" style="background:${tc(t)};font-size:8px;padding:2px 6px">${cap(t)}</span>`).join('');
       const isFav=[...S.favs].some(k=>parseInt(String(k).split('_')[0])===p.id);
       const isCap=Object.keys(S.track).some(k=>parseInt(String(k).split('_')[0])===p.id&&Object.values(S.track[k]).some(g=>g?.captured));
-      const icons=(isFav?'♥ ':'')+''+(isCap?'● ':'○ ');
-      return`<div class="tslot filled" style="background:${bg}12;border-color:${bg}50">
+      return`<div class="tslot filled" style="background:linear-gradient(135deg,rgba(255,255,255,0.85),rgba(255,255,255,0.6));border:1px solid rgba(255,255,255,0.95);box-shadow:0 2px 12px rgba(0,0,0,.08)">
         <button class="tslot-rm" onclick="event.stopPropagation();rmTeamSlot(${i},'${gid}')">
           <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
