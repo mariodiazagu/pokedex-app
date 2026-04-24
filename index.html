@@ -982,8 +982,26 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
   </div>
 </div>
 
-<div id="walker-wrap" style="position:fixed;bottom:0;left:0;right:0;pointer-events:none;z-index:200">
-  <img id="walker-img" style="position:absolute;width:40px;height:40px;object-fit:contain;image-rendering:pixelated;pointer-events:all;cursor:pointer" onclick="walkerClick()">
+<div id="walker-wrap" style="position:fixed;bottom:calc(var(--sb)+72px);right:12px;z-index:200;pointer-events:none">
+  <!-- Bubble speech -->
+  <div id="walker-bubble" style="
+    position:absolute;bottom:100%;right:0;margin-bottom:8px;
+    background:var(--s1);border:1.5px solid var(--bd);border-radius:14px 14px 4px 14px;
+    padding:7px 11px;font-size:11px;font-weight:700;color:var(--t1);
+    white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none;
+    box-shadow:var(--shadow);
+  "></div>
+  <!-- Pokemon sprite -->
+  <div id="walker-btn" style="
+    width:56px;height:56px;border-radius:20px;
+    background:var(--s1);border:2px solid var(--bd);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;pointer-events:all;
+    box-shadow:0 4px 16px rgba(0,0,0,.12);
+    transition:transform .2s cubic-bezier(.34,1.56,.64,1);
+  " onclick="walkerClick()">
+    <img id="walker-img" style="width:42px;height:42px;object-fit:contain;image-rendering:pixelated">
+  </div>
 </div>
 
 <nav class="tabs">
@@ -2383,7 +2401,13 @@ function achievementIcon(id,size=20,color='currentColor'){
 }
 
 // ── POKÉMON WALKER ──
-let _walkerState={x:50,dir:1,paused:false,pauseTimer:null,moveTimer:null,pokeId:null,shiny:false,jumping:false,jumpY:0,jumpVel:0};
+// ── COMPANION ──
+let _companion = {pokeId:null, shiny:false, state:'idle', timer:null, bubbleTimer:null};
+
+const COMPANION_MESSAGES = [
+  '¡Pika!', '¿Listo para capturar?', '¡Vamos!', '¡Soy el mejor!',
+  '¡Un shiny!', '¿Batalla?', '¡Entrenemos!', '¡Pokémon!',
+];
 
 function getDailyWalkerPoke(){
   const d=new Date();
@@ -2398,102 +2422,105 @@ function walkerSrc(id,shiny){
 }
 
 function initWalker(){
-  if(!S.set.showWalker){
-    document.getElementById('walker-wrap').style.display='none';
-    return;
-  }
+  const wrap=document.getElementById('walker-wrap');
+  if(!wrap)return;
+  if(!S.set.showWalker){wrap.style.display='none';return;}
+
   const id=getDailyWalkerPoke();
-  _walkerState.pokeId=id;
-  _walkerState.shiny=false;
+  _companion.pokeId=id;
+  _companion.shiny=false;
+
   const img=document.getElementById('walker-img');
-  img.src=walkerSrc(id,false);
-  img.onerror=()=>{img.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;};
-  document.getElementById('walker-wrap').style.display='block';
-  _walkerState.x=10+Math.random()*80;
-  _walkerState.dir=Math.random()>0.5?1:-1;
-  _walkerState.jumpY=0;
-  _walkerState.jumpVel=0;
-  _walkerState.jumping=false;
-  walkerMove();
+  if(img){
+    img.src=walkerSrc(id,false);
+    img.onerror=()=>{img.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;};
+  }
+  wrap.style.display='block';
+  _companionLoop();
 }
 
-function walkerMove(){
+function _companionLoop(){
   if(!S.set.showWalker)return;
+  clearTimeout(_companion.timer);
+
+  const btn=document.getElementById('walker-btn');
   const img=document.getElementById('walker-img');
-  if(!img)return;
+  if(!btn||!img)return;
 
-  // Get nav height to position walker on top of it
-  const nav=document.querySelector('.tabs');
-  const navH=nav?nav.offsetHeight:60;
+  // Random state transitions
+  const roll=Math.random();
 
-  // Random pause
-  if(!_walkerState.paused&&!_walkerState.jumping&&Math.random()<0.008){
-    _walkerState.paused=true;
-    clearTimeout(_walkerState.pauseTimer);
-    _walkerState.pauseTimer=setTimeout(()=>{_walkerState.paused=false;},800+Math.random()*2200);
-  }
-
-  // Random jump — much less frequent (0.0008 = ~every 80s at 60fps)
-  if(!_walkerState.jumping&&!_walkerState.paused&&Math.random()<0.0008){
-    _walkerState.jumping=true;
-    _walkerState.jumpVel=5+Math.random()*3;
-  }
-
-  // Physics jump
-  if(_walkerState.jumping){
-    _walkerState.jumpY+=_walkerState.jumpVel;
-    _walkerState.jumpVel-=0.4;
-    if(_walkerState.jumpY<=0){
-      _walkerState.jumpY=0;
-      _walkerState.jumpVel=0;
-      _walkerState.jumping=false;
+  if(_companion.state==='idle'){
+    if(roll<0.3){
+      // Bounce
+      _companionAnimate(btn,'bounce');
+      _companion.state='bounce';
+      _companion.timer=setTimeout(()=>{_companion.state='idle';_companionLoop();},600);
+    } else if(roll<0.45){
+      // Show bubble
+      _showBubble();
+      _companion.timer=setTimeout(_companionLoop, 3000+Math.random()*2000);
+    } else if(roll<0.52){
+      // Go shiny briefly
+      _companion.shiny=!_companion.shiny;
+      img.src=walkerSrc(_companion.pokeId,_companion.shiny);
+      if(_companion.shiny){
+        btn.style.boxShadow='0 0 16px var(--gold), 0 4px 16px rgba(0,0,0,.12)';
+        setTimeout(()=>{btn.style.boxShadow='0 4px 16px rgba(0,0,0,.12)';},2000);
+      }
+      _companion.timer=setTimeout(_companionLoop, 2000+Math.random()*3000);
+    } else {
+      // Just wait
+      _companion.timer=setTimeout(_companionLoop, 1500+Math.random()*3000);
     }
   }
+}
 
-  // Random shiny switch
-  if(Math.random()<0.0008){
-    _walkerState.shiny=!_walkerState.shiny;
-    img.src=walkerSrc(_walkerState.pokeId,_walkerState.shiny);
-    if(_walkerState.shiny){
-      img.style.filter='drop-shadow(0 0 5px gold)';
-      setTimeout(()=>{img.style.filter='';},1500);
-    }
+function _companionAnimate(el, anim){
+  el.style.transition='';
+  if(anim==='bounce'){
+    el.style.transform='translateY(-12px) scale(1.1)';
+    setTimeout(()=>{el.style.transition='transform .3s cubic-bezier(.34,1.56,.64,1)';el.style.transform='translateY(0) scale(1)';},150);
+  } else if(anim==='tap'){
+    el.style.transform='scale(0.88)';
+    setTimeout(()=>{el.style.transition='transform .3s cubic-bezier(.34,1.56,.64,1)';el.style.transform='scale(1)';},100);
   }
+}
 
-  if(!_walkerState.paused){
-    const speed=0.12+Math.random()*0.06;
-    _walkerState.x+=_walkerState.dir*speed;
-    if(_walkerState.x>=92){_walkerState.x=92;_walkerState.dir=-1;}
-    else if(_walkerState.x<=2){_walkerState.x=2;_walkerState.dir=1;}
-    if(Math.random()<0.002)_walkerState.dir*=-1;
-  }
-
-  img.style.left=`${_walkerState.x}%`;
-  // Sit on top of nav bar + jump offset
-  img.style.bottom=`${navH+_walkerState.jumpY}px`;
-  img.style.transform=`scaleX(${_walkerState.dir>0?-1:1})`;
-
-  _walkerState.moveTimer=requestAnimationFrame(walkerMove);
+function _showBubble(text){
+  const bubble=document.getElementById('walker-bubble');
+  if(!bubble)return;
+  const msg=text||COMPANION_MESSAGES[Math.floor(Math.random()*COMPANION_MESSAGES.length)];
+  bubble.textContent=msg;
+  bubble.style.opacity='1';
+  clearTimeout(_companion.bubbleTimer);
+  _companion.bubbleTimer=setTimeout(()=>{bubble.style.opacity='0';},2200);
 }
 
 function walkerClick(){
-  if(_walkerState.pokeId) openMdl(_walkerState.pokeId);
+  const btn=document.getElementById('walker-btn');
+  if(btn)_companionAnimate(btn,'tap');
+  // Show Pokémon name in bubble, then open modal after tiny delay
+  const p=S.poke.find(x=>x.id===_companion.pokeId);
+  if(p)_showBubble(`¡${cap(p.name)}!`);
+  setTimeout(()=>{if(_companion.pokeId)openMdl(_companion.pokeId);},300);
 }
 
 function toggleWalker(){
   S.set.showWalker=!S.set.showWalker;
   scheduleSave();
+  const wrap=document.getElementById('walker-wrap');
   if(S.set.showWalker){
-    cancelAnimationFrame(_walkerState.moveTimer);
+    clearTimeout(_companion.timer);
     initWalker();
   } else {
-    cancelAnimationFrame(_walkerState.moveTimer);
-    document.getElementById('walker-wrap').style.display='none';
+    clearTimeout(_companion.timer);
+    if(wrap)wrap.style.display='none';
   }
-  // Update toggle button
   const tog=document.getElementById('walker-toggle');
   if(tog)tog.className=`cfg-toggle${S.set.showWalker?' on':''}`;
 }
+
 function getDailyChallenge(){
   const today=new Date();
   const seed=today.getFullYear()*10000+(today.getMonth()+1)*100+today.getDate();
