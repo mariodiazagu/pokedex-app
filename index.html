@@ -2663,7 +2663,7 @@ const S={
   mPreviewForm:null,
   mPreviewShiny:false,
   ff:{gen:0,types:[],rarity:''}, // fav filters
-  companion:{happiness:80, energy:80, lastVisit:null}, // tamagotchi state
+  companion:{hp:100, energy:80, hunger:70, mood:75, lastVisit:null, fainted:false, faintedAt:null, faintCount:0}, // tamagotchi state
 };
 
 // ═══════════════════════════════════════
@@ -4176,45 +4176,133 @@ function getCompanionPoke(){
   return S.poke.find(p=>p.id===baseId)||null;
 }
 
+// ─────────────────────────────────────────
+// COMPANION SYSTEM
+// ─────────────────────────────────────────
+
+// CSS animations for non-animated sprites
+const COMPANION_ANIM_CSS = `
+@keyframes cp-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes cp-float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+@keyframes cp-wiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes cp-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes cp-faint{0%{transform:translateY(0);opacity:1}100%{transform:translateY(30px);opacity:0}}
+`;
+if(!document.getElementById('cp-anim-style')){
+  const s=document.createElement('style');s.id='cp-anim-style';s.textContent=COMPANION_ANIM_CSS;
+  document.head.appendChild(s);
+}
+
+const FOOD_BY_TYPE = {
+  fire:'🥩', water:'🐟', grass:'🌿', electric:'🍋', ice:'🧊',
+  fighting:'🥩', poison:'🍄', ground:'🌰', flying:'🌾', psychic:'🍇',
+  bug:'🍃', rock:'🌰', ghost:'🍬', dragon:'🥩', dark:'🍬',
+  steel:'🔩', fairy:'🍰', normal:'🌾',
+};
+const FOOD_NAMES_BY_TYPE = {
+  fire:'Carne asada', water:'Pescado fresco', grass:'Bayas silvestres',
+  electric:'Cítricos', ice:'Hielo de fruta', fighting:'Proteínas',
+  poison:'Setas raras', ground:'Nueces', flying:'Semillas',
+  psychic:'Uvas', bug:'Hojas tiernas', rock:'Nueces',
+  ghost:'Caramelos', dragon:'Carne roja', dark:'Caramelos amargos',
+  steel:'Suplementos', fairy:'Tarta', normal:'Pienso',
+};
+
+const REJECT_MESSAGES = [
+  n=>`¡${n} apartó la comida de un manotazo!`,
+  n=>`¡${n} te miró fijamente y se dio la vuelta!`,
+  n=>`¡${n} no tiene hambre ahora mismo...`,
+  n=>`¡${n} está siendo muy caprichoso hoy!`,
+  n=>`¡${n} olió la comida y se alejó!`,
+];
+const ACCEPT_MESSAGES = [
+  n=>`¡${n} devoró la comida con entusiasmo!`,
+  n=>`¡${n} comió feliz!`,
+  n=>`¡A ${n} le encantó!`,
+];
+const PLAY_REJECT = [
+  n=>`¡${n} está demasiado cansado para jugar!`,
+  n=>`¡${n} prefiere descansar ahora!`,
+  n=>`¡${n} se tumbó y cerró los ojos!`,
+];
+
+function getCompanionPoke(){
+  const favKey = S.set.cardFavKey && S.favs.has(S.set.cardFavKey)
+    ? S.set.cardFavKey : [...S.favs][0];
+  if(!favKey) return null;
+  const baseId = parseInt(String(favKey).split('_')[0]);
+  return S.poke.find(p=>p.id===baseId) || null;
+}
+
+function getAnimStyle(types, id){
+  // Animated GIF available for Gen 1-5
+  if(id <= 649) return '';
+  const t = types[0];
+  if(['flying','psychic','ghost','fairy','dragon'].includes(t)) return 'animation:cp-float 3s ease-in-out infinite';
+  if(['fire','fighting','electric'].includes(t)) return 'animation:cp-wiggle 0.5s ease-in-out infinite';
+  if(['ghost','poison'].includes(t)) return 'animation:cp-pulse 2s ease-in-out infinite';
+  return 'animation:cp-bounce 1.5s ease-in-out infinite';
+}
+
+function companionNormalize(c){
+  if(!c) return {hp:100,energy:80,hunger:70,mood:75,lastVisit:null,fainted:false,faintedAt:null,faintCount:0};
+  return {
+    hp: Math.max(0,Math.min(100,c.hp??100)),
+    energy: Math.max(0,Math.min(100,c.energy??80)),
+    hunger: Math.max(0,Math.min(100,c.hunger??70)),
+    mood: Math.max(0,Math.min(100,c.mood??75)),
+    lastVisit: c.lastVisit||null,
+    fainted: c.fainted||false,
+    faintedAt: c.faintedAt||null,
+    faintCount: c.faintCount||0,
+  };
+}
+
 function updateCompanionOnVisit(){
-  if(!S.companion) S.companion={hp:80,energy:80,hunger:70,mood:75,lastVisit:null,fainted:false,faintCount:0,history:[]};
+  S.companion = companionNormalize(S.companion);
   const c = S.companion;
   const now = Date.now();
-  const last = c.lastVisit||now;
-  const hoursSince = (now-last)/(1000*60*60);
+  const hoursSince = c.lastVisit ? (now - c.lastVisit)/(1000*60*60) : 0;
 
-  // Skip if fainted
+  // Check if fainted and daily challenge done → recover
+  if(c.fainted && isDailyChallengeCompleted()){
+    c.fainted = false;
+    c.faintedAt = null;
+    c.hp = 30; c.energy = 20; c.hunger = 20; c.mood = 30;
+  }
+
   if(!c.fainted){
-    // Random decay per visit
-    c.hunger = Math.max(0, c.hunger - (4+Math.floor(Math.random()*6)));
-    c.energy = Math.max(0, c.energy - (2+Math.floor(Math.random()*4)));
+    // Random decay each visit
+    const hDecay = 3 + Math.floor(Math.random()*6);
+    const eDecay = 2 + Math.floor(Math.random()*5);
+    const huDecay = 5 + Math.floor(Math.random()*8); // hunger falls faster
 
-    // Extra decay if away >12h
-    if(hoursSince>12){
-      const extra = Math.min(25, Math.floor(hoursSince/6)*8);
-      c.hunger = Math.max(0, c.hunger - extra);
-      c.hp = Math.max(0, c.hp - Math.floor(extra/2));
-    }
+    c.hunger = Math.max(0, c.hunger - huDecay);
+    c.energy = Math.max(0, c.energy - eDecay);
 
     // Hunger affects HP
-    if(c.hunger===0) c.hp = Math.max(0, c.hp - 5);
+    if(c.hunger < 20) c.hp = Math.max(0, c.hp - hDecay - 3);
+    else c.hp = Math.max(0, c.hp - Math.floor(hDecay/3));
 
-    // Mood based on other stats
-    const avgStats = (c.hp + c.energy + c.hunger) / 3;
-    c.mood = Math.round(Math.max(0, Math.min(100, avgStats * 0.8 + c.mood * 0.2)));
+    // Extra decay if away >24h
+    if(hoursSince > 24){
+      const extra = Math.min(25, Math.floor(hoursSince/24)*10);
+      c.hunger = Math.max(0, c.hunger - extra);
+      c.hp = Math.max(0, c.hp - extra);
+      c.mood = Math.max(0, c.mood - extra);
+    }
+
+    // Mood = average of other stats
+    c.mood = Math.round((c.hp + c.energy + c.hunger) / 3);
 
     // Passive boosts
-    if(isDailyChallengeCompleted()) c.energy = Math.min(100, c.energy+8);
-    if(S.favs.size>5) c.mood = Math.min(100, c.mood+3);
-    const wins = JSON.parse(localStorage.getItem('pkp_battleStats')||'{}').wins||0;
-    if(wins>0) c.energy = Math.min(100, c.energy+Math.min(5,wins));
+    const dailyDone = isDailyChallengeCompleted();
+    if(dailyDone){ c.energy = Math.min(100, c.energy+10); c.mood = Math.min(100, c.mood+8); }
+    if(S.favs.size > 3) c.mood = Math.min(100, c.mood+3);
 
     // Check faint
-    if(c.hp<=0){
-      c.fainted = true;
-      c.faintCount = (c.faintCount||0)+1;
-      const p = getCompanionPoke();
-      if(p) c.history = [{name:p.name,id:p.id,date:new Date().toLocaleDateString('es-ES')},...(c.history||[])].slice(0,5);
+    if(c.hp <= 0){
+      c.hp = 0; c.fainted = true; c.faintedAt = now; c.faintCount++;
     }
   }
 
@@ -4222,374 +4310,290 @@ function updateCompanionOnVisit(){
   scheduleSave();
 }
 
-function feedCompanion(){
+function companionFeed(correctFood){
+  const c = S.companion = companionNormalize(S.companion);
+  if(c.fainted){ showCompanionMsg('¡Está descansando...'); return; }
   const p = getCompanionPoke();
-  if(!p) return;
-  const c = S.companion;
-  const pName = cap(p.name);
-  const foods = FOOD_MAP[p.types[0]]||FOOD_MAP.normal;
-  const food = foods[Math.floor(Math.random()*foods.length)];
+  const name = p ? cap(p.name) : 'Tu Pokémon';
 
-  // Reject chance based on mood
-  const rejectChance = c.mood>=70?0.1:c.mood>=35?0.35:0.6;
-  const rejected = Math.random()<rejectChance;
-
-  if(rejected){
-    const msg = REJECT_MSGS[Math.floor(Math.random()*REJECT_MSGS.length)](pName);
-    showCompanionToast(msg, false);
-    c.mood = Math.max(0, c.mood-3); // gets grumpy from being offered bad food
-  } else {
-    const isPreferred = p.types.some(t=>FOOD_MAP[t]?.includes(food));
-    const boost = isPreferred ? 20 : 12;
-    c.hunger = Math.min(100, c.hunger+boost);
-    c.hp = Math.min(100, c.hp+Math.floor(boost/3));
-    c.mood = Math.min(100, c.mood+5);
-    const msg = ACCEPT_MSGS[Math.floor(Math.random()*ACCEPT_MSGS.length)](pName);
-    showCompanionToast(`🍖 ${food} — ${msg}`, true);
-  }
-  scheduleSave();
-  renderCompanion();
-}
-
-function careCompanion(){
-  const p = getCompanionPoke();
-  if(!p) return;
-  const c = S.companion;
-  const pName = cap(p.name);
-  const rejectChance = c.mood>=70?0.05:c.mood>=35?0.25:0.5;
-
-  if(Math.random()<rejectChance){
-    showCompanionToast(`¡${pName} no quiere que le toquen ahora mismo!`, false);
-    return;
-  }
-  c.hp = Math.min(100, c.hp+15);
-  c.mood = Math.min(100, c.mood+10);
-  showCompanionToast(`¡${pName} ronroneó de felicidad!`, true);
-  scheduleSave();
-  renderCompanion();
-}
-
-function reviveWithFriend(friendId){
-  const c = S.companion;
-  c.fainted = false;
-  c.hp = 30;
-  c.energy = 40;
-  c.hunger = 50;
-  c.mood = 45;
-  const p = getCompanionPoke();
-  const friend = S.poke.find(x=>x.id===friendId);
-  if(p&&friend) showCompanionToast(`¡${cap(friend.name)} ayudó a ${cap(p.name)} a recuperarse!`, true);
-  scheduleSave();
-  renderCompanion();
-}
-
-function showCompanionToast(msg, success){
-  const t = document.createElement('div');
-  t.style.cssText = `position:fixed;bottom:calc(var(--sb)+80px);left:50%;transform:translateX(-50%);
-    background:${success?'var(--s1)':'var(--s1)'};color:${success?'var(--t1)':'var(--red)'};
-    padding:10px 16px;border-radius:14px;font-size:12px;font-weight:700;z-index:999;
-    white-space:nowrap;border:1.5px solid ${success?'var(--green)':'var(--red)'};
-    box-shadow:var(--shadow);animation:fadeout 2.5s forwards;max-width:90vw;white-space:normal;text-align:center`;
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(), 2600);
-}
-
-// Play — wild encounter 1v1
-let _companionBattle = null;
-
-async function startCompanionPlay(){
-  const p = getCompanionPoke();
-  const c = S.companion;
-  if(!p||c.fainted) return;
-
-  if(c.energy<20){
-    const msgs = PLAY_REJECT_MSGS;
-    showCompanionToast(msgs[Math.floor(Math.random()*msgs.length)](cap(p.name)), false);
+  // Rejection chance based on mood
+  const rejectChance = c.mood >= 70 ? 0.10 : c.mood >= 35 ? 0.35 : 0.60;
+  if(Math.random() < rejectChance){
+    const msg = REJECT_MESSAGES[Math.floor(Math.random()*REJECT_MESSAGES.length)](name);
+    showCompanionMsg(msg, 'reject');
     return;
   }
 
-  // Consume energy
-  c.energy = Math.max(0, c.energy-20);
+  const boost = correctFood ? 25 : 12;
+  c.hunger = Math.min(100, c.hunger + boost);
+  c.hp = Math.min(100, c.hp + Math.floor(boost/3));
+  c.mood = Math.min(100, c.mood + (correctFood ? 8 : 3));
   scheduleSave();
 
-  // Show battle modal
-  showCompanionBattle(p);
+  const msg = correctFood
+    ? `¡A ${name} le encantó su comida favorita! +${boost} hambre`
+    : ACCEPT_MESSAGES[Math.floor(Math.random()*ACCEPT_MESSAGES.length)](name);
+  showCompanionMsg(msg, 'accept');
+  renderCompanion();
 }
 
-async function showCompanionBattle(p){
+function companionCare(){
+  const c = S.companion = companionNormalize(S.companion);
+  if(c.fainted){ showCompanionMsg('¡Está descansando...'); return; }
+  const p = getCompanionPoke();
+  const name = p ? cap(p.name) : 'Tu Pokémon';
+  const rejectChance = c.mood >= 70 ? 0.05 : c.mood >= 35 ? 0.2 : 0.4;
+  if(Math.random() < rejectChance){
+    showCompanionMsg(`¡${name} no quiere que le molesten!`, 'reject'); return;
+  }
+  c.hp = Math.min(100, c.hp + 20);
+  c.mood = Math.min(100, c.mood + 10);
+  scheduleSave();
+  showCompanionMsg(`¡${name} se siente mejor! +20 vida`, 'accept');
+  renderCompanion();
+}
+
+function showCompanionMsg(text, type='info'){
+  const el = document.getElementById('companion-msg');
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = type==='reject' ? 'var(--red)' : type==='accept' ? 'var(--green)' : 'var(--t2)';
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{ el.style.opacity='0'; }, 2500);
+}
+
+function boostCompanion(type, amount){
+  S.companion = companionNormalize(S.companion);
+  if(type==='energy') S.companion.energy = Math.min(100, S.companion.energy+amount);
+  if(type==='happiness'||type==='mood') S.companion.mood = Math.min(100, S.companion.mood+amount);
+  if(type==='hp') S.companion.hp = Math.min(100, S.companion.hp+amount);
+  scheduleSave();
+  renderCompanion();
+}
+
+// ── COMPANION WILD BATTLE ──
+let _cpBattle = null;
+
+async function startCompanionBattle(){
+  const c = S.companion = companionNormalize(S.companion);
+  const p = getCompanionPoke();
+  if(!p){ showCompanionMsg('¡Elige un Pokémon compañero primero!'); return; }
+  if(c.fainted){ showCompanionMsg('¡Tu compañero está descansando!'); return; }
+  if(c.energy < 20){
+    const name = cap(p.name);
+    showCompanionMsg(PLAY_REJECT[Math.floor(Math.random()*PLAY_REJECT.length)](name), 'reject');
+    return;
+  }
+
+  // Show loading
+  const btn = document.getElementById('cp-battle-btn');
+  if(btn){ btn.disabled=true; btn.textContent='Buscando rival...'; }
+
   // Fetch player pokemon data
-  let playerData = null;
-  try{
-    const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${p.id}`);
-    const d = await r.json();
-    const statsMap={};
-    d.stats.forEach(s=>statsMap[s.stat.name]=s.base_stat);
-    const moveNames = d.moves
-      .filter(m=>m.version_group_details.some(v=>v.move_learn_method.name==='level-up'))
-      .slice(0,12).map(m=>m.move.name);
-    const moves=[];
-    for(const mn of moveNames){
-      if(moves.length>=4) break;
-      try{
-        const mr=await fetch(`https://pokeapi.co/api/v2/move/${mn}`);
-        const md=await mr.json();
-        if(md.power&&md.power>0&&md.damage_class.name!=='status'){
-          const esName=md.names?.find(n=>n.language.name==='es')?.name||md.name;
-          moves.push({name:mn,nameEs:esName,type:md.type.name,power:md.power,accuracy:md.accuracy||100});
-        }
-      } catch{}
-    }
-    if(moves.length===0) moves.push({name:'tackle',nameEs:'Placaje',type:p.types[0],power:40,accuracy:100});
-    while(moves.length<4) moves.push(moves[0]);
-    playerData={id:p.id,name:p.name,types:p.types,
-      hp:statsMap.hp||45,atk:statsMap.attack||50,def:statsMap.defense||50,
-      spatk:statsMap['special-attack']||50,spdef:statsMap['special-defense']||50,spd:statsMap.speed||45,
-      moves};
-  } catch(e){ showCompanionToast('Error cargando datos...', false); return; }
+  let playerData = await fetchPokemon(p.id);
+  if(!playerData){ showCompanionMsg('Error al cargar datos'); return; }
 
-  // Generate wild pokemon with similar BST
-  const playerBST = playerData.hp+playerData.atk+playerData.def+playerData.spatk+playerData.spdef+playerData.spd;
-  const wildId = await findWildPokemon(playerBST, p.id);
+  // Load moves
+  if(!playerData._movesLoaded){
+    playerData._moves = [];
+    for(const mn of playerData.moves.slice(0,30)){
+      if(playerData._moves.length >= 4) break;
+      const m = await fetchMove(mn);
+      if(m.power > 0 && m.category !== 'status') playerData._moves.push(m);
+    }
+    if(playerData._moves.length < 4){
+      const fallbacks=[
+        {name:'tackle',nameEs:'Placaje',type:'normal',power:40,accuracy:100,category:'physical'},
+        {name:'swift',nameEs:'Rapidez',type:'normal',power:60,accuracy:null,category:'special'},
+        {name:'hyper-beam',nameEs:'Hiperrayo',type:'normal',power:150,accuracy:90,category:'special'},
+        {name:'body-slam',nameEs:'Golpe Cuerpo',type:'normal',power:85,accuracy:100,category:'physical'},
+      ];
+      for(const fb of fallbacks){
+        if(playerData._moves.length >= 4) break;
+        if(!playerData._moves.some(m=>m.name===fb.name)) playerData._moves.push(fb);
+      }
+    }
+    playerData._movesLoaded = true;
+  }
+
+  // Generate wild pokemon (BST ±20%)
+  const targetBST = playerData.bst;
   let wildData = null;
-  try{
-    const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${wildId}`);
-    const d = await r.json();
-    const statsMap={};
-    d.stats.forEach(s=>statsMap[s.stat.name]=s.base_stat);
-    const moveNames = d.moves.filter(m=>m.version_group_details.some(v=>v.move_learn_method.name==='level-up')).slice(0,6).map(m=>m.move.name);
-    const moves=[];
-    for(const mn of moveNames){
-      if(moves.length>=2) break;
-      try{
-        const mr=await fetch(`https://pokeapi.co/api/v2/move/${mn}`);
-        const md=await mr.json();
-        if(md.power&&md.power>0) moves.push({name:mn,nameEs:md.names?.find(n=>n.language.name==='es')?.name||mn,type:md.type.name,power:md.power,accuracy:md.accuracy||100});
-      } catch{}
-    }
-    if(moves.length===0) moves.push({name:'tackle',nameEs:'Placaje',type:d.types[0].type.name,power:40,accuracy:100});
-    wildData={id:wildId,name:d.name,types:d.types.map(t=>t.type.name),
-      hp:statsMap.hp||45,atk:statsMap.attack||50,def:statsMap.defense||50,
-      spatk:statsMap['special-attack']||50,spdef:statsMap['special-defense']||50,spd:statsMap.speed||45,
-      moves};
-  } catch(e){ showCompanionToast('Error cargando rival...', false); return; }
+  for(let i=0;i<30;i++){
+    const wildId = Math.floor(Math.random()*898)+1;
+    if(wildId === p.id) continue;
+    const wd = await fetchPokemon(wildId);
+    if(wd && Math.abs(wd.bst - targetBST)/targetBST < 0.2){ wildData=wd; break; }
+  }
+  if(!wildData) wildData = await fetchPokemon(Math.floor(Math.random()*151)+1);
 
-  // Init battle state
-  const maxHP = p=>Math.floor((2*p.hp*50/100)+60);
-  _companionBattle = {
-    player: playerData, wild: wildData,
-    playerHP: maxHP(playerData), wildHP: maxHP(wildData),
-    playerMaxHP: maxHP(playerData), wildMaxHP: maxHP(wildData),
-    busy: false,
+  // Load wild moves
+  if(!wildData._movesLoaded){
+    wildData._moves = [];
+    for(const mn of wildData.moves.slice(0,20)){
+      if(wildData._moves.length >= 4) break;
+      const m = await fetchMove(mn);
+      if(m.power > 0) wildData._moves.push(m);
+    }
+    if(!wildData._moves.length) wildData._moves.push({name:'tackle',nameEs:'Placaje',type:'normal',power:40,accuracy:100,category:'physical'});
+    wildData._movesLoaded = true;
+  }
+
+  const LV = 50;
+  const calcHP = pd => Math.floor((2*pd.hp*LV/100)+LV+10);
+
+  _cpBattle = {
+    player: playerData,
+    wild: wildData,
+    playerHP: calcHP(playerData),
+    playerMaxHP: calcHP(playerData),
+    wildHP: calcHP(wildData),
+    wildMaxHP: calcHP(wildData),
+    turn: 1,
+    over: false,
   };
 
+  c.energy = Math.max(0, c.energy - 20);
+  scheduleSave();
   renderCompanionBattle();
-}
-
-async function findWildPokemon(targetBST, excludeId){
-  const cached = Object.values(window._pokeCache||{}).filter(p=>p.id!==excludeId&&Math.abs(p.bst-targetBST)<targetBST*0.25);
-  if(cached.length>0) return cached[Math.floor(Math.random()*cached.length)].id;
-  for(let i=0;i<20;i++){
-    const id=Math.floor(Math.random()*649)+1;
-    if(id===excludeId) continue;
-    try{
-      const r=await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-      const d=await r.json();
-      const bst=d.stats.reduce((a,s)=>a+s.base_stat,0);
-      if(Math.abs(bst-targetBST)<targetBST*0.3) return id;
-    } catch{}
-  }
-  return Math.floor(Math.random()*649)+1;
-}
-
-function getTypeEff(moveType, defTypes){
-  const EFF={normal:{rock:.5,ghost:0,steel:.5},fire:{fire:.5,water:.5,rock:.5,dragon:.5,grass:2,ice:2,bug:2,steel:2},water:{water:.5,grass:.5,dragon:.5,fire:2,ground:2,rock:2},grass:{fire:.5,grass:.5,poison:.5,flying:.5,bug:.5,dragon:.5,steel:.5,water:2,ground:2,rock:2},electric:{grass:.5,electric:.5,dragon:.5,ground:0,water:2,flying:2},ice:{water:.5,ice:.5,fire:.5,steel:.5,grass:2,ground:2,flying:2,dragon:2},fighting:{poison:.5,bug:.5,psychic:.5,flying:.5,fairy:.5,ghost:0,normal:2,ice:2,rock:2,dark:2,steel:2},poison:{poison:.5,ground:.5,rock:.5,ghost:.5,steel:0,grass:2,fairy:2},ground:{grass:.5,bug:.5,flying:0,fire:2,electric:2,poison:2,rock:2,steel:2},flying:{electric:.5,rock:.5,steel:.5,grass:2,fighting:2,bug:2},psychic:{psychic:.5,steel:.5,dark:0,fighting:2,poison:2},bug:{fire:.5,fighting:.5,flying:.5,ghost:.5,steel:.5,fairy:.5,grass:2,psychic:2,dark:2},rock:{fighting:.5,ground:.5,steel:.5,fire:2,ice:2,flying:2,bug:2},ghost:{normal:0,psychic:0,dark:.5,ghost:2},dragon:{steel:.5,fairy:0,dragon:2},dark:{fighting:.5,dark:.5,fairy:.5,psychic:2,ghost:2},steel:{fire:.5,water:.5,electric:.5,steel:.5,ice:2,rock:2,fairy:2},fairy:{fire:.5,poison:.5,steel:.5,fighting:2,dragon:2,dark:2}};
-  let e=1;
-  defTypes.forEach(t=>{const row=EFF[moveType]||{};e*=(row[t]!==undefined?row[t]:1);});
-  return e;
-}
-
-function calcCompanionDmg(attacker, defender, move){
-  const isPhys=move.category==='physical'||!move.spatk;
-  const atk=isPhys?attacker.atk:attacker.spatk;
-  const def=isPhys?defender.def:defender.spdef;
-  const base=Math.floor((2*50/5+2)*move.power*atk/def/50)+2;
-  const stab=attacker.types.includes(move.type)?1.5:1;
-  const eff=getTypeEff(move.type,defender.types);
-  const rnd=(85+Math.random()*15)/100;
-  return{dmg:Math.max(1,Math.floor(base*stab*eff*rnd)),eff};
+  renderCompanion();
 }
 
 function renderCompanionBattle(){
-  const b = _companionBattle;
-  if(!b){ renderCompanion(); return; }
+  const b = _cpBattle;
+  if(!b) return;
+  const el = document.getElementById('cp-battle-area');
+  if(!el) return;
 
-  const body = document.getElementById('companion-body');
-  if(!body) return;
+  const playerPct = Math.max(0,(b.playerHP/b.playerMaxHP)*100);
+  const wildPct = Math.max(0,(b.wildHP/b.wildMaxHP)*100);
+  const barColor = pct => pct>50?'var(--green)':pct>20?'var(--gold)':'var(--red)';
 
-  const playerPct = Math.max(0,b.playerHP/b.playerMaxHP*100);
-  const wildPct = Math.max(0,b.wildHP/b.wildMaxHP*100);
-  const pBarColor = playerPct>50?'var(--green)':playerPct>20?'var(--gold)':'var(--red)';
-  const wBarColor = wildPct>50?'var(--green)':wildPct>20?'var(--gold)':'var(--red)';
+  const moves = b.player._moves.map((m,i) => `
+    <button onclick="cpBattleAttack(${i})" ${b.over?'disabled':''} style="
+      padding:10px 8px;border-radius:10px;border:1.5px solid rgba(0,0,0,.1);
+      background:rgba(0,0,0,.06);cursor:pointer;font-family:var(--fn);
+      text-align:left;transition:all .13s;
+    " class="m-${m.type}">
+      <div style="font-size:11px;font-weight:800;color:inherit">${m.nameEs||cap(m.name.replace(/-/g,' '))}</div>
+      <div style="font-size:9px;opacity:.7">${cap(m.type)} · ${m.power||'—'}</div>
+    </button>`).join('');
 
+  const playerAnimStyle = getAnimStyle(b.player.types, b.player.id);
+  const wildAnimStyle = getAnimStyle(b.wild.types, b.wild.id);
   const playerSpr = b.player.id<=649
-    ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${b.player.id}.gif`
-    :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.player.id}.png`;
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${b.player.id}.gif`
+    : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.player.id}.png`;
   const wildSpr = b.wild.id<=649
-    ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${b.wild.id}.gif`
-    :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.wild.id}.png`;
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${b.wild.id}.gif`
+    : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.wild.id}.png`;
 
-  body.innerHTML = `
-  <div style="width:100%;max-width:340px">
-    <!-- Battle screen -->
-    <div style="background:linear-gradient(180deg,#1a1a3a 0%,#0a0a1a 100%);border-radius:20px;overflow:hidden;border:2px solid var(--bd);margin-bottom:10px">
-
+  el.innerHTML = `
+    <div style="background:var(--bg);border-radius:16px;padding:12px;border:1.5px solid var(--bd)">
       <!-- HP bars -->
-      <div style="display:flex;gap:8px;padding:10px 12px 0">
-        <div style="flex:1;background:rgba(255,255,255,.05);border-radius:8px;padding:7px 10px">
-          <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:#aaa;margin-bottom:4px">RIVAL</div>
-          <div style="font-size:9px;font-weight:800;color:#fff;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cap(b.wild.name)}</div>
-          <div style="height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden">
-            <div style="height:100%;width:${wildPct}%;background:${wBarColor};border-radius:3px;transition:width .4s"></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="flex:1;background:var(--s1);border-radius:10px;padding:8px 10px">
+          <div style="font-size:10px;font-weight:800;color:var(--t1);margin-bottom:4px">${cap(b.player.name)}</div>
+          <div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${playerPct}%;background:${barColor(playerPct)};transition:width .4s"></div>
           </div>
-          <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:#888;margin-top:3px">${Math.max(0,b.wildHP)}/${b.wildMaxHP}</div>
+          <div style="font-size:9px;color:var(--t3);margin-top:3px">${Math.max(0,b.playerHP)}/${b.playerMaxHP}</div>
         </div>
-        <div style="flex:1;background:rgba(255,255,255,.05);border-radius:8px;padding:7px 10px">
-          <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:#aaa;margin-bottom:4px">TÚ</div>
-          <div style="font-size:9px;font-weight:800;color:#fff;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cap(b.player.name)}</div>
-          <div style="height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden">
-            <div style="height:100%;width:${playerPct}%;background:${pBarColor};border-radius:3px;transition:width .4s"></div>
+        <div style="flex:1;background:var(--s1);border-radius:10px;padding:8px 10px;text-align:right">
+          <div style="font-size:10px;font-weight:800;color:var(--t1);margin-bottom:4px">${cap(b.wild.name)} <span style="font-size:8px;color:var(--t3)">salvaje</span></div>
+          <div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${wildPct}%;background:${barColor(wildPct)};float:right;transition:width .4s"></div>
           </div>
-          <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:#888;margin-top:3px">${Math.max(0,b.playerHP)}/${b.playerMaxHP}</div>
+          <div style="font-size:9px;color:var(--t3);margin-top:3px">${Math.max(0,b.wildHP)}/${b.wildMaxHP}</div>
         </div>
       </div>
 
       <!-- Sprites -->
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:8px 24px 4px">
-        <div style="display:flex;flex-direction:column;align-items:center">
-          <img id="cb-wild-spr" src="${wildSpr}" style="width:80px;height:80px;object-fit:contain;image-rendering:pixelated;transform:scaleX(-1)"
-            onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.wild.id}.png'">
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center">
-          <img id="cb-player-spr" src="${playerSpr}" style="width:80px;height:80px;object-fit:contain;image-rendering:pixelated"
-            onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.player.id}.png'">
-        </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:0 12px;min-height:100px">
+        <img src="${playerSpr}" style="width:80px;height:80px;object-fit:contain;image-rendering:pixelated;${playerAnimStyle}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.player.id}.png'">
+        <img src="${wildSpr}" style="width:80px;height:80px;object-fit:contain;image-rendering:pixelated;transform:scaleX(-1);${wildAnimStyle}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.wild.id}.png'">
       </div>
 
-      <!-- Battle log -->
-      <div id="cb-log" style="margin:4px 10px 8px;background:rgba(255,255,255,.05);border-radius:8px;padding:8px 10px;min-height:36px">
-        <p style="font-family:'Press Start 2P',monospace;font-size:7px;color:#ddd;line-height:1.6">¡Apareció un ${cap(b.wild.name)} salvaje!</p>
+      <!-- Log -->
+      <div id="cp-battle-log" style="background:var(--s1);border-radius:10px;padding:9px 12px;margin:10px 0;min-height:38px">
+        <p style="font-size:11px;font-weight:600;color:var(--t2)">Turno ${b.turn} — ¡Elige un movimiento!</p>
       </div>
-    </div>
 
-    <!-- Move buttons -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
-      ${b.player.moves.map((m,i)=>`
-        <button id="cb-move-${i}" onclick="companionUseMove(${i})" style="
-          padding:10px 8px;border-radius:12px;border:2px solid var(--bd);
-          background:var(--s1);font-family:var(--fn);cursor:pointer;text-align:left;
-          transition:all .1s;
-        ">
-          <div style="font-size:11px;font-weight:800;color:var(--t1)">${m.nameEs||cap(m.name)}</div>
-          <div style="font-size:9px;color:var(--t3);margin-top:2px">${cap(m.type)} · ${m.power}</div>
-        </button>`).join('')}
-    </div>
-
-    <button onclick="_companionBattle=null;renderCompanion()" style="
-      width:100%;padding:10px;border-radius:12px;border:1.5px solid var(--bd);
-      background:none;color:var(--t3);font-family:var(--fn);font-size:12px;font-weight:700;cursor:pointer;
-    ">Huir</button>
-  </div>`;
+      <!-- Moves grid -->
+      ${b.over ? `
+        <button onclick="_cpBattle=null;renderCompanion()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--ac);color:#fff;font-family:var(--fn);font-size:13px;font-weight:800;cursor:pointer">
+          Volver
+        </button>
+      ` : `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${moves}</div>`}
+    </div>`;
 }
 
-function cbLog(msg){
-  const el=document.getElementById('cb-log');
-  if(el) el.innerHTML=`<p style="font-family:'Press Start 2P',monospace;font-size:7px;color:#ddd;line-height:1.6">${msg}</p>`;
-}
+function cpBattleAttack(moveIdx){
+  const b = _cpBattle;
+  if(!b || b.over) return;
+  const c = S.companion = companionNormalize(S.companion);
+  const LV = 50;
 
-async function companionUseMove(idx){
-  const b = _companionBattle;
-  if(!b||b.busy) return;
-  b.busy=true;
+  const calcDmg = (atk, def, move) => {
+    const isPhys = move.category==='physical';
+    const atkStat = isPhys ? atk.atk : atk.spatk;
+    const defStat = isPhys ? def.def : def.spdef;
+    const base = Math.floor((2*LV/5+2)*move.power*atkStat/defStat/50)+2;
+    const stab = atk.types.includes(move.type) ? 1.5 : 1;
+    const eff = getEffectiveness ? getEffectiveness(move.type, def.types) : 1;
+    const rnd = (85+Math.random()*15)/100;
+    return {dmg:Math.max(1,Math.floor(base*stab*eff*rnd)), eff};
+  };
 
-  // Disable buttons
-  for(let i=0;i<4;i++){const btn=document.getElementById(`cb-move-${i}`);if(btn)btn.disabled=true;}
-
-  const move = b.player.moves[idx];
-  const {dmg:pdmg, eff:peff} = calcCompanionDmg(b.player, b.wild, move);
-  const hit = Math.random()*100 < (move.accuracy||100);
+  const pMove = b.player._moves[moveIdx];
+  const wMove = b.wild._moves[Math.floor(Math.random()*b.wild._moves.length)];
+  const log = document.getElementById('cp-battle-log');
+  const pName = cap(b.player.name);
+  const wName = cap(b.wild.name);
 
   // Player attacks
-  const pSpr=document.getElementById('cb-player-spr');
-  if(pSpr){pSpr.style.transform='translateX(20px)';setTimeout(()=>pSpr.style.transform='',200);}
+  const {dmg:pDmg, eff:pEff} = calcDmg(b.player, b.wild, pMove);
+  const pMoveName = pMove.nameEs||cap(pMove.name.replace(/-/g,' '));
+  b.wildHP = Math.max(0, b.wildHP - pDmg);
 
-  if(!hit){
-    cbLog(`¡${cap(b.player.name)} usó ${move.nameEs||move.name}... pero falló!`);
-  } else {
-    b.wildHP=Math.max(0,b.wildHP-pdmg);
-    const effMsg=peff>1?' ¡Súper efectivo!':peff<1&&peff>0?' No muy efectivo...':'';
-    cbLog(`¡${cap(b.player.name)} usó ${move.nameEs||move.name}!${effMsg}`);
-    const wSpr=document.getElementById('cb-wild-spr');
-    if(wSpr){setTimeout(()=>{wSpr.style.opacity='.3';setTimeout(()=>wSpr.style.opacity='1',200);},200);}
+  let logText = `<span style="font-weight:900;color:var(--t1)">${pName}</span> usa <span style="font-weight:900;color:var(--ac)">${pMoveName}</span> — ${pDmg} daño!`;
+  if(pEff>1) logText += ` <span style="color:var(--red)">¡Súper efectivo!</span>`;
+  if(pEff<1&&pEff>0) logText += ` <span style="color:var(--t3)">No muy efectivo...</span>`;
+
+  if(b.wildHP <= 0){
+    b.over = true;
+    logText += `<br><span style="color:var(--green);font-weight:800">¡${wName} se debilitó! ¡Victoria! +15 humor +10 energía</span>`;
+    c.mood = Math.min(100, c.mood+15);
+    c.energy = Math.min(100, c.energy+10);
+    scheduleSave();
+    if(log) log.innerHTML = `<p style="font-size:11px;line-height:1.6">${logText}</p>`;
+    renderCompanionBattle();
+    return;
   }
 
-  // Re-render HP
-  setTimeout(()=>{
-    const wPct=Math.max(0,b.wildHP/b.wildMaxHP*100);
-    const wBar=document.querySelector('#cb-log')?.parentElement?.querySelector('[style*="wildHP"]');
-    renderCompanionBattle();
+  // Wild attacks back
+  const {dmg:wDmg, eff:wEff} = calcDmg(b.wild, b.player, wMove);
+  const wMoveName = wMove.nameEs||cap(wMove.name.replace(/-/g,' '));
+  b.playerHP = Math.max(0, b.playerHP - wDmg);
+  logText += `<br><span style="font-weight:900;color:var(--t3)">${wName}</span> usa <span style="font-weight:900">${wMoveName}</span> — ${wDmg} daño!`;
 
-    if(b.wildHP<=0){
-      // Win!
-      setTimeout(()=>{
-        cbLog(`¡${cap(b.wild.name)} se debilitó! ¡Victoria!`);
-        S.companion.mood=Math.min(100,S.companion.mood+20);
-        S.companion.energy=Math.min(100,S.companion.energy+10);
-        scheduleSave();
-        for(let i=0;i<4;i++){const btn=document.getElementById(`cb-move-${i}`);if(btn)btn.disabled=true;}
-        setTimeout(()=>{_companionBattle=null;renderCompanion();},2000);
-      },600);
-      return;
-    }
+  if(b.playerHP <= 0){
+    b.over = true;
+    logText += `<br><span style="color:var(--red);font-weight:800">¡${pName} se debilitó! −10 humor</span>`;
+    c.mood = Math.max(0, c.mood-10);
+    c.hp = Math.max(0, c.hp-15);
+    scheduleSave();
+  }
 
-    // Enemy attacks
-    setTimeout(()=>{
-      const emove=b.wild.moves[Math.floor(Math.random()*b.wild.moves.length)];
-      const {dmg:edgm,eff:eeff}=calcCompanionDmg(b.wild,b.player,emove);
-      const eHit=Math.random()*100<(emove.accuracy||100);
-      const eSpr=document.getElementById('cb-wild-spr');
-      if(eSpr){eSpr.style.transform='scaleX(-1) translateX(20px)';setTimeout(()=>eSpr.style.transform='scaleX(-1)',200);}
-
-      if(!eHit){
-        cbLog(`¡${cap(b.wild.name)} usó ${emove.nameEs||emove.name}... pero falló!`);
-      } else {
-        b.playerHP=Math.max(0,b.playerHP-edgm);
-        const eEffMsg=eeff>1?' ¡Súper efectivo!':eeff<1&&eeff>0?' No muy efectivo...':'';
-        cbLog(`¡${cap(b.wild.name)} usó ${emove.nameEs||emove.name}!${eEffMsg}`);
-        const pSpr2=document.getElementById('cb-player-spr');
-        if(pSpr2){setTimeout(()=>{pSpr2.style.opacity='.3';setTimeout(()=>pSpr2.style.opacity='1',200);},200);}
-      }
-
-      setTimeout(()=>{
-        renderCompanionBattle();
-        if(b.playerHP<=0){
-          cbLog(`¡${cap(b.player.name)} se debilitó! Derrota...`);
-          S.companion.mood=Math.max(0,S.companion.mood-15);
-          scheduleSave();
-          setTimeout(()=>{_companionBattle=null;renderCompanion();},2000);
-          return;
-        }
-        b.busy=false;
-        for(let i=0;i<4;i++){const btn=document.getElementById(`cb-move-${i}`);if(btn)btn.disabled=false;}
-      },600);
-    },1200);
-  },600);
+  b.turn++;
+  if(log) log.innerHTML = `<p style="font-size:11px;line-height:1.6">${logText}</p>`;
+  renderCompanionBattle();
 }
 
 function drawStats(){
   if(S.tab!=='stats') return;
   updateCompanionOnVisit();
-  _companionBattle=null;
   renderCompanion();
 }
 
@@ -4597,175 +4601,153 @@ function renderCompanion(){
   const body = document.getElementById('companion-body');
   if(!body) return;
 
-  // If in battle, show battle
-  if(_companionBattle){ renderCompanionBattle(); return; }
-
   const p = getCompanionPoke();
   if(!p){
-    body.innerHTML=`
-      <div style="text-align:center;padding:32px 16px">
-        <div style="font-size:40px;margin-bottom:12px">🐾</div>
-        <div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:8px">Sin compañero</div>
-        <div style="font-size:13px;color:var(--t3);margin-bottom:20px">Elige un Pokémon favorito en la Trainer Card para tener un compañero</div>
-        <button onclick="goTab('card')" style="padding:10px 20px;border-radius:var(--r-md);border:none;background:var(--ac);color:#fff;font-family:var(--fn);font-size:13px;font-weight:800;cursor:pointer">Ir a Trainer Card</button>
-      </div>`;
+    body.innerHTML = `<div class="empty" style="padding:32px 16px;text-align:center">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <div class="etitle" style="margin-top:12px">Sin compañero</div>
+      <div class="esub">Abre un Pokémon favorito y pulsa "Trainer Card" para elegir tu compañero</div>
+    </div>`;
     return;
   }
 
-  if(!S.companion) S.companion={hp:80,energy:80,hunger:70,mood:75,lastVisit:Date.now(),fainted:false,faintCount:0,history:[]};
-  const c = S.companion;
-
-  if(c.fainted){
-    // Show fainted state with revival option
-    const friends=[...S.favs]
-      .map(k=>{const bid=parseInt(String(k).split('_')[0]);return S.poke.find(x=>x.id===bid);})
-      .filter(x=>x&&x.id!==p.id).slice(0,6);
-
-    body.innerHTML=`
-      <div style="width:100%;max-width:340px;text-align:center">
-        <div style="background:var(--s1);border-radius:24px;padding:24px;border:2px solid var(--red)33;margin-bottom:12px">
-          <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png"
-            style="width:100px;height:100px;object-fit:contain;image-rendering:pixelated;filter:grayscale(1) brightness(.6);opacity:.7">
-          <div style="font-family:'Press Start 2P',monospace;font-size:9px;color:var(--red);margin:12px 0 6px">DEBILITADO</div>
-          <div style="font-size:13px;font-weight:700;color:var(--t2)">¡${cap(p.name)} necesita ayuda!</div>
-          <div style="font-size:11px;color:var(--t3);margin-top:6px">Pide a un amigo que le reactive</div>
-          ${c.faintCount>1?`<div style="font-size:10px;color:var(--t3);margin-top:4px">Se ha debilitado ${c.faintCount} veces</div>`:''}
-        </div>
-        ${friends.length>0?`
-          <div style="font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Llamar a un amigo</div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-            ${friends.map(f=>`
-              <button onclick="reviveWithFriend(${f.id})" style="
-                padding:10px 6px;border-radius:14px;border:1.5px solid var(--bd);
-                background:var(--s1);cursor:pointer;font-family:var(--fn);
-                display:flex;flex-direction:column;align-items:center;gap:4px;
-              ">
-                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${f.id}.png"
-                  style="width:40px;height:40px;object-fit:contain;image-rendering:pixelated">
-                <span style="font-size:8px;font-weight:700;color:var(--t2)">${cap(f.name)}</span>
-              </button>`).join('')}
-          </div>`:'<div style="font-size:12px;color:var(--t3)">Añade más Pokémon a favoritos para poder revivir a tu compañero</div>'}
-      </div>`;
-    return;
-  }
-
+  const c = S.companion = companionNormalize(S.companion);
   const typeColor = tc(p.types[0]);
   const r2=parseInt(typeColor.slice(1,3)||'7B',16);
   const g3=parseInt(typeColor.slice(3,5)||'52',16);
   const b2=parseInt(typeColor.slice(5,7)||'AB',16);
 
-  const hp=Math.round(c.hp||0);
-  const energy=Math.round(c.energy||0);
-  const hunger=Math.round(c.hunger||0);
-  const mood=Math.round(c.mood||0);
+  const fav = S.poke.find(x=>x.id===p.id);
+  const primaryType = fav?.types[0]||'normal';
+  const favoriteFood = FOOD_BY_TYPE[primaryType]||'🌾';
+  const favFoodName = FOOD_NAMES_BY_TYPE[primaryType]||'Pienso';
 
-  const screenBg = mood>=70
-    ?`linear-gradient(160deg,rgba(${r2},${g3},${b2},0.3),rgba(${r2},${g3},${b2},0.12))`
-    :mood>=35
-    ?`linear-gradient(160deg,rgba(180,160,80,0.2),rgba(180,160,80,0.08))`
-    :`linear-gradient(160deg,rgba(80,80,100,0.25),rgba(60,60,80,0.1))`;
-  const screenBorder = mood>=70?typeColor:mood>=35?'#c8a840':'#888';
+  const screenBg = c.fainted
+    ? 'linear-gradient(160deg,rgba(80,80,100,0.3),rgba(60,60,80,0.15))'
+    : c.hp>=70
+    ? `linear-gradient(160deg,rgba(${r2},${g3},${b2},0.3),rgba(${r2},${g3},${b2},0.1))`
+    : c.hp>=35
+    ? 'linear-gradient(160deg,rgba(200,168,64,0.25),rgba(200,168,64,0.08))'
+    : 'linear-gradient(160deg,rgba(248,113,113,0.25),rgba(248,113,113,0.08))';
 
-  const moodSvg = mood>=70
-    ?`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${typeColor}" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`
-    :mood>=35
-    ?`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c8a840" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`
-    :`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
+  const screenBorder = c.fainted ? '#666' : c.hp>=70 ? typeColor : c.hp>=35 ? '#c8a840' : '#f87171';
+  const moodLabel = c.fainted ? 'DESCANSANDO' : c.mood>=70 ? '¡MUY FELIZ!' : c.mood>=35 ? 'TRANQUILO' : '¡NECESITA AYUDA!';
+  const moodColor = c.fainted ? '#888' : c.mood>=70 ? typeColor : c.mood>=35 ? '#c8a840' : '#f87171';
 
-  const moodLabel=mood>=70?'MUY FELIZ':mood>=35?'TRANQUILO':'NECESITA AYUDA';
-  const sprUrl=p.id<=649
-    ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${p.id}.gif`
-    :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`;
+  const sprUrl = p.id<=649
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${p.id}.gif`
+    : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`;
+  const animStyle = p.id>649 ? getAnimStyle(p.types, p.id) : '';
 
-  const bar=(val,color,label)=>`
+  const statBar = (val, label, color) => `
     <div>
       <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-        <span style="font-family:'Press Start 2P',monospace;font-size:6px;color:#aaa">${label}</span>
-        <span style="font-family:'Press Start 2P',monospace;font-size:6px;color:${color}">${val}</span>
+        <span style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--t3)">${label}</span>
+        <span style="font-family:'Press Start 2P',monospace;font-size:6px;color:${color}">${Math.round(val)}</span>
       </div>
-      <div style="height:5px;background:rgba(0,0,0,.15);border-radius:3px;overflow:hidden">
+      <div style="height:5px;background:rgba(0,0,0,.12);border-radius:3px;overflow:hidden">
         <div style="height:100%;width:${val}%;background:${color};border-radius:3px;transition:width .5s ease"></div>
       </div>
     </div>`;
 
-  body.style.cssText='padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px';
-  body.innerHTML=`
-    <!-- DEVICE -->
-    <div style="width:100%;max-width:340px;background:var(--s1);border-radius:32px;border:3px solid var(--bd);box-shadow:0 8px 32px rgba(0,0,0,.15);overflow:hidden">
+  body.innerHTML = `
+    <!-- Companion device -->
+    <div style="width:100%;max-width:340px;background:var(--s1);border-radius:32px;border:3px solid var(--bd);box-shadow:0 8px 32px rgba(0,0,0,.12)">
 
-      <!-- SCREEN -->
-      <div style="margin:16px 16px 0;border-radius:20px;border:3px solid ${screenBorder};background:${screenBg};background-color:var(--bg);overflow:hidden;position:relative;box-shadow:inset 0 2px 8px rgba(0,0,0,.1);transition:border-color .5s">
-        <!-- Scanlines -->
-        <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.03) 3px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:1"></div>
+      <!-- Screen -->
+      <div style="margin:16px 16px 0;border-radius:20px;border:3px solid ${screenBorder};background:${screenBg};background-color:var(--bg);overflow:hidden;position:relative;box-shadow:inset 0 2px 8px rgba(0,0,0,.08);transition:border-color .5s">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.025) 3px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:1"></div>
 
         <!-- Screen header -->
-        <div style="padding:10px 14px 6px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2">
-          <span style="font-family:'Press Start 2P',monospace;font-size:6px;color:${screenBorder}">${moodLabel}</span>
-          <div style="display:flex;gap:4px;align-items:center">${moodSvg}</div>
+        <div style="padding:10px 14px 4px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2">
+          <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:${moodColor}">${moodLabel}</div>
+          <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--t3)">LV.50</div>
         </div>
 
         <!-- Sprite -->
-        <div style="display:flex;justify-content:center;padding:4px 0 8px;position:relative;z-index:2;cursor:pointer" onclick="openMdl(${p.id})">
-          <img src="${sprUrl}" style="width:120px;height:120px;object-fit:contain;image-rendering:pixelated;filter:${mood<35?'grayscale(0.5)':''};transition:filter .5s"
+        <div style="display:flex;justify-content:center;align-items:flex-end;padding:8px 16px 4px;min-height:120px;position:relative;z-index:2;cursor:pointer" onclick="openMdl(${p.id})">
+          <img src="${sprUrl}" style="width:110px;height:110px;object-fit:contain;image-rendering:pixelated;${animStyle};filter:${c.fainted?'grayscale(1) brightness(.6)':''};transition:filter .5s"
             onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'">
+          ${c.fainted?`<div style="position:absolute;top:8px;right:16px;font-family:'Press Start 2P',monospace;font-size:7px;color:#f87171">DEBILITADO</div>`:''}
         </div>
 
-        <!-- 4 bars -->
-        <div style="padding:0 14px 10px;display:flex;flex-direction:column;gap:6px;position:relative;z-index:2">
-          ${bar(hp,'#f87171','VIDA')}
-          ${bar(energy,'var(--gold)','ENERGIA')}
-          ${bar(hunger,'#60a5fa','HAMBRE')}
-          ${bar(mood,typeColor,'HUMOR')}
+        <!-- Stats bars -->
+        <div style="padding:4px 14px 10px;position:relative;z-index:2;display:flex;flex-direction:column;gap:5px">
+          ${statBar(c.hp,'VIDA','#f87171')}
+          ${statBar(c.energy,'ENERGIA','var(--gold)')}
+          ${statBar(c.hunger,'HAMBRE','#60a5fa')}
+          ${statBar(c.mood,'HUMOR',typeColor)}
         </div>
 
         <!-- Name bar -->
-        <div style="background:rgba(${r2},${g3},${b2},0.15);border-top:1px solid ${screenBorder}44;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2">
+        <div style="background:rgba(${r2},${g3},${b2},0.15);border-top:1px solid ${screenBorder}44;padding:7px 14px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2">
           <span style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--t1)">${cap(p.name).toUpperCase()}</span>
-          <span style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--t3)">#${pad(p.id)}</span>
+          <span style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--t3)">#${pad(p.id)}</span>
         </div>
       </div>
 
-      <!-- BUTTONS -->
-      <div style="padding:14px 16px 18px;display:flex;gap:8px;justify-content:center">
-        <button onclick="feedCompanion()" title="Alimentar" style="width:56px;height:56px;border-radius:50%;background:rgba(96,165,250,.1);border:2px solid var(--blue)33;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:transform .1s" onmousedown="this.style.transform='scale(.9)'" onmouseup="this.style.transform='scale(1)'">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-          <span style="font-family:'Press Start 2P',monospace;font-size:5px;color:var(--blue)">COMER</span>
+      <!-- Message area -->
+      <div id="companion-msg" style="min-height:28px;padding:6px 16px;text-align:center;font-size:11px;font-weight:700;color:var(--t2);opacity:1;transition:opacity .4s"></div>
+
+      <!-- Action buttons -->
+      <div style="padding:0 16px 18px;display:flex;gap:10px;justify-content:center">
+        <!-- Feed: favorite food -->
+        <button onclick="companionFeed(true)" style="width:56px;height:56px;border-radius:50%;background:rgba(96,165,250,.1);border:2px solid rgba(96,165,250,.3);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px" title="${favFoodName} (favorita)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          <span style="font-family:'Press Start 2P',monospace;font-size:5px;color:#60a5fa">COMER</span>
         </button>
-        <button onclick="careCompanion()" title="Cuidar" style="width:56px;height:56px;border-radius:50%;background:rgba(232,24,74,.1);border:2px solid var(--red)33;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:transform .1s" onmousedown="this.style.transform='scale(.9)'" onmouseup="this.style.transform='scale(1)'">
+        <!-- Feed: random food -->
+        <button onclick="companionFeed(false)" style="width:56px;height:56px;border-radius:50%;background:rgba(200,168,64,.08);border:2px solid rgba(200,168,64,.25);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px" title="Comida aleatoria">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8a840" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span style="font-family:'Press Start 2P',monospace;font-size:5px;color:#c8a840">OTRO</span>
+        </button>
+        <!-- Care -->
+        <button onclick="companionCare()" style="width:56px;height:56px;border-radius:50%;background:rgba(232,24,74,.08);border:2px solid rgba(232,24,74,.25);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--red)" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           <span style="font-family:'Press Start 2P',monospace;font-size:5px;color:var(--red)">CUIDAR</span>
         </button>
-        <button onclick="startCompanionPlay()" title="Jugar" style="width:56px;height:56px;border-radius:50%;background:rgba(245,200,66,.1);border:2px solid var(--gold)33;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:transform .1s" onmousedown="this.style.transform='scale(.9)'" onmouseup="this.style.transform='scale(1)'">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5H20.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8H3.5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"/></svg>
-          <span style="font-family:'Press Start 2P',monospace;font-size:5px;color:var(--gold)">JUGAR</span>
+        <!-- Play / Battle -->
+        <button id="cp-battle-btn" onclick="startCompanionBattle()" style="width:56px;height:56px;border-radius:50%;background:rgba(${r2},${g3},${b2},.1);border:2px solid ${typeColor}44;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${typeColor}" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span style="font-family:'Press Start 2P',monospace;font-size:5px;color:${typeColor}">JUGAR</span>
         </button>
       </div>
     </div>
 
-    <!-- Energy warning for play -->
-    ${energy<20?`<div style="width:100%;max-width:340px;background:rgba(245,200,66,.1);border:1.5px solid var(--gold)33;border-radius:12px;padding:10px 14px;font-size:11px;font-weight:700;color:var(--gold)">⚡ Necesitas 20 de energía para jugar (tienes ${energy})</div>`:''}
+    <!-- Fainted notice -->
+    ${c.fainted?`<div style="width:100%;max-width:340px;background:rgba(248,113,113,.08);border:1.5px solid rgba(248,113,113,.3);border-radius:16px;padding:14px;text-align:center">
+      <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:#f87171;margin-bottom:8px">DEBILITADO</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:10px">Completa el reto diario para recuperarlo</div>
+      ${!isDailyChallengeCompleted()?`<button onclick="completeDailyChallenge();updateCompanionOnVisit();renderCompanion()" style="padding:9px 18px;border-radius:10px;border:none;background:rgba(248,113,113,.15);color:#f87171;font-family:var(--fn);font-size:12px;font-weight:800;cursor:pointer">Marcar reto diario</button>`:'<div style="color:var(--green);font-size:12px;font-weight:700">✓ Reto completado — ¡se recuperará!</div>'}
+    </div>`:''}
+
+    <!-- Battle area -->
+    <div id="cp-battle-area" style="width:100%;max-width:340px">${_cpBattle&&!_cpBattle.over?'':''}</div>
 
     <!-- Daily challenge -->
     <div style="width:100%;max-width:340px;background:var(--s1);border-radius:18px;padding:14px;border:1.5px solid var(--bd)">
       <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--t3);letter-spacing:.5px;margin-bottom:10px">RETO DE HOY</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:34px;height:34px;border-radius:50%;background:${isDailyChallengeCompleted()?'rgba(107,203,139,.15)':'var(--bg)'};border:2px solid ${isDailyChallengeCompleted()?'var(--green)':'var(--bd)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          ${isDailyChallengeCompleted()
-            ?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>'
-            :'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'}
-        </div>
-        <div style="flex:1">
-          <div style="font-size:12px;font-weight:700;color:var(--t1)">${getDailyChallenge().label}</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:2px">${isDailyChallengeCompleted()?'✓ +8 energía':'Complétalo para +8 energía'}</div>
-        </div>
-        ${!isDailyChallengeCompleted()?`<button onclick="completeDailyChallenge();S.companion.energy=Math.min(100,(S.companion.energy||0)+8);scheduleSave();renderCompanion()" style="padding:7px 12px;border-radius:10px;border:none;background:rgba(${r2},${g3},${b2},0.12);color:${typeColor};font-size:11px;font-weight:800;font-family:var(--fn);cursor:pointer;flex-shrink:0">Marcar</button>`:''}
-      </div>
+      ${(()=>{
+        const daily=getDailyChallenge();const done=isDailyChallengeCompleted();
+        return `<div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:${done?'rgba(107,203,139,.15)':'var(--bg)'};border:2px solid ${done?'var(--green)':'var(--bd)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            ${done?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'}
+          </div>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:700;color:var(--t1)">${daily.label}</div>
+            <div style="font-size:10px;color:var(--t3);margin-top:2px">${done?'✓ Completado — +10 energía al compañero':'Sube la energía de tu compañero'}</div>
+          </div>
+          ${!done?`<button onclick="completeDailyChallenge();boostCompanion('energy',10)" style="padding:8px 12px;border-radius:10px;border:none;background:rgba(${r2},${g3},${b2},.12);color:${typeColor};font-size:11px;font-weight:800;font-family:var(--fn);cursor:pointer;flex-shrink:0">Marcar</button>`:''}
+        </div>`;
+      })()}
     </div>
+
     <div style="height:8px"></div>
   `;
+
+  // Restore battle if ongoing
+  if(_cpBattle) renderCompanionBattle();
 }
-
-
 
 async function openMdl(id){
   S.mId=id;S.mMod=S.set.modern;S.mShy=false;S.mForms=[];
@@ -5316,8 +5298,10 @@ function checkPassword(){
   setTimeout(()=>updateTrainerUI(), 0);
 
   const sel = document.getElementById('stsel');
-  sel.innerHTML = '<option value="all">Todos los juegos</option>';
-  GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
+  if(sel){
+    sel.innerHTML = '<option value="all">Todos los juegos</option>';
+    GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
+  }
 
   document.getElementById('si').addEventListener('input', e => {
     S.f.q = e.target.value.trim();
