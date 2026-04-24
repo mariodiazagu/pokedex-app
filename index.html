@@ -868,13 +868,13 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
 </div>
 
 <div class="pg" id="pg-stats">
-  <div class="sthdr">
-    <div class="sttitle">Estadísticas</div>
-    <select class="stsel" id="stsel" onchange="drawStats()">
-      <option value="all">Todos los juegos</option>
-    </select>
+  <div class="phdr">
+    <div class="ptitle">Compañero</div>
+    <div class="psub" id="companion-sub">Pokémon del día</div>
   </div>
-  <div class="stscroll" id="stbody"></div>
+  <div class="gscroll" style="flex:1;min-height:0">
+    <div id="companion-body" style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:16px"></div>
+  </div>
 </div>
 
 <!-- ═══ TRAINER CARD PAGE ═══ -->
@@ -924,8 +924,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
     <div class="cfg-card">
       <div class="cfg-row">
         <div>
-          <div class="cfg-label">Pokémon caminante</div>
-          <div class="cfg-sub">Un Pokémon del día pasea sobre el menú</div>
+          <div class="cfg-label">Pokémon compañero</div>
+          <div class="cfg-sub">Muestra el Pokémon del día en la pestaña Compañero</div>
         </div>
         <button class="cfg-toggle" id="walker-toggle" onclick="toggleWalker()">
           <div class="cfg-toggle-knob"></div>
@@ -982,28 +982,6 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
   </div>
 </div>
 
-<div id="walker-wrap" style="position:fixed;bottom:calc(var(--sb)+72px);right:12px;z-index:200;pointer-events:none">
-  <!-- Bubble speech -->
-  <div id="walker-bubble" style="
-    position:absolute;bottom:100%;right:0;margin-bottom:8px;
-    background:var(--s1);border:1.5px solid var(--bd);border-radius:14px 14px 4px 14px;
-    padding:7px 11px;font-size:11px;font-weight:700;color:var(--t1);
-    white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none;
-    box-shadow:var(--shadow);
-  "></div>
-  <!-- Pokemon sprite -->
-  <div id="walker-btn" style="
-    width:56px;height:56px;border-radius:20px;
-    background:var(--s1);border:2px solid var(--bd);
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;pointer-events:all;
-    box-shadow:0 4px 16px rgba(0,0,0,.12);
-    transition:transform .2s cubic-bezier(.34,1.56,.64,1);
-  " onclick="walkerClick()">
-    <img id="walker-img" style="width:42px;height:42px;object-fit:contain;image-rendering:pixelated">
-  </div>
-</div>
-
 <nav class="tabs">
   <button class="tab on" id="tb-dex" onclick="goTab('dex')">
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -1018,8 +996,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh}
     <span class="tab-lbl">Equipo</span>
   </button>
   <button class="tab" id="tb-stats" onclick="goTab('stats')">
-    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    <span class="tab-lbl">Stats</span>
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <span class="tab-lbl">Compañero</span>
   </button>
 </nav>
 </div>
@@ -4134,56 +4112,127 @@ function toggleTeamCaptured(){
 }
 
 function drawStats(){
-  if(S.tab!=='stats')return;
-  const gid=document.getElementById('stsel').value;
-  const tot=S.poke.length;
-  const capIds=new Set(),shyIds=new Set(),never=[],always=[];
-  const tC={};TYPES.forEach(t=>{tC[t.id]=0;});
-  const rC={};Object.keys(RAR).forEach(k=>{rC[k]=0;});
-  const bC={};BALLS.forEach(b=>{bC[b.id]=0;});
-  S.poke.forEach(p=>{
-    const t=S.track[p.id];
-    if(gid==='all'){
-      const any=t&&Object.values(t).some(g=>g.captured);
-      if(any){capIds.add(p.id);p.types.forEach(tp=>{if(tp in tC)tC[tp]++;});rC[p.rarity]=(rC[p.rarity]||0)+1;}
-      if(!any)never.push(p);
-      if(t&&GAMES.every(g=>t[g.id]?.captured))always.push(p);
-      if(t&&Object.values(t).some(g=>g.shiny))shyIds.add(p.id);
-      if(t)Object.values(t).forEach(g=>{if(g?.ball&&g.ball in bC)bC[g.ball]++;});
-    }else{
-      const c=!!(t&&t[gid]?.captured);
-      if(c){capIds.add(p.id);p.types.forEach(tp=>{if(tp in tC)tC[tp]++;});rC[p.rarity]=(rC[p.rarity]||0)+1;}
-      if(!c)never.push(p);
-      if(t&&t[gid]?.shiny)shyIds.add(p.id);
-      if(t&&t[gid]?.ball&&t[gid].ball in bC)bC[t[gid].ball]++;
-    }
-  });
-  const pct=tot?Math.round((capIds.size/tot)*100):0;
-  const tS=TYPES.map(t=>({...t,c:tC[t.id]})).sort((a,b)=>b.c-a.c);
-  const mT=Math.max(1,...tS.map(t=>t.c));
-  const topB=BALLS.filter(b=>bC[b.id]>0).sort((a,b)=>bC[b.id]-bC[a.id]).reverse().slice(0,10);
-  const mB=topB.length?bC[topB[0].id]:1;
-  const pg=gid==='all'?GAMES.map(g=>({...g,count:Object.values(S.track).filter(t=>t[g.id]?.captured).length})).sort((a,b)=>b.count-a.count).slice(0,12):[];
-  const mG=pg.length?pg[0].count:1;
-  const gn=gid==='all'?'global':(GAMES.find(g=>g.id===gid)?.n||gid);
-  document.getElementById('stbody').innerHTML=`
-    <div class="stlbl">Resumen ${gn}</div>
-    <div class="bnums">
-      <div class="bcard"><div class="bval" style="color:var(--green)">${capIds.size}</div><div class="blbl">Capturados</div></div>
-      <div class="bcard"><div class="bval" style="color:var(--gold)">${shyIds.size}</div><div class="blbl">Shiny</div></div>
-      <div class="bcard"><div class="bval" style="color:var(--ac)">${pct}%</div><div class="blbl">Completado</div></div>
-      <div class="bcard"><div class="bval" style="color:var(--t2)">${never.length}</div><div class="blbl">Sin capturar</div></div>
-    </div>
-    <div class="stlbl">Por tipo</div>
-    <div class="barc">${tS.map(t=>`<div class="brow"><div class="brlbl">${t.n}</div><div class="brtrack"><div class="brfill" style="width:${Math.round((t.c/mT)*100)}%;background:${t.c}"></div></div><div class="brnum">${t.c}</div></div>`).join('')}</div>
-    <div class="stlbl">Por rareza</div>
-    <div class="barc">${Object.entries(RAR).map(([k,r])=>{const tot2=S.poke.filter(p=>p.rarity===k).length;const got=rC[k]||0;return`<div class="brow"><div class="brlbl"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${r.d};margin-right:4px;vertical-align:middle"></span>${r.l}</div><div class="brtrack"><div class="brfill" style="width:${tot2?Math.round((got/tot2)*100):0}%;background:${r.d}"></div></div><div class="brnum">${got}/${tot2}</div></div>`;}).join('')}</div>
-    ${pg.length?`<div class="stlbl">Top juegos</div><div class="barc">${pg.map(g=>`<div class="brow"><div class="brlbl">${g.n}</div><div class="brtrack"><div class="brfill" style="width:${mG?Math.round((g.count/mG)*100):0}%;background:${g.c}"></div></div><div class="brnum">${g.count}</div></div>`).join('')}</div>`:''}
-    ${topB.length?`<div class="stlbl">Pokéballs usadas</div><div class="barc">${topB.map(b=>`<div class="brow"><div class="brlbl">${b.e} ${b.n}</div><div class="brtrack"><div class="brfill" style="width:${Math.round((bC[b.id]/mB)*100)}%;background:var(--ac)"></div></div><div class="brnum">${bC[b.id]}</div></div>`).join('')}</div>`:''}
-    ${never.length?`<div class="stlbl">Nunca capturado (${Math.min(30,never.length)} de ${never.length})</div><div class="plist">${never.slice(0,30).map(p=>`<div class="prow" onclick="openMdl(${p.id})"><img src="${spOf(p.id,S.set.modern,false)}" style="width:36px;height:36px" onerror="this.src=''"><div class="prinfo"><div class="prname">${cap(p.name)}</div><div class="prsub">#${pad(p.id)}</div></div><div class="prbadge" style="color:var(--red)">–</div></div>`).join('')}</div>`:''}
-    ${always.length?`<div class="stlbl">En todos los juegos (${always.length})</div><div class="plist">${always.slice(0,30).map(p=>`<div class="prow" onclick="openMdl(${p.id})"><img src="${spOf(p.id,S.set.modern,false)}" style="width:36px;height:36px" onerror="this.src=''"><div class="prinfo"><div class="prname">${cap(p.name)}</div><div class="prsub">#${pad(p.id)}</div></div><div class="prbadge" style="color:var(--green)">✦</div></div>`).join('')}</div>`:''}
-    <div style="height:18px"></div>`;
+  if(S.tab!=='stats') return;
+  renderCompanion();
 }
+
+function renderCompanion(){
+  const body = document.getElementById('companion-body');
+  if(!body) return;
+
+  const id = getDailyWalkerPoke();
+  const p = S.poke.find(x=>x.id===id);
+  if(!p){ body.innerHTML='<div class="empty"><div class="etitle">Cargando...</div></div>'; return; }
+
+  const isCap = Object.keys(S.track).some(k=>
+    parseInt(String(k).split('_')[0])===id && Object.values(S.track[k]).some(g=>g?.captured)
+  );
+  const isFav = [...S.favs].some(k=>parseInt(String(k).split('_')[0])===id);
+  const typeColor = tc(p.types[0]);
+  const r2=parseInt(typeColor.slice(1,3)||'7B',16);
+  const g3=parseInt(typeColor.slice(3,5)||'52',16);
+  const b2=parseInt(typeColor.slice(5,7)||'AB',16);
+
+  // Daily challenge
+  const daily = getDailyChallenge();
+  const dailyDone = isDailyChallengeCompleted();
+
+  // Mood based on recent activity
+  const recentCaps = Object.keys(S.track).filter(k=>
+    Object.values(S.track[k]).some(g=>g?.captured)
+  ).length;
+  const mood = recentCaps >= 50 ? 'happy' : recentCaps >= 10 ? 'ok' : 'sleep';
+  const moodText = recentCaps >= 50 ? '¡Está muy feliz!' : recentCaps >= 10 ? 'Está contento' : 'Tiene sueño...';
+
+  // Animated sprite
+  const sprUrl = id<=649
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${id}.gif`
+    : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+
+  const d = new Date();
+  const dateStr = d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+
+  body.innerHTML = `
+    <!-- Date -->
+    <div style="font-size:11px;font-weight:600;color:var(--t3);text-transform:capitalize;align-self:flex-start">${dateStr}</div>
+
+    <!-- Main companion card -->
+    <div style="
+      width:100%;border-radius:24px;overflow:hidden;
+      background:linear-gradient(160deg,rgba(${r2},${g3},${b2},0.2),rgba(${r2},${g3},${b2},0.05));
+      border:1.5px solid rgba(${r2},${g3},${b2},0.25);
+      position:relative;
+    ">
+      <!-- Big sprite area -->
+      <div style="display:flex;justify-content:center;padding:32px 16px 16px;position:relative">
+        <img src="${sprUrl}" style="width:140px;height:140px;object-fit:contain;image-rendering:pixelated"
+          onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png'"
+          onclick="openMdl(${id})" style="cursor:pointer">
+        <!-- Mood bubble -->
+        <div style="position:absolute;top:16px;right:20px;width:28px;height:28px;border-radius:50%;background:var(--s1);border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center">
+          ${mood==='happy'
+            ?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>'
+            :mood==='ok'
+            ?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>'
+            :'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-1 4-1 4 1 4 1"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>'
+          }
+        </div>
+        ${isFav?`<div style="position:absolute;top:16px;left:20px;width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>`:''}
+      </div>
+
+      <!-- Info -->
+      <div style="padding:0 20px 20px;text-align:center">
+        <div style="font-size:22px;font-weight:900;color:var(--t1)">${cap(p.name)}</div>
+        <div style="font-size:11px;color:${typeColor};font-weight:700;margin:4px 0 8px">${p.types.map(t=>{const ti=TYPES.find(x=>x.id===t);return ti?.n||t;}).join(' · ')}</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:12px">${moodText}</div>
+        <div style="display:flex;gap:8px;justify-content:center">
+          <button onclick="openMdl(${id})" style="
+            padding:9px 18px;border-radius:var(--r-md);border:none;
+            background:rgba(${r2},${g3},${b2},0.15);color:${typeColor};
+            font-family:var(--fn);font-size:12px;font-weight:800;cursor:pointer;
+          ">Ver ficha</button>
+          ${!isCap?`<button onclick="openMdl(${id})" style="
+            padding:9px 18px;border-radius:var(--r-md);border:none;
+            background:var(--ac);color:#fff;
+            font-family:var(--fn);font-size:12px;font-weight:800;cursor:pointer;
+          ">¡Capturar!</button>`:`<div style="padding:9px 18px;border-radius:var(--r-md);background:rgba(107,203,139,.15);color:var(--green);font-size:12px;font-weight:800">✓ Capturado</div>`}
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily challenge -->
+    <div style="width:100%;background:var(--s1);border-radius:18px;padding:16px;border:1.5px solid var(--bd)">
+      <div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Reto de hoy</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;border-radius:50%;background:${dailyDone?'rgba(107,203,139,.15)':'var(--bg)'};border:2px solid ${dailyDone?'var(--green)':'var(--bd)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          ${dailyDone?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'}
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:var(--t1)">${daily.label}</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">${dailyDone?'✓ Completado':'Se resetea mañana'}</div>
+        </div>
+        ${!dailyDone?`<button onclick="completeDailyChallenge()" style="padding:8px 14px;border-radius:var(--r-md);border:none;background:rgba(${r2},${g3},${b2},0.12);color:${typeColor};font-size:11px;font-weight:800;font-family:var(--fn);cursor:pointer">Marcar</button>`:''}
+      </div>
+    </div>
+
+    <!-- Stats quick -->
+    <div style="width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      ${[
+        {val:Object.keys(S.track).filter(k=>Object.values(S.track[k]).some(g=>g?.captured)).length, lbl:'Capturados', color:'var(--t1)'},
+        {val:Object.keys(S.track).filter(k=>Object.values(S.track[k]).some(g=>g?.shiny)).length, lbl:'Shiny', color:'var(--gold)'},
+        {val:S.favs.size, lbl:'Favoritos', color:'var(--red)'},
+      ].map(s=>`<div style="background:var(--s1);border-radius:14px;padding:12px 8px;text-align:center;border:1.5px solid var(--bd)">
+        <div style="font-size:24px;font-weight:900;color:${s.color};line-height:1">${s.val}</div>
+        <div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">${s.lbl}</div>
+      </div>`).join('')}
+    </div>
+
+    <div style="height:8px"></div>
+  `;
+}
+
 
 async function openMdl(id){
   S.mId=id;S.mMod=S.set.modern;S.mShy=false;S.mForms=[];
