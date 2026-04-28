@@ -782,7 +782,7 @@ border-radius:14px;padding:7px 12px;flex-shrink:0;min-width:80px;
 
 </style>
 <script>
-// Auth — loaded early so button works immediately
+// Auth — loaded early so buttons work immediately
 var _PW_KEY='pkp_auth';
 var _CORRECT_PW='Pokemon2026';
 function checkPassword(){
@@ -801,6 +801,33 @@ function checkPassword(){
     input.value='';
     input.focus();
   }
+}
+function signInWithGoogle(){
+  // Wait for Firebase to be ready
+  var attempts=0;
+  function trySignIn(){
+    if(typeof firebase!=='undefined' && firebase.auth){
+      var loading=document.getElementById('auth-loading');
+      if(loading)loading.style.display='block';
+      var provider=new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then(function(){if(loading)loading.style.display='none';})
+        .catch(function(err){
+          if(loading)loading.style.display='none';
+          if(err.code==='auth/popup-blocked'){
+            firebase.auth().signInWithRedirect(provider);
+          } else if(err.code!=='auth/popup-closed-by-user'){
+            alert('Error: '+err.code+'\n'+err.message);
+          }
+        });
+    } else if(attempts<20){
+      attempts++;
+      setTimeout(trySignIn,300);
+    } else {
+      alert('Firebase no cargó. Recarga la página.');
+    }
+  }
+  trySignIn();
 }
 </script>
 </head>
