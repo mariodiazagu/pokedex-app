@@ -803,31 +803,11 @@ function checkPassword(){
   }
 }
 function signInWithGoogle(){
-  // Wait for Firebase to be ready
-  var attempts=0;
-  function trySignIn(){
-    if(typeof firebase!=='undefined' && firebase.auth){
-      var loading=document.getElementById('auth-loading');
-      if(loading)loading.style.display='block';
-      var provider=new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-        .then(function(){if(loading)loading.style.display='none';})
-        .catch(function(err){
-          if(loading)loading.style.display='none';
-          if(err.code==='auth/popup-blocked'){
-            firebase.auth().signInWithRedirect(provider);
-          } else if(err.code!=='auth/popup-closed-by-user'){
-            alert('Error: '+err.code+'\n'+err.message);
-          }
-        });
-    } else if(attempts<20){
-      attempts++;
-      setTimeout(trySignIn,300);
-    } else {
-      alert('Firebase no cargó. Recarga la página.');
-    }
-  }
-  trySignIn();
+  var loading=document.getElementById('auth-loading');
+  if(loading)loading.style.display='block';
+  var provider=new firebase.auth.GoogleAuthProvider();
+  // signInWithRedirect is the only reliable method on iOS Safari
+  firebase.auth().signInWithRedirect(provider);
 }
 </script>
 </head>
@@ -2847,20 +2827,7 @@ function signInWithGoogle() {
 const loading = document.getElementById(‘auth-loading’);
 if(loading) loading.style.display=‘block’;
 const provider = new firebase.auth.GoogleAuthProvider();
-auth.signInWithPopup(provider)
-.then(result => {
-if(loading) loading.style.display=‘none’;
-})
-.catch(err => {
-if(loading) loading.style.display=‘none’;
-console.error(‘Sign-in error:’, err.code, err.message);
-if(err.code === ‘auth/popup-blocked’){
-// Fallback to redirect if popup blocked
 auth.signInWithRedirect(provider);
-} else if(err.code !== ‘auth/popup-closed-by-user’){
-alert(’Error: ’ + err.code + ‘\n’ + err.message);
-}
-});
 }
 
 function signOut() {
