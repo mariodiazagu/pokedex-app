@@ -18,7 +18,7 @@
   /* Nothing-inspired palette */
   --bg:#EDEDED;
   --s1:rgba(255,255,255,0.82);
-  --s2:rgba(255,255,255,0.55);
+  --s2:rgba(255,255,255,var(--glass));
   --s3:rgba(0,0,0,0.06);
   --ac:#C41E1E;
   --ac2:#D94444;
@@ -46,6 +46,7 @@
   --shadow-lg:0 16px 48px rgba(0,0,0,.16);
   --dot-size:1.5px;
   --dot-space:28px;
+  --glass:0.45;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
@@ -62,8 +63,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .hdr-inner{
   display:flex;align-items:center;justify-content:space-between;
   width:100%;
-  background:rgba(255,255,255,0.42);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  background:rgba(255,255,255,var(--glass));
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   border-radius:99px;
   padding:8px 10px 8px 14px;
 }
@@ -80,7 +81,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
   width:34px;height:34px;border-radius:50%;
   border:none;
   background:rgba(255,255,255,0.5);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;flex-shrink:0;color:var(--t3);
 }
@@ -96,8 +97,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 }
 .tabs-inner{
   display:flex;width:100%;
-  background:rgba(255,255,255,0.42);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  background:rgba(255,255,255,var(--glass));
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   border-radius:99px;
   padding:4px;
   gap:2px;
@@ -124,9 +125,9 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .srch{padding:10px 16px 8px;flex-shrink:0}
 .srch-box{
   display:flex;align-items:center;gap:10px;
-  background:rgba(255,255,255,0.38);
+  background:rgba(255,255,255,var(--glass));
   border:none;border-radius:24px;padding:12px 16px;
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   transition:background .15s;
 }
 .srch-box:focus-within{background:rgba(255,255,255,0.88)}
@@ -148,8 +149,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
   padding:6px 14px;border-radius:24px;
   font-size:11px;font-weight:700;letter-spacing:.3px;
   border:none;
-  background:rgba(255,255,255,0.42);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(255,255,255,var(--glass));
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   color:var(--t2);cursor:pointer;white-space:nowrap;font-family:var(--fn);
   transition:all .15s;
 }
@@ -169,13 +170,13 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 
 /* ── CARD ── */
 .card{
-  background:rgba(255,255,255,0.38);
+  background:rgba(255,255,255,var(--glass));
   border:none;border-radius:24px;
   padding:10px 8px 10px;
   cursor:pointer;display:flex;flex-direction:column;
   align-items:center;position:relative;overflow:visible;
   min-height:0;transition:transform .15s,background .15s;
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
 }
 .card:active{transform:scale(.96);background:rgba(255,255,255,0.88)}
 .card:hover{background:rgba(255,255,255,0.80)}
@@ -197,11 +198,11 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .stDot{width:5px;height:5px;border-radius:50%}
 
 /* ── MODAL ── */
-#ov{position:fixed;inset:0;background:rgba(0,0,0,.25);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:900;display:none;align-items:flex-end}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.25);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:900;display:none;align-items:flex-end}
 #ov.on{display:flex}
 #mdl{
   background:rgba(240,240,240,0.92);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   width:100%;max-height:93dvh;
   border-radius:32px 32px 0 0;
   display:flex;flex-direction:column;
@@ -228,7 +229,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .shbtn{
   position:absolute;top:14px;right:14px;width:36px;height:36px;
   border-radius:var(--r-sm);border:none;background:rgba(255,255,255,.7);
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(3px);
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;transition:all .15s;color:var(--t3);
   box-shadow:var(--shadow);
@@ -382,13 +383,13 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .tslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 10px;flex-shrink:0}
 .tslot{
   border-radius:24px;border:none;
-  background:rgba(255,255,255,0.45);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(255,255,255,var(--glass));
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   cursor:pointer;position:relative;transition:all .15s;padding:10px 6px 8px;
   min-height:110px;
 }
-.tslot.filled{background:rgba(255,255,255,0.48);}
+.tslot.filled{background:rgba(255,255,255,var(--glass));}
 .tslot.filled:active{transform:scale(.97);}
 .tslot-img{width:56px;height:56px;object-fit:contain;image-rendering:pixelated;}
 .tslot-name{font-size:9px;font-weight:700;color:var(--t2);text-align:center;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
@@ -406,12 +407,12 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 /* Game picker bottom sheet */
 .team-game-picker{
   position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.4);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   display:none;align-items:flex-end;
 }
 .team-game-picker.on{display:flex;}
 .team-game-picker-sheet{
-  background:rgba(237,237,237,0.60);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  background:rgba(237,237,237,var(--glass));backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   width:100%;max-height:75dvh;
   border-radius:32px 32px 0 0;
   overflow-y:auto;padding-bottom:var(--sb);
@@ -577,7 +578,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .tcard-header-strip{
   display:flex;align-items:center;justify-content:space-between;
   background:rgba(255,255,255,.55);
-  backdrop-filter:blur(6px);
+  backdrop-filter:blur(3px);
   border-radius:18px;
   padding:8px 12px;margin-bottom:12px;
   border:1.5px solid rgba(255,255,255,.8);
@@ -598,7 +599,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .tcard-row{
   display:flex;align-items:center;gap:8px;
   background:rgba(255,255,255,.55);
-  backdrop-filter:blur(6px);
+  backdrop-filter:blur(3px);
   border-radius:var(--r-sm);padding:7px 10px;
   margin-bottom:6px;
   border:1.5px solid rgba(255,255,255,.7);
@@ -615,7 +616,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 /* Name row */
 .tcard-name-row{
   background:rgba(255,255,255,.7);
-  backdrop-filter:blur(6px);
+  backdrop-filter:blur(3px);
   border-radius:var(--r-sm);padding:8px 10px;
   margin-bottom:8px;
   border:1.5px solid rgba(255,255,255,.8);
@@ -635,7 +636,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .tcard-type-icon{width:20px;height:20px;border-radius:4px;object-fit:contain}
 /* Badges strip */
 .tcard-badges-strip{
-  background:rgba(255,255,255,.55);backdrop-filter:blur(6px);
+  background:rgba(255,255,255,.55);backdrop-filter:blur(3px);
   border-radius:var(--r-sm);padding:8px 10px;
   border:1.5px solid rgba(255,255,255,.7);
   margin-top:6px;
@@ -645,7 +646,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .trainer-gender-btn{
   flex:1;padding:8px 4px;border-radius:var(--r-sm);border:2px solid rgba(255,255,255,.35);
   background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;
-  font-family:var(--fn);cursor:pointer;transition:all .13s;backdrop-filter:blur(8px);
+  font-family:var(--fn);cursor:pointer;transition:all .13s;backdrop-filter:blur(3px);
 }
 .trainer-gender-btn.on{background:rgba(255,255,255,.35);border-color:rgba(255,255,255,.8)}
 .trainer-gender-btn:active{transform:scale(.95)}
@@ -730,10 +731,10 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .auth-btn{
   display:flex;align-items:center;justify-content:center;gap:12px;
   width:100%;max-width:300px;padding:16px 24px;border-radius:24px;
-  background:rgba(255,255,255,0.45);border:none;cursor:pointer;
+  background:rgba(255,255,255,var(--glass));border:none;cursor:pointer;
   font-size:15px;font-weight:700;color:var(--t1);
   font-family:var(--fn);transition:all .15s;
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
 }
 .auth-btn:active{transform:scale(.97)}
 .auth-btn svg{flex-shrink:0}
@@ -745,8 +746,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 .user-avatar{width:36px;height:36px;border-radius:50%;border:3px solid var(--ac);object-fit:cover;cursor:pointer;flex-shrink:0}
 .user-menu{
   position:fixed;top:calc(var(--st) + 62px);right:16px;
-  background:rgba(255,255,255,0.52);border:none;border-radius:24px;
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  background:rgba(255,255,255,var(--glass));border:none;border-radius:24px;
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   padding:8px;min-width:210px;z-index:800;display:none;
 }
 .user-menu.on{display:block}
@@ -777,7 +778,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:6px">
-    <div id="pixel-clock" style="display:flex;flex-direction:column;align-items:flex-end;padding:4px 10px;border-radius:14px;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.9);backdrop-filter:blur(8px)">
+    <div id="pixel-clock" style="display:flex;flex-direction:column;align-items:flex-end;padding:4px 10px;border-radius:14px;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.9);backdrop-filter:blur(3px)">
       <div id="clock-time" style="font-family:'Silkscreen',monospace;font-size:11px;font-weight:700;color:var(--t1);letter-spacing:1.5px;line-height:1"></div>
       <div id="clock-date" style="font-family:'Silkscreen',monospace;font-size:5px;color:var(--t3);margin-top:2px;letter-spacing:.5px;text-transform:uppercase"></div>
     </div>
@@ -837,7 +838,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
   <div style="padding:0 16px 8px;position:relative">
     <svg style="position:absolute;left:26px;top:50%;transform:translateY(-50%);color:var(--t3)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input id="fav-search" type="search" placeholder="Buscar favorito..." oninput="renderFav()"
-      style="width:100%;padding:9px 12px 9px 34px;border-radius:24px;border:none;background:rgba(255,255,255,0.45);backdrop-filter:blur(20px);font-family:var(--fn);font-size:13px;color:var(--t1);outline:none">
+      style="width:100%;padding:9px 12px 9px 34px;border-radius:24px;border:none;background:rgba(255,255,255,var(--glass));backdrop-filter:blur(3px);font-family:var(--fn);font-size:13px;color:var(--t1);outline:none">
   </div>
   <!-- Rarity filter -->
   <div class="frow" id="fav-rrow" style="padding:0 16px 4px;gap:6px;display:flex;flex-wrap:wrap"></div>
@@ -943,7 +944,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
       </div>
       <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
         <input id="trainer-name-input" type="text" maxlength="16" placeholder="Tu nombre de entrenador…"
-          style="width:100%;padding:10px 14px;border-radius:18px;border:none;background:rgba(255,255,255,.25);color:#fff;font-size:14px;font-family:var(--fn);font-weight:700;outline:none;backdrop-filter:blur(8px)"
+          style="width:100%;padding:10px 14px;border-radius:18px;border:none;background:rgba(255,255,255,.25);color:#fff;font-size:14px;font-family:var(--fn);font-weight:700;outline:none;backdrop-filter:blur(3px)"
           oninput="setTrainerName(this.value)"
           placeholder="Tu nombre de entrenador…">
         <div style="display:flex;gap:6px">
@@ -987,7 +988,23 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
       </div>
     </div>
 
-    <!-- Sprite toggle -->
+    <!-- Glass opacity -->
+    <div class="cfg-card">
+      <div class="cfg-row">
+        <div>
+          <div class="cfg-label">Transparencia</div>
+          <div class="cfg-sub">Opacidad del cristal: <span id="glass-val">45</span>%</div>
+        </div>
+      </div>
+      <input type="range" min="10" max="90" step="5" id="glass-slider"
+        style="width:100%;margin-top:10px;accent-color:var(--ac)"
+        oninput="setGlass(parseInt(this.value))">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);font-weight:700;margin-top:4px">
+        <span>Transparente</span><span>Opaco</span>
+      </div>
+    </div>
+
+    <!-- Columnas de la grid -->
     <div class="cfg-card">
       <div class="cfg-row">
         <div>
@@ -1070,7 +1087,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
   <div id="pw-step" style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:10px">
     <div class="auth-sub">Introduce la contraseña para acceder.</div>
     <input id="pw-input" type="password" placeholder="Contraseña…"
-      style="width:100%;padding:16px;border-radius:24px;border:none;background:rgba(255,255,255,0.45);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);font-size:16px;font-family:var(--fn);outline:none;color:var(--t1);text-align:center"
+      style="width:100%;padding:16px;border-radius:24px;border:none;background:rgba(255,255,255,var(--glass));backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);font-size:16px;font-family:var(--fn);outline:none;color:var(--t1);text-align:center"
       onkeydown="if(event.key==='Enter')checkPassword()"
       onfocus="this.style.background='rgba(255,255,255,0.88)'" onblur="this.style.background='rgba(255,255,255,0.65)'">
     <button class="auth-btn" onclick="checkPassword()" style="background:var(--ac);color:#fff">Entrar</button>
@@ -1090,8 +1107,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 </div>
 
 <!-- WHAT'S NEW MODAL -->
-<div id="whatsnew-modal" style="display:none;position:fixed;inset:0;z-index:950;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);align-items:flex-end">
-  <div style="background:rgba(237,237,237,0.60);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);width:100%;max-height:85dvh;border-radius:32px 32px 0 0;display:flex;flex-direction:column;animation:sup .3s cubic-bezier(.34,1.56,.64,1);padding-bottom:var(--sb);box-shadow:0 -12px 48px rgba(0,0,0,.18)">
+<div id="whatsnew-modal" style="display:none;position:fixed;inset:0;z-index:950;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);align-items:flex-end">
+  <div style="background:rgba(237,237,237,var(--glass));backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);width:100%;max-height:85dvh;border-radius:32px 32px 0 0;display:flex;flex-direction:column;animation:sup .3s cubic-bezier(.34,1.56,.64,1);padding-bottom:var(--sb);box-shadow:0 -12px 48px rgba(0,0,0,.18)">
     <div style="width:40px;height:4px;background:var(--s3);border-radius:2px;margin:12px auto 4px"></div>
     <!-- Header -->
     <div style="padding:12px 20px 16px;border-bottom:1px solid var(--bd)">
@@ -1115,8 +1132,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
 </div>
 
 <!-- HELP MODAL -->
-<div id="help-modal" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-end" onclick="if(event.target.id==='help-modal')closeHelp()">
-  <div style="background:rgba(237,237,237,0.60);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);width:100%;max-height:85dvh;border-radius:32px 32px 0 0;display:flex;flex-direction:column;animation:sup .3s cubic-bezier(.34,1.56,.64,1);padding-bottom:var(--sb)">
+<div id="help-modal" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);align-items:flex-end" onclick="if(event.target.id==='help-modal')closeHelp()">
+  <div style="background:rgba(237,237,237,var(--glass));backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);width:100%;max-height:85dvh;border-radius:32px 32px 0 0;display:flex;flex-direction:column;animation:sup .3s cubic-bezier(.34,1.56,.64,1);padding-bottom:var(--sb)">
     <div style="width:40px;height:4px;background:var(--s3);border-radius:2px;margin:12px auto 4px"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 12px;border-bottom:1px solid var(--bd);flex-shrink:0">
       <div style="font-size:18px;font-weight:800;color:var(--t1)">¿Cómo usar PokéPlanner?</div>
@@ -2281,25 +2298,25 @@ const TYPE_ID={
 
 // ── THEMES ──
 const THEMES={
-  magenta:{name:'Rojo',     ac:'#C41E1E',ac2:'#D94444',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  fire:    {name:'Fuego',   ac:'#FF6B35',ac2:'#FF9B6B',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  water:   {name:'Agua',    ac:'#3B82F6',ac2:'#6BAED6',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  grass:   {name:'Planta',  ac:'#22C55E',ac2:'#68B98A',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  electric:{name:'Eléctrico',ac:'#EAB308',ac2:'#F5C842',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  psychic: {name:'Psíquico',ac:'#A855F7',ac2:'#C084FC',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  ice:     {name:'Hielo',   ac:'#06B6D4',ac2:'#67E8F9',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  dragon:  {name:'Dragón',  ac:'#6366F1',ac2:'#818CF8',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  dark:    {name:'Siniestro',ac:'#374151',ac2:'#6B7280',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  fairy:   {name:'Hada',    ac:'#EC4899',ac2:'#F472B6',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  fighting:{name:'Lucha',   ac:'#DC2626',ac2:'#EF4444',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  poison:  {name:'Veneno',  ac:'#9333EA',ac2:'#A855F7',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  ground:  {name:'Tierra',  ac:'#B45309',ac2:'#D97706',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  rock:    {name:'Roca',    ac:'#78716C',ac2:'#A8A29E',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  bug:     {name:'Bicho',   ac:'#65A30D',ac2:'#84CC16',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  ghost:   {name:'Fantasma',ac:'#4F46E5',ac2:'#6366F1',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  steel:   {name:'Acero',   ac:'#0EA5E9',ac2:'#38BDF8',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  flying:  {name:'Volador', ac:'#7C3AED',ac2:'#8B5CF6',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
-  normal:  {name:'Normal',  ac:'#6B7280',ac2:'#9CA3AF',bg:'#EDEDED',s2:'rgba(255,255,255,0.55)',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  magenta:{name:'Rojo',     ac:'#C41E1E',ac2:'#D94444',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  fire:    {name:'Fuego',   ac:'#FF6B35',ac2:'#FF9B6B',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  water:   {name:'Agua',    ac:'#3B82F6',ac2:'#6BAED6',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  grass:   {name:'Planta',  ac:'#22C55E',ac2:'#68B98A',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  electric:{name:'Eléctrico',ac:'#EAB308',ac2:'#F5C842',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  psychic: {name:'Psíquico',ac:'#A855F7',ac2:'#C084FC',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  ice:     {name:'Hielo',   ac:'#06B6D4',ac2:'#67E8F9',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  dragon:  {name:'Dragón',  ac:'#6366F1',ac2:'#818CF8',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  dark:    {name:'Siniestro',ac:'#374151',ac2:'#6B7280',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  fairy:   {name:'Hada',    ac:'#EC4899',ac2:'#F472B6',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  fighting:{name:'Lucha',   ac:'#DC2626',ac2:'#EF4444',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  poison:  {name:'Veneno',  ac:'#9333EA',ac2:'#A855F7',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  ground:  {name:'Tierra',  ac:'#B45309',ac2:'#D97706',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  rock:    {name:'Roca',    ac:'#78716C',ac2:'#A8A29E',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  bug:     {name:'Bicho',   ac:'#65A30D',ac2:'#84CC16',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  ghost:   {name:'Fantasma',ac:'#4F46E5',ac2:'#6366F1',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  steel:   {name:'Acero',   ac:'#0EA5E9',ac2:'#38BDF8',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  flying:  {name:'Volador', ac:'#7C3AED',ac2:'#8B5CF6',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
+  normal:  {name:'Normal',  ac:'#6B7280',ac2:'#9CA3AF',bg:'#EDEDED',s2:'rgba(255,255,255,var(--glass))',s3:'rgba(0,0,0,0.06)',bd:'rgba(0,0,0,0.10)'},
 };
 
 function applyTheme(themeId){
@@ -2790,6 +2807,7 @@ function scheduleSave() {
         dailyCount: S.dailyCount || 0,
         showWalker: S.set.showWalker !== false,
         companion: S.companion || {hp:80,energy:80,hunger:70,mood:75,lastVisit:null,fainted:false,faintCount:0,history:[]},
+        glass: S.set.glass || 45,
       };
       await db.collection('users').doc(currentUser.uid).set({
         track: S.track,
@@ -2838,6 +2856,7 @@ async function loadUserData(uid) {
         if (d.set.dailyCount !== undefined) S.dailyCount = d.set.dailyCount;
         if (d.set.showWalker !== undefined) S.set.showWalker = d.set.showWalker;
         if (d.set.companion !== undefined) S.companion = d.set.companion;
+        if (d.set.glass !== undefined) { S.set.glass = d.set.glass; applyGlass(d.set.glass); }
       }
     } else {
       loadFromLocalStorage();
@@ -5309,6 +5328,21 @@ function doNota(pid,gid,val){
   scheduleSave();updateCard(parseInt(String(pid).split('_')[0]));
 }
 
+function applyGlass(val){
+  const v = (val||45)/100;
+  document.documentElement.style.setProperty('--glass', v);
+  const el = document.getElementById('glass-val');
+  if(el) el.textContent = val||45;
+  const sl = document.getElementById('glass-slider');
+  if(sl) sl.value = val||45;
+}
+
+function setGlass(val){
+  S.set.glass = val;
+  applyGlass(val);
+  scheduleSave();
+}
+
 function applyColsSetting(){
   const cols=S.set.cols||3;
   document.querySelectorAll('.grid').forEach(g=>{
@@ -5357,6 +5391,8 @@ function checkPassword(){
   applyColsSetting();
   // Apply saved theme
   applyTheme(S.set.theme||'magenta');
+  // Apply saved glass opacity
+  applyGlass(S.set.glass||45);
   // Apply trainer UI
   setTimeout(()=>updateTrainerUI(), 0);
 
