@@ -41,7 +41,7 @@
       background:var(--ac);border:2px solid var(--ac);
       overflow:hidden;cursor:pointer;flex-shrink:0;
       display:flex;align-items:flex-start;justify-content:center;
-      box-shadow:0 2px 8px rgba(232,24,74,.35);
+      box-shadow:0 2px 8px color-mix(in srgb,var(--ac) 45%,transparent);
     ">
       <img id="hdr-trainer-img" src="" style="
         width:72px;height:72px;object-fit:contain;
@@ -1566,7 +1566,11 @@ function applyTheme(themeId){
   document.body.style.backgroundImage=`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
   // Update trainer avatar bg
   const avatar=document.getElementById('hdr-trainer-avatar');
-  if(avatar){avatar.style.background=t.ac;avatar.style.borderColor=t.ac;}
+  if(avatar){
+    avatar.style.background=t.ac;
+    avatar.style.borderColor=t.ac;
+    avatar.style.boxShadow=`0 2px 8px ${t.ac}55`;
+  }
 }
 
 function setTheme(themeId){
