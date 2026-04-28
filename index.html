@@ -2803,15 +2803,28 @@ const db = firebase.firestore();
 let currentUser = null;
 let syncTimeout = null;
 
+// Handle redirect result from Google sign-in
+auth.getRedirectResult().then(result => {
+if(result && result.user){
+// Redirect completed — onAuthStateChanged will handle the rest
+console.log(‘Redirect sign-in complete:’, result.user.email);
+}
+}).catch(err => {
+if(err.code !== ‘auth/no-current-user’){
+console.error(‘Redirect result error:’, err);
+}
+});
+
 // ── AUTH FUNCTIONS ──
 function signInWithGoogle() {
-document.getElementById(‘auth-loading’).classList.add(‘on’);
+const loading = document.getElementById(‘auth-loading’);
+if(loading) loading.style.display=‘block’;
 const provider = new firebase.auth.GoogleAuthProvider();
-auth.signInWithPopup(provider)
-.then(()=>{ document.getElementById(‘auth-loading’).classList.remove(‘on’); })
+// Use redirect instead of popup — works on all browsers including iOS Safari
+auth.signInWithRedirect(provider)
 .catch(err => {
 console.error(‘Sign-in error:’, err);
-document.getElementById(‘auth-loading’).classList.remove(‘on’);
+if(loading) loading.style.display=‘none’;
 if(err.code !== ‘auth/popup-closed-by-user’){
 alert(’Error al iniciar sesión: ’ + err.message);
 }
