@@ -781,6 +781,33 @@ border-radius:14px;padding:7px 12px;flex-shrink:0;min-width:80px;
 .wclock.active{background:rgba(255,255,255,calc(var(–glass) + 0.15));border:1.5px solid var(–ac)22}
 
 </style>
+<script>
+// Auth — loaded early so button works immediately
+var _PW_KEY='pkp_auth';
+var _CORRECT_PW='Pokemon2026';
+function checkPassword(){
+  var input=document.getElementById('pw-input');
+  var err=document.getElementById('pw-error');
+  if(!input)return;
+  if(input.value.trim()===_CORRECT_PW){
+    if(err)err.style.display='none';
+    localStorage.setItem(_PW_KEY,'1');
+    var ps=document.getElementById('pw-step');
+    var gs=document.getElementById('google-step');
+    if(ps)ps.style.display='none';
+    if(gs)gs.style.display='flex';
+  } else {
+    if(err)err.style.display='block';
+    input.value='';
+    input.focus();
+  }
+}
+function signInWithGoogle(){
+  // Will be overridden by main script once Firebase loads
+  var btn=document.getElementById('auth-loading');
+  if(btn)btn.style.display='block';
+}
+</script>
 </head>
 <body>
 <!-- PASSWORD GATE -->
