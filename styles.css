@@ -31,7 +31,7 @@
   --shadow-lg:0 16px 48px rgba(0,0,0,.16);
   --dot-size:1.5px;
   --dot-space:28px;
-  --glass:0.45;
+  --glass:0.15;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
