@@ -2311,105 +2311,268 @@ const isAfternoon = h >= 12 && h < 18;
 const isEvening = h >= 18 && h < 22;
 const isNight = h >= 22 || h < 6;
 const pName = (()=>{ const p=S.poke.find(x=>x.id===_companion.pokeId); return p?cap(p.name):''; })();
+const trainer = S.set.trainerName || 'Entrenador';
 
 const morning = [
-  'Buenos días!', 'A entrenar!', 'El sol sale para todos!',
-  'Hoy puede aparecer un shiny!', 'Gran día para capturar!',
-  'Desayuno... de Bayas!', 'El profesor Oak me dijo que madrugara',
-  'Temprano sale el Pokémon!', 'Mañana fresca, batalla segura',
+  'Buenos dias!','Arriba arriba!','El sol sale para todos!',
+  'Hoy puede aparecer un shiny!','Gran dia para capturar!',
+  'Desayuno de Bayas!','El profesor Oak madruga','Temprano sale el Pokemon!',
+  'Manana fresca, batalla segura','Un nuevo dia de aventura',
+  'Los Pidgey cantan por la manana','Hora de revisar la Pokedex',
+  'Que bonito amanecer','Las Bayas crecen mas rapido por la manana',
+  'Los Pokemon tipo Planta se cargan de energia','Bellsprout se estira',
+  'Hay rocio en la hierba... cuidado con Dew','A ver que nos trae hoy',
+  'Primer paso del dia!','Cafe o Baya Lum?',
+  trainer+'! ya estas despierto?', 'Buenos dias, '+trainer+'!',
+  trainer+' madruga, '+pName+' tambien',
 ];
 const afternoon = [
-  'La hora punta de los Pokémon!', 'El sol calienta mucho hoy',
-  'Hora de explorar la hierba alta!', 'Cuidado con los Pokémon Fuego!',
-  'La Pokédex no se llena sola!', 'Batalla de tarde?',
-  'Los Pokémon están muy activos ahora', 'Hora de la siesta... o no!',
+  'La hora punta de los Pokemon!','El sol aprieta hoy',
+  'Hora de explorar la hierba alta!','Cuidado con los Pokemon Fuego!',
+  'La Pokedex no se llena sola!','Batalla de tarde?',
+  'Los Pokemon estan muy activos ahora','Hora de la siesta... o no!',
+  'Charmeleon descansa bajo el sol','Sandshrew se entierra para refrescarse',
+  'Los Geodude ruedan por las colinas','Hay una manada de Tauros!',
+  'Vuelta al Cole Pokemon!','La Liga es por la tarde?',
+  'Hora de entrenar!','Falta poco para el gym!',
+  trainer+', a comer!', trainer+' vas al gimnasio hoy?',
+  'Ey '+trainer+'! hay un Ditto ahi',
 ];
 const evening = [
-  'Atardecer pokémon...', 'Los Pokémon nocturnos despiertan',
-  'Umbreon aparece de noche', 'El cielo está precioso',
-  'Los Haunter salen pronto', 'Hora de revisar la Pokédex',
-  'Un día de aventuras más', 'Los Pokémon Siniestro se activan',
+  'Atardecer pokemon...','Los Pokemon nocturnos despiertan',
+  'Umbreon aparece de noche','El cielo esta precioso',
+  'Los Haunter salen pronto','Hora de revisar la Pokedex',
+  'Un dia de aventuras mas','Los Pokemon Siniestro se activan',
+  'Gastly flota al atardecer','Murkrow grazna en los arboles',
+  'Sunflora se va a dormir','Los Espeon pierden fuerza',
+  'Las estrellas salen...','Hora de la fogata Pokemon',
+  trainer+', ya es de noche!', 'Buenas tardes '+trainer,
 ];
 const night = [
-  'Chhhh... silencio nocturno', 'Los Pokémon duermen... casi todos',
-  'Cuidado con los Gengar!', 'Luna llena... brillan los Moonstone',
-  'Dreaming of Pokémon...', 'Zzz... no, estoy despierto!',
-  'Los Pokémon psíquicos son más fuertes de noche',
-  'Hora de meditar como Mewtwo', 'El profesor Oak también duerme',
+  'Chhhh... silencio nocturno','Los Pokemon duermen... casi todos',
+  'Cuidado con los Gengar!','Luna llena... brillan los Moonstone',
+  'Dreaming of Pokemon...','Zzz... no, estoy despierto!',
+  'Los Pokemon psiquicos son mas fuertes de noche',
+  'Hora de meditar como Mewtwo','El profesor Oak tambien duerme',
+  'Jigglypuff me canta y me duermo','Lunala vuela por el cielo',
+  'Darkrai da pesadillas... espero que no','Las luces de Lavanda brillan',
+  'Mismagius aparece en la oscuridad','Mimikyu busca amigos en la noche',
+  trainer+' aun despierto?', 'Duerme '+trainer+'!',
+  trainer+' tu tambien tienes pesadillas de Darkrai?',
 ];
-const general = [
+const withName = [
+  trainer+'!', trainer+'!!', 'Ey, '+trainer+'!',
+  trainer+', mira esto!', trainer+'... psst',
+  'Oye '+trainer+'!', trainer+', un shiny!',
+  trainer+' cuantos te faltan?', trainer+' atrapa a '+pName+'!',
+  trainer+' eres el mejor entrenador!',
+  'Vamos '+trainer+'!', trainer+' no te rindas!',
+  trainer+', el campeon te espera!',
+  trainer+' recuerdas tu primer Pokemon?',
+  trainer+' que starter elegiste?',
+  trainer+' tienes la Masterball?',
+  trainer+' Ash no tiene nada que hacerte',
+  trainer+', cuidado con Team Rocket!',
+  trainer+' los de Team Rocket se acercan',
+  trainer+' hay una Pokeball brillando ahi',
+  trainer+', capturame a mi tambien!',
+  trainer+' ya tienes los 8 badges?',
+  trainer+', el profesor Oak pregunta por ti',
+  trainer+' cuantos shinies tienes?',
+  trainer+' este '+pName+' es tuyo!',
+];
+const pokemonNames = [
   pName+'!', pName+'!!', '...'+pName+'...', pName+'~',
-  'Pika pika!', 'Pokémon!', 'Vamos!', 'Ey!',
-  'Qué día más bonito', 'Mira un Pokémon!',
-  'Cuántos quedan por capturar...', 'Necesito más Poké Balls',
-  'El profesor Oak estaría orgulloso', 'Ash lo haría mejor',
-  'Misty... Brock... echad de menos?', 'Team Rocket se acerca',
-  'A atrapar Pokémon!', 'La vida es una aventura',
-  'Ruta 1... siempre la Ruta 1', 'Pokémon Go no es lo mismo',
-  'Soy de la gen 1!', 'Los starters son los mejores',
-  'Charizard mola más que Blastoise... o no?',
-  'Mega Evolución activada!', 'Giratina me da miedo',
-  'La Zona Ultrawormhole...', 'Necesito una Masterball',
-  'Shiny rate del 1/8192...', 'Synchronize!',
-  'Overpowered...', 'Crítico!!', 'Es muy eficaz!',
-  'No tiene efecto...', 'Se debilitó!', 'Ve Pokémon!',
-  'Cómo que no evoluciona?', 'Hay que subirlo de nivel',
-  'La Pokédex dice...', 'Espera espera espera',
-  'Tengo hambre de Bayas', 'Una Baya Pecha!',
-  'La Cave de Hielo me congela', 'Surf!',
-  'Necesito un HM01 aquí', 'Cortacésped activado',
-  'Roca Tumba go!', 'Rayo Thunder!',
-  'Fuego Sagrado!', 'Hidrobomba!',
-  'La Torre Sylph está llena de Rockets', 'Giovanni!',
-  'N era un buen rival', 'Cynthia es imbatible',
-  'El campeonato de Kanto...', 'Medalla de Roca conseguida!',
-  'El gimnasio de agua es lo peor', 'Surge el de los truenos!',
-  'Blaine tiene preguntas difíciles', 'Sabrina me asusta',
-  'Erika huele a flores', 'Koga usa veneno!',
-  'El señor Mime de la madre de Ash...', 'Delibird reparte regalos',
-  'Jigglypuff canta y me duerme', 'Snorlax bloquea el camino',
-  'Safari Zone... sin Pokéballs?!', 'Magikarp... el más fuerte',
-  'Gyarados furioso!', 'Un Raro Candy!',
-  'PP gastados...', 'Lucha libre!',
-  'Pokémon de tipo Normal son infravalorados',
-  'Rotom en la Pokédex es muy molesto', 'Siri de Pokémon',
-  'Zygarde al 100%!', 'Las Ultra Bestias son raras',
-  'Palkia dobla el espacio', 'Dialga controla el tiempo',
-  'Giratina vive en el Distortion World', 'Arceus creó todo esto?',
-  'Mew contiene el ADN de todos', 'Mewtwo escapó del laboratorio',
-  'Entei Raikou Suicune corren libres', 'Los perros legendarios!',
-  'Los pájaros de Kanto vuelan lejos', 'Lugia el señor de los mares',
-  'Ho-Oh y sus plumas doradas', 'Celebi viaja en el tiempo',
-  'Jirachi concede deseos cada 1000 años', 'Deoxys viene del espacio',
-  'Rayquaza patrulla la atmósfera', 'Groudon expande la tierra',
-  'Kyogre expande los mares', 'La lluvia de Kyogre...',
-  'Pokémon tipo Hada rompen los Dragón', 'Nerf a Fairy type!',
-  'Sableye no tiene debilidades... casi', 'Spiritomb igual',
-  'Pokémon que no evolucionan son únicos', 'Unown... qué secretos guardan',
-  'La Torre Pokémon de Lavanda...', 'Mr. Fuji cuida a los Pokémon',
-  'Los fósiles reviven!', 'Aerodactyl del ámbar',
-  'Omanyte lord!', 'Helix Fossil decides!',
-  'Los Pokémon de tipo Hielo son frágiles', 'Pero Walrein aguanta',
-  'Wobbuffet!', 'Sólo ataca en defensa',
-  'Smeargle copia todo', 'Ditto se transforma en cualquiera',
-  'Mew también aprende de todo', 'El movimiento Salpicadura...',
-  'Magikarp solo sabe Salpicadura', 'Pero luego... GYARADOS',
-  'La paciencia es clave en Pokémon', 'Como esperar al shiny',
-  'EV training...', 'IV perfectos!',
-  'Nature Modest para especiales', 'Nature Adamant para físicos',
-  'Pokémon competitivo es otro juego', 'VGC rules!',
-  'Smogon tiene sus reglas...', 'Uber tier',
-  'OU vibes!', 'Stall team o HO?',
-  'Priority moves son frustrantes', 'Sucker Punch!',
-  'Extreme Speed de Arcanine', 'Mach Punch!',
-  'Quick Attack del ratón amarillo', 'ExtremeSpeed!',
-  'El movimiento Z activa!', 'Mega Evolución!',
-  'Dynamax en la batalla!', 'Terastal!',
+  pName+' pika!', pName+' pika pika!',
+  'Soy '+pName+'!', pName+' usa Placaje!',
+  pName+' quiere batallar!', pName+' evoluciona!',
+  pName+' tiene hambre!', pName+' esta feliz!',
+  pName+'... '+pName+'...', 'El '+pName+' de '+trainer+'!',
+  pName+' nivel 100!', pName+' aprende un movimiento!',
 ];
-
+const battle = [
+  'Pika pika!','Pokemon!','Vamos!','Ey!',
+  'Batalla!','A luchar!','Usa Placaje!','Usa Lanzallamas!',
+  'Critico!!','Es muy eficaz!','No tiene efecto...',
+  'Se debilito!','Ve Pokemon!','Capturado!',
+  'Lanza la Pokeball!','Agarra esa Masterball!',
+  'Rayo Thunder!','Fuego Sagrado!','Hidrobomba!',
+  'Terremoto!','Surf!','Vuelo!','Corte!',
+  'Quick Attack!','Extreme Speed!','Sucker Punch!',
+  'Mach Punch!','Sombra Vil!','Psicorayos!',
+  'Overpowered...','Nerf please!','Meta relevante',
+  'Sweep completo!','Setup sweeper!','Hazards activos!',
+  'Stealth Rock!','Spikes en campo!','Toxic Spikes!',
+  'Sand Stream activado!','Drizzle llueve!','Drought brilla!',
+  'Snow Warning nieva!','Electric Surge!','Psychic Surge!',
+  'Grassy Terrain!','Misty Terrain!','Trick Room activo!',
+  'Perish Song activado!','Encore forzado!','Taunt bloqueado!',
+  'Protect usado!','Detect tambien!','Banido en Smogon',
+  'Uber tier!','OU vibes!','Priority move!',
+  'Choice locked!','Scarf Garchomp!','Specs Greninja!',
+  'Eviolite Chansey!','Rocky Helmet!','Assault Vest!',
+  'Life Orb recoil...','Leftovers recover!','Black Sludge!',
+  'Focus Sash activado!','Sturdy holds!','Multiscale!',
+  'Wonder Guard!','Levitate!','Flash Fire!',
+  'Water Absorb!','Volt Absorb!','Storm Drain!',
+  'Dry Skin!','Sand Rush!','Swift Swim!',
+  'Chlorophyll!','Slush Rush!','Surge Surfer!',
+  'Sand Force!','Tough Claws!','Adaptability!',
+  'Pixilate!','Aerilate!','Refrigerate!',
+  'Galvanize!','Normalize!','Liquid Voice!',
+  'Scrappy!','Mold Breaker!','Turboblaze!',
+  'Teravolt!','Tinted Lens!','Filter!',
+  'Solid Rock!','Prism Armor!','Magic Guard!',
+  'Hustle!','Sheer Force!','Reckless!',
+  'Iron Fist!','Strong Jaw!','Mega Launcher!',
+  'Sniper!','Skill Link!','Technician!',
+];
+const lore = [
+  'El profesor Oak estaría orgulloso','Ash lo haría mejor',
+  'Misty... Brock... los echo de menos?','Team Rocket se acerca',
+  'La vida es una aventura','Ruta 1... siempre la Ruta 1',
+  'Pokemon Go no es lo mismo','Soy de la gen 1!',
+  'Los starters son los mejores','Charizard vs Blastoise',
+  'Mega Evolucion activada!','Giratina me da miedo',
+  'La Zona Ultrawormhole...','Necesito una Masterball',
+  'Shiny rate del 1/8192...','Synchronize!',
+  'La Torre Sylph esta llena de Rockets','Giovanni!',
+  'N era un buen rival','Cynthia es imbatible',
+  'El campeonato de Kanto...','Medalla de Roca conseguida!',
+  'El gimnasio de agua es lo peor','Surge el de los truenos!',
+  'Blaine tiene preguntas difíciles','Sabrina me asusta',
+  'Erika huele a flores','Koga usa veneno!',
+  'El senor Mime de la madre de Ash...','Delibird reparte regalos',
+  'Jigglypuff canta y me duerme','Snorlax bloquea el camino',
+  'Safari Zone... sin Pokeballs?!','Magikarp... el mas fuerte',
+  'Gyarados furioso!','Un Raro Candy!',
+  'PP gastados...','EV training...',
+  'IV perfectos!','Nature Modest para especiales',
+  'Nature Adamant para fisicos','VGC rules!',
+  'Smogon tiene sus reglas...','Stall team o HO?',
+  'Mew contiene el ADN de todos','Mewtwo escapó del laboratorio',
+  'Entei Raikou Suicune corren libres','Los perros legendarios!',
+  'Los pajaros de Kanto vuelan lejos','Lugia el senor de los mares',
+  'Ho-Oh y sus plumas doradas','Celebi viaja en el tiempo',
+  'Jirachi concede deseos cada 1000 anos','Deoxys viene del espacio',
+  'Rayquaza patrulla la atmosfera','Groudon expande la tierra',
+  'Kyogre expande los mares','La lluvia de Kyogre...',
+  'Pokemon tipo Hada rompen los Dragon','Nerf a Fairy type!',
+  'Sableye no tiene debilidades... casi','Spiritomb igual',
+  'Pokemon que no evolucionan son unicos','Unown... que secretos guardan',
+  'La Torre Pokemon de Lavanda...','Mr. Fuji cuida a los Pokemon',
+  'Los fosiles reviven!','Aerodactyl del ambar',
+  'Omanyte lord!','Helix Fossil decides!',
+  'Los Pokemon de tipo Hielo son fragiles','Pero Walrein aguanta',
+  'Wobbuffet!','Solo ataca en defensa',
+  'Smeargle copia todo','Ditto se transforma en cualquiera',
+  'El movimiento Salpicadura...','Magikarp solo sabe Salpicadura',
+  'Pero luego... GYARADOS','La paciencia es clave en Pokemon',
+  'Como esperar al shiny','Palkia dobla el espacio',
+  'Dialga controla el tiempo','Giratina vive en el Distortion World',
+  'Arceus cre todo esto?','Entrenadores de todo el mundo',
+  'La Pokedex... 1025 Pokemon!','Cada generacion nueva sorpresa',
+  'Gen 9 fue sorprendente','Paldea es enorme',
+  'Leyendas Arceus cambio todo','La mecanica de captura nueva mola',
+  'Pokemon Escarlata y Violeta...','Los paradoja Pokemon son raros',
+  'Iron Valiant asusta','Flutter Mane muy roto',
+  'Koraidon mola mas que Miraidon','O al reves?',
+  'Pecharunt... el nuevo mitico','Ogerpon con mascaras!',
+  'Terapagos transforma!','El Terastal es interesante',
+  'Dynamax era demasiado grande','Mega Evolucion era perfecto',
+  'Z-Moves eran espectaculares','Cada gen su mecanica',
+  'Game Freak no decepciona... casi','El anime sigue!',
+  'Ash es campeon mundial!','Liko y Roy la nueva era',
+  'El Detective Pikachu fue raro','Pero mola el live action',
+  'Las pelis de Pokemon...','Mewtwo vs Mew la clasica',
+  'Lucario y el misterio de Mew!','Giratina y el guerrero celeste',
+  'Arceus y la joya de la vida','El reino de Hoopa',
+  'Volcanion y el mecanico Magearna','Coco fue emotiva',
+  'Pokemon 2000... Lugia epico','El invierno de Pikachu',
+  'Mewtwo contraataca remake!','El legado de Pokemon',
+  'Pokemon es de todos!','Cuantos anos entrenando...',
+  'Primera vez que jugue Pokemon...','Recuerdo mi primer shiny',
+  'El primer Pokemon fue Charmander','O Bulbasaur el infravalorado',
+  'Squirtle squad!','Pikachu siempre gana',
+  'Team Magma vs Team Aqua','Team Galactic queria destruir todo',
+  'Team Plasma liberaba Pokemon','Team Flare queria belleza',
+  'Team Skull los mas cool','Aether Foundation...',
+  'Rose queria energia ilimitada','Team Star estudiantes rebeldes',
+  'Los rivales... Gary Oak el clasico','Silver el mal rival',
+  'Wally el rival timido que crece','Barry el impaciente',
+  'Cheren y Bianca de Unova','Hau de Alola',
+  'Hop de Galar','Nemona siempre quiere batallar',
+  'Arven con su Mabosstiff','Penny aka Cassiopeia',
+  'El rival secreto siempre sorprende','La traicion del Campeón',
+  'Leon imbatible... hasta que no','El Campeón de tu region?',
+  'Los Elite Four... que dificiles','Lanza el mas dificil',
+  'Steven Stone y sus rocas','Wallace el elegante',
+  'Cynthia... la mejor Campeon?','Alder el libre',
+  'Iris la reina Dragon','Diantha la actriz',
+  'Kukui el profesor salvaje','Hau el campeon de Alola?',
+  'Leon sin mapa en Galar','Geeta la top de Paldea',
+  'Nemona siempre quiere rematche','La evolucion de rivales en Pokemon',
+];
+const random = [
+  'Qué dia mas bonito','Mira un Pokemon!',
+  'Cuantos quedan por capturar...','Necesito mas Poke Balls',
+  'Safari Zone es estresante','Las Berries crecen solas',
+  'PC de Bill... cuantos Pokemon caben?','El almacenamiento de Sonia',
+  'Los huevos tardan tanto en salir...','Cadena de cadena...',
+  'Pokerus! que suerte!','El encantamiento de la bici',
+  'Me quede sin PP...','El revivir en el momento justo',
+  'Huyó!','Que rabia cuando huyen!',
+  'Era el Pokemon que necesitaba!','Full Restore del rival...',
+  'Hyper Potion justo antes','Que injusto el RNG',
+  'Critico cuando menos lo esperas','Flinch en el peor momento',
+  'Paralisis y siempre falla...','Confusion autoataque',
+  'Dormido 5 turnos...','Encantado y no puede atacar',
+  'El movimiento fallo...','Missed!',
+  'Acurracy baja demasiado','Evasion sube demasiado',
+  'Double Team es frustrante','Baton Pass banneable',
+  'Speed tie decided by RNG','0 Spd IVs para Trick Room',
+  'El EV spread perfecto','Natures que descuadran todo',
+  'Hidden Power Fire en el gen 6','Brillo busqueda encadenada',
+  'Pokeradar chain roto','Soft Reset metodo clasico',
+  'Masuda method con 2 juegos','Charm shiny del DLC',
+  'Shiny lock en legendarios...','Desbloqueado en Leyendas Arceus!',
+  'Outbreaks masivos en Paldea','Sandwich de potencia shiny',
+  'El sandwich perfecto de ingredientes','Humillagas y queso',
+  'Ensalada con Relleno de Pato','El profesor Cirio y sus recetas',
+  'Los torneos de Paldea','La Liga de Kanto en 3 dias?',
+  'Speedrun Pokemon any%','Nuzlocke desafiante!',
+  'Monotype run!','Solo starter run',
+  'Wedlocke los mas dificiles','Randomizer nuzlocke caos',
+  'Hardcore nuzlocke sin items','Fan games increibles',
+  'Pokemon Reborn es brutal','Pokemon Insurgence tambien',
+  'Pokemon Unbound alucinante','ROM hacks de calidad',
+  'Pokemon quartz... raro','Pokemon clover de meme',
+  'Showdown para competitivo','Marill o Azumarill?',
+  'Swampert no tiene debilidad facil','Solo Hierba x4',
+  'Dunsparce ha mejorado!','Dudunsparce el secreto',
+  'Cyclizar el precursor de Koraidon','Annihilape fuera de control',
+  'Chien-Pao el cuadrino dao','Wo-Chien lento pero firme',
+  'Chi-Yu y sus llamas','Ting-Lu el de tierra',
+  'El paradox de Donphan bicicleta','Sandy Shocks es raro',
+  'Slither Wing rapido','Scream Tail Jigglypuff',
+  'Brute Bonnet hongo','Flutter Mane Misdreavus',
+  'Roaring Moon Salamence roto','Iron Bundle Delibird op',
+  'Iron Moth Volcarona especial','Iron Hands luchador',
+  'Iron Jugulis Hydreigon','Iron Thorns Tyranitar',
+  'Iron Valiant mixto','Iron Treads Excadrill',
+  'Iron Leaves Virizion','Walking Wake Suicune',
+  'Gouging Fire Entei','Raging Bolt Raikou',
+  'Archaludon Duraludon evoluciona','Hydrapple manzana culebra',
+  'Pecharunt veneno juego','Ogerpon cuatro mascaras',
+  'Terapagos tres formas','Kieran el villano que crece',
+  'Carmine la hermana mayor','El Area Zero del DLC',
+  'La aldea Blueberry Academy','El torneo BB League',
+  'Synchro Machine de Kieran','Los recuerdos de los cuadrinos',
+  'El epilogo emociona','La historia de Paldea completa',
+];
+const pool = [...pokemonNames, ...withName, ...battle, ...lore, ...random];
 const timePool = isMorning ? morning : isAfternoon ? afternoon : isEvening ? evening : night;
-const pool = [...general, ...timePool];
-return pool;
+return [...pool, ...timePool];
 }
 const COMPANION_MESSAGES = ['...'];
 
@@ -2472,9 +2635,10 @@ const roll = Math.random();
 if(roll < 0.60){
   // Idle - just stand there for a while
   _walkerState2 = 'pause';
-  const idleTime = 2000 + Math.random()*5000;
+  const idleTime = 4000 + Math.random()*9000;
   // Maybe show bubble or jump while idle
-  if(Math.random() < 0.4) setTimeout(_showBubble, Math.random()*idleTime*0.8);
+  if(Math.random() < 0.12) setTimeout(_showBubble, Math.random()*idleTime*0.8);
+  if(Math.random() < 0.08) setTimeout(_walkerShowFriend, 1000 + Math.random()*idleTime*0.5);
   if(Math.random() < 0.25) setTimeout(_walkerDoJump, 500 + Math.random()*idleTime*0.5);
   _walkerStateTimer = setTimeout(()=>{
     _walkerState2 = 'walk';
@@ -2503,7 +2667,7 @@ if(roll < 0.60){
 } else {
   // Jump + maybe bubble
   _walkerDoJump();
-  if(Math.random() < 0.5) setTimeout(_showBubble, 300);
+  if(Math.random() < 0.18) setTimeout(_showBubble, 300);
   _walkerStateTimer = setTimeout(_walkerScheduleNext, 1500 + Math.random()*2000);
 }
 }
@@ -2540,7 +2704,7 @@ if(_walkerState2 === 'walk'){
   if(_walkerX > 88){ _walkerX = 88; _walkerDir = -1; img.style.transform='scaleX(-1)'; }
   if(_walkerX < 5){ _walkerX = 5; _walkerDir = 1; img.style.transform='scaleX(1)'; }
   img.style.left = _walkerX + '%';
-  if(bubble) bubble.style.left = Math.max(2, _walkerX - 5) + '%';
+  if(bubble){ const bOff = _walkerDir > 0 ? _walkerX + 5 : Math.max(1, _walkerX - 28); bubble.style.left = Math.min(65, Math.max(1, bOff)) + '%'; }
 }
 
 // Occasionally go shiny
@@ -3003,6 +3167,66 @@ function onSpriteError(img){
 function _silhouetteSvg(){
   // Pokeball silhouette as inline SVG data URL
   return 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#ddd"/><rect x="5" y="45" width="90" height="10" fill="#bbb"/><circle cx="50" cy="50" r="12" fill="#ccc" stroke="#bbb" stroke-width="2"/></svg>');
+}
+
+
+// ── WALKER FRIEND ──
+let _walkerFriendActive = false;
+let _walkerFriendTimer = null;
+
+async function _walkerShowFriend(){
+  if(_walkerFriendActive) return;
+  if(!_companion.pokeId) return;
+
+  // Get evo chain
+  let stages;
+  try { stages = await fetchEvoChain(_companion.pokeId); } catch(e){ return; }
+  if(!stages || stages.length < 2) return;
+
+  // Pick a different member of the chain
+  const others = stages.filter(s => s.id !== _companion.pokeId);
+  if(!others.length) return;
+  const friend = others[Math.floor(Math.random()*others.length)];
+
+  const friendImg = document.getElementById('walker-friend');
+  const mainImg = document.getElementById('walker-img');
+  if(!friendImg || !mainImg) return;
+
+  _walkerFriendActive = true;
+
+  // Position friend on the opposite side from main walker
+  const friendX = _walkerDir > 0
+    ? Math.max(5, _walkerX - 18 - Math.random()*10)
+    : Math.min(80, _walkerX + 18 + Math.random()*10);
+
+  friendImg.src = walkerSrc(friend.id, false);
+  friendImg.onerror = ()=>{ friendImg.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+friend.id+'.png'; };
+  // Friend faces toward main pokemon
+  friendImg.style.transform = _walkerDir > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+  friendImg.style.left = friendX + '%';
+  friendImg.style.opacity = '1';
+
+  // Pause main walker while chatting
+  const prevState = _walkerState2;
+  _walkerState2 = 'pause';
+
+  // After a bit, main pokemon turns to face friend
+  setTimeout(()=>{
+    if(!_walkerFriendActive) return;
+    const turnDir = friendX < _walkerX ? -1 : 1;
+    if(mainImg) mainImg.style.transform = turnDir > 0 ? 'scaleX(-1)' : 'scaleX(1)';
+  }, 400);
+
+  // Hide friend after 3-6 seconds
+  const duration = 3000 + Math.random()*3000;
+  _walkerFriendTimer = setTimeout(()=>{
+    friendImg.style.opacity = '0';
+    _walkerFriendActive = false;
+    // Resume walking
+    _walkerState2 = 'walk';
+    // Turn back to original direction
+    if(mainImg) mainImg.style.transform = _walkerDir > 0 ? 'scaleX(-1)' : 'scaleX(1)';
+  }, duration);
 }
 
 // ── AUTH STATE LISTENER ──
@@ -5250,6 +5474,7 @@ window.getDailyWalkerPoke = getDailyWalkerPoke;
 window.walkerSrc = walkerSrc;
 window.initWalker = initWalker;
 window.walkerClick = walkerClick;
+window._walkerShowFriend = _walkerShowFriend;
 window.toggleWalker = toggleWalker;
 window.getDailyChallenge = getDailyChallenge;
 window.isDailyChallengeCompleted = isDailyChallengeCompleted;
@@ -5434,7 +5659,8 @@ renderGrid();
 
 <div id="walker-wrap" style="position:fixed;bottom:0;left:0;right:0;pointer-events:none;z-index:150;display:none">
   <div id="walker-bubble" style="position:absolute;bottom:calc(var(--nav-h, 72px) + 44px);background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px 12px 12px 2px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--t1);box-shadow:0 2px 12px rgba(0,0,0,.12);pointer-events:none;white-space:nowrap;max-width:160px;line-height:1.4;opacity:0;transition:opacity .3s;left:0"></div>
-  <img id="walker-img" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:40px;height:40px;object-fit:contain;image-rendering:pixelated;pointer-events:all;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));left:10%" onclick="walkerClick()">
+  <img id="walker-img" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:40px;height:40px;object-fit:contain;image-rendering:pixelated;pointer-events:all;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));left:10%;transition:left .4s ease" onclick="walkerClick()">
+  <img id="walker-friend" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:36px;height:36px;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.12));opacity:0;transition:opacity .5s,left .6s ease;left:20%">
 </div>
 
 </body>
