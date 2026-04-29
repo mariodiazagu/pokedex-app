@@ -93,8 +93,8 @@ background:transparent;
 }
 .tabs-inner{
 display:flex;width:100%;
-background:rgba(255,255,255,var(--glass));
-backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+background:rgba(220,220,220,0.55);
+backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
 border-radius:99px;
 padding:4px;
 gap:2px;
@@ -121,12 +121,12 @@ transition:all .15s;
 .srch{padding:10px 16px 8px;flex-shrink:0}
 .srch-box{
 display:flex;align-items:center;gap:10px;
-background:rgba(255,255,255,var(--glass));
+background:rgba(210,210,210,0.45);
 border:none;border-radius:24px;padding:12px 16px;
-backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
 transition:background .15s;
 }
-.srch-box:focus-within{background:rgba(255,255,255,0.88)}
+.srch-box:focus-within{background:rgba(220,220,220,0.70)}
 .srch-box svg{color:var(--t3);flex-shrink:0}
 .srch-inp{
 flex:1;background:none;border:none;outline:none;
@@ -610,30 +610,56 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 
 /* ── DARK MODE ── */
 body.dark{
-  --bg:#111111;
-  --s1:rgba(30,30,30,0.95);
-  --s2:rgba(30,30,30,var(--glass));
+  --bg:#141414;
+  --s1:rgba(26,26,26,0.97);
+  --s2:rgba(26,26,26,var(--glass));
   --s3:rgba(255,255,255,0.04);
-  --t1:#F0F0F0;
-  --t2:#A0A0A0;
-  --t3:#606060;
-  --bd:rgba(255,255,255,0.10);
-  --bd2:rgba(255,255,255,0.06);
+  --t1:#EEEEEE;
+  --t2:#999999;
+  --t3:#555555;
+  --bd:rgba(255,255,255,0.09);
+  --bd2:rgba(255,255,255,0.05);
 }
-body.dark{background-color:var(--bg)}
-body.dark .card{background:rgba(28,28,28,var(--glass))}
-body.dark .card:hover{background:rgba(40,40,40,0.60)}
-body.dark .gscroll{background:transparent}
-body.dark #world-clock-bar .wclock{background:rgba(28,28,28,0.7)}
-body.dark .tabs-inner{background:rgba(20,20,20,0.85)}
-body.dark .hdr-inner{background:rgba(20,20,20,0.85)}
-body.dark #whatsnew-modal > div{background:rgba(18,18,18,0.98)}
-body.dark .grow{background:rgba(28,28,28,0.9);border-color:rgba(255,255,255,0.08)}
-body.dark input,body.dark textarea,body.dark select{background:rgba(28,28,28,0.9);color:var(--t1);border-color:var(--bd)}
-body.dark .cfg-card{background:rgba(25,25,25,0.9)}
-body.dark .ov-inner{background:rgba(18,18,18,0.98)}
-body.dark .pill{background:rgba(40,40,40,0.8)}
-body.dark .pill.on{background:var(--ac)}
+/* Search */
+body.dark .srch-box{background:rgba(255,255,255,0.07)}
+body.dark .srch-box:focus-within{background:rgba(255,255,255,0.11)}
+/* Cards */
+body.dark .card{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.07)}
+body.dark .card:hover{background:rgba(255,255,255,0.09)}
+/* Pills/Filters */
+body.dark .pill{background:rgba(255,255,255,0.07);color:var(--t2)}
+body.dark .pill.on{background:var(--ac);color:#fff}
+/* Header & Nav */
+body.dark .hdr-inner{background:rgba(20,20,20,0.92)}
+body.dark .tabs-inner{background:rgba(20,20,20,0.92)}
+/* World clock */
+body.dark .wclock{background:rgba(255,255,255,0.06)}
+/* Modals & overlays */
+body.dark .ov-inner{background:rgba(16,16,16,0.99)}
+body.dark #whatsnew-modal > div{background:rgba(16,16,16,0.99)}
+/* Forms / settings */
+body.dark .grow{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.08)}
+body.dark .cfg-card{background:rgba(255,255,255,0.05)}
+body.dark input,body.dark textarea,body.dark select{background:rgba(255,255,255,0.07);color:var(--t1);border-color:var(--bd)}
+/* Game picker & bottom sheets */
+body.dark .team-game-picker-sheet{background:rgba(18,18,18,0.99)}
+/* Buttons */
+body.dark .ibtn{color:var(--t2)}
+body.dark .ibtn:hover{background:rgba(255,255,255,0.1)}
+/* Filter row active pill special colors */
+body.dark .pill.on svg path{stroke:currentColor}
+/* Type badges keep their colors */
+body.dark .tbadge{opacity:0.9}
+/* Modal hero */
+body.dark .hero{background:rgba(255,255,255,0.04) !important}
+/* Grow buttons */
+body.dark .grow-btn{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.08);color:var(--t2)}
+body.dark .grow-extra-btn{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.08);color:var(--t3)}
+/* Chips */
+body.dark .bchip{background:rgba(255,255,255,0.06)}
+body.dark .bchip.on{background:var(--acg)}
+/* frow background */
+body.dark .frow{background:transparent}
 </style>
 <script>
 function signInWithGoogle(){
@@ -705,7 +731,7 @@ function signInWithGoogle(){
     <a href="battle.html" class="ibtn" title="Combate" style="text-decoration:none;display:flex;align-items:center;justify-content:center">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5H20.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8H3.5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"/></svg>
     </a>
-<button class="ibtn" id="dark-btn" onclick="toggleDark()" title="Modo oscuro">
+<button class="ibtn" id="dark-btn" onclick="toggleDark()" title="Modo siniestro">
       <svg width="17" height="17" viewBox="0 0 24 24" style="transform:rotate(90deg)">
         <!-- Pokeball half-circle symbol -->
         <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -2871,11 +2897,16 @@ function onSpriteError(img){
   if(next){
     img.src = next;
   } else {
-    // Final fallback: silhouette using CSS
-    img.style.filter = 'brightness(0) saturate(0)';
-    img.style.opacity = '0.15';
-    // Use a guaranteed placeholder image
-    img.src = `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/0.png`;
+    // Final fallback: inline SVG placeholder with pokemon number
+    const pid = id || '?';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="46" fill="rgba(0,0,0,0.06)" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>
+      <line x1="5" y1="50" x2="95" y2="50" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>
+      <circle cx="50" cy="50" r="12" fill="rgba(255,255,255,0.8)" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>
+      <text x="50" y="46" text-anchor="middle" font-family="monospace" font-size="9" fill="rgba(0,0,0,0.35)" font-weight="bold">#${pid}</text>
+    </svg>`;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    img.style.opacity = '0.6';
     img.onerror = null;
   }
 }
@@ -5324,6 +5355,13 @@ renderGrid();
 
 
 </script>
+
+<div id="walker-wrap" style="position:fixed;bottom:calc(var(--sb)+72px);right:16px;pointer-events:none;z-index:200;display:none;flex-direction:column;align-items:center;gap:4px">
+  <div id="walker-bubble" style="background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px 12px 12px 2px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--t1);box-shadow:0 2px 12px rgba(0,0,0,.12);pointer-events:none;white-space:nowrap;max-width:160px;line-height:1.4;opacity:0;transition:opacity .3s"></div>
+  <button id="walker-btn" onclick="walkerClick()" style="background:none;border:none;cursor:pointer;padding:0;pointer-events:all;transition:transform .15s;display:flex;align-items:center;justify-content:center">
+    <img id="walker-img" style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 6px rgba(0,0,0,.2))">
+  </button>
+</div>
 
 </body>
 </html>
