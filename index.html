@@ -1222,7 +1222,8 @@ function signInWithGoogle(){
     Cerrar sesión
   </div>
 </div>
-<script>
+<script>// PokePlanner v1777459879
+
 const POKE_DB=[
 [1,"bulbasaur","grass","poison"],
 [2,"ivysaur","grass","poison"],
@@ -2966,6 +2967,9 @@ document.getElementById('whatsnew-modal').style.display='none';
 }
 
 // ── AUTH STATE LISTENER ──
+// Expose render functions globally for Safari
+window.renderFilters = renderFilters;
+window.renderGrid = renderGrid;
 auth.onAuthStateChanged(async user => {
 if (user && isPwUnlocked()) {
 // Fully authenticated -- show app
