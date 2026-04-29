@@ -812,15 +812,6 @@ function signInWithGoogle(){
   </div>
 </div>
 
-<div class="pg" id="pg-stats">
-  <div class="phdr">
-    <div class="ptitle">Compañero</div>
-    <div class="psub" id="companion-sub">Pokémon del día</div>
-  </div>
-  <div class="gscroll" style="flex:1;min-height:0">
-    <div id="companion-body" style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:16px"></div>
-  </div>
-</div>
 
 <!-- ═══ TRAINER CARD PAGE ═══ -->
 
@@ -870,8 +861,8 @@ function signInWithGoogle(){
 <div class="cfg-card">
   <div class="cfg-row">
     <div>
-      <div class="cfg-label">Pokémon compañero</div>
-      <div class="cfg-sub">Muestra el Pokémon del día en la pestaña Compañero</div>
+      <div class="cfg-label">Pokémon caminante</div>
+      <div class="cfg-sub">Muestra un Pokémon del día caminando sobre el menú</div>
     </div>
     <button class="cfg-toggle" id="walker-toggle" onclick="toggleWalker()">
       <div class="cfg-toggle-knob"></div>
@@ -943,10 +934,7 @@ function signInWithGoogle(){
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     <span class="tab-lbl">Equipo</span>
   </button>
-  <button class="tab" id="tb-stats" onclick="goTab('stats')">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-    <span class="tab-lbl">Compañero</span>
-  </button>
+
   </div>
 </nav>
 </div>
@@ -2345,56 +2333,70 @@ if(img){
 img.src=walkerSrc(id,false);
 img.onerror=()=>{img.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;};
 }
-wrap.style.display='flex';
+wrap.style.display='block';
+// Set initial position
+const img2 = document.getElementById('walker-img');
+const navH = document.querySelector('.tabs')?.offsetHeight || 72;
+const sb = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sb')||'0')||0;
+if(img2){
+  img2.style.left = _walkerX + '%';
+  img2.style.bottom = (navH - 2) + 'px';
+  img2.style.transform = _walkerDir > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+}
+if(_walkerRAF) cancelAnimationFrame(_walkerRAF);
 _companionLoop();
 }
 
+let _walkerX = 10; // percent of screen width
+let _walkerDir = 1; // 1=right, -1=left
+let _walkerRAF = null;
+let _walkerPaused = false;
+let _walkerPauseTimer = null;
+const WALKER_SPEED = 0.04; // % per ms
+
 function _companionLoop(){
-if(!S.set.showWalker)return;
-clearTimeout(_companion.timer);
+if(!S.set.showWalker) return;
+const img = document.getElementById('walker-img');
+const bubble = document.getElementById('walker-bubble');
+if(!img) return;
 
-const btn=document.getElementById('walker-btn');
-const img=document.getElementById('walker-img');
-if(!btn||!img)return;
-
-// Random state transitions
-const roll=Math.random();
-
-if(_companion.state==='idle'){
-if(roll<0.3){
-// Bounce
-_companionAnimate(btn,'bounce');
-_companion.state='bounce';
-_companion.timer=setTimeout(()=>{_companion.state='idle';_companionLoop();},600);
-} else if(roll<0.45){
-// Show bubble
-_showBubble();
-_companion.timer=setTimeout(_companionLoop, 3000+Math.random()*2000);
-} else if(roll<0.52){
-// Go shiny briefly
-_companion.shiny=!_companion.shiny;
-img.src=walkerSrc(_companion.pokeId,_companion.shiny);
-if(_companion.shiny){
-btn.style.boxShadow='0 0 16px var(--gold), 0 4px 16px rgba(0,0,0,.12)';
-setTimeout(()=>{btn.style.boxShadow='0 4px 16px rgba(0,0,0,.12)';},2000);
-}
-_companion.timer=setTimeout(_companionLoop, 2000+Math.random()*3000);
-} else {
-// Just wait
-_companion.timer=setTimeout(_companionLoop, 1500+Math.random()*3000);
-}
-}
+// Move horizontally
+if(!_walkerPaused){
+  _walkerX += WALKER_SPEED * 16 * _walkerDir; // ~60fps step
+  // Flip at edges
+  if(_walkerX > 88){ _walkerX = 88; _walkerDir = -1; img.style.transform='scaleX(-1)'; }
+  if(_walkerX < 5){ _walkerX = 5; _walkerDir = 1; img.style.transform='scaleX(1)'; }
+  img.style.left = _walkerX + '%';
+  if(bubble) bubble.style.left = Math.max(2, _walkerX - 5) + '%';
 }
 
-function _companionAnimate(el, anim){
-el.style.transition='';
-if(anim==='bounce'){
-el.style.transform='translateY(-12px) scale(1.1)';
-setTimeout(()=>{el.style.transition='transform .3s cubic-bezier(.34,1.56,.64,1)';el.style.transform='translateY(0) scale(1)';},150);
-} else if(anim==='tap'){
-el.style.transform='scale(0.88)';
-setTimeout(()=>{el.style.transition='transform .3s cubic-bezier(.34,1.56,.64,1)';el.style.transform='scale(1)';},100);
+// Randomly pause, jump, show bubble
+if(Math.random() < 0.002 && !_walkerPaused){
+  // Pause briefly
+  _walkerPaused = true;
+  // Maybe jump
+  if(Math.random() < 0.5){
+    img.style.transition = 'bottom .2s cubic-bezier(.34,1.56,.64,1)';
+    const navH = document.querySelector('.tabs')?.offsetHeight || 72;
+    img.style.bottom = (navH + 28) + 'px';
+    setTimeout(()=>{
+      img.style.transition = 'bottom .3s ease-in';
+      img.style.bottom = (navH - 2) + 'px';
+    }, 250);
+  }
+  // Maybe show bubble
+  if(Math.random() < 0.6) _showBubble();
+  _walkerPauseTimer = setTimeout(()=>{ _walkerPaused = false; }, 800 + Math.random()*1500);
 }
+
+// Occasionally go shiny
+if(Math.random() < 0.0003){
+  _companion.shiny = !_companion.shiny;
+  img.src = walkerSrc(_companion.pokeId, _companion.shiny);
+  if(_companion.shiny) setTimeout(()=>{ _companion.shiny=false; img.src=walkerSrc(_companion.pokeId,false); }, 3000);
+}
+
+_walkerRAF = requestAnimationFrame(_companionLoop);
 }
 
 function _showBubble(text){
@@ -2408,11 +2410,14 @@ _companion.bubbleTimer=setTimeout(()=>{bubble.style.opacity='0';},2200);
 }
 
 function walkerClick(){
-const btn=document.getElementById('walker-btn');
-if(btn)_companionAnimate(btn,'tap');
-// Show Pokémon name in bubble, then open modal after tiny delay
+const img=document.getElementById('walker-img');
+if(img){
+  img.style.transition='transform .1s';
+  img.style.transform=(_walkerDir>0?'scaleX(1)':'scaleX(-1)')+' scale(0.85)';
+  setTimeout(()=>{ img.style.transform=(_walkerDir>0?'scaleX(1)':'scaleX(-1)')+' scale(1)'; },150);
+}
 const p=S.poke.find(x=>x.id===_companion.pokeId);
-if(p)_showBubble(`¡${cap(p.name)}!`);
+if(p)_showBubble('!' + cap(p.name) + '!');
 setTimeout(()=>{if(_companion.pokeId)openMdl(_companion.pokeId);},300);
 }
 
@@ -2421,10 +2426,11 @@ S.set.showWalker=!S.set.showWalker;
 scheduleSave();
 const wrap=document.getElementById('walker-wrap');
 if(S.set.showWalker){
-clearTimeout(_companion.timer);
+if(_walkerRAF){ cancelAnimationFrame(_walkerRAF); _walkerRAF=null; }
 initWalker();
 } else {
-clearTimeout(_companion.timer);
+if(_walkerRAF){ cancelAnimationFrame(_walkerRAF); _walkerRAF=null; }
+clearTimeout(_walkerPauseTimer);
 if(wrap)wrap.style.display='none';
 }
 const tog=document.getElementById('walker-toggle');
@@ -5275,11 +5281,9 @@ renderGrid();
 
 </script>
 
-<div id="walker-wrap" style="position:fixed;bottom:calc(var(--sb)+72px);right:16px;pointer-events:none;z-index:200;display:none;flex-direction:column;align-items:center;gap:4px">
-  <div id="walker-bubble" style="background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px 12px 12px 2px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--t1);box-shadow:0 2px 12px rgba(0,0,0,.12);pointer-events:none;white-space:nowrap;max-width:160px;line-height:1.4;opacity:0;transition:opacity .3s"></div>
-  <button id="walker-btn" onclick="walkerClick()" style="background:none;border:none;cursor:pointer;padding:0;pointer-events:all;transition:transform .15s;display:flex;align-items:center;justify-content:center">
-    <img id="walker-img" style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 6px rgba(0,0,0,.2))">
-  </button>
+<div id="walker-wrap" style="position:fixed;bottom:0;left:0;right:0;pointer-events:none;z-index:150;display:none">
+  <div id="walker-bubble" style="position:absolute;bottom:calc(var(--nav-h, 72px) + 44px);background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px 12px 12px 2px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--t1);box-shadow:0 2px 12px rgba(0,0,0,.12);pointer-events:none;white-space:nowrap;max-width:160px;line-height:1.4;opacity:0;transition:opacity .3s;left:0"></div>
+  <img id="walker-img" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:40px;height:40px;object-fit:contain;image-rendering:pixelated;pointer-events:all;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));left:10%" onclick="walkerClick()">
 </div>
 
 </body>
