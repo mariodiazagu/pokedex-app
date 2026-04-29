@@ -2637,7 +2637,7 @@ if(roll < 0.60){
   _walkerState2 = 'pause';
   const idleTime = 4000 + Math.random()*9000;
   // Maybe show bubble or jump while idle
-  if(Math.random() < 0.12) setTimeout(_showBubble, Math.random()*idleTime*0.8);
+  if(Math.random() < 0.35) setTimeout(_showBubble, 600 + Math.random()*idleTime*0.6);
   if(Math.random() < 0.08) setTimeout(_walkerShowFriend, 1000 + Math.random()*idleTime*0.5);
   if(Math.random() < 0.25) setTimeout(_walkerDoJump, 500 + Math.random()*idleTime*0.5);
   _walkerStateTimer = setTimeout(()=>{
@@ -2667,7 +2667,7 @@ if(roll < 0.60){
 } else {
   // Jump + maybe bubble
   _walkerDoJump();
-  if(Math.random() < 0.18) setTimeout(_showBubble, 300);
+  if(Math.random() < 0.40) setTimeout(_showBubble, 300);
   _walkerStateTimer = setTimeout(_walkerScheduleNext, 1500 + Math.random()*2000);
 }
 }
@@ -2704,7 +2704,7 @@ if(_walkerState2 === 'walk'){
   if(_walkerX > 88){ _walkerX = 88; _walkerDir = -1; img.style.transform='scaleX(-1)'; }
   if(_walkerX < 5){ _walkerX = 5; _walkerDir = 1; img.style.transform='scaleX(1)'; }
   img.style.left = _walkerX + '%';
-  if(bubble){ const bOff = _walkerDir > 0 ? _walkerX + 5 : Math.max(1, _walkerX - 28); bubble.style.left = Math.min(65, Math.max(1, bOff)) + '%'; }
+  // bubble position updated in _showBubble
 }
 
 // Occasionally go shiny
@@ -2719,12 +2719,31 @@ _walkerRAF = requestAnimationFrame(_companionLoop);
 
 function _showBubble(text){
 const bubble=document.getElementById('walker-bubble');
+const img=document.getElementById('walker-img');
 if(!bubble)return;
 const pool=_walkerMessages();const msg=text||pool[Math.floor(Math.random()*pool.length)];
 bubble.textContent=msg;
+// Position bubble relative to pokemon's actual pixel position
+requestAnimationFrame(()=>{
+  const sw = window.innerWidth;
+  const imgLeft = parseFloat(img ? img.style.left : '10')/100*sw;
+  const bw = bubble.offsetWidth || 120;
+  let left;
+  if(_walkerDir > 0){
+    // facing right: bubble to the right of pokemon
+    left = imgLeft + 44;
+  } else {
+    // facing left: bubble to the left of pokemon
+    left = imgLeft - bw - 4;
+  }
+  // Clamp within screen
+  left = Math.max(6, Math.min(sw - bw - 6, left));
+  bubble.style.left = left + 'px';
+  bubble.style.transition = 'opacity .3s';
+});
 bubble.style.opacity='1';
 clearTimeout(_companion.bubbleTimer);
-_companion.bubbleTimer=setTimeout(()=>{bubble.style.opacity='0';},2200);
+_companion.bubbleTimer=setTimeout(()=>{bubble.style.opacity='0';},2800);
 }
 
 function walkerClick(){
@@ -5658,8 +5677,8 @@ renderGrid();
 </script>
 
 <div id="walker-wrap" style="position:fixed;bottom:0;left:0;right:0;pointer-events:none;z-index:150;display:none">
-  <div id="walker-bubble" style="position:absolute;bottom:calc(var(--nav-h, 72px) + 44px);background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px 12px 12px 2px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--t1);box-shadow:0 2px 12px rgba(0,0,0,.12);pointer-events:none;white-space:nowrap;max-width:160px;line-height:1.4;opacity:0;transition:opacity .3s;left:0"></div>
-  <img id="walker-img" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:40px;height:40px;object-fit:contain;image-rendering:pixelated;pointer-events:all;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));left:10%;transition:left .4s ease" onclick="walkerClick()">
+  <div id="walker-bubble" style="position:absolute;bottom:calc(var(--nav-h, 72px) + 44px);background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px 12px 12px 2px;padding:6px 10px;font-size:11px;font-weight:700;color:var(--t1);box-shadow:0 2px 12px rgba(0,0,0,.12);pointer-events:none;white-space:normal;max-width:140px;min-width:40px;width:max-content;line-height:1.5;opacity:0;transition:opacity .3s;left:0;word-break:break-word"></div>
+  <img id="walker-img" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:40px;height:40px;object-fit:contain;image-rendering:pixelated;pointer-events:all;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));left:10%;transition:left .06s linear,bottom .2s,transform .15s" onclick="walkerClick()">
   <img id="walker-friend" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:36px;height:36px;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.12));opacity:0;transition:opacity .5s,left .6s ease;left:20%">
 </div>
 
