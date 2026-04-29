@@ -5643,10 +5643,8 @@ function addAiMessage(role, text, id){
   div.className = 'ai-msg ' + role;
   if(id) div.id = id;
   // Simple markdown: **bold**, newlines
-  div.innerHTML = text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/
-/g, '<br>');
+  const boldRx = new RegExp('\\*\\*(.*?)\\*\\*', 'g');
+  div.innerHTML = text.replace(boldRx, '<strong>$1</strong>').split('\n').join('<br>');
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
   if(role !== 'thinking') _aiMessages.push({role: role === 'user' ? 'user' : 'assistant', content: text});
