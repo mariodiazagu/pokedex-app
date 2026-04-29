@@ -4988,7 +4988,6 @@ const mod=S.set.modern;
 const allForms=forms.length?forms:[{id,name:base.name,speciesName:base.name,types:base.types,isDefault:true,sprites:{official:iArt(id),official_shiny:iShy(id),front_default:iPx(id),front_shiny:iPxS(id)}}];
 const loading=forms.length===0?'<span style="font-size:10px;color:var(--t3);font-weight:500;margin-left:5px">Cargando...</span>':'';
 
-}
 function makeChip(f){
 const slotFormId=f.isCostume?f.formName:f.id;
 const inAnyTeam=inTmSlot(id, slotFormId, false)||inTmSlot(id, slotFormId, true);
@@ -5033,6 +5032,7 @@ ${formSection}
 </div>
 
   </div>`;
+}
 
 // Current variant picker state
 let _vpPoke=null,_vpForm=null,_vpShiny=false;
