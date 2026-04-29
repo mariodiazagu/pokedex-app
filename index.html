@@ -1002,7 +1002,6 @@ function signInWithGoogle(){
   <div class="phdr"><div class="ptitle">Ajustes</div></div>
   <div class="gscroll" style="padding:0 16px">
 
-```
 <!-- Trainer Profile -->
 <div class="cfg-card" style="background:linear-gradient(135deg,var(--ac) 0%,var(--ac2) 100%);color:#fff">
   <div style="display:flex;align-items:center;gap:14px">
@@ -1090,7 +1089,6 @@ function signInWithGoogle(){
 </div>
 
 <div style="height:20px"></div>
-```
 
   </div>
 </div>
@@ -2718,7 +2716,6 @@ if(!listRes.ok)throw new Error('list fetch failed');
 const listJson=await listRes.json();
 const results=listJson.results; // [{name,url}]
 
-```
 // Step 2: fetch all pokemon data in parallel batches of 50
 const BATCH=50;
 const typeMap={};
@@ -2743,7 +2740,6 @@ applyTypesData(typeMap);
 saveTypesCache(typeMap);
 if(syncEl){syncEl.innerHTML='<span class="sync-dot"></span> Sincronizado';}
 console.log(`[PokéPlanner] Types updated from API for ${Object.keys(typeMap).length} Pokémon`);
-```
 
 } catch(e){
 if(syncEl){syncEl.innerHTML='<span class="sync-dot"></span> Sincronizado';}
@@ -3079,7 +3075,6 @@ img.src = iPx(randId);
 img.style.filter = '';
 img.style.transform = 'scale(1.3)';
 
-```
 // Show transformation message
 const tMsg = document.createElement('div');
 tMsg.style.cssText = 'position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;color:var(--t3);white-space:nowrap;animation:fadeout 2s forwards';
@@ -3110,7 +3105,6 @@ for(let i=0;i<12;i++){
   });
   setTimeout(()=>p.remove(), 900);
 }
-```
 
 }
 
@@ -3188,7 +3182,6 @@ const sd = await sr.json();
 const chainUrl = sd.evolution_chain?.url;
 if(!chainUrl) return [];
 
-```
 const cr = await fetch(chainUrl);
 const cd = await cr.json();
 
@@ -3205,7 +3198,6 @@ function parseChain(node, stage=0, minLevel=null){
 parseChain(cd.chain);
 evoCache[pokeId] = stages;
 return stages;
-```
 
 } catch(e){ return []; }
 }
@@ -3234,7 +3226,6 @@ const r2=parseInt(typeColor.slice(1,3)||'7B',16);
 const g3=parseInt(typeColor.slice(3,5)||'52',16);
 const b2=parseInt(typeColor.slice(5,7)||'AB',16);
 
-```
   return `<div onclick="if(${id}!==${currentId}){closeMdl();setTimeout(()=>openMdl(${id}),150)}" style="
     display:flex;flex-direction:column;align-items:center;gap:6px;
     cursor:${isCurrent?'default':'pointer'};
@@ -3262,7 +3253,6 @@ const arrow = gi < stageGroups.length-1 ? `
   </div>` : '';
 
 return `<div style="display:flex;flex-direction:column;align-items:center">${pokes}</div>${arrow}`;
-```
 
 }).join('');
 
@@ -3285,7 +3275,6 @@ const r=await fetch(`https://pokeapi.co/api/v2/pokemon-species/${bid}`);
 if(!r.ok)throw 0;
 const spec=await r.json();
 
-```
 // Extract best Spanish flavor text
 if(!S.desc[bid]){
   const esEntries=(spec.flavor_text_entries||[]).filter(e=>e.language.name==='es');
@@ -3358,7 +3347,6 @@ for(const {pokeData, isDefault} of varieties){
 S.fc[bid]=allForms.length?allForms:fb;
 saveFormsCache();
 return S.fc[bid];
-```
 
 }catch(e){
 console.warn('fetchForms error:',e);
@@ -3619,7 +3607,6 @@ wrap.innerHTML=`
 
   <div style="border-radius:24px;overflow:hidden;box-shadow:0 12px 40px rgba(${r},${g2},${b},0.3);margin-bottom:16px;border:2px solid rgba(${r},${g2},${b},0.25)">
 
-```
 <!-- HERO with pokemon behind trainer -->
 <div style="position:relative;overflow:hidden;min-height:160px">
   <!-- Gradient background -->
@@ -3723,7 +3710,6 @@ wrap.innerHTML=`
   </div>`:``}
 
 </div>
-```
 
   </div>`;
 }
@@ -4332,7 +4318,6 @@ const hDecay = 3 + Math.floor(Math.random()*6);
 const eDecay = 2 + Math.floor(Math.random()*5);
 const huDecay = 5 + Math.floor(Math.random()*8); // hunger falls faster
 
-```
 c.hunger = Math.max(0, c.hunger - huDecay);
 c.energy = Math.max(0, c.energy - eDecay);
 
@@ -4360,7 +4345,6 @@ if(S.favs.size > 3) c.mood = Math.min(100, c.mood+3);
 if(c.hp <= 0){
   c.hp = 0; c.fainted = true; c.faintedAt = now; c.faintCount++;
 }
-```
 
 }
 
@@ -4559,7 +4543,6 @@ el.innerHTML = `
 </div>
 </div>
 
-```
   <!-- Sprites -->
   <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:0 12px;min-height:100px">
     <img src="${playerSpr}" style="width:80px;height:80px;object-fit:contain;image-rendering:pixelated;${playerAnimStyle}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${b.player.id}.png'">
@@ -4578,7 +4561,6 @@ el.innerHTML = `
     </button>
   ` : `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${moves}</div>`}
 </div>`;
-```
 
 }
 
@@ -4694,7 +4676,6 @@ body.innerHTML = `
 <!-- Companion device -->
 <div style="width:100%;max-width:340px;background:var(--s1);border-radius:32px;border:3px solid var(--bd);box-shadow:0 8px 32px rgba(0,0,0,.12)">
 
-```
   <!-- Screen -->
   <div style="margin:16px 16px 0;border-radius:24px;border:3px solid ${screenBorder};background:${screenBg};background-color:var(--bg);overflow:hidden;position:relative;box-shadow:inset 0 2px 8px rgba(0,0,0,.08);transition:border-color .5s">
     <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.025) 3px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:1"></div>
@@ -4784,7 +4765,6 @@ ${c.fainted?`<div style="width:100%;max-width:340px;background:rgba(248,113,113,
 </div>
 
 <div style="height:8px"></div>
-```
 
 `;
 
@@ -4810,7 +4790,6 @@ fetchEvoChain(id),
 if(S.mId===id){
 S.mForms=forms;
 
-```
 // Pre-select fav variant if coming from fav tab
 if(S.tab==='fav'&&forms.length>0){
   const favKey=[...S.favs].find(k=>{
@@ -4842,7 +4821,6 @@ if(evoHTML){
     }
   }, 50);
 }
-```
 
 }
 }
