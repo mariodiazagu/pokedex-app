@@ -4063,7 +4063,7 @@ counter.style.color=team.length>=6?'var(--ac)':'var(--t3)';
 
 // Render 6 slots (3x2 grid)
 if(slotsEl){
-slotsEl.innerHTML=Array.from({length:6},(*,i)=>{
+slotsEl.innerHTML=Array.from({length:6},(_,i)=>{
 const slot=team[i];
 if(!slot){
 return`<div class="tslot" onclick="showTeamFullMsg(${i})" style="cursor:default"> <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bd)" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> </div>`;
