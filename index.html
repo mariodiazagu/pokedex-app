@@ -781,6 +781,26 @@ border-radius:14px;padding:7px 12px;flex-shrink:0;min-width:80px;
 .wclock.active{background:rgba(255,255,255,calc(var(--glass) + 0.15));border:1.5px solid var(--ac)22}
 
 </style>
+<script>
+function signInWithGoogle(){
+  var loading=document.getElementById('auth-loading');
+  if(loading)loading.style.display='block';
+  if(typeof firebase==='undefined'||!firebase.auth){
+    setTimeout(signInWithGoogle,500);return;
+  }
+  var provider=new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider)
+    .catch(function(err){
+      if(err.code==='auth/popup-blocked'||err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request'){
+        firebase.auth().signInWithRedirect(provider);
+      } else {
+        var loading=document.getElementById('auth-loading');
+        if(loading)loading.style.display='none';
+        alert('Error: '+err.code+'\n'+err.message);
+      }
+    });
+}
+</script>
 </head>
 <body>
 <!-- PASSWORD GATE -->
