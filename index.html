@@ -608,58 +608,14 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
-/* ── DARK MODE ── */
-body.dark{
-  --bg:#141414;
-  --s1:rgba(26,26,26,0.97);
-  --s2:rgba(26,26,26,var(--glass));
-  --s3:rgba(255,255,255,0.04);
-  --t1:#EEEEEE;
-  --t2:#999999;
-  --t3:#555555;
-  --bd:rgba(255,255,255,0.09);
-  --bd2:rgba(255,255,255,0.05);
-}
-/* Search */
-body.dark .srch-box{background:rgba(255,255,255,0.07)}
-body.dark .srch-box:focus-within{background:rgba(255,255,255,0.11)}
-/* Cards */
-body.dark .card{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.07)}
-body.dark .card:hover{background:rgba(255,255,255,0.09)}
-/* Pills/Filters */
-body.dark .pill{background:rgba(255,255,255,0.07);color:var(--t2)}
-body.dark .pill.on{background:var(--ac);color:#fff}
-/* Header & Nav */
-body.dark .hdr-inner{background:rgba(20,20,20,0.92)}
-body.dark .tabs-inner{background:rgba(20,20,20,0.92)}
-/* World clock */
-body.dark .wclock{background:rgba(255,255,255,0.06)}
-/* Modals & overlays */
-body.dark .ov-inner{background:rgba(16,16,16,0.99)}
-body.dark #whatsnew-modal > div{background:rgba(16,16,16,0.99)}
-/* Forms / settings */
-body.dark .grow{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.08)}
-body.dark .cfg-card{background:rgba(255,255,255,0.05)}
-body.dark input,body.dark textarea,body.dark select{background:rgba(255,255,255,0.07);color:var(--t1);border-color:var(--bd)}
 /* Game picker & bottom sheets */
-body.dark .team-game-picker-sheet{background:rgba(18,18,18,0.99)}
 /* Buttons */
-body.dark .ibtn{color:var(--t2)}
-body.dark .ibtn:hover{background:rgba(255,255,255,0.1)}
 /* Filter row active pill special colors */
-body.dark .pill.on svg path{stroke:currentColor}
 /* Type badges keep their colors */
-body.dark .tbadge{opacity:0.9}
 /* Modal hero */
-body.dark .hero{background:rgba(255,255,255,0.04) !important}
 /* Grow buttons */
-body.dark .grow-btn{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.08);color:var(--t2)}
-body.dark .grow-extra-btn{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.08);color:var(--t3)}
 /* Chips */
-body.dark .bchip{background:rgba(255,255,255,0.06)}
-body.dark .bchip.on{background:var(--acg)}
 /* frow background */
-body.dark .frow{background:transparent}
 </style>
 <script>
 function signInWithGoogle(){
@@ -731,18 +687,7 @@ function signInWithGoogle(){
     <a href="battle.html" class="ibtn" title="Combate" style="text-decoration:none;display:flex;align-items:center;justify-content:center">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5H20.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8H3.5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"/></svg>
     </a>
-<button class="ibtn" id="dark-btn" onclick="toggleDark()" title="Modo siniestro">
-      <svg width="17" height="17" viewBox="0 0 24 24" style="transform:rotate(90deg)">
-        <!-- Pokeball half-circle symbol -->
-        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-        <path d="M12 2 A10 10 0 0 1 12 22" fill="currentColor"/>
-        <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
-        <path d="M12 8 A4 4 0 0 1 12 16" fill="currentColor"/>
-        <line x1="2" y1="12" x2="8" y2="12" stroke="currentColor" stroke-width="2"/>
-        <line x1="16" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="2"/>
-      </svg>
-    </button>
-        <button class="ibtn" onclick="toggleHelp(event)" title="Ayuda">
+    <button class="ibtn" onclick="toggleHelp(event)" title="Ayuda">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     </button>
     <div id="hdr-trainer-avatar" onclick="toggleUserMenu(event)" style="
@@ -2264,7 +2209,6 @@ avatar.style.boxShadow=`0 2px 8px ${t.ac}55`;
 }
 }
 
-
 function setTheme(themeId){
 S.set.theme=themeId;
 applyTheme(themeId);
@@ -2401,7 +2345,7 @@ if(img){
 img.src=walkerSrc(id,false);
 img.onerror=()=>{img.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;};
 }
-wrap.style.display='block';
+wrap.style.display='flex';
 _companionLoop();
 }
 
@@ -2642,7 +2586,7 @@ console.warn('[PokéPlanner] Could not fetch types from API:',e);
 
 const S={
 poke:POKE,track:{},favs:new Set(),teams:{},
-set:{modern:true, cols:3, myGames:[], trainerName:'', trainerGender:'male', cardFavKey:null, theme:'magenta', dailyDone:null, showWalker:true, dark:false},
+set:{modern:true, cols:3, myGames:[], trainerName:'', trainerGender:'male', cardFavKey:null, theme:'magenta', dailyDone:null, showWalker:true},
 f:{q:'',types:[],gen:0,rar:null},
 tab:'dex',
 teamGame:null,
@@ -2858,21 +2802,6 @@ localStorage.setItem('wn_version',APP_VERSION);
 document.getElementById('whatsnew-modal').style.display='none';
 }
 
-
-// ── DARK MODE ──
-function toggleDark(){
-  const isDark = document.body.classList.toggle('dark');
-  S.set.dark = isDark;
-  document.getElementById('dark-btn')?.classList.toggle('on', isDark);
-  scheduleSave();
-}
-
-function applyDark(isDark){
-  document.body.classList.toggle('dark', !!isDark);
-  document.getElementById('dark-btn')?.classList.toggle('on', !!isDark);
-}
-
-
 // ── SPRITE FALLBACK CHAIN ──
 const _sprFailed = {}; // track which IDs have failed which sources
 
@@ -3027,7 +2956,6 @@ for(let i=0;i<12;i++){
   });
   setTimeout(()=>p.remove(), 900);
 }
-
 
 // Secret message
 await new Promise(r=>setTimeout(r,500));
@@ -4272,7 +4200,6 @@ if(c.hp <= 0){
   c.hp = 0; c.fainted = true; c.faintedAt = now; c.faintCount++;
 }
 
-
 c.lastVisit = now;
 scheduleSave();
 }
@@ -4487,7 +4414,6 @@ el.innerHTML = `
     </button>
   ` : `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${moves}</div>`}
 </div>`;
-
 
 }
 function cpBattleAttack(moveIdx){
@@ -5155,7 +5081,6 @@ function setPwUnlocked(){}
 //  INIT
 // ═══════════════════════════════════════
 
-
 // Safari globals
 window.applyTheme = applyTheme;
 window.setTheme = setTheme;
@@ -5224,7 +5149,6 @@ window.setTrainerGender = setTrainerGender;
 window.updateTrainerUI = updateTrainerUI;
 window.renderSettings = renderSettings;
 window.toggleSprite = toggleSprite;
-window.toggleDark = toggleDark;
 window.onSpriteError = onSpriteError;
 window.toggleHelp = toggleHelp;
 window.closeHelp = closeHelp;
@@ -5295,7 +5219,6 @@ if (user && isPwUnlocked()) {
 // Fully authenticated -- show app
 currentUser = user;
 try { await loadUserData(user.uid); } catch(e) { console.warn('loadUserData failed:', e); }
-applyDark(S.set.dark);
 document.getElementById('auth-screen').classList.add('hidden');
 document.getElementById('app').style.display='flex';
 updateHeaderUser(user);
@@ -5349,10 +5272,6 @@ renderGrid();
 
 // App is hidden by CSS default, auth screen visible by CSS default
 })();
-
-
-
-
 
 </script>
 
