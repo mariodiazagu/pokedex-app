@@ -787,9 +787,10 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
   width:52px;height:52px;border-radius:50%;
   background:var(--ac);color:#fff;border:none;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 20px rgba(0,0,0,.25);z-index:450;display:none;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);z-index:450;
   transition:transform .2s,box-shadow .2s;flex-shrink:0;
 }
+#ai-fab{display:none}
 #ai-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(0,0,0,.3)}
 #ai-fab:active{transform:scale(.94)}
 #ai-fab svg{width:24px;height:24px}
@@ -5527,6 +5528,11 @@ renderGrid();
 });
 
 // App is hidden by CSS default, auth screen visible by CSS default
+// Show AI fab if already logged in
+if(typeof currentUser !== 'undefined' && currentUser){
+  const fab=document.getElementById('ai-fab');
+  if(fab) fab.style.display='flex';
+}
 })();
 
 
