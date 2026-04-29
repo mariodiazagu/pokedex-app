@@ -771,14 +771,15 @@ font-weight:700;color:var(--t2);margin-top:4px;transition:background .12s;
 #world-clock-bar{background:transparent}
 #world-clock-bar::-webkit-scrollbar{display:none}
 .wclock{
-display:flex;flex-direction:column;align-items:center;gap:2px;
+display:flex;flex-direction:column;align-items:center;gap:3px;
 background:rgba(255,255,255,var(--glass));
 backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
-border-radius:14px;padding:7px 12px;flex-shrink:0;min-width:80px;
+border-radius:14px;padding:6px 14px;flex-shrink:0;
 }
-.wclock-region{font-family:'Silkscreen',monospace;font-size:6px;color:var(--t3);letter-spacing:.5px;text-transform:uppercase;text-align:center}
-.wclock-time{font-family:'Silkscreen',monospace;font-size:12px;font-weight:700;color:var(--t1);letter-spacing:1px;line-height:1}
-.wclock-icon{font-size:14px;line-height:1}
+.wclock-time{font-family:'Silkscreen',monospace;font-size:13px;font-weight:700;color:var(--t1);letter-spacing:1px;line-height:1}
+.wclock-regions{display:flex;align-items:center;gap:3px;flex-wrap:nowrap}
+.wclock-region-name{font-family:'Silkscreen',monospace;font-size:7px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;line-height:1}
+.wclock-region-sep{font-size:7px;color:var(--t3);line-height:1}
 .wclock.active{background:rgba(255,255,255,calc(var(--glass) + 0.15));border:1.5px solid var(--ac)22}
 
 </style>
@@ -3093,16 +3094,14 @@ msg.style.transform='translate(-50%,-50%) scale(1)';
 }
 }
 // ── WORLD CLOCK ──
+// Grouped by timezone - regions sharing TZ appear in one pill
 const REGION_CLOCKS = [
-{region:'Kanto',    icon:'🔴', tz:'Asia/Tokyo',       color:'#E53935'},
-{region:'Johto',    icon:'🌸', tz:'Asia/Tokyo',       color:'#EC407A'},
-{region:'Hoenn',    icon:'🌊', tz:'Asia/Tokyo',       color:'#1E88E5'},
-{region:'Sinnoh',   icon:'❄️', tz:'Asia/Tokyo',       color:'#5E35B1'},
-{region:'Unova',    icon:'🏙️', tz:'America/New_York', color:'#546E7A'},
-{region:'Kalos',    icon:'🗼', tz:'Europe/Paris',     color:'#00ACC1'},
-{region:'Alola',    icon:'🌺', tz:'Pacific/Honolulu', color:'#F9A825'},
-{region:'Galar',    icon:'☁️', tz:'Europe/London',    color:'#6D4C41'},
-{region:'Paldea',   icon:'🌞', tz:'Europe/Madrid',    color:'#E65100'},
+{regions:[{name:'Kanto',color:'#E53935'},{name:'Johto',color:'#EC407A'},{name:'Hoenn',color:'#1E88E5'},{name:'Sinnoh',color:'#7B5EA7'}], tz:'Asia/Tokyo'},
+{regions:[{name:'Unova',color:'#546E7A'}], tz:'America/New_York'},
+{regions:[{name:'Kalos',color:'#00ACC1'}], tz:'Europe/Paris'},
+{regions:[{name:'Alola',color:'#F9A825'}], tz:'Pacific/Honolulu'},
+{regions:[{name:'Galar',color:'#5C8A3C'}], tz:'Europe/London'},
+{regions:[{name:'Paldea',color:'#E65100'},{name:'Hisui',color:'#7986CB'}], tz:'Europe/Madrid'},
 ];
 
 function renderWorldClocks(){
@@ -3114,13 +3113,19 @@ if(!inner) return;
 const now = new Date();
 const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-inner.innerHTML = REGION_CLOCKS.map(r => {
+inner.innerHTML = REGION_CLOCKS.map(group => {
 const timeStr = now.toLocaleTimeString('es-ES', {
-timeZone: r.tz,
+timeZone: group.tz,
 hour:'2-digit', minute:'2-digit', hour12:false
 });
-const isLocal = r.tz === localTz;
-return `<div class="wclock${isLocal?' active':''}"> <div class="wclock-icon">${r.icon}</div> <div class="wclock-time">${timeStr}</div> <div class="wclock-region" style="color:${r.color}">${r.region}</div> </div>`;
+const isLocal = group.tz === localTz;
+const regionNames = group.regions.map(r =>
+`<span class="wclock-region-name" style="color:${r.color}">${r.name}</span>`
+).join('<span class="wclock-region-sep">/</span>');
+return `<div class="wclock${isLocal?' active':''}">
+<div class="wclock-time">${timeStr}</div>
+<div class="wclock-regions">${regionNames}</div>
+</div>`;
 }).join('');
 }
 
