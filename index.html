@@ -3547,7 +3547,7 @@ wrap.innerHTML=`<div style="padding:20px;text-align:center;color:var(--t2)">${e.
 }
 }
 
-function *renderTrainerCardInner(wrap){
+function renderTrainerCardInner(wrap){
 const name=trainerDisplayName();
 const sprite=trainerSprite();
 const capturedIds=new Set(Object.keys(S.track).filter(id=>{
