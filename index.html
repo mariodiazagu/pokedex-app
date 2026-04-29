@@ -2970,42 +2970,6 @@ document.getElementById('whatsnew-modal').style.display='none';
 // Expose render functions globally for Safari
 window.renderFilters = renderFilters;
 window.renderGrid = renderGrid;
-auth.onAuthStateChanged(async user => {
-console.log('[DEBUG] onAuthStateChanged fired, user:', user ? user.email : 'null');
-console.log('[DEBUG] typeof renderFilters:', typeof renderFilters);
-console.log('[DEBUG] typeof renderGrid:', typeof renderGrid);
-console.log('[DEBUG] typeof isPwUnlocked:', typeof isPwUnlocked);
-if (user && isPwUnlocked()) {
-// Fully authenticated -- show app
-currentUser = user;
-try { await loadUserData(user.uid); } catch(e) { console.warn('loadUserData failed:', e); }
-document.getElementById('auth-screen').classList.add('hidden');
-document.getElementById('app').style.display='flex';
-updateHeaderUser(user);
-console.log('[DEBUG] About to call renderFilters...');
-renderFilters();
-console.log('[DEBUG] renderFilters done, calling renderGrid...');
-renderGrid();
-document.getElementById('sprbtn')?.classList.toggle('on', !S.set.modern);
-const sel = document.getElementById('stsel');
-if (sel && (!sel.options.length || sel.options[0].value !== 'all')) {
-sel.innerHTML = '<option value="all">Todos los juegos</option>';
-GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
-}
-updateTrainerUI();
-setTimeout(fetchTypesInBackground, 1500);
-setTimeout(initWalker, 500);
-setTimeout(showWhatsNew, 800);
-// Update companion state on each visit
-updateCompanionOnVisit();
-} else {
-// Not logged in -- show Google sign-in
-currentUser = null;
-document.getElementById('app').style.display='none';
-document.getElementById('auth-screen').classList.remove('hidden');
-document.getElementById('google-step').style.display='flex';
-}
-});
 
 function updateHeaderUser(user) {
 if(user){
@@ -5239,6 +5203,44 @@ function setPwUnlocked(){}
 // ═══════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════
+
+auth.onAuthStateChanged(async user => {
+console.log('[DEBUG] onAuthStateChanged fired, user:', user ? user.email : 'null');
+console.log('[DEBUG] typeof renderFilters:', typeof renderFilters);
+console.log('[DEBUG] typeof renderGrid:', typeof renderGrid);
+console.log('[DEBUG] typeof isPwUnlocked:', typeof isPwUnlocked);
+if (user && isPwUnlocked()) {
+// Fully authenticated -- show app
+currentUser = user;
+try { await loadUserData(user.uid); } catch(e) { console.warn('loadUserData failed:', e); }
+document.getElementById('auth-screen').classList.add('hidden');
+document.getElementById('app').style.display='flex';
+updateHeaderUser(user);
+console.log('[DEBUG] About to call renderFilters...');
+renderFilters();
+console.log('[DEBUG] renderFilters done, calling renderGrid...');
+renderGrid();
+document.getElementById('sprbtn')?.classList.toggle('on', !S.set.modern);
+const sel = document.getElementById('stsel');
+if (sel && (!sel.options.length || sel.options[0].value !== 'all')) {
+sel.innerHTML = '<option value="all">Todos los juegos</option>';
+GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
+}
+updateTrainerUI();
+setTimeout(fetchTypesInBackground, 1500);
+setTimeout(initWalker, 500);
+setTimeout(showWhatsNew, 800);
+// Update companion state on each visit
+updateCompanionOnVisit();
+} else {
+// Not logged in -- show Google sign-in
+currentUser = null;
+document.getElementById('app').style.display='none';
+document.getElementById('auth-screen').classList.remove('hidden');
+document.getElementById('google-step').style.display='flex';
+}
+});
+
 (function(){
 loadFormsCache();
 try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
