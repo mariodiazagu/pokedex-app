@@ -2438,7 +2438,7 @@ const getNotesCount=s=>Object.values(s.track).reduce((a,g)=>a+Object.values(g).f
 
 function getUnlockedAchievements(){
 const state={track:S.track,teams:S.teams,set:S.set,dailyCount:S.dailyCount||0};
-return ACHIEVEMENTS.filter(a=>{try{return a.check(state);}catch{return false;}});
+return ACHIEVEMENTS.filter(a=>{try{return a.check(state);}catch(e){return false;}});
 }
 
 // Achievement SVG icons
@@ -2678,11 +2678,11 @@ if(!raw)return null;
 const {ts,data}=JSON.parse(raw);
 if(Date.now()-ts>TC_TTL)return null; // stale
 return data; // {[id]: [type1, type2?]}
-} catch { return null; }
+} catch(e){ return null; }
 }
 
 function saveTypesCache(data){
-try { localStorage.setItem(TC_KEY,JSON.stringify({ts:Date.now(),data})); } catch {}
+try { localStorage.setItem(TC_KEY,JSON.stringify({ts:Date.now(),data})); } catch(e){}
 }
 
 function applyTypesData(data){
@@ -2918,14 +2918,14 @@ return out;
 }
 
 function loadFromLocalStorage() {
-try { S.track = JSON.parse(localStorage.getItem('t')) || {}; } catch { S.track = {}; }
-try { S.favs = new Set((JSON.parse(localStorage.getItem('fv')) || []).map(String)); } catch { S.favs = new Set(); }
-try { S.teams = sanitizeTeams(JSON.parse(localStorage.getItem('tms')||'{}')); } catch { S.teams = {}; }
-try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch {}
+try { S.track = JSON.parse(localStorage.getItem('t')) || {}; } catch(e){ S.track = {}; }
+try { S.favs = new Set((JSON.parse(localStorage.getItem('fv')) || []).map(String)); } catch(e){ S.favs = new Set(); }
+try { S.teams = sanitizeTeams(JSON.parse(localStorage.getItem('tms')||'{}')); } catch(e){ S.teams = {}; }
+try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
 }
 
 function forceRefreshTypes(){
-try { localStorage.removeItem(TC_KEY); } catch {}
+try { localStorage.removeItem(TC_KEY); } catch(e){}
 document.getElementById('user-menu').classList.remove('on');
 fetchTypesInBackground();
 }
@@ -2935,7 +2935,7 @@ try { localStorage.setItem('fc5', JSON.stringify(S.fc)); } catch(e) {}
 }
 
 function loadFormsCache() {
-try { const d = localStorage.getItem('fc5'); if(d) S.fc = JSON.parse(d); } catch {}
+try { const d = localStorage.getItem('fc5'); if(d) S.fc = JSON.parse(d); } catch(e){}
 }
 
 // ── WHAT'S NEW ──
@@ -3062,7 +3062,7 @@ setTimeout(()=>flash.remove(), 300);
 
 // Transform into random captured pokemon
 const capturedIds = Object.keys(S.track).filter(id=>{
-try{ return Object.values(S.track[id]).some(g=>g?.captured) && parseInt(id)!==151; }catch{ return false; }
+try{ return Object.values(S.track[id]).some(g=>g?.captured) && parseInt(id)!==151; }catch(e){ return false; }
 }).map(id=>parseInt(id)).filter(id=>!isNaN(id));
 
 if(capturedIds.length > 0){
@@ -3445,8 +3445,8 @@ applyColsSetting();
 
 function updateStat(){
 try{
-const c=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch{return false;}}).length;
-const s=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch{return false;}}).length;
+const c=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch(e){return false;}}).length;
+const s=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch(e){return false;}}).length;
 const hstat=document.getElementById('hstat');
 if(hstat)hstat.textContent=`${c} / ${S.poke.length} capturados · ${s} shiny`;
 // Update header trainer name display
@@ -3551,11 +3551,11 @@ function _renderTrainerCardInner(wrap){
 const name=trainerDisplayName();
 const sprite=trainerSprite();
 const capturedIds=new Set(Object.keys(S.track).filter(id=>{
-try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch{return false;}
+try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch(e){return false;}
 }));
 const totalCap=capturedIds.size;
 const totalShiny=new Set(Object.keys(S.track).filter(id=>{
-try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch{return false;}
+try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch(e){return false;}
 })).size;
 const isShinyHunter=totalShiny>=50;
 const typeCount={};
@@ -3762,10 +3762,10 @@ hdrAvatar.style.borderColor=c;
 const hstat=document.getElementById('hstat');
 if(hstat&&!hasName){
 try{
-const c=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch{return false;}}).length;
-const s=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch{return false;}}).length;
+const c=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.captured);}catch(e){return false;}}).length;
+const s=Object.keys(S.track).filter(id=>{try{return Object.values(S.track[id]).some(g=>g&&g.shiny);}catch(e){return false;}}).length;
 hstat.textContent=`${c} / ${S.poke.length} capturados · ${s} shiny`;
-}catch{}
+}catch(e){}
 }
 
 // Fav page title
@@ -5230,7 +5230,7 @@ function setPwUnlocked(){}
 // ═══════════════════════════════════════
 (function(){
 loadFormsCache();
-try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch {}
+try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
 
 // Apply saved columns setting
 applyColsSetting();
