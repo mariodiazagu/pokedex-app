@@ -2304,10 +2304,114 @@ return icons[id]||icons.star;
 // ── COMPANION ──
 let _companion = {pokeId:null, shiny:false, state:'idle', timer:null, bubbleTimer:null};
 
-const COMPANION_MESSAGES = [
-'¡Pika!', '¿Listo para capturar?', '¡Vamos!', '¡Soy el mejor!',
-'¡Un shiny!', '¿Batalla?', '¡Entrenemos!', '¡Pokémon!',
+function _walkerMessages(){
+const h = new Date().getHours();
+const isMorning = h >= 6 && h < 12;
+const isAfternoon = h >= 12 && h < 18;
+const isEvening = h >= 18 && h < 22;
+const isNight = h >= 22 || h < 6;
+const pName = (()=>{ const p=S.poke.find(x=>x.id===_companion.pokeId); return p?cap(p.name):''; })();
+
+const morning = [
+  'Buenos días!', 'A entrenar!', 'El sol sale para todos!',
+  'Hoy puede aparecer un shiny!', 'Gran día para capturar!',
+  'Desayuno... de Bayas!', 'El profesor Oak me dijo que madrugara',
+  'Temprano sale el Pokémon!', 'Mañana fresca, batalla segura',
 ];
+const afternoon = [
+  'La hora punta de los Pokémon!', 'El sol calienta mucho hoy',
+  'Hora de explorar la hierba alta!', 'Cuidado con los Pokémon Fuego!',
+  'La Pokédex no se llena sola!', 'Batalla de tarde?',
+  'Los Pokémon están muy activos ahora', 'Hora de la siesta... o no!',
+];
+const evening = [
+  'Atardecer pokémon...', 'Los Pokémon nocturnos despiertan',
+  'Umbreon aparece de noche', 'El cielo está precioso',
+  'Los Haunter salen pronto', 'Hora de revisar la Pokédex',
+  'Un día de aventuras más', 'Los Pokémon Siniestro se activan',
+];
+const night = [
+  'Chhhh... silencio nocturno', 'Los Pokémon duermen... casi todos',
+  'Cuidado con los Gengar!', 'Luna llena... brillan los Moonstone',
+  'Dreaming of Pokémon...', 'Zzz... no, estoy despierto!',
+  'Los Pokémon psíquicos son más fuertes de noche',
+  'Hora de meditar como Mewtwo', 'El profesor Oak también duerme',
+];
+const general = [
+  pName+'!', pName+'!!', '...'+pName+'...', pName+'~',
+  'Pika pika!', 'Pokémon!', 'Vamos!', 'Ey!',
+  'Qué día más bonito', 'Mira un Pokémon!',
+  'Cuántos quedan por capturar...', 'Necesito más Poké Balls',
+  'El profesor Oak estaría orgulloso', 'Ash lo haría mejor',
+  'Misty... Brock... echad de menos?', 'Team Rocket se acerca',
+  'A atrapar Pokémon!', 'La vida es una aventura',
+  'Ruta 1... siempre la Ruta 1', 'Pokémon Go no es lo mismo',
+  'Soy de la gen 1!', 'Los starters son los mejores',
+  'Charizard mola más que Blastoise... o no?',
+  'Mega Evolución activada!', 'Giratina me da miedo',
+  'La Zona Ultrawormhole...', 'Necesito una Masterball',
+  'Shiny rate del 1/8192...', 'Synchronize!',
+  'Overpowered...', 'Crítico!!', 'Es muy eficaz!',
+  'No tiene efecto...', 'Se debilitó!', 'Ve Pokémon!',
+  'Cómo que no evoluciona?', 'Hay que subirlo de nivel',
+  'La Pokédex dice...', 'Espera espera espera',
+  'Tengo hambre de Bayas', 'Una Baya Pecha!',
+  'La Cave de Hielo me congela', 'Surf!',
+  'Necesito un HM01 aquí', 'Cortacésped activado',
+  'Roca Tumba go!', 'Rayo Thunder!',
+  'Fuego Sagrado!', 'Hidrobomba!',
+  'La Torre Sylph está llena de Rockets', 'Giovanni!',
+  'N era un buen rival', 'Cynthia es imbatible',
+  'El campeonato de Kanto...', 'Medalla de Roca conseguida!',
+  'El gimnasio de agua es lo peor', 'Surge el de los truenos!',
+  'Blaine tiene preguntas difíciles', 'Sabrina me asusta',
+  'Erika huele a flores', 'Koga usa veneno!',
+  'El señor Mime de la madre de Ash...', 'Delibird reparte regalos',
+  'Jigglypuff canta y me duerme', 'Snorlax bloquea el camino',
+  'Safari Zone... sin Pokéballs?!', 'Magikarp... el más fuerte',
+  'Gyarados furioso!', 'Un Raro Candy!',
+  'PP gastados...', 'Lucha libre!',
+  'Pokémon de tipo Normal son infravalorados',
+  'Rotom en la Pokédex es muy molesto', 'Siri de Pokémon',
+  'Zygarde al 100%!', 'Las Ultra Bestias son raras',
+  'Palkia dobla el espacio', 'Dialga controla el tiempo',
+  'Giratina vive en el Distortion World', 'Arceus creó todo esto?',
+  'Mew contiene el ADN de todos', 'Mewtwo escapó del laboratorio',
+  'Entei Raikou Suicune corren libres', 'Los perros legendarios!',
+  'Los pájaros de Kanto vuelan lejos', 'Lugia el señor de los mares',
+  'Ho-Oh y sus plumas doradas', 'Celebi viaja en el tiempo',
+  'Jirachi concede deseos cada 1000 años', 'Deoxys viene del espacio',
+  'Rayquaza patrulla la atmósfera', 'Groudon expande la tierra',
+  'Kyogre expande los mares', 'La lluvia de Kyogre...',
+  'Pokémon tipo Hada rompen los Dragón', 'Nerf a Fairy type!',
+  'Sableye no tiene debilidades... casi', 'Spiritomb igual',
+  'Pokémon que no evolucionan son únicos', 'Unown... qué secretos guardan',
+  'La Torre Pokémon de Lavanda...', 'Mr. Fuji cuida a los Pokémon',
+  'Los fósiles reviven!', 'Aerodactyl del ámbar',
+  'Omanyte lord!', 'Helix Fossil decides!',
+  'Los Pokémon de tipo Hielo son frágiles', 'Pero Walrein aguanta',
+  'Wobbuffet!', 'Sólo ataca en defensa',
+  'Smeargle copia todo', 'Ditto se transforma en cualquiera',
+  'Mew también aprende de todo', 'El movimiento Salpicadura...',
+  'Magikarp solo sabe Salpicadura', 'Pero luego... GYARADOS',
+  'La paciencia es clave en Pokémon', 'Como esperar al shiny',
+  'EV training...', 'IV perfectos!',
+  'Nature Modest para especiales', 'Nature Adamant para físicos',
+  'Pokémon competitivo es otro juego', 'VGC rules!',
+  'Smogon tiene sus reglas...', 'Uber tier',
+  'OU vibes!', 'Stall team o HO?',
+  'Priority moves son frustrantes', 'Sucker Punch!',
+  'Extreme Speed de Arcanine', 'Mach Punch!',
+  'Quick Attack del ratón amarillo', 'ExtremeSpeed!',
+  'El movimiento Z activa!', 'Mega Evolución!',
+  'Dynamax en la batalla!', 'Terastal!',
+];
+
+const timePool = isMorning ? morning : isAfternoon ? afternoon : isEvening ? evening : night;
+const pool = [...general, ...timePool];
+return pool;
+}
+const COMPANION_MESSAGES = ['...'];
 
 function getDailyWalkerPoke(){
 const d=new Date();
@@ -2343,7 +2447,7 @@ const sb = parseInt(getComputedStyle(document.documentElement).getPropertyValue(
 if(img2){
   img2.style.left = _walkerX + '%';
   img2.style.bottom = (navH - 2) + 'px';
-  img2.style.transform = _walkerDir > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+  img2.style.transform = _walkerDir > 0 ? 'scaleX(-1)' : 'scaleX(1)';
 }
 if(_walkerRAF) cancelAnimationFrame(_walkerRAF);
 if(_walkerStateTimer) clearTimeout(_walkerStateTimer);
@@ -2363,43 +2467,48 @@ let _walkerJumping = false;
 let _walkerLastEvent = 0; // throttle random events
 
 function _walkerScheduleNext(){
-// Pick a random next state and duration
+// Mostly idle (60%), short walks (40%)
 const roll = Math.random();
-if(roll < 0.35){
-  // Keep walking but maybe change speed
-  _walkerState2 = 'walk';
-  _walkerSpeed = 0.005 + Math.random()*0.008;
-  _walkerStateTimer = setTimeout(_walkerDoRandomEvent, 1500 + Math.random()*3500);
-} else if(roll < 0.65){
-  // Pause
+if(roll < 0.60){
+  // Idle - just stand there for a while
   _walkerState2 = 'pause';
+  const idleTime = 2000 + Math.random()*5000;
+  // Maybe show bubble or jump while idle
+  if(Math.random() < 0.4) setTimeout(_showBubble, Math.random()*idleTime*0.8);
+  if(Math.random() < 0.25) setTimeout(_walkerDoJump, 500 + Math.random()*idleTime*0.5);
   _walkerStateTimer = setTimeout(()=>{
     _walkerState2 = 'walk';
     _walkerScheduleNext();
-  }, 400 + Math.random()*1400);
-} else if(roll < 0.82){
-  // Sudden turn
+  }, idleTime);
+} else if(roll < 0.80){
+  // Short walk burst then stop
   _walkerState2 = 'walk';
-  _walkerDir *= -1;
-  const img = document.getElementById('walker-img');
-  if(img) img.style.transform = _walkerDir > 0 ? 'scaleX(1)' : 'scaleX(-1)';
-  _walkerSpeed = 0.005 + Math.random()*0.008;
-  _walkerStateTimer = setTimeout(_walkerDoRandomEvent, 1000 + Math.random()*2500);
+  _walkerSpeed = 0.004 + Math.random()*0.006;
+  const walkTime = 600 + Math.random()*1800;
+  _walkerStateTimer = setTimeout(()=>{
+    _walkerState2 = 'pause';
+    _walkerScheduleNext();
+  }, walkTime);
+} else if(roll < 0.92){
+  // Quick turn then idle
+  _walkerState2 = 'pause';
+  setTimeout(()=>{
+    _walkerDir *= -1;
+    const img = document.getElementById('walker-img');
+    if(img) img.style.transform = _walkerDir > 0 ? 'scaleX(-1)' : 'scaleX(1)';
+    _walkerState2 = 'walk';
+    _walkerSpeed = 0.003 + Math.random()*0.005;
+    _walkerStateTimer = setTimeout(()=>{ _walkerState2='pause'; _walkerScheduleNext(); }, 400+Math.random()*1000);
+  }, 200 + Math.random()*400);
 } else {
-  // Jump
+  // Jump + maybe bubble
   _walkerDoJump();
-  _walkerStateTimer = setTimeout(_walkerDoRandomEvent, 2000 + Math.random()*3000);
+  if(Math.random() < 0.5) setTimeout(_showBubble, 300);
+  _walkerStateTimer = setTimeout(_walkerScheduleNext, 1500 + Math.random()*2000);
 }
 }
 
 function _walkerDoRandomEvent(){
-const now = Date.now();
-if(now - _walkerLastEvent < 600){ _walkerStateTimer = setTimeout(_walkerDoRandomEvent, 600); return; }
-_walkerLastEvent = now;
-// Random event: bubble, jump, turn, pause
-const r = Math.random();
-if(r < 0.3) _showBubble();
-if(r < 0.55) _walkerDoJump();
 _walkerScheduleNext();
 }
 
@@ -2447,7 +2556,7 @@ _walkerRAF = requestAnimationFrame(_companionLoop);
 function _showBubble(text){
 const bubble=document.getElementById('walker-bubble');
 if(!bubble)return;
-const msg=text||COMPANION_MESSAGES[Math.floor(Math.random()*COMPANION_MESSAGES.length)];
+const pool=_walkerMessages();const msg=text||pool[Math.floor(Math.random()*pool.length)];
 bubble.textContent=msg;
 bubble.style.opacity='1';
 clearTimeout(_companion.bubbleTimer);
@@ -2458,8 +2567,8 @@ function walkerClick(){
 const img=document.getElementById('walker-img');
 if(img){
   img.style.transition='transform .1s';
-  img.style.transform=(_walkerDir>0?'scaleX(1)':'scaleX(-1)')+' scale(0.85)';
-  setTimeout(()=>{ img.style.transform=(_walkerDir>0?'scaleX(1)':'scaleX(-1)')+' scale(1)'; },150);
+  img.style.transform=(_walkerDir>0?'scaleX(-1)':'scaleX(1)')+' scale(0.85)';
+  setTimeout(()=>{ img.style.transform=(_walkerDir>0?'scaleX(-1)':'scaleX(1)')+' scale(1)'; },150);
 }
 const p=S.poke.find(x=>x.id===_companion.pokeId);
 if(p)_showBubble('!' + cap(p.name) + '!');
