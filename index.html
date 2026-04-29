@@ -627,10 +627,12 @@ function signInWithGoogle(){
   var provider=new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithPopup(provider)
     .catch(function(err){
-      if(err.code==='auth/popup-blocked'||err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request'){
+      var loading=document.getElementById('auth-loading');
+      if(err.code==='auth/popup-blocked'){
         firebase.auth().signInWithRedirect(provider);
+      } else if(err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request'){
+        if(loading)loading.style.display='none';
       } else {
-        var loading=document.getElementById('auth-loading');
         if(loading)loading.style.display='none';
         alert('Error: '+err.code+'\n'+err.message);
       }
