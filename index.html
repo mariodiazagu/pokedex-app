@@ -2971,6 +2971,10 @@ document.getElementById('whatsnew-modal').style.display='none';
 window.renderFilters = renderFilters;
 window.renderGrid = renderGrid;
 auth.onAuthStateChanged(async user => {
+console.log('[DEBUG] onAuthStateChanged fired, user:', user ? user.email : 'null');
+console.log('[DEBUG] typeof renderFilters:', typeof renderFilters);
+console.log('[DEBUG] typeof renderGrid:', typeof renderGrid);
+console.log('[DEBUG] typeof isPwUnlocked:', typeof isPwUnlocked);
 if (user && isPwUnlocked()) {
 // Fully authenticated -- show app
 currentUser = user;
@@ -2978,7 +2982,9 @@ try { await loadUserData(user.uid); } catch(e) { console.warn('loadUserData fail
 document.getElementById('auth-screen').classList.add('hidden');
 document.getElementById('app').style.display='flex';
 updateHeaderUser(user);
+console.log('[DEBUG] About to call renderFilters...');
 renderFilters();
+console.log('[DEBUG] renderFilters done, calling renderGrid...');
 renderGrid();
 document.getElementById('sprbtn')?.classList.toggle('on', !S.set.modern);
 const sel = document.getElementById('stsel');
