@@ -783,7 +783,7 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 
 /* ── AI CHAT WIDGET ── */
 #ai-fab{
-  position:fixed;bottom:calc(var(--sb) + 76px);right:16px;
+  position:fixed;bottom:calc(var(--sb) + 82px);right:16px;
   width:52px;height:52px;border-radius:50%;
   background:var(--ac);color:#fff;border:none;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
@@ -796,9 +796,11 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 #ai-fab svg{width:24px;height:24px}
 
 #ai-widget{
-  position:fixed;bottom:calc(var(--sb)+144px);right:16px;
+  position:fixed;
+  bottom:calc(var(--sb) + 148px);
+  right:16px;
   width:340px;max-width:calc(100vw - 32px);
-  height:520px;max-height:calc(100dvh - 200px);
+  height:min(520px, calc(100dvh - var(--sb) - 220px));
   background:rgba(245,245,245,0.97);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-radius:24px;box-shadow:0 8px 48px rgba(0,0,0,.22);
