@@ -2346,53 +2346,96 @@ if(img2){
   img2.style.transform = _walkerDir > 0 ? 'scaleX(1)' : 'scaleX(-1)';
 }
 if(_walkerRAF) cancelAnimationFrame(_walkerRAF);
+if(_walkerStateTimer) clearTimeout(_walkerStateTimer);
+_walkerState2 = 'walk';
+_walkerSpeed = 0.006 + Math.random()*0.005;
 _companionLoop();
+_walkerDoRandomEvent();
 }
 
 let _walkerX = 10; // percent of screen width
 let _walkerDir = 1; // 1=right, -1=left
 let _walkerRAF = null;
-let _walkerPaused = false;
-let _walkerPauseTimer = null;
-const WALKER_SPEED = 0.04; // % per ms
+let _walkerState2 = 'walk'; // walk | pause | turn
+let _walkerSpeed = 0.007 + Math.random()*0.005; // slightly random speed per session
+let _walkerStateTimer = null;
+let _walkerJumping = false;
+let _walkerLastEvent = 0; // throttle random events
+
+function _walkerScheduleNext(){
+// Pick a random next state and duration
+const roll = Math.random();
+if(roll < 0.35){
+  // Keep walking but maybe change speed
+  _walkerState2 = 'walk';
+  _walkerSpeed = 0.005 + Math.random()*0.008;
+  _walkerStateTimer = setTimeout(_walkerDoRandomEvent, 1500 + Math.random()*3500);
+} else if(roll < 0.65){
+  // Pause
+  _walkerState2 = 'pause';
+  _walkerStateTimer = setTimeout(()=>{
+    _walkerState2 = 'walk';
+    _walkerScheduleNext();
+  }, 400 + Math.random()*1400);
+} else if(roll < 0.82){
+  // Sudden turn
+  _walkerState2 = 'walk';
+  _walkerDir *= -1;
+  const img = document.getElementById('walker-img');
+  if(img) img.style.transform = _walkerDir > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+  _walkerSpeed = 0.005 + Math.random()*0.008;
+  _walkerStateTimer = setTimeout(_walkerDoRandomEvent, 1000 + Math.random()*2500);
+} else {
+  // Jump
+  _walkerDoJump();
+  _walkerStateTimer = setTimeout(_walkerDoRandomEvent, 2000 + Math.random()*3000);
+}
+}
+
+function _walkerDoRandomEvent(){
+const now = Date.now();
+if(now - _walkerLastEvent < 600){ _walkerStateTimer = setTimeout(_walkerDoRandomEvent, 600); return; }
+_walkerLastEvent = now;
+// Random event: bubble, jump, turn, pause
+const r = Math.random();
+if(r < 0.3) _showBubble();
+if(r < 0.55) _walkerDoJump();
+_walkerScheduleNext();
+}
+
+function _walkerDoJump(){
+if(_walkerJumping) return;
+const img = document.getElementById('walker-img');
+if(!img) return;
+_walkerJumping = true;
+const navH = document.querySelector('.tabs')?.offsetHeight || 72;
+const jumpH = 18 + Math.random()*20;
+img.style.transition = 'bottom .18s cubic-bezier(.34,1.56,.64,1)';
+img.style.bottom = (navH - 2 + jumpH) + 'px';
+setTimeout(()=>{
+  img.style.transition = 'bottom .22s cubic-bezier(.55,0,1,.8)';
+  img.style.bottom = (navH - 2) + 'px';
+  setTimeout(()=>{ _walkerJumping = false; }, 220);
+}, 200);
+}
 
 function _companionLoop(){
 if(!S.set.showWalker) return;
 const img = document.getElementById('walker-img');
 const bubble = document.getElementById('walker-bubble');
-if(!img) return;
+if(!img){ _walkerRAF = requestAnimationFrame(_companionLoop); return; }
 
-// Move horizontally
-if(!_walkerPaused){
-  _walkerX += WALKER_SPEED * 16 * _walkerDir; // ~60fps step
-  // Flip at edges
+// Move horizontally when walking
+if(_walkerState2 === 'walk'){
+  _walkerX += _walkerSpeed * 16 * _walkerDir;
   if(_walkerX > 88){ _walkerX = 88; _walkerDir = -1; img.style.transform='scaleX(-1)'; }
   if(_walkerX < 5){ _walkerX = 5; _walkerDir = 1; img.style.transform='scaleX(1)'; }
   img.style.left = _walkerX + '%';
   if(bubble) bubble.style.left = Math.max(2, _walkerX - 5) + '%';
 }
 
-// Randomly pause, jump, show bubble
-if(Math.random() < 0.002 && !_walkerPaused){
-  // Pause briefly
-  _walkerPaused = true;
-  // Maybe jump
-  if(Math.random() < 0.5){
-    img.style.transition = 'bottom .2s cubic-bezier(.34,1.56,.64,1)';
-    const navH = document.querySelector('.tabs')?.offsetHeight || 72;
-    img.style.bottom = (navH + 28) + 'px';
-    setTimeout(()=>{
-      img.style.transition = 'bottom .3s ease-in';
-      img.style.bottom = (navH - 2) + 'px';
-    }, 250);
-  }
-  // Maybe show bubble
-  if(Math.random() < 0.6) _showBubble();
-  _walkerPauseTimer = setTimeout(()=>{ _walkerPaused = false; }, 800 + Math.random()*1500);
-}
-
 // Occasionally go shiny
-if(Math.random() < 0.0003){
+if(Math.random() < 0.0002){
   _companion.shiny = !_companion.shiny;
   img.src = walkerSrc(_companion.pokeId, _companion.shiny);
   if(_companion.shiny) setTimeout(()=>{ _companion.shiny=false; img.src=walkerSrc(_companion.pokeId,false); }, 3000);
@@ -2432,7 +2475,7 @@ if(_walkerRAF){ cancelAnimationFrame(_walkerRAF); _walkerRAF=null; }
 initWalker();
 } else {
 if(_walkerRAF){ cancelAnimationFrame(_walkerRAF); _walkerRAF=null; }
-clearTimeout(_walkerPauseTimer);
+if(_walkerStateTimer){ clearTimeout(_walkerStateTimer); _walkerStateTimer=null; }
 if(wrap)wrap.style.display='none';
 }
 const tog=document.getElementById('walker-toggle');
