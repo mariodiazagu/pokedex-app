@@ -639,24 +639,33 @@ function signInWithGoogle(){
   }
   dbg('Firebase OK, creating provider...');
   var provider=new firebase.auth.GoogleAuthProvider();
-  dbg('Calling signInWithPopup...');
-  firebase.auth().signInWithPopup(provider)
-    .then(function(result){ dbg('Popup OK: '+result.user.email); })
-    .catch(function(err){
-      dbg('Error: '+err.code);
-      var loading=document.getElementById('auth-loading');
-      if(err.code==='auth/popup-blocked'){
-        dbg('Popup blocked, trying redirect...');
-        firebase.auth().signInWithRedirect(provider);
-      } else if(err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request'){
-        dbg('Popup closed by user');
-        if(loading)loading.style.display='none';
-      } else {
-        dbg('Unknown error: '+err.message);
-        if(loading)loading.style.display='none';
-        alert('Error: '+err.code+'\n'+err.message);
-      }
-    });
+  // Safari iOS blocks popups — always use redirect on iOS
+  var isSafariIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || 
+    (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome') && !navigator.userAgent.includes('CriOS'));
+  dbg('isSafariIOS: ' + isSafariIOS);
+  if(isSafariIOS){
+    dbg('iOS Safari detected, using redirect...');
+    firebase.auth().signInWithRedirect(provider);
+  } else {
+    dbg('Using popup...');
+    firebase.auth().signInWithPopup(provider)
+      .then(function(result){ dbg('Popup OK: '+result.user.email); })
+      .catch(function(err){
+        dbg('Error: '+err.code);
+        var loading=document.getElementById('auth-loading');
+        if(err.code==='auth/popup-blocked'){
+          dbg('Popup blocked, trying redirect...');
+          firebase.auth().signInWithRedirect(provider);
+        } else if(err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request'){
+          dbg('Popup closed by user');
+          if(loading)loading.style.display='none';
+        } else {
+          dbg('Unknown error: '+err.message);
+          if(loading)loading.style.display='none';
+          alert('Error: '+err.code+'\n'+err.message);
+        }
+      });
+  }
 }
 </script>
 
