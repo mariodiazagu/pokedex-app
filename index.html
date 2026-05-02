@@ -695,12 +695,15 @@ function signInWithGoogle(){
       firebase.auth().signInWithCredential(credential)
         .then(function(result){
           dbg('Firebase sign-in OK: '+result.user.email);
+          // onAuthStateChanged will handle showing the app
+          var l=document.getElementById('auth-loading');
+          if(l)l.style.display='none';
         })
         .catch(function(err){
           dbg('Firebase credential error: '+err.code+' '+err.message);
           var l=document.getElementById('auth-loading');
           if(l)l.style.display='none';
-          alert('Error: '+err.message);
+          alert('Error al iniciar sesion: '+err.code);
         });
     },
   });
