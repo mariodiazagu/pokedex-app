@@ -624,6 +624,8 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+<script src="https://accounts.google.com/gsi/client" async></script>
+
 <script>
 function dbg(msg){
   var ol=document.getElementById('debug-overlay');
@@ -635,39 +637,76 @@ function dbg(msg){
   dl.innerHTML='<div>['+t+'] '+msg+'</div>'+dl.innerHTML;
 }
 
+var _gisClient = null;
+
 function signInWithGoogle(){
   dbg('signInWithGoogle called');
   var loading=document.getElementById('auth-loading');
   if(loading)loading.style.display='block';
+
+  // Check if Firebase is ready
   if(typeof firebase==='undefined'||!firebase.auth){
-    dbg('Firebase not loaded - check network connection');
+    dbg('Firebase not ready');
     if(loading)loading.style.display='none';
-    alert('Error: Firebase no cargado. Recarga la página.');
+    alert('Error: recarga la página e inténtalo de nuevo.');
     return;
   }
-  dbg('Creating provider and calling signInWithPopup immediately...');
-  var provider=new firebase.auth.GoogleAuthProvider();
-  // Call popup immediately - must be synchronous from user gesture for Safari
-  firebase.auth().signInWithPopup(provider)
-    .then(function(result){
-      dbg('Popup OK: '+result.user.email);
-    })
-    .catch(function(err){
-      dbg('Popup error: '+err.code);
-      var loading2=document.getElementById('auth-loading');
-      if(err.code==='auth/popup-blocked'){
-        // Only try redirect if popup was actually blocked (not just closed)
-        dbg('Popup blocked, trying redirect...');
-        firebase.auth().signInWithRedirect(provider);
-      } else if(err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request'){
-        dbg('User closed popup');
-        if(loading2)loading2.style.display='none';
-      } else {
-        dbg('Error: '+err.code+' '+err.message);
-        if(loading2)loading2.style.display='none';
-        alert('Error: '+err.code);
-      }
+
+  dbg('Initializing Google Identity Services...');
+
+  // Use Google Identity Services - works on all browsers including Safari iOS
+  if(!_gisClient){
+    _gisClient = google.accounts.oauth2.initCodeClient({
+      client_id: '271473943519-99mj8028k0c8h3ovol9vurvn030qvakp.apps.googleusercontent.com',
+      scope: 'email profile openid',
+      ux_mode: 'popup',
+      callback: function(response){
+        dbg('GIS callback received');
+        if(response.error){
+          dbg('GIS error: '+response.error);
+          var l=document.getElementById('auth-loading');
+          if(l)l.style.display='none';
+          return;
+        }
+        // Exchange code for Firebase credential
+        dbg('Got auth code, signing in to Firebase...');
+        // Use id_token flow instead
+      },
     });
+  }
+
+  // Actually use the token flow which is simpler
+  var tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: '271473943519-99mj8028k0c8h3ovol9vurvn030qvakp.apps.googleusercontent.com',
+    scope: 'email profile openid',
+    callback: function(tokenResponse){
+      dbg('Token received: '+JSON.stringify(Object.keys(tokenResponse)));
+      if(tokenResponse.error){
+        dbg('Token error: '+tokenResponse.error);
+        var l=document.getElementById('auth-loading');
+        if(l)l.style.display='none';
+        return;
+      }
+      // Sign in to Firebase with the Google access token
+      var credential = firebase.auth.GoogleAuthProvider.credential(
+        null, tokenResponse.access_token
+      );
+      dbg('Signing in to Firebase with credential...');
+      firebase.auth().signInWithCredential(credential)
+        .then(function(result){
+          dbg('Firebase sign-in OK: '+result.user.email);
+        })
+        .catch(function(err){
+          dbg('Firebase credential error: '+err.code+' '+err.message);
+          var l=document.getElementById('auth-loading');
+          if(l)l.style.display='none';
+          alert('Error: '+err.message);
+        });
+    },
+  });
+
+  dbg('Requesting access token...');
+  tokenClient.requestAccessToken({prompt: 'select_account'});
 }
 </script>
 
