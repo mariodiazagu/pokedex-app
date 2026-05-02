@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="es">
@@ -640,33 +639,33 @@ function signInWithGoogle(){
   }
   dbg('Firebase OK, creating provider...');
   var provider=new firebase.auth.GoogleAuthProvider();
-  // Safari iOS blocks popups — always use redirect on iOS
-  var isSafariIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || 
-    (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome') && !navigator.userAgent.includes('CriOS'));
-  dbg('isSafariIOS: ' + isSafariIOS);
-  if(isSafariIOS){
-    dbg('iOS Safari detected, using redirect...');
-    firebase.auth().signInWithRedirect(provider);
-  } else {
-    dbg('Using popup...');
-    firebase.auth().signInWithPopup(provider)
-      .then(function(result){ dbg('Popup OK: '+result.user.email); })
-      .catch(function(err){
-        dbg('Error: '+err.code);
-        var loading=document.getElementById('auth-loading');
-        if(err.code==='auth/popup-blocked'){
-          dbg('Popup blocked, trying redirect...');
-          firebase.auth().signInWithRedirect(provider);
-        } else if(err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request'){
-          dbg('Popup closed by user');
-          if(loading)loading.style.display='none';
-        } else {
-          dbg('Unknown error: '+err.message);
-          if(loading)loading.style.display='none';
-          alert('Error: '+err.code+'\n'+err.message);
-        }
-      });
-  }
+  provider.addScope('email');
+  provider.addScope('profile');
+  // Try popup first - if blocked or on iOS, try redirect
+  dbg('Trying signInWithPopup...');
+  firebase.auth().signInWithPopup(provider)
+    .then(function(result){
+      dbg('Popup OK: '+result.user.email);
+    })
+    .catch(function(err){
+      dbg('Popup error: '+err.code);
+      var loading2=document.getElementById('auth-loading');
+      // For ANY popup error on Safari iOS, use redirect
+      if(err.code==='auth/popup-blocked'||
+         err.code==='auth/popup-closed-by-user'||
+         err.code==='auth/cancelled-popup-request'||
+         err.code==='auth/operation-not-supported-in-this-environment'||
+         err.code==='auth/unauthorized-domain'){
+        dbg('Falling back to redirect...');
+        firebase.auth().signInWithRedirect(provider);
+      } else if(err.code==='auth/popup-closed-by-user'){
+        if(loading2)loading2.style.display='none';
+      } else {
+        dbg('Fatal error: '+err.message);
+        if(loading2)loading2.style.display='none';
+        alert('Error al iniciar sesión:\n'+err.code+'\n'+err.message);
+      }
+    });
 }
 </script>
 
@@ -3004,7 +3003,7 @@ companion:{hp:100, energy:80, hunger:70, mood:75, lastVisit:null, fainted:false,
 // ═══════════════════════════════════════
 const firebaseConfig = {
 apiKey: “AIzaSyCEbQsGmgOUyOmUfr2uJe-chzNIENqgdok”,
-authDomain: “pokeplanner-b6321.firebaseapp.com”,
+authDomain: “mariodiazagu.github.io”,
 projectId: “pokeplanner-b6321”,
 storageBucket: “pokeplanner-b6321.firebasestorage.app”,
 messagingSenderId: “271473943519”,
@@ -3021,13 +3020,15 @@ let syncTimeout = null;
 auth.getRedirectResult().then(result => {
 if(result && result.user){
 dbg(’Redirect OK: ’ + result.user.email);
+// onAuthStateChanged will handle showing the app
 } else {
-dbg(‘getRedirectResult: no user (normal on first load)’);
+dbg(‘getRedirectResult: no pending redirect’);
 }
 }).catch(err => {
 dbg(’getRedirectResult ERROR: ’ + err.code + ’ - ’ + err.message);
-if(err.code !== ‘auth/no-current-user’){
-console.error(‘Redirect result error:’, err);
+if(err.code === ‘auth/unauthorized-domain’){
+dbg(‘ERROR: domain not authorized in Firebase Console!’);
+alert(‘Dominio no autorizado en Firebase. Añade mariodiazagu.github.io en Firebase Console > Authentication > Authorized domains’);
 }
 });
 
