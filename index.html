@@ -619,21 +619,40 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 </style>
 
 <script>
+function dbg(msg){
+  var ol=document.getElementById('debug-overlay');
+  var dl=document.getElementById('debug-log');
+  if(!ol||!dl)return;
+  ol.style.display='block';
+  var d=new Date();
+  var t=d.getHours()+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
+  dl.innerHTML='<div>['+t+'] '+msg+'</div>'+dl.innerHTML;
+}
+
 function signInWithGoogle(){
+  dbg('signInWithGoogle called');
   var loading=document.getElementById('auth-loading');
   if(loading)loading.style.display='block';
   if(typeof firebase==='undefined'||!firebase.auth){
+    dbg('Firebase not loaded yet, retrying...');
     setTimeout(signInWithGoogle,500);return;
   }
+  dbg('Firebase OK, creating provider...');
   var provider=new firebase.auth.GoogleAuthProvider();
+  dbg('Calling signInWithPopup...');
   firebase.auth().signInWithPopup(provider)
+    .then(function(result){ dbg('Popup OK: '+result.user.email); })
     .catch(function(err){
+      dbg('Error: '+err.code);
       var loading=document.getElementById('auth-loading');
       if(err.code==='auth/popup-blocked'){
+        dbg('Popup blocked, trying redirect...');
         firebase.auth().signInWithRedirect(provider);
       } else if(err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request'){
+        dbg('Popup closed by user');
         if(loading)loading.style.display='none';
       } else {
+        dbg('Unknown error: '+err.message);
         if(loading)loading.style.display='none';
         alert('Error: '+err.code+'\n'+err.message);
       }
@@ -646,7 +665,7 @@ function signInWithGoogle(){
 <!-- PASSWORD GATE -->
 <div id="auth-screen">
   <div class="auth-logo"><svg width="48" height="48" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="48" fill="#C41E1E"/></svg></div>
-  <div class="auth-title">PokéPlanner</div>
+  <div class="auth-title" onclick="(function(){window._dbgTap=(window._dbgTap||0)+1;if(window._dbgTap>=5){document.getElementById('debug-overlay').style.display='block';window._dbgTap=0;}})()">PokéPlanner</div>
   <!-- Step 2: Google login (shown after correct password) -->
 
   <div id="google-step" style="display:flex;width:100%;max-width:300px;flex-direction:column;gap:10px;align-items:center">
@@ -5714,6 +5733,14 @@ renderGrid();
   <div id="walker-bubble" style="position:absolute;bottom:calc(var(--nav-h, 72px) + 44px);background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px 12px 12px 2px;padding:6px 10px;font-size:11px;font-weight:700;color:var(--t1);box-shadow:0 2px 12px rgba(0,0,0,.12);pointer-events:none;white-space:normal;max-width:140px;min-width:40px;width:max-content;line-height:1.5;opacity:0;transition:opacity .3s;left:0;word-break:break-word"></div>
   <img id="walker-img" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:40px;height:40px;object-fit:contain;image-rendering:pixelated;pointer-events:all;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));left:10%;transition:left .06s linear,bottom .2s,transform .15s" onclick="walkerClick()">
   <img id="walker-friend" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:36px;height:36px;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.12));opacity:0;transition:opacity .5s,left .6s ease;left:20%">
+</div>
+
+<div id="debug-overlay" style="display:none;position:fixed;bottom:80px;left:10px;right:10px;z-index:99999;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:10px;border-radius:12px;max-height:200px;overflow-y:auto;pointer-events:all">
+  <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+    <span style="color:#fff;font-weight:bold">Debug Log</span>
+    <button onclick="document.getElementById('debug-overlay').style.display='none'" style="background:none;border:none;color:#f66;cursor:pointer;font-size:14px">✕</button>
+  </div>
+  <div id="debug-log"></div>
 </div>
 
 </body>
