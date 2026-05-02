@@ -624,8 +624,6 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<script src="https://accounts.google.com/gsi/client" async></script>
-
 <script>
 function dbg(msg){
   var ol=document.getElementById('debug-overlay');
@@ -637,80 +635,85 @@ function dbg(msg){
   dl.innerHTML='<div>['+t+'] '+msg+'</div>'+dl.innerHTML;
 }
 
-var _gisClient = null;
-
 function signInWithGoogle(){
   dbg('signInWithGoogle called');
   var loading=document.getElementById('auth-loading');
   if(loading)loading.style.display='block';
 
-  // Check if Firebase is ready
   if(typeof firebase==='undefined'||!firebase.auth){
     dbg('Firebase not ready');
     if(loading)loading.style.display='none';
-    alert('Error: recarga la página e inténtalo de nuevo.');
+    alert('Error: recarga la página.');
     return;
   }
 
-  dbg('Initializing Google Identity Services...');
+  dbg('Opening Google OAuth...');
 
-  // Use Google Identity Services - works on all browsers including Safari iOS
-  if(!_gisClient){
-    _gisClient = google.accounts.oauth2.initCodeClient({
-      client_id: '271473943519-99mj8028k0c8h3ovol9vurvn030qvakp.apps.googleusercontent.com',
-      scope: 'email profile openid',
-      ux_mode: 'popup',
-      callback: function(response){
-        dbg('GIS callback received');
-        if(response.error){
-          dbg('GIS error: '+response.error);
-          var l=document.getElementById('auth-loading');
-          if(l)l.style.display='none';
-          return;
-        }
-        // Exchange code for Firebase credential
-        dbg('Got auth code, signing in to Firebase...');
-        // Use id_token flow instead
-      },
-    });
-  }
-
-  // Actually use the token flow which is simpler
-  var tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: '271473943519-99mj8028k0c8h3ovol9vurvn030qvakp.apps.googleusercontent.com',
-    scope: 'email profile openid',
-    callback: function(tokenResponse){
-      dbg('Token received: '+JSON.stringify(Object.keys(tokenResponse)));
-      if(tokenResponse.error){
-        dbg('Token error: '+tokenResponse.error);
-        var l=document.getElementById('auth-loading');
-        if(l)l.style.display='none';
-        return;
-      }
-      // Sign in to Firebase with the Google access token
-      var credential = firebase.auth.GoogleAuthProvider.credential(
-        null, tokenResponse.access_token
-      );
-      dbg('Signing in to Firebase with credential...');
-      firebase.auth().signInWithCredential(credential)
-        .then(function(result){
-          dbg('Firebase sign-in OK: '+result.user.email);
-          // onAuthStateChanged will handle showing the app
-          var l=document.getElementById('auth-loading');
-          if(l)l.style.display='none';
-        })
-        .catch(function(err){
-          dbg('Firebase credential error: '+err.code+' '+err.message);
-          var l=document.getElementById('auth-loading');
-          if(l)l.style.display='none';
-          alert('Error al iniciar sesion: '+err.code);
-        });
-    },
-  });
-
-  dbg('Requesting access token...');
-  tokenClient.requestAccessToken({prompt: 'select_account'});
+  // Use Google OAuth 2.0 implicit flow to get id_token directly
+  // This works on Safari iOS - opens in same window then returns
+  var clientId = '271473943519-99mj8028k0c8h3ovol9vurvn030qvakp.apps.googleusercontent.com';
+  var redirectUri = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
+  var nonce = Math.random().toString(36).substring(2);
+  
+  // Store nonce for verification
+  try{ sessionStorage.setItem('gauth_nonce', nonce); }catch(e){}
+  
+  var authUrl = 'https://accounts.google.com/o/oauth2/v2/auth' +
+    '?client_id=' + clientId +
+    '&redirect_uri=' + redirectUri +
+    '&response_type=id_token' +
+    '&scope=email+profile+openid' +
+    '&nonce=' + nonce +
+    '&prompt=select_account';
+  
+  dbg('Redirecting to Google...');
+  window.location.href = authUrl;
 }
+
+// Handle the OAuth callback on page load
+(function(){
+  var hash = window.location.hash;
+  if(!hash || hash.indexOf('id_token') === -1) return;
+  
+  dbg('OAuth callback detected, processing...');
+  
+  // Parse the hash fragment
+  var params = {};
+  hash.replace('#','').split('&').forEach(function(p){
+    var kv = p.split('=');
+    params[kv[0]] = decodeURIComponent(kv[1]||'');
+  });
+  
+  if(!params.id_token){
+    dbg('No id_token in callback');
+    return;
+  }
+  
+  // Clean the URL
+  history.replaceState(null, '', window.location.pathname);
+  
+  // Wait for Firebase to load then sign in
+  var attempts = 0;
+  function tryFirebaseSignIn(){
+    attempts++;
+    if(typeof firebase === 'undefined' || !firebase.auth){
+      if(attempts < 20){ setTimeout(tryFirebaseSignIn, 300); return; }
+      dbg('Firebase never loaded');
+      return;
+    }
+    dbg('Signing in to Firebase with id_token...');
+    var credential = firebase.auth.GoogleAuthProvider.credential(params.id_token);
+    firebase.auth().signInWithCredential(credential)
+      .then(function(result){
+        dbg('Firebase OK: ' + result.user.email);
+      })
+      .catch(function(err){
+        dbg('Firebase error: ' + err.code + ' - ' + err.message);
+        alert('Error: ' + err.code);
+      });
+  }
+  tryFirebaseSignIn();
+})();
 </script>
 
 </head>
