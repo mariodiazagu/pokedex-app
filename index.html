@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="es">
@@ -3019,10 +3020,12 @@ let syncTimeout = null;
 // Handle redirect result from Google sign-in
 auth.getRedirectResult().then(result => {
 if(result && result.user){
-// Redirect completed – onAuthStateChanged will handle the rest
-console.log(‘Redirect sign-in complete:’, result.user.email);
+dbg(’Redirect OK: ’ + result.user.email);
+} else {
+dbg(‘getRedirectResult: no user (normal on first load)’);
 }
 }).catch(err => {
+dbg(’getRedirectResult ERROR: ’ + err.code + ’ - ’ + err.message);
 if(err.code !== ‘auth/no-current-user’){
 console.error(‘Redirect result error:’, err);
 }
@@ -5678,6 +5681,7 @@ window.isPwUnlocked = isPwUnlocked;
 window.setPwUnlocked = setPwUnlocked;
 
 auth.onAuthStateChanged(async user => {
+dbg(’onAuthStateChanged: ’ + (user ? user.email : ‘null’));
 if (user && isPwUnlocked()) {
 // Fully authenticated – show app
 currentUser = user;
