@@ -618,13 +618,13 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 /* frow background */
 
 /* -- WIKI TABS -- */
-.wiki-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px 16px;border-radius:14px;border:none;background:rgba(255,255,255,var(--glass));font-size:13px;font-weight:700;color:var(--t2);cursor:pointer;font-family:var(--fn);transition:all .15s;margin-top:2px}
+.wiki-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px 20px;border-radius:14px;border:none;background:rgba(255,255,255,var(--glass));font-size:13px;font-weight:700;color:var(--t2);cursor:pointer;font-family:var(--fn);transition:all .15s;margin-top:2px}
 .wiki-btn:hover{background:rgba(255,255,255,0.6);color:var(--t1)}
 .wiki-btn svg{transition:transform .25s}
 .wiki-btn.open svg{transform:rotate(180deg)}
 .wiki-section{overflow:hidden;max-height:0;transition:max-height .5s ease;margin:0 0 8px}
 .wiki-section.open{max-height:5000px}
-.wiki-inner{padding:4px 0 8px}
+.wiki-inner{padding:4px 16px 12px}
 .wiki-tabs{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .wiki-tabs::-webkit-scrollbar{display:none}
 .wiki-tab{flex-shrink:0;padding:6px 14px;border-radius:99px;border:1.5px solid var(--bd);background:none;font-size:12px;font-weight:700;color:var(--t3);cursor:pointer;font-family:var(--fn);transition:all .15s;white-space:nowrap}
@@ -659,6 +659,11 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .wmove-filter::-webkit-scrollbar{display:none}
 .wmove-fbtn{flex-shrink:0;padding:4px 12px;border-radius:99px;border:1.5px solid var(--bd);background:none;font-size:11px;font-weight:700;color:var(--t3);cursor:pointer;font-family:var(--fn);white-space:nowrap}
 .wmove-fbtn.on{background:var(--t1);border-color:var(--t1);color:var(--bg)}
+/* Tooltips */
+.wiki-tooltip{position:relative;cursor:help}
+.wiki-tooltip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(20,20,20,0.9);color:#fff;font-size:11px;font-weight:600;padding:5px 9px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:100;max-width:200px;white-space:normal;text-align:center;line-height:1.4}
+.wiki-tooltip:hover::after{opacity:1}
+
 .wmove-row{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.5);margin-bottom:3px}
 .wmove-name{flex:1;font-size:12px;font-weight:700;color:var(--t1)}
 .wmove-lvl{font-size:10px;color:var(--t3);font-family:var(--px);min-width:24px;text-align:right}
@@ -3163,7 +3168,9 @@ async function _wikiLoadStats(id, panel){
     const col = statColors[s.stat.name]||'var(--ac)';
     const val = s.base_stat;
     const color = val>=100?'#4CAF50':val>=60?'#FF9800':'#F44336';
-    return `<div class="wstat-row"><span class="wstat-lbl">${statNames[s.stat.name]||s.stat.name}</span><div class="wstat-bar"><div class="wstat-fill" style="width:${pct}%;background:${col}"></div></div><span class="wstat-val" style="color:${color}">${val}</span></div>`;
+    const tips = {hp:'Puntos de vida',attack:'Ataque físico',defense:'Defensa física','special-attack':'Ataque especial','special-defense':'Defensa especial',speed:'Velocidad'};
+    const tip = tips[s.stat.name]||s.stat.name;
+    return `<div class="wstat-row wiki-tooltip" data-tip="${tip}: ${val}/255"><span class="wstat-lbl">${statNames[s.stat.name]||s.stat.name}</span><div class="wstat-bar"><div class="wstat-fill" style="width:${pct}%;background:${col}"></div></div><span class="wstat-val" style="color:${color}">${val}</span></div>`;
   }).join('');
   const totalPct = Math.round(total/780*100);
   const totalColor = total>=500?'#4CAF50':total>=400?'#FF9800':'#F44336';
@@ -3194,11 +3201,13 @@ async function _wikiLoadTypes(id, panel){
   });
   const sectionColors = {'4x':'#f44336','2x':'#FF9800','1/2':'#4CAF50','1/4':'#2196F3','0x':'#9E9E9E'};
   const sectionLabels = {'4x':'Debilidad x4','2x':'Debilidad x2','1/2':'Resistencia x2','1/4':'Resistencia x4','0x':'Inmunidad'};
+  const typeDescriptions = {normal:'Sin fortalezas ni debilidades especiales.',fire:'Fuerte contra Planta, Hielo, Bicho y Acero.',water:'Fuerte contra Fuego, Tierra y Roca.',grass:'Fuerte contra Agua, Tierra y Roca.',electric:'Fuerte contra Agua y Volador.',ice:'Fuerte contra Planta, Tierra, Volador y Dragón.',fighting:'Fuerte contra Normal, Hielo, Roca, Siniestro y Acero.',poison:'Fuerte contra Planta y Hada.',ground:'Fuerte contra Fuego, Eléctrico, Veneno, Roca y Acero.',flying:'Fuerte contra Planta, Lucha y Bicho.',psychic:'Fuerte contra Lucha y Veneno.',bug:'Fuerte contra Planta, Psíquico y Siniestro.',rock:'Fuerte contra Fuego, Hielo, Volador y Bicho.',ghost:'Fuerte contra Psíquico y Fantasma.',dragon:'Fuerte contra Dragón.',dark:'Fuerte contra Psíquico y Fantasma.',steel:'Fuerte contra Hielo, Roca y Hada.',fairy:'Fuerte contra Lucha, Dragón y Siniestro.'};
   const chip = (t,mult) => {
     const ti = TYPES.find(x=>x.id===t);
     const bg = ti?ti.c+'22':'#88888822';
     const col = ti?ti.c:'#888';
-    return `<span class="wtype-chip" style="background:${bg};color:${col}"><span style="font-size:9px;opacity:.8">${mult}</span>${ti?ti.n:t}</span>`;
+    const desc = typeDescriptions[t] || '';
+    return `<span class="wtype-chip wiki-tooltip" style="background:${bg};color:${col}" data-tip="${desc}"><span style="font-size:9px;opacity:.8">${mult}</span>${ti?ti.n:t}</span>`;
   };
   panel.innerHTML = Object.entries(groups).filter(([,arr])=>arr.length).map(([mult,arr])=>
     `<div class="wtype-section"><div class="wtype-section-lbl" style="color:${sectionColors[mult]}">${sectionLabels[mult]}</div><div class="wtype-grid">${arr.map(t=>chip(t,mult)).join('')}</div></div>`
@@ -3225,7 +3234,7 @@ function _wikiRenderMoves(method){
       })
       .sort((a,b) => method==='level-up' ? (a.lvl-b.lvl) : a.name.localeCompare(b.name));
     list.innerHTML = moves.slice(0,30).map(m =>
-      `<div class="wmove-row">
+      `<div class="wmove-row wiki-tooltip" data-tip="${m.lvl!==null?'Aprendido en nivel '+(m.lvl||1)+'. Haz clic en el Pokémon para ver más detalles.':'Haz clic para ver más detalles.'}">
         <span class="wmove-name">${cap(m.name.replace(/-/g,' '))}</span>
         ${m.lvl!==null ? `<span class="wmove-lvl">Nv.${m.lvl||'1'}</span>` : ''}
       </div>`
@@ -3238,8 +3247,8 @@ function _wikiRenderMoves(method){
   panel.innerHTML =
     `<div class="wmove-filter">${methods.map(m=>`<button class="wmove-fbtn${m===activeMethod?' on':''}" data-m="${m}" onclick="(function(){${JSON.stringify(id)};wikiMoveFilter(${id},'${m}')})()">${methodLabels[m]||m}</button>`).join('')}</div>` +
     `<div class="wmove-list"></div>`;
-  renderMoves(activeMethod);
-  window['_wikiMovesData_'+id] = {poke, renderMoves};
+  _wikiRenderMoves(activeMethod);
+  window['_wikiMovesData_'+id] = {poke, renderMoves:_wikiRenderMoves};
 }
 
 function wikiMoveFilter(id, method){
@@ -5185,7 +5194,7 @@ const descHTML=descData
 document.getElementById('mbody').innerHTML=` <div class="hero" id="mhero" style="background:${ps?'rgba(176,128,0,.08)':tClr+'10'}"> <button class="shbtn${ps?' on':''}" id="shbtn-hero" onclick="toggleShy()" title="Ver forma shiny"> <svg width="15" height="15" viewBox="0 0 24 24" fill="${ps?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="${ps?'currentColor':'none'}"/></svg> </button> <div class="hwrap"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="onSpriteError(this)" onclick="${base.id===151?'mewTap()':''}"></div> <div class="hname">${cap(base.name)}</div> ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}${ps?' ✦':''}</div>`:ps?`<div class="hform" style="color:var(--gold)">✦ Shiny</div>`:''} <div class="hrar" style="background:${rar.d}18;border-color:${rar.d}55;color:${rar.d}"><span class="hrardot" style="background:${rar.d}"></span>${rar.l}</div> <div class="htypes">${tPills}</div> <div class="hstats"> <div class="hs"><div class="hs-val">${capC}/${activeGames().length||GAMES.length}</div><div class="hs-lbl">Juegos</div></div> <div class="hsdiv"></div> <div class="hs"><div class="hs-val">Gen ${base.generation}</div><div class="hs-lbl">Generación</div></div> <div class="hsdiv"></div> <div class="hs"><div class="hs-val">#${pad(id)}</div><div class="hs-lbl">Número</div></div> </div> </div> ${descHTML} <div class="qrow"> <button class="qbtn${fav?' fav':''}" id="qfav" onclick="doFav('${favKey}')"> <svg width="13" height="13" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> ${fav?'Favorito':'Añadir favorito'} </button> ${S.tab==='fav'&&fav?`<button class="qbtn" id="qcard" onclick="setCardFavFromModal('${favKey}')" style="${S.set.cardFavKey===favKey?'background:#FFF8EE;color:var(--gold)':''}">
 <svg width="13" height="13" viewBox="0 0 24 24" fill="${S.set.cardFavKey===favKey?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
 ${S.set.cardFavKey===favKey?'En Trainer Card':'Trainer Card'}
-</button>`:''} </div> ${buildVariantSection(base,forms)} <div class="mleg"> <span style="color:var(--green)">✓</span> Capturado &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="#b08000" stroke="none" style="vertical-align:middle"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> Shiny &nbsp; <span style="color:var(--blue)">▣</span> En caja &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;color:var(--t2)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ball &nbsp; <span style="color:var(--t2)">✎</span> Notas </div> <div class="wiki-btn" id="wiki-btn" onclick="if(typeof toggleWiki!=='undefined')toggleWiki(${id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>Datos del Pokemon</div><div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"></div></div>${gens}<div class="msp"></div>`;
+</button>`:''} </div> <div class="wiki-btn" id="wiki-btn" onclick="if(typeof toggleWiki!=='undefined')toggleWiki(${id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>Datos del Pokémon</div><div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"></div></div> ${buildVariantSection(base,forms)} <div class="mleg"> <span style="color:var(--green)">✓</span> Capturado &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="#b08000" stroke="none" style="vertical-align:middle"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> Shiny &nbsp; <span style="color:var(--blue)">▣</span> En caja &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;color:var(--t2)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ball &nbsp; <span style="color:var(--t2)">✎</span> Notas </div>${gens}<div class="msp"></div>`;
 setTimeout(()=>_refreshPickerButtons(base.id, base.id, false), 0);
 }
 
