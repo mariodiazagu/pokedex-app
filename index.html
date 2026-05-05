@@ -616,34 +616,45 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 /* Grow buttons */
 /* Chips */
 /* frow background */
+
+/* -- WIKI SECTION -- */
+.wiki-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px 16px;border-radius:14px;border:none;background:rgba(255,255,255,var(--glass));font-size:13px;font-weight:700;color:var(--t2);cursor:pointer;font-family:var(--fn);transition:all .15s;margin-top:2px}
+.wiki-btn:hover{background:rgba(255,255,255,0.6);color:var(--t1)}
+.wiki-btn svg{transition:transform .25s}
+.wiki-btn.open svg{transform:rotate(180deg)}
+.wiki-section{overflow:hidden;max-height:0;transition:max-height .4s ease;margin:0 0 8px}
+.wiki-section.open{max-height:3000px}
+.wiki-inner{padding:0 4px 8px}
+.wiki-block{margin-bottom:16px}
+.wiki-block-title{font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.wstat-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.wstat-lbl{font-size:11px;font-weight:700;color:var(--t2);width:80px;flex-shrink:0}
+.wstat-bar{flex:1;height:6px;border-radius:99px;background:var(--bd);overflow:hidden}
+.wstat-fill{height:100%;border-radius:99px;transition:width .6s ease}
+.wstat-val{font-size:11px;font-weight:800;color:var(--t1);width:28px;text-align:right;flex-shrink:0;font-family:var(--px)}
+.wtype-grid{display:flex;flex-wrap:wrap;gap:4px}
+.wtype-chip{display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:99px;font-size:10px;font-weight:800}
+.wmove-list{display:flex;flex-direction:column;gap:3px}
+.wmove-row{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:10px;background:rgba(255,255,255,0.5)}
+.wmove-name{font-size:12px;font-weight:700;color:var(--t1)}
+.wmove-meta{display:flex;align-items:center;gap:6px}
+.wmove-type{font-size:9px;font-weight:800;padding:2px 6px;border-radius:99px;color:#fff}
+.wmove-lvl{font-size:10px;color:var(--t3);font-weight:600;font-family:var(--px)}
+.wiki-loading{text-align:center;padding:20px;color:var(--t3);font-size:12px}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-function dbg(msg){
-  var ol=document.getElementById('debug-overlay');
-  var dl=document.getElementById('debug-log');
-  if(!ol||!dl)return;
-  ol.style.display='block';
-  var d=new Date();
-  var t=d.getHours()+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
-  dl.innerHTML='<div>['+t+'] '+msg+'</div>'+dl.innerHTML;
-}
-
 function signInWithGoogle(){
-  dbg('signInWithGoogle called');
   var loading=document.getElementById('auth-loading');
   if(loading)loading.style.display='block';
 
   if(typeof firebase==='undefined'||!firebase.auth){
-    dbg('Firebase not ready');
     if(loading)loading.style.display='none';
     alert('Error: recarga la página.');
     return;
   }
-
-  dbg('Opening Google OAuth...');
 
   // Use Google OAuth 2.0 implicit flow to get id_token directly
   // This works on Safari iOS - opens in same window then returns
@@ -661,8 +672,6 @@ function signInWithGoogle(){
     '&scope=email+profile+openid' +
     '&nonce=' + nonce +
     '&prompt=select_account';
-  
-  dbg('Redirecting to Google...');
   window.location.href = authUrl;
 }
 
@@ -670,8 +679,6 @@ function signInWithGoogle(){
 (function(){
   var hash = window.location.hash;
   if(!hash || hash.indexOf('id_token') === -1) return;
-  
-  dbg('OAuth callback detected, processing...');
   
   // Parse the hash fragment
   var params = {};
@@ -681,7 +688,6 @@ function signInWithGoogle(){
   });
   
   if(!params.id_token){
-    dbg('No id_token in callback');
     return;
   }
   
@@ -694,17 +700,13 @@ function signInWithGoogle(){
     attempts++;
     if(typeof firebase === 'undefined' || !firebase.auth){
       if(attempts < 20){ setTimeout(tryFirebaseSignIn, 300); return; }
-      dbg('Firebase never loaded');
       return;
     }
-    dbg('Signing in to Firebase with id_token...');
     var credential = firebase.auth.GoogleAuthProvider.credential(params.id_token);
     firebase.auth().signInWithCredential(credential)
       .then(function(result){
-        dbg('Firebase OK: ' + result.user.email);
       })
       .catch(function(err){
-        dbg('Firebase error: ' + err.code + ' - ' + err.message);
         alert('Error: ' + err.code);
       });
   }
@@ -716,7 +718,7 @@ function signInWithGoogle(){
 <!-- PASSWORD GATE -->
 <div id="auth-screen">
   <div class="auth-logo"><svg width="48" height="48" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="48" fill="#C41E1E"/></svg></div>
-  <div class="auth-title" onclick="(function(){window._dbgTap=(window._dbgTap||0)+1;if(window._dbgTap>=5){document.getElementById('debug-overlay').style.display='block';window._dbgTap=0;}})()">PokéPlanner</div>
+  <div class="auth-title">PokéPlanner</div>
   <!-- Step 2: Google login (shown after correct password) -->
 
   <div id="google-step" style="display:flex;width:100%;max-width:300px;flex-direction:column;gap:10px;align-items:center">
@@ -886,7 +888,6 @@ function signInWithGoogle(){
   </div>
 </div>
 
-
 <!-- ═══ TRAINER CARD PAGE ═══ -->
 
 <div class="pg" id="pg-card">
@@ -1029,12 +1030,6 @@ function signInWithGoogle(){
 </div>
 
 <!-- ═══ FIREBASE ═══ -->
-
-
-
-
-
-
 
 <!-- WHAT'S NEW MODAL -->
 
@@ -3058,15 +3053,11 @@ let syncTimeout = null;
 // Handle redirect result from Google sign-in
 auth.getRedirectResult().then(result => {
 if(result && result.user){
-dbg('Redirect OK: ' + result.user.email);
 // onAuthStateChanged will handle showing the app
 } else {
-dbg('getRedirectResult: no pending redirect');
 }
 }).catch(err => {
-dbg('getRedirectResult ERROR: ' + err.code + ' - ' + err.message);
 if(err.code === 'auth/unauthorized-domain'){
-dbg('ERROR: domain not authorized in Firebase Console!');
 alert('Dominio no autorizado en Firebase. Añade mariodiazagu.github.io en Firebase Console > Authentication > Authorized domains');
 }
 });
@@ -3287,7 +3278,6 @@ function _silhouetteSvg(){
   return 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#ddd"/><rect x="5" y="45" width="90" height="10" fill="#bbb"/><circle cx="50" cy="50" r="12" fill="#ccc" stroke="#bbb" stroke-width="2"/></svg>');
 }
 
-
 // ── WALKER FRIEND ──
 let _walkerFriendActive = false;
 let _walkerFriendTimer = null;
@@ -3345,6 +3335,157 @@ async function _walkerShowFriend(){
     // Turn back to original direction
     if(mainImg) mainImg.style.transform = _walkerDir > 0 ? 'scaleX(-1)' : 'scaleX(1)';
   }, duration);
+}
+
+
+// ── WIKI SECTION ──
+const _wikiCache = {};
+
+async function toggleWiki(id){
+  const btn = document.getElementById('wiki-btn');
+  const section = document.getElementById('wiki-section');
+  if(!btn || !section) return;
+  const isOpen = section.classList.contains('open');
+  if(isOpen){
+    section.classList.remove('open');
+    btn.classList.remove('open');
+    return;
+  }
+  section.classList.add('open');
+  btn.classList.add('open');
+  const content = document.getElementById('wiki-content');
+  if(content.dataset.loaded === String(id)) return; // already loaded
+  content.innerHTML = '<div class="wiki-loading">Cargando datos...</div>';
+  try {
+    await loadWikiData(id, content);
+    content.dataset.loaded = String(id);
+  } catch(e) {
+    content.innerHTML = '<div class="wiki-loading">Error al cargar datos.</div>';
+    console.error('Wiki error:', e);
+  }
+}
+
+async function loadWikiData(id, container){
+  // Fetch pokemon data and species data in parallel
+  const [pokeRes, specRes] = await Promise.all([
+    fetch('https://pokeapi.co/api/v2/pokemon/' + id),
+    fetch('https://pokeapi.co/api/v2/pokemon-species/' + id),
+  ]);
+  const [poke, spec] = await Promise.all([pokeRes.json(), specRes.json()]);
+
+  // ── 1. BASE STATS ──
+  const statNames = {
+    'hp':'HP','attack':'Ataque','defense':'Defensa',
+    'special-attack':'Atq. Esp.','special-defense':'Def. Esp.','speed':'Velocidad'
+  };
+  const statColors = {
+    'hp':'#FF5959','attack':'#F5AC78','defense':'#FAE078',
+    'special-attack':'#9DB7F5','special-defense':'#A7DB8D','speed':'#FA92B2'
+  };
+  const totalStats = poke.stats.reduce((s,x) => s + x.base_stat, 0);
+  const statsHTML = poke.stats.map(s => {
+    const pct = Math.round(s.base_stat / 255 * 100);
+    const name = statNames[s.stat.name] || s.stat.name;
+    const color = statColors[s.stat.name] || 'var(--ac)';
+    return '<div class="wstat-row">' +
+      '<span class="wstat-lbl">' + name + '</span>' +
+      '<div class="wstat-bar"><div class="wstat-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+      '<span class="wstat-val">' + s.base_stat + '</span>' +
+    '</div>';
+  }).join('') +
+  '<div class="wstat-row" style="margin-top:4px;border-top:1px solid var(--bd);padding-top:6px">' +
+    '<span class="wstat-lbl" style="color:var(--t1)">Total</span>' +
+    '<div class="wstat-bar"><div class="wstat-fill" style="width:' + Math.round(totalStats/780*100) + '%;background:var(--ac)"></div></div>' +
+    '<span class="wstat-val">' + totalStats + '</span>' +
+  '</div>';
+
+  // ── 2. TYPE EFFECTIVENESS ──
+  const typeChart = {
+    normal:{fighting:2,ghost:0},fire:{water:2,rock:2,ground:2,fire:.5,grass:.5,ice:.5,bug:.5,steel:.5,fairy:.5},
+    water:{electric:2,grass:2,water:.5,fire:.5,ice:.5,steel:.5},grass:{fire:2,ice:2,poison:2,flying:2,bug:2,water:.5,grass:.5,electric:.5,ground:.5},
+    electric:{ground:2,electric:.5,flying:.5,steel:.5},ice:{fire:2,fighting:2,rock:2,steel:2,ice:.5},
+    fighting:{flying:2,psychic:2,fairy:2,bug:.5,rock:.5,dark:.5},poison:{ground:2,psychic:2,fighting:.5,poison:.5,bug:.5,grass:.5,fairy:.5},
+    ground:{water:2,grass:2,ice:2,rock:.5,poison:.5,electric:0},flying:{electric:2,ice:2,rock:2,fighting:.5,bug:.5,grass:.5,ground:0},
+    psychic:{bug:2,ghost:2,dark:2,fighting:.5,psychic:.5},bug:{fire:2,flying:2,rock:2,fighting:.5,ground:.5,grass:.5},
+    rock:{water:2,grass:2,fighting:2,ground:2,steel:2,normal:.5,fire:.5,poison:.5,flying:.5},
+    ghost:{ghost:2,dark:2,poison:.5,bug:.5,normal:0,fighting:0},dragon:{ice:2,dragon:2,fairy:2,fire:.5,water:.5,grass:.5,electric:.5},
+    dark:{fighting:2,bug:2,fairy:2,ghost:.5,dark:.5,psychic:0},steel:{fire:2,fighting:2,ground:2,normal:.5,grass:.5,ice:.5,flying:.5,psychic:.5,bug:.5,rock:.5,dragon:.5,steel:.5,poison:0},
+    fairy:{poison:2,steel:2,fighting:.5,bug:.5,dark:.5,dragon:0}
+  };
+  const types = poke.types.map(t => t.type.name);
+  const effectiveness = {};
+  Object.keys(typeChart).forEach(atk => {
+    let mult = 1;
+    types.forEach(def => {
+      mult *= (typeChart[def] && typeChart[def][atk] !== undefined) ? typeChart[def][atk] : 1;
+    });
+    effectiveness[atk] = mult;
+  });
+  const weaknesses = Object.entries(effectiveness).filter(([,v]) => v > 1).sort((a,b) => b[1]-a[1]);
+  const resistances = Object.entries(effectiveness).filter(([,v]) => v < 1 && v > 0).sort((a,b) => a[1]-b[1]);
+  const immunities = Object.entries(effectiveness).filter(([,v]) => v === 0);
+  const makeTypeChips = (arr) => arr.map(([t, v]) => {
+    const ti = TYPES.find(x => x.id === t);
+    const mult = v >= 4 ? '4x' : v === 2 ? '2x' : v === 0.5 ? '1/2' : v === 0.25 ? '1/4' : '0x';
+    return '<span class="wtype-chip" style="background:' + (ti ? ti.c : '#888') + '22;color:' + (ti ? ti.c : '#888') + '">' +
+      '<span style="font-size:9px">' + mult + '</span>' +
+      (ti ? ti.n : t) +
+    '</span>';
+  }).join('');
+  const typeHTML = (weaknesses.length ? '<div style="margin-bottom:6px"><span style="font-size:10px;color:var(--red);font-weight:700">Debilidades</span><div class="wtype-grid" style="margin-top:4px">' + makeTypeChips(weaknesses) + '</div></div>' : '') +
+    (resistances.length ? '<div style="margin-bottom:6px"><span style="font-size:10px;color:var(--green);font-weight:700">Resistencias</span><div class="wtype-grid" style="margin-top:4px">' + makeTypeChips(resistances) + '</div></div>' : '') +
+    (immunities.length ? '<div><span style="font-size:10px;color:var(--t3);font-weight:700">Inmunidades</span><div class="wtype-grid" style="margin-top:4px">' + makeTypeChips(immunities) + '</div></div>' : '');
+
+  // ── 3. MOVES (level-up only, first 15) ──
+  const levelMoves = poke.moves
+    .filter(m => m.version_group_details.some(v => v.move_learn_method.name === 'level-up'))
+    .map(m => ({
+      name: m.move.name,
+      level: Math.max(...m.version_group_details
+        .filter(v => v.move_learn_method.name === 'level-up')
+        .map(v => v.level_learned_at))
+    }))
+    .sort((a,b) => a.level - b.level)
+    .slice(0, 15);
+
+  const movesHTML = '<div class="wmove-list">' + levelMoves.map(m =>
+    '<div class="wmove-row">' +
+      '<span class="wmove-name">' + cap(m.name.replace(/-/g,' ')) + '</span>' +
+      '<div class="wmove-meta">' +
+        '<span class="wmove-lvl">Nv.' + (m.level || '1') + '</span>' +
+      '</div>' +
+    '</div>'
+  ).join('') + '</div>';
+
+  // ── 4. FLAVOR TEXT (latest Spanish or English) ──
+  const esEntries = spec.flavor_text_entries.filter(e => e.language.name === 'es');
+  const enEntries = spec.flavor_text_entries.filter(e => e.language.name === 'en');
+  const flavorEntry = (esEntries[esEntries.length-1] || enEntries[enEntries.length-1]);
+  const flavorText = flavorEntry ? flavorEntry.flavor_text.replace(/\f|\n/g,' ').replace(/\s+/g,' ').trim() : '';
+  const genus = spec.genera?.find(g => g.language.name === 'es')?.genus || spec.genera?.find(g => g.language.name === 'en')?.genus || '';
+  const habitat = spec.habitat?.name || '';
+  const captureRate = spec.capture_rate;
+  const happiness = spec.base_happiness;
+  const growthRate = spec.growth_rate?.name?.replace(/-/g,' ') || '';
+
+  const infoHTML = [
+    genus ? '<div style="margin-bottom:6px"><span style="font-size:11px;color:var(--t3)">Especie: </span><span style="font-size:11px;font-weight:700;color:var(--t1)">' + genus + '</span></div>' : '',
+    flavorText ? '<div style="font-size:12px;color:var(--t2);line-height:1.6;font-style:italic;margin-bottom:8px">"' + flavorText + '"</div>' : '',
+    '<div style="display:flex;flex-wrap:wrap;gap:8px 16px">',
+    habitat ? '<div><span style="font-size:10px;color:var(--t3)">Habitat</span><div style="font-size:12px;font-weight:700;color:var(--t1)">' + cap(habitat) + '</div></div>' : '',
+    captureRate !== undefined ? '<div><span style="font-size:10px;color:var(--t3)">Captura</span><div style="font-size:12px;font-weight:700;color:var(--t1)">' + captureRate + '/255</div></div>' : '',
+    happiness !== undefined ? '<div><span style="font-size:10px;color:var(--t3)">Amistad base</span><div style="font-size:12px;font-weight:700;color:var(--t1)">' + happiness + '</div></div>' : '',
+    growthRate ? '<div><span style="font-size:10px;color:var(--t3)">Crecimiento</span><div style="font-size:12px;font-weight:700;color:var(--t1)">' + cap(growthRate) + '</div></div>' : '',
+    poke.height ? '<div><span style="font-size:10px;color:var(--t3)">Altura</span><div style="font-size:12px;font-weight:700;color:var(--t1)">' + (poke.height/10).toFixed(1) + ' m</div></div>' : '',
+    poke.weight ? '<div><span style="font-size:10px;color:var(--t3)">Peso</span><div style="font-size:12px;font-weight:700;color:var(--t1)">' + (poke.weight/10).toFixed(1) + ' kg</div></div>' : '',
+    '</div>',
+  ].join('');
+
+  container.innerHTML =
+    '<div class="wiki-block"><div class="wiki-block-title">Info</div>' + infoHTML + '</div>' +
+    '<div class="wiki-block"><div class="wiki-block-title">Stats base</div>' + statsHTML + '</div>' +
+    '<div class="wiki-block"><div class="wiki-block-title">Efectividad de tipos</div>' + typeHTML + '</div>' +
+    (levelMoves.length ? '<div class="wiki-block"><div class="wiki-block-title">Movimientos (subida de nivel)</div>' + movesHTML + '</div>' : '');
 }
 
 // ── AUTH STATE LISTENER ──
@@ -5230,7 +5371,7 @@ const descHTML=descData
 document.getElementById('mbody').innerHTML=` <div class="hero" id="mhero" style="background:${ps?'rgba(176,128,0,.08)':tClr+'10'}"> <button class="shbtn${ps?' on':''}" id="shbtn-hero" onclick="toggleShy()" title="Ver forma shiny"> <svg width="15" height="15" viewBox="0 0 24 24" fill="${ps?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="${ps?'currentColor':'none'}"/></svg> </button> <div class="hwrap"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="onSpriteError(this)" onclick="${base.id===151?'mewTap()':''}"></div> <div class="hname">${cap(base.name)}</div> ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}${ps?' ✦':''}</div>`:ps?`<div class="hform" style="color:var(--gold)">✦ Shiny</div>`:''} <div class="hrar" style="background:${rar.d}18;border-color:${rar.d}55;color:${rar.d}"><span class="hrardot" style="background:${rar.d}"></span>${rar.l}</div> <div class="htypes">${tPills}</div> <div class="hstats"> <div class="hs"><div class="hs-val">${capC}/${activeGames().length||GAMES.length}</div><div class="hs-lbl">Juegos</div></div> <div class="hsdiv"></div> <div class="hs"><div class="hs-val">Gen ${base.generation}</div><div class="hs-lbl">Generación</div></div> <div class="hsdiv"></div> <div class="hs"><div class="hs-val">#${pad(id)}</div><div class="hs-lbl">Número</div></div> </div> </div> ${descHTML} <div class="qrow"> <button class="qbtn${fav?' fav':''}" id="qfav" onclick="doFav('${favKey}')"> <svg width="13" height="13" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> ${fav?'Favorito':'Añadir favorito'} </button> ${S.tab==='fav'&&fav?`<button class="qbtn" id="qcard" onclick="setCardFavFromModal('${favKey}')" style="${S.set.cardFavKey===favKey?'background:#FFF8EE;color:var(--gold)':''}">
 <svg width="13" height="13" viewBox="0 0 24 24" fill="${S.set.cardFavKey===favKey?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
 ${S.set.cardFavKey===favKey?'En Trainer Card':'Trainer Card'}
-</button>`:''} </div> ${buildVariantSection(base,forms)} <div class="mleg"> <span style="color:var(--green)">✓</span> Capturado &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="#b08000" stroke="none" style="vertical-align:middle"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> Shiny &nbsp; <span style="color:var(--blue)">▣</span> En caja &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;color:var(--t2)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ball &nbsp; <span style="color:var(--t2)">✎</span> Notas </div> ${gens}<div class="msp"></div>`;
+</button>`:''} </div> ${buildVariantSection(base,forms)} <div class="mleg"> <span style="color:var(--green)">✓</span> Capturado &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="#b08000" stroke="none" style="vertical-align:middle"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> Shiny &nbsp; <span style="color:var(--blue)">▣</span> En caja &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;color:var(--t2)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ball &nbsp; <span style="color:var(--t2)">✎</span> Notas </div> <div class="wiki-btn" id="wiki-btn" onclick="toggleWiki(${id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>Datos del Pokemon</div><div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"></div></div>${gens}<div class="msp"></div>`;
 setTimeout(()=>_refreshPickerButtons(base.id, base.id, false), 0);
 }
 
@@ -5688,6 +5829,7 @@ window.renderCompanion = renderCompanion;
 window.closeMdl = closeMdl;
 window.ovClick = ovClick;
 window.buildMdl = buildMdl;
+window.toggleWiki = toggleWiki;
 window.toggleMSprite = toggleMSprite;
 window.toggleShy = toggleShy;
 window.doFav = doFav;
@@ -5716,7 +5858,6 @@ window.isPwUnlocked = isPwUnlocked;
 window.setPwUnlocked = setPwUnlocked;
 
 auth.onAuthStateChanged(async user => {
-dbg('onAuthStateChanged: ' + (user ? user.email : 'null'));
 if (user && isPwUnlocked()) {
 // Fully authenticated -- show app
 currentUser = user;
@@ -5783,11 +5924,6 @@ renderGrid();
   <img id="walker-friend" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:36px;height:36px;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.12));opacity:0;transition:opacity .5s,left .6s ease;left:20%">
 </div>
 
-<div id="debug-overlay" style="display:none;position:fixed;bottom:80px;left:10px;right:10px;z-index:99999;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:10px;border-radius:12px;max-height:200px;overflow-y:auto;pointer-events:all">
-  <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-    <span style="color:#fff;font-weight:bold">Debug Log</span>
-    <button onclick="document.getElementById('debug-overlay').style.display='none'" style="background:none;border:none;color:#f66;cursor:pointer;font-size:14px">✕</button>
-  </div>
   <div id="debug-log"></div>
 </div>
 
