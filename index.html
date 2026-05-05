@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="version" content="1777465659">
+<meta name="version" content="1778001057">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1149,7 +1149,7 @@ function signInWithGoogle(){
     Cerrar sesión
   </div>
 </div>
-<script>// PokePlanner v1777459879
+<script>// PokePlanner v1778001205
 
 const POKE_DB=[
 [1,"bulbasaur","grass","poison"],
@@ -2774,16 +2774,17 @@ let currentUser = null;
 let syncTimeout = null;
 
 // Handle redirect result from Google sign-in
+if(typeof auth !== 'undefined'){
 auth.getRedirectResult().then(result => {
 if(result && result.user){
 // onAuthStateChanged will handle showing the app
-} else {
 }
 }).catch(err => {
 if(err.code === 'auth/unauthorized-domain'){
-alert('Dominio no autorizado en Firebase. Añade mariodiazagu.github.io en Firebase Console > Authentication > Authorized domains');
+console.error('Unauthorized domain');
 }
 });
+}
 
 // ── AUTH FUNCTIONS ──
 // signInWithGoogle defined in head-script early
@@ -5184,7 +5185,7 @@ const descHTML=descData
 document.getElementById('mbody').innerHTML=` <div class="hero" id="mhero" style="background:${ps?'rgba(176,128,0,.08)':tClr+'10'}"> <button class="shbtn${ps?' on':''}" id="shbtn-hero" onclick="toggleShy()" title="Ver forma shiny"> <svg width="15" height="15" viewBox="0 0 24 24" fill="${ps?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="${ps?'currentColor':'none'}"/></svg> </button> <div class="hwrap"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="onSpriteError(this)" onclick="${base.id===151?'mewTap()':''}"></div> <div class="hname">${cap(base.name)}</div> ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}${ps?' ✦':''}</div>`:ps?`<div class="hform" style="color:var(--gold)">✦ Shiny</div>`:''} <div class="hrar" style="background:${rar.d}18;border-color:${rar.d}55;color:${rar.d}"><span class="hrardot" style="background:${rar.d}"></span>${rar.l}</div> <div class="htypes">${tPills}</div> <div class="hstats"> <div class="hs"><div class="hs-val">${capC}/${activeGames().length||GAMES.length}</div><div class="hs-lbl">Juegos</div></div> <div class="hsdiv"></div> <div class="hs"><div class="hs-val">Gen ${base.generation}</div><div class="hs-lbl">Generación</div></div> <div class="hsdiv"></div> <div class="hs"><div class="hs-val">#${pad(id)}</div><div class="hs-lbl">Número</div></div> </div> </div> ${descHTML} <div class="qrow"> <button class="qbtn${fav?' fav':''}" id="qfav" onclick="doFav('${favKey}')"> <svg width="13" height="13" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> ${fav?'Favorito':'Añadir favorito'} </button> ${S.tab==='fav'&&fav?`<button class="qbtn" id="qcard" onclick="setCardFavFromModal('${favKey}')" style="${S.set.cardFavKey===favKey?'background:#FFF8EE;color:var(--gold)':''}">
 <svg width="13" height="13" viewBox="0 0 24 24" fill="${S.set.cardFavKey===favKey?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
 ${S.set.cardFavKey===favKey?'En Trainer Card':'Trainer Card'}
-</button>`:''} </div> ${buildVariantSection(base,forms)} <div class="mleg"> <span style="color:var(--green)">✓</span> Capturado &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="#b08000" stroke="none" style="vertical-align:middle"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> Shiny &nbsp; <span style="color:var(--blue)">▣</span> En caja &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;color:var(--t2)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ball &nbsp; <span style="color:var(--t2)">✎</span> Notas </div> <div class="wiki-btn" id="wiki-btn" onclick="toggleWiki(${id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>Datos del Pokemon</div><div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"></div></div>${gens}<div class="msp"></div>`;
+</button>`:''} </div> ${buildVariantSection(base,forms)} <div class="mleg"> <span style="color:var(--green)">✓</span> Capturado &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="#b08000" stroke="none" style="vertical-align:middle"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> Shiny &nbsp; <span style="color:var(--blue)">▣</span> En caja &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;color:var(--t2)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ball &nbsp; <span style="color:var(--t2)">✎</span> Notas </div> <div class="wiki-btn" id="wiki-btn" onclick="if(typeof toggleWiki!=='undefined')toggleWiki(${id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>Datos del Pokemon</div><div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"></div></div>${gens}<div class="msp"></div>`;
 setTimeout(()=>_refreshPickerButtons(base.id, base.id, false), 0);
 }
 
@@ -5641,9 +5642,10 @@ window.renderCompanion = renderCompanion;
 window.closeMdl = closeMdl;
 window.ovClick = ovClick;
 window.buildMdl = buildMdl;
-window.toggleWiki = toggleWiki;
-window.wikiTab = wikiTab;
-window.wikiMoveFilter = wikiMoveFilter;
+// wiki functions are already global - these are safety references
+if(typeof toggleWiki !== "undefined") window.toggleWiki = toggleWiki;
+if(typeof wikiTab !== "undefined") window.wikiTab = wikiTab;
+if(typeof wikiMoveFilter !== "undefined") window.wikiMoveFilter = wikiMoveFilter;
 window.toggleMSprite = toggleMSprite;
 window.toggleShy = toggleShy;
 window.doFav = doFav;
