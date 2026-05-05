@@ -661,9 +661,6 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .wmove-fbtn.on{background:var(--t1);border-color:var(--t1);color:var(--bg)}
 .wmove-row{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.5);margin-bottom:3px}
 .wmove-name{flex:1;font-size:12px;font-weight:700;color:var(--t1)}
-.wmove-type{font-size:9px;font-weight:800;padding:2px 7px;border-radius:99px;color:#fff;white-space:nowrap}
-.wmove-cat{font-size:9px;color:var(--t3);font-weight:600;min-width:28px;text-align:center}
-.wmove-pow{font-size:11px;font-weight:800;color:var(--t1);min-width:24px;text-align:right;font-family:var(--px)}
 .wmove-lvl{font-size:10px;color:var(--t3);font-family:var(--px);min-width:24px;text-align:right}
 /* Breeding tab */
 .wbreed-row{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)}
@@ -2789,7 +2786,7 @@ alert('Dominio no autorizado en Firebase. Añade mariodiazagu.github.io en Fireb
 });
 
 // ── AUTH FUNCTIONS ──
-// signInWithGoogle defined in <head> early script
+// signInWithGoogle defined in head-script early
 
 function signOut() {
 closeUserMenu();
@@ -3004,6 +3001,305 @@ function _silhouetteSvg(){
   return 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#ddd"/><rect x="5" y="45" width="90" height="10" fill="#bbb"/><circle cx="50" cy="50" r="12" fill="#ccc" stroke="#bbb" stroke-width="2"/></svg>');
 }
 
+
+
+// ── WIKI SECTION ──
+const _wikiCache = {};
+let _wikiActiveTab = 'info';
+
+async function toggleWiki(id){
+  const btn = document.getElementById('wiki-btn');
+  const section = document.getElementById('wiki-section');
+  if(!btn||!section) return;
+  const isOpen = section.classList.contains('open');
+  if(isOpen){ section.classList.remove('open'); btn.classList.remove('open'); return; }
+  section.classList.add('open');
+  btn.classList.add('open');
+  const content = document.getElementById('wiki-content');
+  if(content.dataset.loaded === String(id)) return;
+  _buildWikiShell(id, content);
+  _loadWikiTab(id, _wikiActiveTab);
+}
+
+function _buildWikiShell(id, container){
+  container.dataset.id = id;
+  const tabs = ['info','stats','tipos','movimientos','crianza'];
+  const labels = {'info':'Info','stats':'Stats','tipos':'Tipos','movimientos':'Movimientos','crianza':'Crianza'};
+  const tabsHTML = tabs.map(t =>
+    `<button class="wiki-tab${t===_wikiActiveTab?' on':''}" onclick="wikiTab(${id},'${t}')">${labels[t]}</button>`
+  ).join('');
+  container.innerHTML =
+    `<div class="wiki-tabs">${tabsHTML}</div>` +
+    tabs.map(t => `<div class="wiki-panel${t===_wikiActiveTab?' on':''}" id="wiki-panel-${t}"><div class="wiki-loading">Cargando...</div></div>`).join('');
+}
+
+function wikiTab(id, tab){
+  _wikiActiveTab = tab;
+  document.querySelectorAll('.wiki-tab').forEach((b,i) => {
+    const tabs = ['info','stats','tipos','movimientos','crianza'];
+    b.classList.toggle('on', tabs[i] === tab);
+  });
+  document.querySelectorAll('.wiki-panel').forEach(p => p.classList.remove('on'));
+  const panel = document.getElementById('wiki-panel-'+tab);
+  if(panel) panel.classList.add('on');
+  const content = document.getElementById('wiki-content');
+  if(content.dataset[tab+'Loaded']) return;
+  _loadWikiTab(id, tab);
+}
+
+async function _loadWikiTab(id, tab){
+  const panel = document.getElementById('wiki-panel-'+tab);
+  if(!panel) return;
+  const key = id+'_'+tab;
+  if(_wikiCache[key]){ panel.innerHTML = _wikiCache[key]; return; }
+  try {
+    if(tab==='info') await _wikiLoadInfo(id, panel);
+    else if(tab==='stats') await _wikiLoadStats(id, panel);
+    else if(tab==='tipos') await _wikiLoadTypes(id, panel);
+    else if(tab==='movimientos') await _wikiLoadMoves(id, panel);
+    else if(tab==='crianza') await _wikiLoadBreeding(id, panel);
+    const content = document.getElementById('wiki-content');
+    if(content) content.dataset[tab+'Loaded'] = '1';
+    _wikiCache[key] = panel.innerHTML;
+  } catch(e) {
+    panel.innerHTML = '<div class="wiki-loading">Error al cargar datos.</div>';
+    console.error('Wiki error:', tab, e);
+  }
+}
+
+async function _wikiLoadInfo(id, panel){
+  const pName = S.poke.find(p=>p.id===id)?.name || '';
+
+  // Fetch PokeAPI species + Wikipedia intro in parallel
+  const [specRes, wikiRes] = await Promise.allSettled([
+    fetch('https://pokeapi.co/api/v2/pokemon-species/'+id),
+    fetch('https://en.wikipedia.org/w/api.php?action=query&titles='+encodeURIComponent(cap(pName)+'_(Pok%C3%A9mon)')+'&prop=extracts&exintro=true&explaintext=true&format=json&origin=*')
+  ]);
+  const spec = specRes.status==='fulfilled' ? await specRes.value.json() : null;
+
+  // Wikipedia intro
+  let intro = '';
+  if(wikiRes.status==='fulfilled'){
+    try {
+      const wData = await wikiRes.value.json();
+      const pages = wData?.query?.pages;
+      if(pages){
+        const page = Object.values(pages)[0];
+        if(page.extract && !page.missing){
+          // Take first 3 paragraphs max
+          const paras = page.extract.split('\n').filter(p=>p.trim().length>30).slice(0,3);
+          intro = paras.join('\n');
+        }
+      }
+    } catch(e){}
+  }
+
+  if(!spec){ panel.innerHTML='<div class="wiki-loading">Sin datos disponibles.</div>'; return; }
+
+  const genus = spec.genera?.find(g=>g.language.name==='es')?.genus || spec.genera?.find(g=>g.language.name==='en')?.genus || '';
+  const habitat = spec.habitat?.name ? cap(spec.habitat.name.replace(/-/g,' ')) : 'Desconocido';
+  const captureRate = spec.capture_rate ?? '?';
+  const baseHappiness = spec.base_happiness ?? '?';
+  const growthRate = cap((spec.growth_rate?.name||'').replace(/-/g,' '));
+  const shape = cap((spec.shape?.name||'').replace(/-/g,' '));
+  const color = cap(spec.color?.name||'');
+  const isLegendary = spec.is_legendary;
+  const isMythical = spec.is_mythical;
+  const genderRate = spec.gender_rate;
+  let genderText = 'Sin género';
+  if(genderRate === -1) genderText = 'Sin género';
+  else if(genderRate === 0) genderText = '100% ♂';
+  else if(genderRate === 8) genderText = '100% ♀';
+  else { const f = Math.round(genderRate/8*100); genderText = `${100-f}% ♂ / ${f}% ♀`; }
+
+  // Flavor texts - latest 2 unique entries in Spanish or English
+  const flavorLang = spec.flavor_text_entries?.filter(e=>e.language.name==='es') || [];
+  const flavorEn = spec.flavor_text_entries?.filter(e=>e.language.name==='en') || [];
+  const flavors = (flavorLang.length ? flavorLang : flavorEn).slice(-3).reverse();
+  const uniqueFlavors = [];
+  const seen = new Set();
+  for(const f of flavors){
+    const txt = f.flavor_text.replace(/\f|\n/g,' ').replace(/\s+/g,' ').trim();
+    if(!seen.has(txt)){ seen.add(txt); uniqueFlavors.push({text:txt, game:f.version?.name||''}); }
+    if(uniqueFlavors.length>=2) break;
+  }
+
+  const badgesHTML = [
+    isLegendary ? '<span style="font-size:10px;font-weight:800;background:#FFB30030;color:#B08000;padding:3px 9px;border-radius:99px">Legendario</span>' : '',
+    isMythical ? '<span style="font-size:10px;font-weight:800;background:#C41E1E20;color:var(--ac);padding:3px 9px;border-radius:99px">Mítico</span>' : '',
+  ].filter(Boolean).join(' ');
+
+  const introHTML = intro
+    ? `<div class="winfo-intro">${intro.replace(/\n/g,'<br><br>')}</div>`
+    : '';
+
+  const gridHTML = `<div class="winfo-grid">
+    ${genus ? `<div class="winfo-cell"><div class="winfo-cell-lbl">Especie</div><div class="winfo-cell-val">${genus}</div></div>` : ''}
+    <div class="winfo-cell"><div class="winfo-cell-lbl">Hábitat</div><div class="winfo-cell-val">${habitat}</div></div>
+    <div class="winfo-cell"><div class="winfo-cell-lbl">Género</div><div class="winfo-cell-val">${genderText}</div></div>
+    <div class="winfo-cell"><div class="winfo-cell-lbl">Color</div><div class="winfo-cell-val">${color}</div></div>
+    <div class="winfo-cell"><div class="winfo-cell-lbl">Forma</div><div class="winfo-cell-val">${shape}</div></div>
+    <div class="winfo-cell"><div class="winfo-cell-lbl">Tasa captura</div><div class="winfo-cell-val">${captureRate}/255</div></div>
+  </div>`;
+
+  const flavorsHTML = uniqueFlavors.map(f =>
+    `<div class="wflavor-box"><div class="wflavor-game">${cap(f.game.replace(/-/g,' '))}</div><div class="wflavor-text">"${f.text}"</div></div>`
+  ).join('');
+
+  panel.innerHTML = (badgesHTML ? `<div style="display:flex;gap:6px;margin-bottom:12px">${badgesHTML}</div>` : '') +
+    introHTML + gridHTML +
+    (flavorsHTML ? `<div style="margin-top:4px"><div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Entradas Pokédex</div>${flavorsHTML}</div>` : '');
+}
+
+async function _wikiLoadStats(id, panel){
+  const res = await fetch('https://pokeapi.co/api/v2/pokemon/'+id);
+  const poke = await res.json();
+  const statNames = {hp:'HP',attack:'Ataque',defense:'Defensa','special-attack':'Atq. Esp.','special-defense':'Def. Esp.',speed:'Velocidad'};
+  const statColors = {hp:'#FF5959',attack:'#F5AC78',defense:'#FAE078','special-attack':'#9DB7F5','special-defense':'#A7DB8D',speed:'#FA92B2'};
+  const total = poke.stats.reduce((s,x)=>s+x.base_stat,0);
+  const rows = poke.stats.map(s=>{
+    const pct = Math.round(s.base_stat/255*100);
+    const col = statColors[s.stat.name]||'var(--ac)';
+    const val = s.base_stat;
+    const color = val>=100?'#4CAF50':val>=60?'#FF9800':'#F44336';
+    return `<div class="wstat-row"><span class="wstat-lbl">${statNames[s.stat.name]||s.stat.name}</span><div class="wstat-bar"><div class="wstat-fill" style="width:${pct}%;background:${col}"></div></div><span class="wstat-val" style="color:${color}">${val}</span></div>`;
+  }).join('');
+  const totalPct = Math.round(total/780*100);
+  const totalColor = total>=500?'#4CAF50':total>=400?'#FF9800':'#F44336';
+  panel.innerHTML = rows +
+    `<div class="wstat-row wstat-total"><span class="wstat-lbl" style="color:var(--t1);font-weight:800">Total</span><div class="wstat-bar"><div class="wstat-fill" style="width:${totalPct}%;background:var(--ac)"></div></div><span class="wstat-val" style="color:${totalColor}">${total}</span></div>` +
+    `<div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.5);border-radius:12px"><div style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">EVs al derrotar</div><div style="font-size:13px;font-weight:700;color:var(--t1)">${poke.stats.filter(s=>s.effort>0).map(s=>`+${s.effort} ${statNames[s.stat.name]||s.stat.name}`).join(', ')||'Ninguno'}</div></div>`;
+}
+
+async function _wikiLoadTypes(id, panel){
+  const res = await fetch('https://pokeapi.co/api/v2/pokemon/'+id);
+  const poke = await res.json();
+  const types = poke.types.map(t=>t.type.name);
+  const typeChart = {normal:{fighting:2,ghost:0},fire:{water:2,rock:2,ground:2,fire:.5,grass:.5,ice:.5,bug:.5,steel:.5,fairy:.5},water:{electric:2,grass:2,water:.5,fire:.5,ice:.5,steel:.5},grass:{fire:2,ice:2,poison:2,flying:2,bug:2,water:.5,grass:.5,electric:.5,ground:.5},electric:{ground:2,electric:.5,flying:.5,steel:.5},ice:{fire:2,fighting:2,rock:2,steel:2,ice:.5},fighting:{flying:2,psychic:2,fairy:2,bug:.5,rock:.5,dark:.5},poison:{ground:2,psychic:2,fighting:.5,poison:.5,bug:.5,grass:.5,fairy:.5},ground:{water:2,grass:2,ice:2,rock:.5,poison:.5,electric:0},flying:{electric:2,ice:2,rock:2,fighting:.5,bug:.5,grass:.5,ground:0},psychic:{bug:2,ghost:2,dark:2,fighting:.5,psychic:.5},bug:{fire:2,flying:2,rock:2,fighting:.5,ground:.5,grass:.5},rock:{water:2,grass:2,fighting:2,ground:2,steel:2,normal:.5,fire:.5,poison:.5,flying:.5},ghost:{ghost:2,dark:2,poison:.5,bug:.5,normal:0,fighting:0},dragon:{ice:2,dragon:2,fairy:2,fire:.5,water:.5,grass:.5,electric:.5},dark:{fighting:2,bug:2,fairy:2,ghost:.5,dark:.5,psychic:0},steel:{fire:2,fighting:2,ground:2,normal:.5,grass:.5,ice:.5,flying:.5,psychic:.5,bug:.5,rock:.5,dragon:.5,steel:.5,poison:0},fairy:{poison:2,steel:2,fighting:.5,bug:.5,dark:.5,dragon:0}};
+  const effectiveness = {};
+  const allTypes = Object.keys(typeChart);
+  allTypes.forEach(atk=>{
+    let mult = 1;
+    types.forEach(def=>{ mult *= (typeChart[def]&&typeChart[def][atk]!==undefined)?typeChart[def][atk]:1; });
+    effectiveness[atk] = mult;
+  });
+  const groups = {'4x':[],'2x':[],'1/2':[],'1/4':[],'0x':[]};
+  Object.entries(effectiveness).forEach(([t,v])=>{
+    if(v===4) groups['4x'].push(t);
+    else if(v===2) groups['2x'].push(t);
+    else if(v===0.5) groups['1/2'].push(t);
+    else if(v===0.25) groups['1/4'].push(t);
+    else if(v===0) groups['0x'].push(t);
+  });
+  const sectionColors = {'4x':'#f44336','2x':'#FF9800','1/2':'#4CAF50','1/4':'#2196F3','0x':'#9E9E9E'};
+  const sectionLabels = {'4x':'Debilidad x4','2x':'Debilidad x2','1/2':'Resistencia x2','1/4':'Resistencia x4','0x':'Inmunidad'};
+  const chip = (t,mult) => {
+    const ti = TYPES.find(x=>x.id===t);
+    const bg = ti?ti.c+'22':'#88888822';
+    const col = ti?ti.c:'#888';
+    return `<span class="wtype-chip" style="background:${bg};color:${col}"><span style="font-size:9px;opacity:.8">${mult}</span>${ti?ti.n:t}</span>`;
+  };
+  panel.innerHTML = Object.entries(groups).filter(([,arr])=>arr.length).map(([mult,arr])=>
+    `<div class="wtype-section"><div class="wtype-section-lbl" style="color:${sectionColors[mult]}">${sectionLabels[mult]}</div><div class="wtype-grid">${arr.map(t=>chip(t,mult)).join('')}</div></div>`
+  ).join('');
+}
+
+async function _wikiLoadMoves(id, panel){
+  const res = await fetch('https://pokeapi.co/api/v2/pokemon/'+id);
+  const poke = await res.json();
+  const methodLabels = {'level-up':'Nivel','machine':'MT/MO','tutor':'Tutor','egg':'Huevo'};
+  let activeMethod = 'level-up';
+
+function _wikiRenderMoves(method){
+    activeMethod = method;
+    panel.querySelectorAll('.wmove-fbtn').forEach(b => b.classList.toggle('on', b.dataset.m===method));
+    const list = panel.querySelector('.wmove-list');
+    if(!list) return;
+    const moves = poke.moves
+      .filter(m => m.version_group_details.some(v=>v.move_learn_method.name===method))
+      .map(m => {
+        const det = m.version_group_details.filter(v=>v.move_learn_method.name===method);
+        const lvl = method==='level-up' ? Math.max(...det.map(v=>v.level_learned_at)) : null;
+        return {name:m.move.name, lvl};
+      })
+      .sort((a,b) => method==='level-up' ? (a.lvl-b.lvl) : a.name.localeCompare(b.name));
+    list.innerHTML = moves.slice(0,30).map(m =>
+      `<div class="wmove-row">
+        <span class="wmove-name">${cap(m.name.replace(/-/g,' '))}</span>
+        ${m.lvl!==null ? `<span class="wmove-lvl">Nv.${m.lvl||'1'}</span>` : ''}
+      </div>`
+    ).join('') + (moves.length>30 ? `<div style="text-align:center;padding:8px;font-size:11px;color:var(--t3)">+${moves.length-30} movimientos más</div>` : '');
+  }
+
+  const methods = ['level-up','machine','tutor','egg'].filter(m =>
+    poke.moves.some(mv => mv.version_group_details.some(v=>v.move_learn_method.name===m))
+  );
+  panel.innerHTML =
+    `<div class="wmove-filter">${methods.map(m=>`<button class="wmove-fbtn${m===activeMethod?' on':''}" data-m="${m}" onclick="(function(){${JSON.stringify(id)};wikiMoveFilter(${id},'${m}')})()">${methodLabels[m]||m}</button>`).join('')}</div>` +
+    `<div class="wmove-list"></div>`;
+  renderMoves(activeMethod);
+  window['_wikiMovesData_'+id] = {poke, renderMoves};
+}
+
+function wikiMoveFilter(id, method){
+  const data = window['_wikiMovesData_'+id];
+  if(data) data.renderMoves(method);
+}
+
+async function _wikiLoadBreeding(id, panel){
+  const [pokeRes, specRes] = await Promise.all([
+    fetch('https://pokeapi.co/api/v2/pokemon/'+id),
+    fetch('https://pokeapi.co/api/v2/pokemon-species/'+id)
+  ]);
+  const [poke, spec] = await Promise.all([pokeRes.json(), specRes.json()]);
+
+  const genderRate = spec.gender_rate;
+  let genderText = 'Sin género';
+  if(genderRate===-1) genderText = 'Sin género';
+  else if(genderRate===0) genderText = '100% macho';
+  else if(genderRate===8) genderText = '100% hembra';
+  else { const f=Math.round(genderRate/8*100); genderText=`${100-f}% ♂ / ${f}% ♀`; }
+
+  const eggGroups = spec.egg_groups?.map(g=>cap(g.name.replace(/-/g,' '))).join(', ') || 'Sin grupo';
+  const eggSteps = spec.hatch_counter ? (spec.hatch_counter+1)*255 : '?';
+  const captureRate = spec.capture_rate ?? '?';
+  const baseHappiness = spec.base_happiness ?? '?';
+  const growthRate = cap((spec.growth_rate?.name||'').replace(/-/g,' '));
+
+  // Abilities with descriptions
+  const abilityHTML = await Promise.all(poke.abilities.map(async a => {
+    let desc = '';
+    try {
+      const aRes = await fetch(a.ability.url);
+      const aData = await aRes.json();
+      const esEffect = aData.effect_entries?.find(e=>e.language.name==='es');
+      const enEffect = aData.effect_entries?.find(e=>e.language.name==='en');
+      desc = (esEffect||enEffect)?.short_effect || '';
+    } catch(e){}
+    return `<div class="wability-row">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="wability-name">${cap(a.ability.name.replace(/-/g,' '))}</span>
+        ${a.is_hidden?'<span class="wability-hidden">Oculta</span>':''}
+      </div>
+      ${desc?`<div class="wability-desc">${desc}</div>`:''}
+    </div>`;
+  }));
+
+  const rows = [
+    ['Género', genderText],
+    ['Grupo huevo', eggGroups],
+    ['Pasos para eclosionar', eggSteps.toLocaleString?.()??eggSteps],
+    ['Tasa de captura', `${captureRate} / 255`],
+    ['Amistad base', baseHappiness],
+    ['Ritmo de crecimiento', growthRate],
+  ].map(([lbl,val])=>
+    `<div class="wbreed-row"><span class="wbreed-lbl">${lbl}</span><span class="wbreed-val">${val}</span></div>`
+  ).join('');
+
+  panel.innerHTML =
+    `<div style="margin-bottom:14px"><div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Datos de crianza</div>${rows}</div>` +
+    `<div><div style="font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Habilidades</div>${abilityHTML.join('')}</div>`;
+}
 
 // ── AUTH STATE LISTENER ──
 
