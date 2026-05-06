@@ -738,18 +738,7 @@ function signInWithGoogle(){
   });
 }
 
-// Recoger el resultado del redirect al volver a la app
-(function(){
-  if(typeof firebase === 'undefined' || !firebase.auth) return;
-  firebase.auth().getRedirectResult().then(function(result){
-    // onAuthStateChanged se encarga del resto
-  }).catch(function(err){
-    console.error('Redirect error:', err.code, err.message);
-    if(err.code === 'auth/unauthorized-domain'){
-      alert('Dominio no autorizado en Firebase. Añade mariodiazagu.github.io en Firebase Console → Authentication → Authorized domains.');
-    }
-  });
-})();
+
 </script>
 </head>
 <body>
@@ -2784,7 +2773,15 @@ const db = firebase.firestore();
 let currentUser = null;
 let syncTimeout = null;
 
-// getRedirectResult handled in head script
+// Recoger resultado del redirect (debe ir DESPUÉS de initializeApp)
+auth.getRedirectResult().then(function(result){
+  // onAuthStateChanged se encarga del resto
+}).catch(function(err){
+  console.error('Redirect error:', err.code, err.message);
+  if(err.code === 'auth/unauthorized-domain'){
+    alert('Dominio no autorizado en Firebase.');
+  }
+});
 
 // ── AUTH FUNCTIONS ──
 // signInWithGoogle defined in head-script early
