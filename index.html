@@ -717,101 +717,38 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-// Detect iOS standalone (PWA from homescreen)
-var isStandalone = window.navigator.standalone === true;
-
 function signInWithGoogle(){
-  var loading=document.getElementById('auth-loading');
-  if(loading)loading.style.display='block';
+  var loading = document.getElementById('auth-loading');
+  if(loading) loading.style.display = 'block';
 
-  if(typeof firebase==='undefined'||!firebase.auth){
-    if(loading)loading.style.display='none';
+  if(typeof firebase === 'undefined' || !firebase.auth){
+    if(loading) loading.style.display = 'none';
     alert('Error: recarga la página.');
     return;
   }
 
-  var clientId = '271473943519-99mj8028k0c8h3ovol9vurvn030qvakp.apps.googleusercontent.com';
-  var redirectUri = 'https://mariodiazagu.github.io/pokedex-app/';
-  var nonce = Math.random().toString(36).substring(2);
+  var provider = new firebase.auth.GoogleAuthProvider();
+  provider.addScope('email');
+  provider.addScope('profile');
 
-  try{ localStorage.setItem('gauth_nonce', nonce); }catch(e){}
-
-  var authUrl = 'https://accounts.google.com/o/oauth2/v2/auth' +
-    '?client_id=' + clientId +
-    '&redirect_uri=' + encodeURIComponent(redirectUri) +
-    '&response_type=id_token' +
-    '&scope=email+profile+openid' +
-    '&nonce=' + nonce +
-    '&prompt=select_account';
-
-  if(isStandalone){
-    // En modo PWA standalone, abrimos en Safari para que el redirect funcione.
-    // Safari guardara el token en localStorage y la PWA lo recogera al reabrirse.
-    window.open(authUrl, '_blank');
-    var loading2=document.getElementById('auth-loading');
-    if(loading2){ loading2.textContent='Completa el login en Safari y vuelve a abrir la app'; loading2.style.display='block'; }
-  } else {
-    window.location.href = authUrl;
-  }
+  // signInWithRedirect funciona en Safari iOS, WKWebView y PWA standalone
+  firebase.auth().signInWithRedirect(provider).catch(function(err){
+    if(loading) loading.style.display = 'none';
+    alert('Error: ' + err.message);
+  });
 }
 
-// Handle the OAuth callback (runs in Safari normal tab)
+// Recoger el resultado del redirect al volver a la app
 (function(){
-  var hash = window.location.hash;
-  if(!hash || hash.indexOf('id_token') === -1) return;
-
-  var params = {};
-  hash.replace('#','').split('&').forEach(function(p){
-    var kv = p.split('=');
-    params[kv[0]] = decodeURIComponent(kv[1]||'');
+  if(typeof firebase === 'undefined' || !firebase.auth) return;
+  firebase.auth().getRedirectResult().then(function(result){
+    // onAuthStateChanged se encarga del resto
+  }).catch(function(err){
+    console.error('Redirect error:', err.code, err.message);
+    if(err.code === 'auth/unauthorized-domain'){
+      alert('Dominio no autorizado en Firebase. Añade mariodiazagu.github.io en Firebase Console → Authentication → Authorized domains.');
+    }
   });
-
-  if(!params.id_token) return;
-
-  // Guardar token en localStorage para que la PWA lo recoja al reabrirse
-  try{ localStorage.setItem('gauth_pending_token', params.id_token); }catch(e){}
-
-  // Limpiar URL
-  history.replaceState(null, '', window.location.pathname);
-
-  // Si NO estamos en standalone, hacer signin aqui mismo (flujo normal en Safari)
-  if(!window.navigator.standalone){
-    var attempts = 0;
-    function tryFirebaseSignIn(){
-      attempts++;
-      if(typeof firebase === 'undefined' || !firebase.auth){
-        if(attempts < 20){ setTimeout(tryFirebaseSignIn, 300); return; }
-        return;
-      }
-      var credential = firebase.auth.GoogleAuthProvider.credential(params.id_token);
-      firebase.auth().signInWithCredential(credential)
-        .then(function(){ localStorage.removeItem('gauth_pending_token'); })
-        .catch(function(err){ alert('Error al iniciar sesion: ' + err.message); });
-    }
-    tryFirebaseSignIn();
-  }
-})();
-
-// Al abrir la PWA standalone, comprobar si hay un token pendiente de Safari
-(function(){
-  if(!window.navigator.standalone) return;
-  var pendingToken = null;
-  try{ pendingToken = localStorage.getItem('gauth_pending_token'); }catch(e){}
-  if(!pendingToken) return;
-
-  var attempts = 0;
-  function tryPendingSignIn(){
-    attempts++;
-    if(typeof firebase === 'undefined' || !firebase.auth){
-      if(attempts < 30){ setTimeout(tryPendingSignIn, 300); return; }
-      return;
-    }
-    var credential = firebase.auth.GoogleAuthProvider.credential(pendingToken);
-    firebase.auth().signInWithCredential(credential)
-      .then(function(){ localStorage.removeItem('gauth_pending_token'); })
-      .catch(function(err){ console.warn('Pending token error:', err.code); localStorage.removeItem('gauth_pending_token'); });
-  }
-  tryPendingSignIn();
 })();
 </script>
 </head>
@@ -2847,18 +2784,7 @@ const db = firebase.firestore();
 let currentUser = null;
 let syncTimeout = null;
 
-// Handle redirect result from Google sign-in
-if(typeof auth !== 'undefined'){
-auth.getRedirectResult().then(result => {
-if(result && result.user){
-// onAuthStateChanged will handle showing the app
-}
-}).catch(err => {
-if(err.code === 'auth/unauthorized-domain'){
-console.error('Unauthorized domain');
-}
-});
-}
+// getRedirectResult handled in head script
 
 // ── AUTH FUNCTIONS ──
 // signInWithGoogle defined in head-script early
