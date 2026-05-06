@@ -2775,11 +2775,25 @@ let syncTimeout = null;
 
 // Recoger resultado del redirect (debe ir DESPUÉS de initializeApp)
 auth.getRedirectResult().then(function(result){
-  // onAuthStateChanged se encarga del resto
+  if(result && result.user){
+    console.log('Redirect login OK:', result.user.email);
+    // onAuthStateChanged se encarga del resto
+  } else {
+    console.log('getRedirectResult: sin usuario (carga normal o standalone sin redirect pendiente)');
+  }
 }).catch(function(err){
   console.error('Redirect error:', err.code, err.message);
-  if(err.code === 'auth/unauthorized-domain'){
-    alert('Dominio no autorizado en Firebase.');
+  // En WKWebView standalone, signInWithRedirect no funciona.
+  // Detectar y avisar al usuario que use Safari.
+  if(err.code === 'auth/operation-not-supported-in-this-environment' ||
+     err.code === 'auth/web-storage-unsupported'){
+    var authScreen = document.getElementById('auth-screen');
+    if(authScreen){
+      var msg = document.createElement('p');
+      msg.style.cssText = 'color:#e74c3c;font-size:13px;padding:0 24px;text-align:center;margin-top:8px';
+      msg.textContent = 'Para iniciar sesión, abre esta web en Safari (no desde el icono del homescreen), haz login, y luego añade a pantalla de inicio.';
+      authScreen.appendChild(msg);
+    }
   }
 });
 
@@ -5753,6 +5767,7 @@ window.isPwUnlocked = isPwUnlocked;
 window.setPwUnlocked = setPwUnlocked;
 
 auth.onAuthStateChanged(async user => {
+console.log('[Auth] onAuthStateChanged fired. user:', user ? user.email : 'null', '| standalone:', !!window.navigator.standalone);
 if (user && isPwUnlocked()) {
 // Fully authenticated -- show app
 currentUser = user;
