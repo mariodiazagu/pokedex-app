@@ -78,7 +78,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--t1);height:100dvh;ba
   display:flex;flex-shrink:0;
   padding:8px 16px calc(10px + var(--sb));
   gap:0;position:relative;z-index:100;
-  background:transparent;
+  background:var(--bg);
 }
 .tabs-inner{
   display:flex;width:100%;
