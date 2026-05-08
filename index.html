@@ -5262,26 +5262,33 @@ if(evoHTML){
 function closeMdl(){document.getElementById('ov').classList.remove('on');document.body.style.overflow='';}
 function ovClick(e){if(e.target.id==='ov')closeMdl();}
 
+function _buildFlatTrack(trkKey){
+return[1,2,3,4,5,6,7,8,9].map(gen=>{
+const gGs=activeGames().filter(g=>g.gen===gen);
+if(!gGs.length)return'';
+return`<div class="mtrack-gen"><div class="mtrack-gen-lbl">${GNS[gen]}</div></div><div class="mtrack-rows">${gGs.map(g=>gRow(trkKey,g)).join('')}</div>`;
+}).join('');
+}
+
 function buildMdl(base,forms){
 const id=base.id;
 const rar=RAR[base.rarity]||RAR.normal;
 const pf=S.mPreviewForm;
 const ps=S.mPreviewShiny;
 
-// Tracking key: base uses id, variant uses id_formId (or id_formName for costumes)
 const trkKey=pf&&(pf.id!==id||pf.isCostume)
 ?(pf.isCostume?`${id}_${pf.formName||pf.name}`:`${id}_${pf.id}`)
 :String(id);
-const favKey=trkKey; // same key for favorites
+const favKey=trkKey;
 
-const fav=isFav(favKey),team=inTm(id);
+const fav=isFav(favKey);
 const dispForm=pf||null;
 const dispTypes=dispForm?(dispForm.types||base.types):base.types;
 const tClr=dispTypes[0]?tc(dispTypes[0]):'#6060a0';
 
-// Count captures for ACTIVE variant only
 const trkData=S.track?.[trkKey]||{};
 const capC=Object.values(trkData).filter(g=>g?.captured).length;
+const totalG=activeGames().length||GAMES.length;
 
 const imgSrc=dispForm
 ?(ps?(S.mMod?(dispForm.sprites.official_shiny||iShy(dispForm.id)):(dispForm.sprites.front_shiny||iPxS(dispForm.id)))
@@ -5293,26 +5300,105 @@ const dispName=dispForm&&(dispForm.id!==id||dispForm.isCostume)
 document.getElementById('mnum').textContent=`#${pad(id)}`;
 document.getElementById('msprbtn').classList.toggle('on',!S.mMod);
 const tPills=dispTypes.map(t=>{const ti=TYPES.find(x=>x.id===t);return`<span class="htype" style="background:${tc(t)}">${ti?.n||t}</span>`;}).join('');
-
-// Build game rows using active variant tracking key
-const gens=[1,2,3,4,5,6,7,8,9].map(gen=>{
-const gGs=activeGames().filter(g=>g.gen===gen);
-if(!gGs.length)return'';
-const act=gGs.some(g=>{const d=S.track?.[trkKey]?.[g.id];return d&&(d.captured||d.shiny||d.inBox||d.notes||d.ball);});
-const varLabel=dispName?`<span style="font-size:9px;color:var(--t3);font-weight:600;margin-left:4px">${dispName}</span>`:'';
-return`<div class="gsec"><div class="ghdr" onclick="tGen(${gen})"><div class="ghdrl"><svg class="gchev" id="gc${gen}" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg><span class="gtitle">${GNLONG[gen]}</span>${varLabel}</div>${act?'<span class="gbadge">✦ activo</span>':''}</div><div class="ggames" id="gg${gen}">${gGs.map(g=>gRow(trkKey,g)).join('')}</div></div>`;
-}).join('');
+const tSmallPills=dispTypes.map(t=>{const ti=TYPES.find(x=>x.id===t);return`<span class="htype" style="background:${tc(t)};font-size:10px;padding:3px 10px">${ti?.n||t}</span>`;}).join('');
 
 const descData=S.desc[id];
 const descHTML=descData
 ?`<div class="hdesc">${descData.text}${descData.game?`<span class="hdesc-src">${cap(descData.game.replace(/-/g,' '))}</span>`:''}</div>`
 :(forms.length===0?`<div class="hdesc"><div class="hdesc-skel"></div><div class="hdesc-skel w2"></div></div>`:'');
 
-document.getElementById('mbody').innerHTML=` <div class="hero" id="mhero" style="background:${ps?'rgba(176,128,0,.08)':tClr+'10'}"> <button class="shbtn${ps?' on':''}" id="shbtn-hero" onclick="toggleShy()" title="Ver forma shiny"> <svg width="15" height="15" viewBox="0 0 24 24" fill="${ps?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="${ps?'currentColor':'none'}"/></svg> </button> <div class="hwrap"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="onSpriteError(this)" onclick="${base.id===151?'mewTap()':''}"></div> <div class="hname">${cap(base.name)}</div> ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}${ps?' ✦':''}</div>`:ps?`<div class="hform" style="color:var(--gold)">✦ Shiny</div>`:''} <div class="hrar" style="background:${rar.d}18;border-color:${rar.d}55;color:${rar.d}"><span class="hrardot" style="background:${rar.d}"></span>${rar.l}</div> <div class="htypes">${tPills}</div> <div class="hstats"> <div class="hs"><div class="hs-val">${capC}/${activeGames().length||GAMES.length}</div><div class="hs-lbl">Juegos</div></div> <div class="hsdiv"></div> <div class="hs"><div class="hs-val">Gen ${base.generation}</div><div class="hs-lbl">Generación</div></div> <div class="hsdiv"></div> <div class="hs"><div class="hs-val">#${pad(id)}</div><div class="hs-lbl">Número</div></div> </div> </div> ${descHTML} <div class="qrow"> <button class="qbtn${fav?' fav':''}" id="qfav" onclick="doFav('${favKey}')"> <svg width="13" height="13" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> ${fav?'Favorito':'Añadir favorito'} </button> ${S.tab==='fav'&&fav?`<button class="qbtn" id="qcard" onclick="setCardFavFromModal('${favKey}')" style="${S.set.cardFavKey===favKey?'background:#FFF8EE;color:var(--gold)':''}">
+// ── PANEL 1: Info ──
+const p1=`<div id="mdl-panel-info" class="mdl-panel">
+<div class="hero" id="mhero" style="background:${ps?'rgba(176,128,0,.08)':tClr+'10'}">
+<button class="shbtn${ps?' on':''}" id="shbtn-hero" onclick="toggleShy()" title="Ver forma shiny">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="${ps?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="${ps?'currentColor':'none'}"/></svg>
+</button>
+<div class="hwrap"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="onSpriteError(this)" onclick="${base.id===151?'mewTap()':''}"></div>
+<div class="hname">${cap(base.name)}</div>
+${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}${ps?' ✦':''}</div>`:ps?`<div class="hform" style="color:var(--gold)">✦ Shiny</div>`:''}
+<div class="hrar" style="background:${rar.d}18;border-color:${rar.d}55;color:${rar.d}"><span class="hrardot" style="background:${rar.d}"></span>${rar.l}</div>
+<div class="htypes">${tPills}</div>
+<div class="hstats">
+<div class="hs"><div class="hs-val">${capC}/${totalG}</div><div class="hs-lbl">Juegos</div></div>
+<div class="hsdiv"></div>
+<div class="hs"><div class="hs-val">Gen ${base.generation}</div><div class="hs-lbl">Generación</div></div>
+<div class="hsdiv"></div>
+<div class="hs"><div class="hs-val">#${pad(id)}</div><div class="hs-lbl">Número</div></div>
+</div>
+<div class="mdl-dots"><span class="mdl-dot on" onclick="switchMdlPanel('info')"></span><span class="mdl-dot" onclick="switchMdlPanel('track')"></span></div>
+</div>
+${descHTML}
+<div class="qrow">
+<button class="qbtn${fav?' fav':''}" id="qfav" onclick="doFav('${favKey}')">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+${fav?'Favorito':'Añadir favorito'}
+</button>
+${S.tab==='fav'&&fav?`<button class="qbtn" id="qcard" onclick="setCardFavFromModal('${favKey}')" style="${S.set.cardFavKey===favKey?'background:#FFF8EE;color:var(--gold)':''}">
 <svg width="13" height="13" viewBox="0 0 24 24" fill="${S.set.cardFavKey===favKey?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
 ${S.set.cardFavKey===favKey?'En Trainer Card':'Trainer Card'}
-</button>`:''} </div> <div class="wiki-btn" id="wiki-btn" onclick="if(typeof toggleWiki!=='undefined')toggleWiki(${id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>Datos del Pokémon</div><div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"></div></div> ${buildVariantSection(base,forms)} <div class="mleg"> <span style="color:var(--green)">✓</span> Capturado &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="#b08000" stroke="none" style="vertical-align:middle"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> Shiny &nbsp; <span style="color:var(--blue)">▣</span> En caja &nbsp; <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;color:var(--t2)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ball &nbsp; <span style="color:var(--t2)">✎</span> Notas </div>${gens}<div class="msp"></div>`;
+</button>`:''}
+</div>
+<div class="wiki-btn" id="wiki-btn" onclick="if(typeof toggleWiki!=='undefined')toggleWiki(${id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>Datos del Pokémon</div>
+<div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"></div></div>
+${buildVariantSection(base,forms)}
+<div class="msp"></div>
+</div>`;
+
+// ── PANEL 2: Tracking ──
+const p2=`<div id="mdl-panel-track" class="mdl-panel">
+<div class="mtrack-hdr">
+<img id="mtrack-img" class="mtrack-sprite${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="onSpriteError(this)">
+<div class="mtrack-info">
+<div class="mtrack-name">${cap(base.name)}</div>
+<div class="mtrack-form" id="mtrack-form" style="${dispName||ps?'':'display:none'};${ps&&!dispName?'color:var(--gold)':''}">${dispName?(ps?`${dispName} ✦`:dispName):(ps?'✦ Shiny':'')}</div>
+<div class="mtrack-types" id="mtrack-types">${tSmallPills}</div>
+</div>
+<div class="mtrack-stat">
+<div class="mtrack-capn" id="mtrack-capn">${capC}</div>
+<div class="mtrack-capl">Capturados</div>
+</div>
+</div>
+<div class="mleg" style="margin-top:10px">
+<span style="color:var(--green)">✓</span> Cap. &nbsp;
+<svg width="10" height="10" viewBox="0 0 24 24" fill="#b08000" stroke="none" style="vertical-align:middle"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> Shiny &nbsp;
+<span style="color:var(--blue)">▣</span> Caja &nbsp;
+<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;color:var(--t2)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ball &nbsp;
+<span style="color:var(--t2)">✎</span> Nota
+</div>
+<div id="mtrack-games">${_buildFlatTrack(trkKey)}</div>
+<div class="msp"></div>
+</div>`;
+
+document.getElementById('mbody').innerHTML=`<div id="mdl-carousel" class="mdl-carousel">${p1}${p2}</div>`;
+_initMdlSwipe();
 setTimeout(()=>_refreshPickerButtons(base.id, base.id, false), 0);
+}
+
+function switchMdlPanel(p){
+const c=document.getElementById('mdl-carousel');
+if(!c)return;
+const toTrack=p==='track';
+c.classList.toggle('track',toTrack);
+document.querySelectorAll('.mdl-dot').forEach((d,i)=>d.classList.toggle('on',toTrack?i===1:i===0));
+}
+
+function _initMdlSwipe(){
+const body=document.getElementById('mbody');
+if(!body)return;
+if(body._sw){body.removeEventListener('touchstart',body._sw.s);body.removeEventListener('touchend',body._sw.e);}
+let sx=0,sy=0;
+const onS=e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;};
+const onE=e=>{
+const dx=e.changedTouches[0].clientX-sx;
+const dy=e.changedTouches[0].clientY-sy;
+if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.8){
+const c=document.getElementById('mdl-carousel');if(!c)return;
+if(dx<0&&!c.classList.contains('track'))switchMdlPanel('track');
+else if(dx>0&&c.classList.contains('track'))switchMdlPanel('info');
+}};
+body.addEventListener('touchstart',onS,{passive:true});
+body.addEventListener('touchend',onE,{passive:true});
+body._sw={s:onS,e:onE};
 }
 
 function toggleMSprite(){S.mMod=!S.mMod;const b=S.poke.find(p=>p.id===S.mId);if(b)buildMdl(b,S.mForms);}
@@ -5419,29 +5505,30 @@ qcard.setAttribute('onclick',`setCardFavFromModal('${favKey}')`);
 qcard?.remove();
 }
 }
-// Rebuild game rows for the active variant tracking key
-const dispNameForLabel=form&&(form.id!==pokeId||form.isCostume)
-?fmtF(form.isCostume?(form.formName||form.name):form.name,form.speciesName):null;
-[1,2,3,4,5,6,7,8,9].forEach(gen=>{
-const ggEl=document.getElementById(`gg${gen}`);
-if(!ggEl)return;
-const gGs=activeGames().filter(g=>g.gen===gen);
-if(!gGs.length)return;
-ggEl.innerHTML=gGs.map(g=>gRow(trkKey,g)).join('');
-// Update badge
-const act=gGs.some(g=>{const d=S.track?.[trkKey]?.[g.id];return d&&(d.captured||d.shiny||d.inBox||d.notes||d.ball);});
-const secEl=document.getElementById(`gg${gen}`)?.closest('.gsec');
-const badge=secEl?.querySelector('.gbadge');
-if(act&&!badge){const hdr=secEl?.querySelector('.ghdr .ghdrl');if(hdr)hdr.insertAdjacentHTML('afterend','<span class="gbadge">✦ activo</span>');}
-else if(!act&&badge)badge.remove();
-// Update variant label in gen header
-const titleEl=secEl?.querySelector('.gtitle');
-if(titleEl){
-const existingLbl=titleEl.nextElementSibling;
-if(existingLbl&&existingLbl.tagName==='SPAN'&&existingLbl.style.fontSize==='9px')existingLbl.remove();
-if(dispNameForLabel){const lbl=document.createElement('span');lbl.style.cssText='font-size:9px;color:var(--t3);font-weight:600;margin-left:4px';lbl.textContent=dispNameForLabel;titleEl.after(lbl);}
+// Update tracking panel mini-header
+const mod=S.mMod;
+const mtrackImg=document.getElementById('mtrack-img');
+if(mtrackImg){
+const sp=form?(isShiny?(mod?(form.sprites.official_shiny||iShy(form.id)):(form.sprites.front_shiny||iPxS(form.id))):(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id)))):spOf(pokeId,mod,isShiny);
+mtrackImg.src=sp;
 }
-});
+const dispName2=form&&(form.id!==pokeId||form.isCostume)?fmtF(form.isCostume?(form.formName||form.name):form.name,form.speciesName):null;
+const mtrackForm=document.getElementById('mtrack-form');
+if(mtrackForm){
+const label=dispName2?(isShiny?`${dispName2} ✦`:dispName2):(isShiny?'✦ Shiny':null);
+mtrackForm.style.display=label?'':'none';
+mtrackForm.style.color=isShiny&&!dispName2?'var(--gold)':'';
+mtrackForm.textContent=label||'';
+}
+const mtrackTypes=document.getElementById('mtrack-types');
+if(mtrackTypes)mtrackTypes.innerHTML=dispTypes.map(t=>{const ti=TYPES.find(x=>x.id===t);return`<span class="htype" style="background:${tc(t)};font-size:10px;padding:3px 10px">${ti?.n||t}</span>`;}).join('');
+const trkData2=S.track?.[trkKey]||{};
+const capC2=Object.values(trkData2).filter(g=>g?.captured).length;
+const mtrackCapn=document.getElementById('mtrack-capn');
+if(mtrackCapn)mtrackCapn.textContent=capC2;
+// Rebuild flat tracking game rows
+const mtrackGames=document.getElementById('mtrack-games');
+if(mtrackGames)mtrackGames.innerHTML=_buildFlatTrack(trkKey);
 }
 // Each form (including shiny version) is an independent team slot
 function buildVariantSection(base, forms){
@@ -5609,7 +5696,10 @@ if(!S.track[pid])S.track[pid]={};
 if(!S.track[pid][gid])S.track[pid][gid]=tDef();
 S.track[pid][gid][field]=!S.track[pid][gid][field];
 scheduleSave();refRow(pid,gid);
-// updateCard needs base numeric id
+const capEl=document.getElementById('mtrack-capn');
+if(capEl){const td=S.track?.[pid]||{};capEl.textContent=Object.values(td).filter(g=>g?.captured).length;}
+const capHero=document.querySelector('#mhero .hs-val');
+if(capHero&&capHero.closest('.hs')?.querySelector('.hs-lbl')?.textContent==='Juegos'){const td=S.track?.[pid]||{};capHero.textContent=`${Object.values(td).filter(g=>g?.captured).length}/${activeGames().length||GAMES.length}`;}
 const baseId=parseInt(String(pid).split('*')[0]);
 updateCard(baseId);updateStat();
 if(S.tab==='team')renderTeam();
