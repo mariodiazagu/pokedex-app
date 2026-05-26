@@ -209,13 +209,13 @@ display:flex;align-items:center;justify-content:space-between;
 padding:4px 16px 12px;border-bottom:1px solid var(--bd);flex-shrink:0;
 }
 .mnum{font-size:13px;color:var(--t3);font-weight:700}
-.mbody{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.mbody{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
 /* ── MODAL PANELS CAROUSEL ── */
 .mdl-carousel{display:flex;flex:1;min-height:0;width:200%;transition:transform .38s cubic-bezier(.4,0,.2,1)}
 .mdl-carousel.track{transform:translateX(-50%)}
-.mdl-panel{width:50%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;height:100%}
+.mdl-panel{width:50%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;align-self:stretch}
 /* Dot indicators */
-.mdl-dots{display:flex;gap:5px;justify-content:center;padding:10px 0 2px}
+.mdl-dots{display:flex;gap:5px;justify-content:center;padding:6px 0 4px;margin:-4px 0 0}
 .mdl-dot{height:5px;border-radius:3px;background:rgba(0,0,0,.12);transition:all .22s;width:5px;cursor:pointer}
 .mdl-dot.on{background:var(--ac);width:16px}
 /* Tracking panel mini-header */
@@ -5348,8 +5348,8 @@ ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}$
 <div class="hsdiv"></div>
 <div class="hs"><div class="hs-val">#${pad(id)}</div><div class="hs-lbl">Número</div></div>
 </div>
-<div class="mdl-dots"><span class="mdl-dot on" onclick="switchMdlPanel('info')"></span><span class="mdl-dot" onclick="switchMdlPanel('track')"></span></div>
 </div>
+<div class="mdl-dots"><span class="mdl-dot on" onclick="switchMdlPanel('info')"></span><span class="mdl-dot" onclick="switchMdlPanel('track')"></span></div>
 ${descHTML}
 <div class="qrow">
 <button class="qbtn${fav?' fav':''}" id="qfav" onclick="doFav('${favKey}')">
