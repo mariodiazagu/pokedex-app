@@ -677,6 +677,16 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .wtype-section-lbl{font-size:11px;font-weight:700;margin-bottom:6px}
 .wtype-grid{display:flex;flex-wrap:wrap;gap:4px}
 .wtype-chip{display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:99px;font-size:11px;font-weight:800}
+/* ── TYPE CALCULATOR ── */
+.tcalc{padding:4px 0}
+.tcalc-row{margin-bottom:16px}
+.tcalc-lbl{font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.tcalc-grid{display:flex;flex-wrap:wrap;gap:5px}
+.tcalc-type{padding:5px 11px;border-radius:99px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;opacity:.5;transition:opacity .15s,transform .15s;border:2px solid transparent;background:none}
+.tcalc-type.on{opacity:1;transform:scale(1.07);box-shadow:0 2px 10px rgba(0,0,0,.22);border-color:rgba(255,255,255,.55)}
+.tcalc-result{background:var(--s1);border-radius:20px;padding:18px;text-align:center;min-height:72px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;transition:background .2s}
+.tcalc-mult{font-size:44px;font-weight:900;line-height:1;letter-spacing:-1px}
+.tcalc-mult-lbl{font-size:13px;font-weight:600;color:var(--t2)}
 /* Moves tab */
 .wmove-filter{display:flex;gap:4px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none}
 .wmove-filter::-webkit-scrollbar{display:none}
@@ -3444,6 +3454,7 @@ function closeMovePopup(e){
 function openResources(){
   document.getElementById('resources-panel')?.classList.add('on');
   document.body.style.overflow = 'hidden';
+  setTimeout(initTypeCalc, 0);
 }
 
 function closeResources(){
@@ -5590,19 +5601,7 @@ const row=gs.map(g=>`<button class="tgpchip" style="--tgc:${g.c}" data-gid="${g.
 return`<div class="tgpicker-gen"><div class="tgpicker-gen-lbl">${GNS[gen]}</div><div class="tgpicker-row">${row}</div></div>`;
 }).join('');
 
-return`<div id="modal-variants">
-${formSection}
-<div class="tgpicker" id="variant-picker">
-<div class="tgpicker-hdr" style="justify-content:space-between">
-<span class="tgpicker-title" id="vp-title">Añadir al equipo</span>
-<button onclick="closeVariantPicker()" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:2px">
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-</button>
-</div>
-<div class="tgpicker-body on" id="vp-body">${pickerRows}</div>
-</div>
-
-  </div>`;
+return`<div id="modal-variants">${formSection}</div>`;
 }
 
 // Current variant picker state
@@ -5666,9 +5665,7 @@ function handleVChipClick(el){
 const pokeId=parseInt(el.dataset.pokeid);
 const formIdRaw=el.dataset.formid;
 const formId=isNaN(Number(formIdRaw))?formIdRaw:Number(formIdRaw);
-// Reset shiny when switching form, keep current shiny state
-const isShiny=S.mPreviewShiny;
-openVariantPicker(pokeId,formId,isShiny);
+previewVariant(pokeId,formId,S.mPreviewShiny);
 }
 
 function toggleTeamPickerBody(){
@@ -6012,18 +6009,19 @@ renderGrid();
     <span class="res-title">Recursos</span>
   </div>
   <div class="res-section">
-    <div class="res-section-title">Tabla de compatibilidad de tipos</div>
-    <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Filas = Atacante &nbsp;·&nbsp; Columnas = Defensor</div>
-    <div class="type-chart-wrap">
-      <table class="type-chart">
-        <tr class="tc-head-row"><th></th><th style="color:#A8A878;background:#A8A87818">Normal</th><th style="color:#F08030;background:#F0803018">Fuego</th><th style="color:#6890F0;background:#6890F018">Agua</th><th style="color:#78C850;background:#78C85018">Planta</th><th style="color:#F8D030;background:#F8D03018">Eléc.</th><th style="color:#98D8D8;background:#98D8D818">Hielo</th><th style="color:#C03028;background:#C0302818">Lucha</th><th style="color:#A040A0;background:#A040A018">Veneno</th><th style="color:#E0C068;background:#E0C06818">Tierra</th><th style="color:#A890F0;background:#A890F018">Volad.</th><th style="color:#F85888;background:#F8588818">Psíq.</th><th style="color:#A8B820;background:#A8B82018">Bicho</th><th style="color:#B8A038;background:#B8A03818">Roca</th><th style="color:#705898;background:#70589818">Fantasma</th><th style="color:#7038F8;background:#7038F818">Dragón</th><th style="color:#705848;background:#70584818">Siniest.</th><th style="color:#B8B8D0;background:#B8B8D018">Acero</th><th style="color:#EE99AC;background:#EE99AC18">Hada</th></tr>
-        <tr><th class="tc-row-label" style="color:#A8A878">Normal</th><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-0">0</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#F08030">Fuego</th><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#6890F0">Agua</th><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#78C850">Planta</th><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#F8D030">Eléc.</th><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-0">0</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#98D8D8">Hielo</th><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#C03028">Lucha</th><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-05">½</td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-0">0</td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td></tr><tr><th class="tc-row-label" style="color:#A040A0">Veneno</th><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-0">0</td><td class="tc-cell-2">2</td></tr><tr><th class="tc-row-label" style="color:#E0C068">Tierra</th><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-0">0</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#A890F0">Volad.</th><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-0">0</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#F85888">Psíq.</th><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-0">0</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#A8B820">Bicho</th><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-05">½</td></tr><tr><th class="tc-row-label" style="color:#B8A038">Roca</th><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#705898">Fantasma</th><td class="tc-cell-0">0</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-0">0</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td></tr><tr><th class="tc-row-label" style="color:#7038F8">Dragón</th><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-0">0</td></tr><tr><th class="tc-row-label" style="color:#705848">Siniest.</th><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-0">0</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td></tr><tr><th class="tc-row-label" style="color:#B8B8D0">Acero</th><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-0">0</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-2">2</td></tr><tr><th class="tc-row-label" style="color:#EE99AC">Hada</th><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-1"></td><td class="tc-cell-2">2</td><td class="tc-cell-2">2</td><td class="tc-cell-05">½</td><td class="tc-cell-1"></td></tr>
-      </table>
-    </div>
-    <div style="display:flex;gap:12px;font-size:11px;font-weight:700;margin-bottom:16px">
-      <span><span class="tc-cell-2" style="display:inline-block;width:16px;height:16px;border-radius:4px;vertical-align:middle;margin-right:4px;text-align:center;font-size:9px;color:#fff;line-height:16px">2</span>Super eficaz</span>
-      <span><span class="tc-cell-05" style="display:inline-block;width:16px;height:16px;border-radius:4px;vertical-align:middle;margin-right:4px;text-align:center;font-size:9px;color:#fff;line-height:16px">½</span>Poco eficaz</span>
-      <span><span class="tc-cell-0" style="display:inline-block;width:16px;height:16px;border-radius:4px;vertical-align:middle;margin-right:4px;text-align:center;font-size:9px;color:#aaa;line-height:16px">0</span>Sin efecto</span>
+    <div class="res-section-title">Calculadora de tipos</div>
+    <div class="tcalc">
+      <div class="tcalc-row">
+        <div class="tcalc-lbl">⚔ Atacante</div>
+        <div class="tcalc-grid" id="tcalc-atk"></div>
+      </div>
+      <div class="tcalc-row">
+        <div class="tcalc-lbl">🛡 Defensor <span style="font-weight:500;color:var(--t3)">(1 ó 2 tipos)</span></div>
+        <div class="tcalc-grid" id="tcalc-def"></div>
+      </div>
+      <div class="tcalc-result" id="tcalc-result">
+        <div style="font-size:13px;color:var(--t3)">Elige un tipo atacante y uno defensor</div>
+      </div>
     </div>
   </div>
 </div>
