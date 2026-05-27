@@ -3462,6 +3462,41 @@ function closeResources(){
   document.body.style.overflow = '';
 }
 
+function initTypeCalc(){
+  const atkEl=document.getElementById('tcalc-atk');
+  const defEl=document.getElementById('tcalc-def');
+  if(!atkEl||!defEl)return;
+  if(atkEl._init)return; // already initialized
+  atkEl._init=true;
+  const TC={normal:{fighting:2,ghost:0},fire:{water:2,rock:2,ground:2,fire:.5,grass:.5,ice:.5,bug:.5,steel:.5,fairy:.5},water:{electric:2,grass:2,water:.5,fire:.5,ice:.5,steel:.5},grass:{fire:2,ice:2,poison:2,flying:2,bug:2,water:.5,grass:.5,electric:.5,ground:.5},electric:{ground:2,electric:.5,flying:.5,steel:.5},ice:{fire:2,fighting:2,rock:2,steel:2,ice:.5},fighting:{flying:2,psychic:2,fairy:2,bug:.5,rock:.5,dark:.5},poison:{ground:2,psychic:2,fighting:.5,poison:.5,bug:.5,grass:.5,fairy:.5},ground:{water:2,grass:2,ice:2,rock:.5,poison:.5,electric:0},flying:{electric:2,ice:2,rock:2,fighting:.5,bug:.5,grass:.5,ground:0},psychic:{bug:2,ghost:2,dark:2,fighting:.5,psychic:.5},bug:{fire:2,flying:2,rock:2,fighting:.5,ground:.5,grass:.5},rock:{water:2,grass:2,fighting:2,ground:2,steel:2,normal:.5,fire:.5,poison:.5,flying:.5},ghost:{ghost:2,dark:2,poison:.5,bug:.5,normal:0,fighting:0},dragon:{ice:2,dragon:2,fairy:2,fire:.5,water:.5,grass:.5,electric:.5},dark:{fighting:2,bug:2,fairy:2,ghost:.5,dark:.5,psychic:0},steel:{fire:2,fighting:2,ground:2,normal:.5,grass:.5,ice:.5,flying:.5,psychic:.5,bug:.5,rock:.5,dragon:.5,steel:.5,poison:0},fairy:{poison:2,steel:2,fighting:.5,bug:.5,dark:.5,dragon:0}};
+  let selAtk=null,selDef=[];
+  function calcResult(){
+    const res=document.getElementById('tcalc-result');
+    if(!res)return;
+    if(!selAtk||!selDef.length){res.innerHTML='<div style="font-size:13px;color:var(--t3)">Elige un tipo atacante y uno defensor</div>';return;}
+    let mult=1;
+    selDef.forEach(def=>{mult*=((TC[def]||{})[selAtk]!==undefined?(TC[def]||{})[selAtk]:1);});
+    const cols={0:'#9E9E9E',0.25:'#2196F3',0.5:'#4CAF50',1:'var(--t2)',2:'#FF9800',4:'#f44336'};
+    const lbls={0:'Sin efecto ✕',0.25:'Resistencia \xd7\xbc',0.5:'Resistencia \xd7\xbd',1:'Eficacia normal',2:'Super eficaz ⚡',4:'S\xfaper eficaz \xd74 🔥'};
+    const c=cols[mult]||'var(--t2)';
+    const ms=mult===0.25?'\xd7\xbc':mult===0.5?'\xd7\xbd':mult===0?'\xd70':mult===1?'\xd71':'\xd7'+mult;
+    res.innerHTML=`<div class="tcalc-mult" style="color:${c}">${ms}</div><div class="tcalc-mult-lbl">${lbls[mult]||''}</div>`;
+    res.style.background=mult>=2?(cols[mult]+'18'):(mult===0||mult<=0.5?cols[mult]+'18':'var(--s1)');
+  }
+  function render(){
+    [atkEl,defEl].forEach((el,isD)=>{
+      el.innerHTML=TYPES.map(t=>`<button class="tcalc-type${(isD?selDef.includes(t.id):selAtk===t.id)?' on':''}" style="background:${t.c}" onclick="_tcClick('${t.id}',${isD})">${t.n}</button>`).join('');
+    });
+    calcResult();
+  }
+  window._tcClick=function(tid,isD){
+    if(!isD){selAtk=selAtk===tid?null:tid;}
+    else{const i=selDef.indexOf(tid);if(i>=0)selDef.splice(i,1);else if(selDef.length<2)selDef.push(tid);else selDef=[selDef[1],tid];}
+    render();
+  };
+  render();
+}
+
 // ── AUTH STATE LISTENER ──
 
 function updateHeaderUser(user) {
