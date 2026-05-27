@@ -89,7 +89,7 @@ cursor:pointer;flex-shrink:0;color:var(--t3);
 display:flex;flex-shrink:0;
 padding:8px 16px calc(10px + var(--sb));
 gap:0;position:relative;z-index:100;
-background:transparent;
+background:var(--bg);
 }
 .tabs-inner{
 display:flex;width:100%;
@@ -209,7 +209,30 @@ display:flex;align-items:center;justify-content:space-between;
 padding:4px 16px 12px;border-bottom:1px solid var(--bd);flex-shrink:0;
 }
 .mnum{font-size:13px;color:var(--t3);font-weight:700}
-.mbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.mbody{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+/* ── MODAL PANELS CAROUSEL ── */
+.mdl-carousel{display:flex;flex:1;min-height:0;width:200%;transition:transform .38s cubic-bezier(.4,0,.2,1)}
+.mdl-carousel.track{transform:translateX(-50%)}
+.mdl-panel{width:50%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;align-self:stretch}
+/* Dot indicators */
+.mdl-dots{display:flex;gap:5px;justify-content:center;padding:6px 0 4px;margin:-4px 0 0}
+.mdl-dot{height:5px;border-radius:3px;background:rgba(0,0,0,.12);transition:all .22s;width:5px;cursor:pointer}
+.mdl-dot.on{background:var(--ac);width:16px}
+/* Tracking panel mini-header */
+.mtrack-hdr{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:12px;background:rgba(255,255,255,.7);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-radius:20px}
+.mtrack-sprite{width:54px;height:54px;object-fit:contain;image-rendering:pixelated;flex-shrink:0}
+.mtrack-info{flex:1;min-width:0}
+.mtrack-name{font-size:19px;font-weight:800;color:var(--t1);letter-spacing:-.4px;text-transform:capitalize;line-height:1.1}
+.mtrack-form{font-size:12px;color:var(--gold);font-weight:600;margin-top:2px}
+.mtrack-types{display:flex;gap:3px;margin-top:5px;flex-wrap:wrap}
+.mtrack-types .htype{font-size:10px;padding:3px 10px}
+.mtrack-stat{text-align:right;flex-shrink:0}
+.mtrack-capn{font-size:24px;font-weight:900;color:var(--t1);line-height:1}
+.mtrack-capl{font-size:9px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+/* Flat gen labels in tracking panel */
+.mtrack-gen{padding:14px 16px 5px}
+.mtrack-gen-lbl{font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.6px}
+.mtrack-rows{padding:0 16px;display:flex;flex-direction:column;gap:8px}
 
 /* ── HERO ── */
 .hero{
@@ -5325,8 +5348,8 @@ ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}$
 <div class="hsdiv"></div>
 <div class="hs"><div class="hs-val">#${pad(id)}</div><div class="hs-lbl">Número</div></div>
 </div>
-<div class="mdl-dots"><span class="mdl-dot on" onclick="switchMdlPanel('info')"></span><span class="mdl-dot" onclick="switchMdlPanel('track')"></span></div>
 </div>
+<div class="mdl-dots"><span class="mdl-dot on" onclick="switchMdlPanel('info')"></span><span class="mdl-dot" onclick="switchMdlPanel('track')"></span></div>
 ${descHTML}
 <div class="qrow">
 <button class="qbtn${fav?' fav':''}" id="qfav" onclick="doFav('${favKey}')">
