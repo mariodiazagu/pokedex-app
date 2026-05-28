@@ -54,11 +54,12 @@
 html{height:100%;overflow:hidden;overscroll-behavior:none}
 body{font-family:var(--fn);background:var(--bg);color:var(--t1);
 position:fixed;top:0;left:0;right:0;bottom:0;
+height:100%;width:100%;
 overflow:hidden;overscroll-behavior:none;
 -webkit-touch-callout:none;-webkit-text-size-adjust:none;
 background-image:radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size));background-size:var(--dot-space) var(--dot-space)}
 img{-webkit-touch-callout:none;-webkit-user-drag:none}
-#app{display:none;flex-direction:column;position:fixed;inset:0;overflow:hidden}
+#app{display:none;flex-direction:column;height:100%}
 
 /* ── HEADER ── */
 .hdr{
@@ -187,6 +188,7 @@ backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
 
 .card-img{width:68px;height:68px;object-fit:contain;display:block}
 .card-img.px{width:60px;height:60px;image-rendering:pixelated;margin:2px 0}
+.card-img.px.anim{width:48px;height:48px;margin:6px 0}
 .card-img[data-src]{opacity:0;transition:opacity .2s}
 .card-img.loaded{opacity:1}
 .card-name{font-size:9px;font-weight:700;text-align:center;margin:3px 0 4px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1);letter-spacing:1.5px;text-transform:uppercase;font-family:'Silkscreen',monospace}
@@ -3879,9 +3881,10 @@ else if(shy)st='border-color:#ffd54f55;';
 else if(fav)st='border-color:#f0629255;';
 const ov=(fav?`<svg width="9" height="9" viewBox="0 0 24 24" fill="#f06292" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`:'')+
 (team?`<svg width="9" height="9" viewBox="0 0 24 24" fill="#42a5f5" stroke="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`:'');
-const imgUrl=(!mod&&p.id<=649)?`${CDN}/versions/generation-v/black-white/animated/${p.id}.gif`:spOf(p.id,mod,false);
-const imgAttrs=eager?`src="${imgUrl}" class="card-img${mod?'':' px'} loaded" data-sprite-id="${p.id}" onerror="onSpriteError(this)"`:
-`data-src="${imgUrl}" src="" class="card-img${mod?'':' px'}" data-sprite-id="${p.id}" onerror="onSpriteError(this)"`;
+const isAnim=(!mod&&p.id<=649);
+const imgUrl=isAnim?`${CDN}/versions/generation-v/black-white/animated/${p.id}.gif`:spOf(p.id,mod,false);
+const imgAttrs=eager?`src="${imgUrl}" class="card-img${mod?'':' px'}${isAnim?' anim':''} loaded" data-sprite-id="${p.id}" onerror="onSpriteError(this)"`:
+`data-src="${imgUrl}" src="" class="card-img${mod?'':' px'}${isAnim?' anim':''}" data-sprite-id="${p.id}" onerror="onSpriteError(this)"`;
 const typeColor=p.types[0]?tc(p.types[0]):'#888';
 return`<div class="card" style="${st}" data-id="${p.id}" onclick="openMdl(${p.id})"> <div class="card-hdr"> <span class="card-id">${pad(p.id)}</span> <span style="display:flex;gap:4px;align-items:center"> ${fav?`<svg width="8" height="8" viewBox="0 0 24 24" fill="var(--red)" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`:''} ${caught?`<div style="width:5px;height:5px;border-radius:50%;background:var(--green)"></div>`:''} ${shy?`<div style="width:5px;height:5px;border-radius:50%;background:var(--gold)"></div>`:''}
 <div style="width:5px;height:5px;border-radius:50%;background:${rar.d}" title="${rar.l}"></div>
