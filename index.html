@@ -783,25 +783,17 @@ function signInWithGoogle(){
   provider.addScope('email');
   provider.addScope('profile');
 
-  // En modo standalone (PWA de pantalla de inicio) usar popup porque
-  // signInWithRedirect no devuelve el token a la PWA tras el redirect.
-  if(window.navigator.standalone){
-    firebase.auth().signInWithPopup(provider).catch(function(err){
-      if(loading) loading.style.display = 'none';
-      if(err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment'){
-        // Fallback: abrir Safari para hacer login y volver
-        document.getElementById('google-step').style.display='none';
-        document.getElementById('standalone-step').style.display='flex';
-      } else {
-        alert('Error: ' + err.message);
-      }
-    });
-  } else {
-    firebase.auth().signInWithRedirect(provider).catch(function(err){
-      if(loading) loading.style.display = 'none';
+  // signInWithPopup works in all contexts (PWA, Safari, Chrome).
+  // signInWithRedirect fails in Safari because ITP blocks sessionStorage.
+  firebase.auth().signInWithPopup(provider).catch(function(err){
+    if(loading) loading.style.display = 'none';
+    if(err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment'){
+      document.getElementById('google-step').style.display='none';
+      document.getElementById('standalone-step').style.display='flex';
+    } else {
       alert('Error: ' + err.message);
-    });
-  }
+    }
+  });
 }
 
 
