@@ -58,7 +58,7 @@ overflow:hidden;overscroll-behavior:none;
 -webkit-touch-callout:none;-webkit-text-size-adjust:none;
 background-image:radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size));background-size:var(--dot-space) var(--dot-space)}
 img{-webkit-touch-callout:none;-webkit-user-drag:none}
-#app{display:none;flex-direction:column;height:100%}
+#app{display:none;flex-direction:column;position:fixed;inset:0;overflow:hidden}
 
 /* ── HEADER ── */
 .hdr{
@@ -650,8 +650,7 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .wiki-btn:hover{background:rgba(255,255,255,0.6);color:var(--t1)}
 .wiki-btn svg{transition:transform .25s}
 .wiki-btn.open svg{transform:rotate(180deg)}
-.wiki-section{overflow:hidden;max-height:0;transition:max-height .5s ease;margin:0 0 8px}
-.wiki-section.open{max-height:5000px}
+.wiki-section{margin:0 0 8px}
 .wiki-inner{padding:4px 16px 12px}
 .wiki-tabs{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .wiki-tabs::-webkit-scrollbar{display:none}
@@ -3121,6 +3120,8 @@ function _buildWikiShell(id, container){
 }
 
 function wikiTab(id, tab){
+  const scrollEl=document.getElementById('mdl-panel-info');
+  const savedScroll=scrollEl?scrollEl.scrollTop:0;
   _wikiActiveTab = tab;
   document.querySelectorAll('.wiki-tab').forEach((b,i) => {
     const tabs = ['info','stats','tipos','movimientos','crianza'];
@@ -3129,6 +3130,7 @@ function wikiTab(id, tab){
   document.querySelectorAll('.wiki-panel').forEach(p => p.classList.remove('on'));
   const panel = document.getElementById('wiki-panel-'+tab);
   if(panel) panel.classList.add('on');
+  if(scrollEl) requestAnimationFrame(()=>{scrollEl.scrollTop=savedScroll;});
   const content = document.getElementById('wiki-content');
   if(content.dataset[tab+'Loaded']) return;
   _loadWikiTab(id, tab);
@@ -3478,11 +3480,11 @@ function initTypeCalc(){
   function calcResult(){
     const res=document.getElementById('tcalc-result');
     if(!res)return;
-    if(!selAtk||!selDef.length){res.innerHTML='<div style="font-size:13px;color:var(--t3)">Elige un tipo atacante y uno defensor</div>';return;}
+    if(!selAtk||!selDef.length){res.innerHTML='<div style="font-size:13px;color:var(--t3)">Elige el tipo de ataque del rival y tus tipos</div>';return;}
     let mult=1;
     selDef.forEach(def=>{mult*=((TC[def]||{})[selAtk]!==undefined?(TC[def]||{})[selAtk]:1);});
     const cols={0:'#9E9E9E',0.25:'#2196F3',0.5:'#4CAF50',1:'var(--t2)',2:'#FF9800',4:'#f44336'};
-    const lbls={0:'Sin efecto — inmune',0.25:'Muy resistente',0.5:'Poco eficaz',1:'Eficaz (daño normal)',2:'Muy eficaz',4:'Devastador'};
+    const lbls={0:'Inmune — no recibirías daño',0.25:'Muy resistente — recibirías ×¼ daño',0.5:'Resistente — recibirías ×½ daño',1:'Daño normal',2:'Vulnerable — recibirías el doble de daño',4:'Muy vulnerable — recibirías ×4 daño'};
     const c=cols[mult]||'var(--t2)';
     const ms=mult===0.25?'\xd7\xbc':mult===0.5?'\xd7\xbd':mult===0?'\xd70':mult===1?'\xd71':'\xd7'+mult;
     res.innerHTML=`<div class="tcalc-mult" style="color:${c}">${ms}</div><div class="tcalc-mult-lbl">${lbls[mult]||''}</div>`;
@@ -5412,8 +5414,7 @@ ${S.tab==='fav'&&fav?`<button class="qbtn" id="qcard" onclick="setCardFavFromMod
 ${S.set.cardFavKey===favKey?'En Trainer Card':'Trainer Card'}
 </button>`:''}
 </div>
-<div class="wiki-btn" id="wiki-btn" onclick="if(typeof toggleWiki!=='undefined')toggleWiki(${id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>Datos del Pokémon</div>
-<div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"></div></div>
+<div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"><div class="wiki-loading">Cargando datos...</div></div></div>
 ${buildVariantSection(base,forms)}
 <div class="msp"></div>
 </div>`;
@@ -5446,6 +5447,14 @@ const p2=`<div id="mdl-panel-track" class="mdl-panel">
 document.getElementById('mbody').innerHTML=`<div id="mdl-carousel" class="mdl-carousel">${p1}${p2}</div>`;
 _initMdlSwipe();
 setTimeout(()=>_refreshPickerButtons(base.id, base.id, false), 0);
+setTimeout(()=>{
+  const wc=document.getElementById('wiki-content');
+  if(wc&&wc.dataset.loaded!==String(id)){
+    _buildWikiShell(id,wc);
+    _loadWikiTab(id,_wikiActiveTab);
+    wc.dataset.loaded=String(id);
+  }
+},0);
 }
 
 function switchMdlPanel(p){
@@ -6050,17 +6059,18 @@ renderGrid();
   </div>
   <div class="res-section">
     <div class="res-section-title">Calculadora de tipos</div>
+    <div style="font-size:11px;color:var(--t3);font-weight:500;margin:-6px 0 14px">¿Cuánto daño recibiría tu Pokémon si el rival ataca con ese tipo?</div>
     <div class="tcalc">
       <div class="tcalc-row">
-        <div class="tcalc-lbl">⚔ Tipo atacante <span style="font-weight:500;color:var(--t3);text-transform:none;letter-spacing:0">(rival)</span></div>
+        <div class="tcalc-lbl">El rival ataca con:</div>
         <div class="tcalc-grid" id="tcalc-atk"></div>
       </div>
       <div class="tcalc-row">
-        <div class="tcalc-lbl">🛡 Tipo defensor <span style="font-weight:500;color:var(--t3);text-transform:none;letter-spacing:0">(tu Pokémon — 1 ó 2 tipos)</span></div>
+        <div class="tcalc-lbl">Mis tipos <span style="font-weight:500;color:var(--t3);text-transform:none;letter-spacing:0">(1 ó 2)</span></div>
         <div class="tcalc-grid" id="tcalc-def"></div>
       </div>
       <div class="tcalc-result" id="tcalc-result">
-        <div style="font-size:13px;color:var(--t3)">Elige un tipo atacante y uno defensor</div>
+        <div style="font-size:13px;color:var(--t3)">Elige el tipo de ataque del rival y tus tipos</div>
       </div>
     </div>
   </div>
