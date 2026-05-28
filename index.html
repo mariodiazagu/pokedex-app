@@ -3879,7 +3879,7 @@ else if(shy)st='border-color:#ffd54f55;';
 else if(fav)st='border-color:#f0629255;';
 const ov=(fav?`<svg width="9" height="9" viewBox="0 0 24 24" fill="#f06292" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`:'')+
 (team?`<svg width="9" height="9" viewBox="0 0 24 24" fill="#42a5f5" stroke="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`:'');
-const imgUrl=spOf(p.id,mod,false);
+const imgUrl=(!mod&&p.id<=649)?`${CDN}/versions/generation-v/black-white/animated/${p.id}.gif`:spOf(p.id,mod,false);
 const imgAttrs=eager?`src="${imgUrl}" class="card-img${mod?'':' px'} loaded" data-sprite-id="${p.id}" onerror="onSpriteError(this)"`:
 `data-src="${imgUrl}" src="" class="card-img${mod?'':' px'}" data-sprite-id="${p.id}" onerror="onSpriteError(this)"`;
 const typeColor=p.types[0]?tc(p.types[0]):'#888';
