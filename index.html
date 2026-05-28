@@ -61,6 +61,9 @@ background-image:radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transpa
 img{-webkit-touch-callout:none;-webkit-user-drag:none}
 #app{display:none;flex-direction:column;height:100%}
 
+/* ── TOP BAR (world clock + header, collapses on scroll) ── */
+#top-bar{flex-shrink:0;transition:margin-top .28s cubic-bezier(.4,0,.2,1);}
+
 /* ── HEADER ── */
 .hdr{
 padding:4px 16px 10px;
@@ -831,7 +834,7 @@ function signInWithGoogle(){
 <div id="app">
 
 <!-- WORLD CLOCK BAR -->
-
+<div id="top-bar">
 <div id="world-clock-bar" style="
   padding:calc(var(--st) + 6px) 12px 6px;
   overflow-x:auto;scrollbar-width:none;
@@ -879,6 +882,7 @@ function signInWithGoogle(){
   </div>
   </div>
 </header>
+</div><!-- /#top-bar -->
 
 <div class="pg on" id="pg-dex">
   <div class="srch">
@@ -4368,10 +4372,38 @@ const modal=document.getElementById('help-modal');
 if(modal)modal.style.display='none';
 }
 
+// ── Scroll-hide top bar ──
+(function(){
+  let lastY=0,lastEl=null,hidden=false;
+  function topBar(){return document.getElementById('top-bar');}
+  function show(){
+    const tb=topBar(); if(!tb||!hidden)return;
+    hidden=false; tb.style.marginTop='';
+  }
+  function hide(){
+    const tb=topBar(); if(!tb||hidden)return;
+    hidden=true; tb.style.marginTop='-'+tb.offsetHeight+'px';
+  }
+  document.addEventListener('scroll',function(e){
+    const el=e.target;
+    if(!el||!el.closest)return;
+    // ignore scrolls inside modal/overlay/resources
+    if(el.closest('#ov')||el.closest('#resources-panel')||el.closest('.mdl-panel'))return;
+    if(!el.closest('#app'))return;
+    const y=el.scrollTop||0;
+    if(el!==lastEl){lastEl=el;lastY=y;return;}
+    const dy=y-lastY; lastY=y;
+    if(dy>8&&y>80)hide();
+    else if(dy<-5)show();
+  },true);
+  window._showTopBar=show;
+})();
+
 function goTab(t){
 S.tab=t;
 document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
 document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+if(window._showTopBar)window._showTopBar();
 document.getElementById('tb-cfg')?.classList.remove('on');
 document.getElementById('pg-'+t)?.classList.add('on');
 if(t==='cfg'){
