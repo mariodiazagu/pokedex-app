@@ -2317,6 +2317,9 @@ const iShy=id=>`${CDN}/other/official-artwork/shiny/${id}.png`;
 const iPx=id=>`${CDN}/${id}.png`;
 const iPxS=id=>`${CDN}/shiny/${id}.png`;
 const spOf=(id,mod,shy)=>mod?(shy?iShy(id):iArt(id)):(shy?iPxS(id):iPx(id));
+const STAT_COLORS={hp:'#FF5959',attack:'#F5AC78',defense:'#FAE078','special-attack':'#9DB7F5','special-defense':'#A7DB8D',speed:'#FA92B2'};
+const STAT_ORDER=['hp','attack','defense','special-attack','special-defense','speed'];
+const TYPE_CHART={normal:{fighting:2,ghost:0},fire:{water:2,rock:2,ground:2,fire:.5,grass:.5,ice:.5,bug:.5,steel:.5,fairy:.5},water:{electric:2,grass:2,water:.5,fire:.5,ice:.5,steel:.5},grass:{fire:2,ice:2,poison:2,flying:2,bug:2,water:.5,grass:.5,electric:.5,ground:.5},electric:{ground:2,electric:.5,flying:.5,steel:.5},ice:{fire:2,fighting:2,rock:2,steel:2,ice:.5},fighting:{flying:2,psychic:2,fairy:2,bug:.5,rock:.5,dark:.5},poison:{ground:2,psychic:2,fighting:.5,poison:.5,bug:.5,grass:.5,fairy:.5},ground:{water:2,grass:2,ice:2,rock:.5,poison:.5,electric:0},flying:{electric:2,ice:2,rock:2,fighting:.5,bug:.5,grass:.5,ground:0},psychic:{bug:2,ghost:2,dark:2,fighting:.5,psychic:.5},bug:{fire:2,flying:2,rock:2,fighting:.5,ground:.5,grass:.5},rock:{water:2,grass:2,fighting:2,ground:2,steel:2,normal:.5,fire:.5,poison:.5,flying:.5},ghost:{ghost:2,dark:2,poison:.5,bug:.5,normal:0,fighting:0},dragon:{ice:2,dragon:2,fairy:2,fire:.5,water:.5,grass:.5,electric:.5},dark:{fighting:2,bug:2,fairy:2,ghost:.5,dark:.5,psychic:0},steel:{fire:2,fighting:2,ground:2,normal:.5,grass:.5,ice:.5,flying:.5,psychic:.5,bug:.5,rock:.5,dragon:.5,steel:.5,poison:0},fairy:{poison:2,steel:2,fighting:.5,bug:.5,dark:.5,dragon:0}};
 const fmSp=(f,mod,shy)=>{
 if(!f)return'';
 if(mod)return shy?(f.sprites?.official_shiny||iShy(f.id)):(f.sprites?.official||iArt(f.id));
@@ -3149,6 +3152,11 @@ function _silhouetteSvg(){
 // ── WIKI SECTION ──
 const _wikiCache = {};
 let _wikiActiveTab = 'info';
+const _pokeCache={};
+const _speciesCache={};
+let _wFlavorTexts=[];
+async function _fetchPoke(id){ if(!_pokeCache[id]) _pokeCache[id]=await fetch('https://pokeapi.co/api/v2/pokemon/'+id).then(r=>r.json()); return _pokeCache[id]; }
+async function _fetchSpecies(id){ if(!_speciesCache[id]) _speciesCache[id]=await fetch('https://pokeapi.co/api/v2/pokemon-species/'+id).then(r=>r.json()); return _speciesCache[id]; }
 
 async function toggleWiki(id){
   const btn = document.getElementById('wiki-btn');
@@ -3220,10 +3228,10 @@ async function _wikiLoadInfo(id, panel){
 
   // Fetch PokeAPI species + Wikipedia intro in parallel
   const [specRes, wikiRes] = await Promise.allSettled([
-    fetch('https://pokeapi.co/api/v2/pokemon-species/'+id),
+    _fetchSpecies(id),
     fetch('https://en.wikipedia.org/w/api.php?action=query&titles='+encodeURIComponent(cap(pName)+'_(Pok%C3%A9mon)')+'&prop=extracts&exintro=true&explaintext=true&format=json&origin=*')
   ]);
-  const spec = specRes.status==='fulfilled' ? await specRes.value.json() : null;
+  const spec = specRes.status==='fulfilled' ? specRes.value : null;
 
   // Wikipedia intro
   let intro = '';
@@ -3270,7 +3278,7 @@ async function _wikiLoadInfo(id, panel){
     const txt = f.flavor_text.replace(/\f|\n/g,' ').replace(/\s+/g,' ').trim();
     if(!seen.has(txt)){ seen.add(txt); uniqueFlavors.push({text:txt, game:f.version?.name||''}); }
   }
-  window._wFlavorTexts = uniqueFlavors;
+  _wFlavorTexts = uniqueFlavors;
 
   const badgesHTML = [
     isLegendary ? '<span style="font-size:10px;font-weight:800;background:#FFB30030;color:#B08000;padding:3px 9px;border-radius:99px">Legendario</span>' : '',
@@ -3303,7 +3311,6 @@ async function _wikiLoadInfo(id, panel){
 function _buildStatsRadar(stats){
   const cx=80,cy=80,maxR=58;
   const order=['hp','attack','defense','special-defense','special-attack','speed'];
-  const cols={hp:'#FF5959',attack:'#F5AC78',defense:'#FAE078','special-attack':'#9DB7F5','special-defense':'#A7DB8D',speed:'#FA92B2'};
   const abbr={hp:'HP',attack:'Atq',defense:'Def','special-attack':'AEsp','special-defense':'DEsp',speed:'Vel'};
   const vals={};
   stats.forEach(s=>vals[s.stat.name]=s.base_stat);
@@ -3314,7 +3321,7 @@ function _buildStatsRadar(stats){
     return{x:cx+maxR*Math.cos(a)*v,y:cy+maxR*Math.sin(a)*v,
       gx:cx+maxR*Math.cos(a),gy:cy+maxR*Math.sin(a),
       lx:cx+(maxR+18)*Math.cos(a),ly:cy+(maxR+18)*Math.sin(a),
-      col:cols[name]||'#888',ab:abbr[name]};
+      col:STAT_COLORS[name]||'#888',ab:abbr[name]};
   });
   const bg=[.25,.5,.75,1].map(f=>{
     const p=order.map((_,i)=>{const a=(i*60-90)*Math.PI/180;return`${cx+maxR*f*Math.cos(a)},${cy+maxR*f*Math.sin(a)}`;}).join(' ');
@@ -3328,14 +3335,12 @@ function _buildStatsRadar(stats){
 }
 
 async function _wikiLoadStats(id, panel){
-  const res = await fetch('https://pokeapi.co/api/v2/pokemon/'+id);
-  const poke = await res.json();
+  const poke = await _fetchPoke(id);
   const statNames = {hp:'HP',attack:'Ataque',defense:'Defensa','special-attack':'Atq. Esp.','special-defense':'Def. Esp.',speed:'Velocidad'};
-  const statColors = {hp:'#FF5959',attack:'#F5AC78',defense:'#FAE078','special-attack':'#9DB7F5','special-defense':'#A7DB8D',speed:'#FA92B2'};
   const total = poke.stats.reduce((s,x)=>s+x.base_stat,0);
   const rows = poke.stats.map(s=>{
     const pct = Math.round(s.base_stat/255*100);
-    const col = statColors[s.stat.name]||'var(--ac)';
+    const col = STAT_COLORS[s.stat.name]||'var(--ac)';
     const val = s.base_stat;
     const color = val>=100?'#4CAF50':val>=60?'#FF9800':'#F44336';
     const tips = {hp:'Puntos de vida',attack:'Ataque físico',defense:'Defensa física','special-attack':'Ataque especial','special-defense':'Defensa especial',speed:'Velocidad'};
@@ -3350,15 +3355,13 @@ async function _wikiLoadStats(id, panel){
 }
 
 async function _wikiLoadTypes(id, panel){
-  const res = await fetch('https://pokeapi.co/api/v2/pokemon/'+id);
-  const poke = await res.json();
+  const poke = await _fetchPoke(id);
   const types = poke.types.map(t=>t.type.name);
-  const typeChart = {normal:{fighting:2,ghost:0},fire:{water:2,rock:2,ground:2,fire:.5,grass:.5,ice:.5,bug:.5,steel:.5,fairy:.5},water:{electric:2,grass:2,water:.5,fire:.5,ice:.5,steel:.5},grass:{fire:2,ice:2,poison:2,flying:2,bug:2,water:.5,grass:.5,electric:.5,ground:.5},electric:{ground:2,electric:.5,flying:.5,steel:.5},ice:{fire:2,fighting:2,rock:2,steel:2,ice:.5},fighting:{flying:2,psychic:2,fairy:2,bug:.5,rock:.5,dark:.5},poison:{ground:2,psychic:2,fighting:.5,poison:.5,bug:.5,grass:.5,fairy:.5},ground:{water:2,grass:2,ice:2,rock:.5,poison:.5,electric:0},flying:{electric:2,ice:2,rock:2,fighting:.5,bug:.5,grass:.5,ground:0},psychic:{bug:2,ghost:2,dark:2,fighting:.5,psychic:.5},bug:{fire:2,flying:2,rock:2,fighting:.5,ground:.5,grass:.5},rock:{water:2,grass:2,fighting:2,ground:2,steel:2,normal:.5,fire:.5,poison:.5,flying:.5},ghost:{ghost:2,dark:2,poison:.5,bug:.5,normal:0,fighting:0},dragon:{ice:2,dragon:2,fairy:2,fire:.5,water:.5,grass:.5,electric:.5},dark:{fighting:2,bug:2,fairy:2,ghost:.5,dark:.5,psychic:0},steel:{fire:2,fighting:2,ground:2,normal:.5,grass:.5,ice:.5,flying:.5,psychic:.5,bug:.5,rock:.5,dragon:.5,steel:.5,poison:0},fairy:{poison:2,steel:2,fighting:.5,bug:.5,dark:.5,dragon:0}};
   const effectiveness = {};
-  const allTypes = Object.keys(typeChart);
+  const allTypes = Object.keys(TYPE_CHART);
   allTypes.forEach(atk=>{
     let mult = 1;
-    types.forEach(def=>{ mult *= (typeChart[def]&&typeChart[def][atk]!==undefined)?typeChart[def][atk]:1; });
+    types.forEach(def=>{ mult *= (TYPE_CHART[def]&&TYPE_CHART[def][atk]!==undefined)?TYPE_CHART[def][atk]:1; });
     effectiveness[atk] = mult;
   });
   const groups = {'4x':[],'2x':[],'1/2':[],'1/4':[],'0x':[]};
@@ -3385,8 +3388,7 @@ async function _wikiLoadTypes(id, panel){
 }
 
 async function _wikiLoadMoves(id, panel){
-  const res = await fetch('https://pokeapi.co/api/v2/pokemon/'+id);
-  const poke = await res.json();
+  const poke = await _fetchPoke(id);
   const methodLabels = {'level-up':'Nivel','machine':'MT/MO','tutor':'Tutor','egg':'Huevo'};
   let activeMethod = 'level-up';
 
@@ -3427,11 +3429,7 @@ function wikiMoveFilter(id, method){
 }
 
 async function _wikiLoadBreeding(id, panel){
-  const [pokeRes, specRes] = await Promise.all([
-    fetch('https://pokeapi.co/api/v2/pokemon/'+id),
-    fetch('https://pokeapi.co/api/v2/pokemon-species/'+id)
-  ]);
-  const [poke, spec] = await Promise.all([pokeRes.json(), specRes.json()]);
+  const [poke, spec] = await Promise.all([_fetchPoke(id), _fetchSpecies(id)]);
 
   const genderRate = spec.gender_rate;
   let genderText = 'Sin género';
@@ -3482,8 +3480,7 @@ async function _wikiLoadBreeding(id, panel){
 }
 
 async function _wikiLoadEvolution(id, panel){
-  const specRes = await fetch('https://pokeapi.co/api/v2/pokemon-species/'+id);
-  const spec = await specRes.json();
+  const spec = await _fetchSpecies(id);
   const evoUrl = spec.evolution_chain?.url;
   if(!evoUrl){ panel.innerHTML='<div class="wevo-none">Sin cadena evolutiva.</div>'; return; }
 
@@ -3580,7 +3577,7 @@ function wFlavorSet(btn, idx){
   const chips = btn.closest('.wflavor-chips');
   if(chips) chips.querySelectorAll('.wflavor-chip').forEach((b,i)=>b.classList.toggle('on',i===idx));
   const display = document.getElementById('wflavor-display');
-  if(display && window._wFlavorTexts?.[idx]) display.textContent='"'+window._wFlavorTexts[idx].text+'"';
+  if(display && _wFlavorTexts[idx]) display.textContent='"'+_wFlavorTexts[idx].text+'"';
 }
 
 function navMdl(dir){
@@ -3605,32 +3602,28 @@ function shareMdl(id){
 }
 
 // ── COMPARE PANEL ──
-const _cmpCache={};
 let _cmpBaseId=null;
 
-function openCmp(id){
-  _cmpBaseId=id;
+function _cmpShowPick(){
   document.getElementById('cmp-title').textContent='Comparar con…';
   document.getElementById('cmp-back-btn').style.display='none';
   document.getElementById('cmp-pick').style.display='';
   document.getElementById('cmp-result').style.display='none';
   document.getElementById('cmp-inp').value='';
-  document.getElementById('cmp-panel').classList.add('on');
   cmpSearch('');
+}
+
+function openCmp(id){
+  _cmpBaseId=id;
+  _cmpShowPick();
+  document.getElementById('cmp-panel').classList.add('on');
 }
 
 function closeCmp(){
   document.getElementById('cmp-panel').classList.remove('on');
 }
 
-function cmpReset(){
-  document.getElementById('cmp-title').textContent='Comparar con…';
-  document.getElementById('cmp-back-btn').style.display='none';
-  document.getElementById('cmp-pick').style.display='';
-  document.getElementById('cmp-result').style.display='none';
-  document.getElementById('cmp-inp').value='';
-  cmpSearch('');
-}
+function cmpReset(){ _cmpShowPick(); }
 
 function cmpSearch(q){
   const lq=q.trim().toLowerCase();
@@ -3656,20 +3649,14 @@ async function selectCmpPoke(id2){
 
   const id1=_cmpBaseId;
   try{
-    const [d1,d2]=await Promise.all([
-      _cmpCache[id1]?Promise.resolve(_cmpCache[id1]):fetch('https://pokeapi.co/api/v2/pokemon/'+id1).then(r=>r.json()),
-      _cmpCache[id2]?Promise.resolve(_cmpCache[id2]):fetch('https://pokeapi.co/api/v2/pokemon/'+id2).then(r=>r.json()),
-    ]);
-    _cmpCache[id1]=d1; _cmpCache[id2]=d2;
+    const [d1,d2]=await Promise.all([_fetchPoke(id1),_fetchPoke(id2)]);
 
     const p1=S.poke.find(x=>x.id===id1), p2=S.poke.find(x=>x.id===id2);
     const sv1={},sv2={};
     d1.stats.forEach(s=>sv1[s.stat.name]=s.base_stat);
     d2.stats.forEach(s=>sv2[s.stat.name]=s.base_stat);
 
-    const statOrder=['hp','attack','defense','special-attack','special-defense','speed'];
     const sN={hp:'HP',attack:'Atq',defense:'Def','special-attack':'AEsp','special-defense':'DEsp',speed:'Vel'};
-    const sC={hp:'#FF5959',attack:'#F5AC78',defense:'#FAE078','special-attack':'#9DB7F5','special-defense':'#A7DB8D',speed:'#FA92B2'};
 
     function pills(p){
       return(p?.types||[]).map(t=>{const ti=TYPES.find(x=>x.id===t);return`<span class="htype" style="background:${tc(t)};font-size:9px;padding:2px 7px">${ti?.n||t}</span>`;}).join('');
@@ -3690,9 +3677,9 @@ async function selectCmpPoke(id2){
         <div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:2px">${pills(p2)}</div>
       </div>`;
 
-    document.getElementById('cmpv-stats').innerHTML=statOrder.map(n=>{
+    document.getElementById('cmpv-stats').innerHTML=STAT_ORDER.map(n=>{
       const s1=sv1[n]||0,s2=sv2[n]||0;
-      const col=sC[n]||'var(--ac)';
+      const col=STAT_COLORS[n]||'var(--ac)';
       const w1=Math.round(s1/255*100),w2=Math.round(s2/255*100);
       const c1=s1>s2?'#4CAF50':s1<s2?'#F44336':'var(--t2)';
       const c2=s2>s1?'#4CAF50':s2<s1?'#F44336':'var(--t2)';
@@ -3736,14 +3723,9 @@ async function shareImg(id){
   const origHTML=btn?btn.innerHTML:'';
   if(btn) btn.innerHTML='Generando…';
 
-  // Ensure stats are cached
-  if(!_cmpCache[id]){
-    try{ _cmpCache[id]=await fetch('https://pokeapi.co/api/v2/pokemon/'+id).then(r=>r.json()); }
-    catch(e){}
-  }
-
   const p=S.poke.find(x=>x.id===id);
-  const pData=_cmpCache[id];
+  let pData;
+  try{ pData=await _fetchPoke(id); }catch(e){}
   const typeColor=p?tc(p.types[0]):'#5A6070';
   const hex=typeColor.replace('#','');
   const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
@@ -3815,16 +3797,14 @@ async function shareImg(id){
   ctx.fill();
 
   // Stats bars
-  const statOrder=['hp','attack','defense','special-attack','special-defense','speed'];
   const sN={hp:'HP',attack:'Ataque',defense:'Defensa','special-attack':'Atq.Esp','special-defense':'Def.Esp',speed:'Velocidad'};
-  const sC={hp:'#FF5959',attack:'#F5AC78',defense:'#FAE078','special-attack':'#9DB7F5','special-defense':'#A7DB8D',speed:'#FA92B2'};
   const sv={};
   if(pData?.stats) pData.stats.forEach(s=>sv[s.stat.name]=s.base_stat);
 
-  statOrder.forEach((n,i)=>{
+  STAT_ORDER.forEach((n,i)=>{
     const y=328+i*37;
     const val=sv[n]||0;
-    const col=sC[n];
+    const col=STAT_COLORS[n];
     ctx.fillStyle='rgba(0,0,0,.45)';
     ctx.font='600 10px Inter,-apple-system,sans-serif';
     ctx.textAlign='right';
@@ -3967,14 +3947,13 @@ function initTypeCalc(){
   if(!atkEl||!defEl)return;
   if(atkEl._init)return; // already initialized
   atkEl._init=true;
-  const TC={normal:{fighting:2,ghost:0},fire:{water:2,rock:2,ground:2,fire:.5,grass:.5,ice:.5,bug:.5,steel:.5,fairy:.5},water:{electric:2,grass:2,water:.5,fire:.5,ice:.5,steel:.5},grass:{fire:2,ice:2,poison:2,flying:2,bug:2,water:.5,grass:.5,electric:.5,ground:.5},electric:{ground:2,electric:.5,flying:.5,steel:.5},ice:{fire:2,fighting:2,rock:2,steel:2,ice:.5},fighting:{flying:2,psychic:2,fairy:2,bug:.5,rock:.5,dark:.5},poison:{ground:2,psychic:2,fighting:.5,poison:.5,bug:.5,grass:.5,fairy:.5},ground:{water:2,grass:2,ice:2,rock:.5,poison:.5,electric:0},flying:{electric:2,ice:2,rock:2,fighting:.5,bug:.5,grass:.5,ground:0},psychic:{bug:2,ghost:2,dark:2,fighting:.5,psychic:.5},bug:{fire:2,flying:2,rock:2,fighting:.5,ground:.5,grass:.5},rock:{water:2,grass:2,fighting:2,ground:2,steel:2,normal:.5,fire:.5,poison:.5,flying:.5},ghost:{ghost:2,dark:2,poison:.5,bug:.5,normal:0,fighting:0},dragon:{ice:2,dragon:2,fairy:2,fire:.5,water:.5,grass:.5,electric:.5},dark:{fighting:2,bug:2,fairy:2,ghost:.5,dark:.5,psychic:0},steel:{fire:2,fighting:2,ground:2,normal:.5,grass:.5,ice:.5,flying:.5,psychic:.5,bug:.5,rock:.5,dragon:.5,steel:.5,poison:0},fairy:{poison:2,steel:2,fighting:.5,bug:.5,dark:.5,dragon:0}};
   let selAtk=null,selDef=[];
   function calcResult(){
     const res=document.getElementById('tcalc-result');
     if(!res)return;
     if(!selAtk||!selDef.length){res.innerHTML='<div style="font-size:13px;color:var(--t3)">Elige el tipo de ataque del rival y tus tipos</div>';return;}
     let mult=1;
-    selDef.forEach(def=>{mult*=((TC[def]||{})[selAtk]!==undefined?(TC[def]||{})[selAtk]:1);});
+    selDef.forEach(def=>{mult*=((TYPE_CHART[def]||{})[selAtk]!==undefined?(TYPE_CHART[def]||{})[selAtk]:1);});
     const cols={0:'#9E9E9E',0.25:'#2196F3',0.5:'#4CAF50',1:'var(--t2)',2:'#FF9800',4:'#f44336'};
     const lbls={0:'Inmune — no recibirías daño',0.25:'Muy resistente — recibirías ×¼ daño',0.5:'Resistente — recibirías ×½ daño',1:'Daño normal',2:'Vulnerable — recibirías el doble de daño',4:'Muy vulnerable — recibirías ×4 daño'};
     const c=cols[mult]||'var(--t2)';
@@ -4870,23 +4849,21 @@ if(modal)modal.style.display='none';
 // Attach directly to #gs so iOS Safari momentum-scroll events fire reliably.
 function initScrollHide(){
   const gs=document.getElementById('gs');
-  if(!gs)return;
+  const tb=document.getElementById('top-bar');
+  const fb=document.getElementById('filter-bar');
+  if(!gs||!tb||!fb)return;
   let lastY=0,hidden=false;
   function show(){
     if(!hidden)return;
     hidden=false;
-    const tb=document.getElementById('top-bar');
-    const fb=document.getElementById('filter-bar');
-    if(tb)tb.style.marginTop='';
-    if(fb)fb.style.marginTop='';
+    tb.style.marginTop='';
+    fb.style.marginTop='';
   }
   function hide(){
     if(hidden)return;
     hidden=true;
-    const tb=document.getElementById('top-bar');
-    const fb=document.getElementById('filter-bar');
-    if(tb)tb.style.marginTop='-'+tb.offsetHeight+'px';
-    if(fb)fb.style.marginTop='-'+fb.offsetHeight+'px';
+    tb.style.marginTop='-'+tb.offsetHeight+'px';
+    fb.style.marginTop='-'+fb.offsetHeight+'px';
   }
   gs.addEventListener('scroll',function(){
     const y=gs.scrollTop;
