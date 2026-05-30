@@ -35,7 +35,7 @@
   --t3:#888888;
   --bd:rgba(0,0,0,0.10);
   --bd2:rgba(0,0,0,0.06);
-  --st:env(safe-area-inset-top,0px);
+  --st:env(safe-area-inset-top,44px);
   --sb:env(safe-area-inset-bottom,0px);
   --fn:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
   --px:'Silkscreen',monospace;
@@ -205,7 +205,7 @@ backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
 #mdl{
 background:rgba(240,240,240,0.92);
 backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
-width:100%;max-height:93dvh;
+width:100%;max-height:calc(100dvh - env(safe-area-inset-top,50px) - 16px);
 border-radius:32px 32px 0 0;
 display:flex;flex-direction:column;
 animation:sup .3s cubic-bezier(.34,1.56,.64,1);
@@ -544,7 +544,7 @@ font-family:var(--fn);cursor:pointer;transition:all .13s;backdrop-filter:blur(3p
 .mygame-chip.on{border-color:var(--tgc,var(--ac));background:color-mix(in srgb,var(--tgc,var(--ac)) 12%,#fff);color:var(--t1)}
 .mygame-chip:active{transform:scale(.94)}
 .hdesc{
-margin:12px 16px 0;padding:12px 14px;
+margin:0 16px 12px;padding:12px 14px;
 background:rgba(255,255,255,.6);border-radius:18px;
 font-size:13px;line-height:1.6;color:var(--t2);
 font-weight:500;font-style:italic;text-align:center;
@@ -5908,7 +5908,6 @@ ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}$
 </div>
 </div>
 <div class="mdl-dots"><span class="mdl-dot on" onclick="switchMdlPanel('info')"></span><span class="mdl-dot" onclick="switchMdlPanel('track')"></span></div>
-${descHTML}
 <div class="qrow">
 <button class="qbtn${fav?' fav':''}" id="qfav" onclick="doFav('${favKey}')">
 <svg width="13" height="13" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -5933,6 +5932,7 @@ Comparar
 Imagen
 </button>
 </div>
+${descHTML}
 <div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"><div class="wiki-loading">Cargando datos...</div></div></div>
 ${buildVariantSection(base,forms)}
 <div class="msp"></div>
@@ -5986,18 +5986,27 @@ document.querySelectorAll('.mdl-dot').forEach((d,i)=>d.classList.toggle('on',toT
 
 function _initMdlSwipe(){
 const body=document.getElementById('mbody');
-if(!body)return;
+const mdl=document.getElementById('mdl');
+if(!body||!mdl)return;
 if(body._sw){body.removeEventListener('touchstart',body._sw.s);body.removeEventListener('touchend',body._sw.e);}
 let sx=0,sy=0;
 const onS=e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;};
 const onE=e=>{
 const dx=e.changedTouches[0].clientX-sx;
 const dy=e.changedTouches[0].clientY-sy;
+// Horizontal: switch carousel panel
 if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.8){
-const c=document.getElementById('mdl-carousel');if(!c)return;
-if(dx<0&&!c.classList.contains('track'))switchMdlPanel('track');
-else if(dx>0&&c.classList.contains('track'))switchMdlPanel('info');
-}};
+  const c=document.getElementById('mdl-carousel');if(!c)return;
+  if(dx<0&&!c.classList.contains('track'))switchMdlPanel('track');
+  else if(dx>0&&c.classList.contains('track'))switchMdlPanel('info');
+  return;
+}
+// Vertical down swipe from top of scroll: close modal
+const panel=document.querySelector('.mdl-panel');
+if(dy>60&&Math.abs(dy)>Math.abs(dx)*1.5&&(panel?panel.scrollTop<=0:true)){
+  closeMdl();
+}
+};
 body.addEventListener('touchstart',onS,{passive:true});
 body.addEventListener('touchend',onE,{passive:true});
 body._sw={s:onS,e:onE};
