@@ -786,9 +786,10 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .mdl-nav-prev{left:6px}
 .mdl-nav-next{right:6px}
 /* ── COMPARE PANEL ── */
-#cmp-panel{display:none;position:fixed;inset:0;z-index:2500;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;padding-bottom:calc(var(--sb)+24px)}
-#cmp-panel.on{display:block}
-.cmp-hdr{display:flex;align-items:center;gap:10px;padding:calc(var(--st)+14px) 16px 12px;position:sticky;top:0;background:var(--bg);z-index:1;border-bottom:1px solid var(--bd)}
+#cmp-panel{display:none;position:fixed;inset:0;z-index:2500;background:var(--bg);flex-direction:column;padding-bottom:calc(var(--sb)+24px)}
+#cmp-panel.on{display:flex}
+.cmp-hdr{flex-shrink:0;display:flex;align-items:center;gap:10px;padding:calc(var(--st)+14px) 16px 12px;background:var(--bg);border-bottom:1px solid var(--bd)}
+#cmp-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
 .cmp-title{font-size:17px;font-weight:800;color:var(--t1);flex:1}
 .cmp-srch-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.7);border-radius:16px;padding:0 12px;border:1.5px solid var(--bd);margin:12px 16px}
 .cmp-inp{flex:1;border:none;background:none;padding:10px 0;font-family:var(--fn);font-size:15px;color:var(--t1);outline:none}
@@ -6611,19 +6612,21 @@ renderGrid();
     <span class="cmp-title" id="cmp-title">Comparar con…</span>
     <button id="cmp-back-btn" onclick="cmpReset()" style="display:none;padding:4px 10px;border-radius:99px;border:1.5px solid var(--bd);background:none;font-family:var(--fn);font-size:11px;font-weight:700;color:var(--t3);cursor:pointer">← Cambiar</button>
   </div>
-  <!-- Search mode -->
-  <div id="cmp-pick">
-    <div class="cmp-srch-box">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input class="cmp-inp" id="cmp-inp" placeholder="Nombre o número…" oninput="cmpSearch(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <div id="cmp-scroll">
+    <!-- Search mode -->
+    <div id="cmp-pick">
+      <div class="cmp-srch-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="cmp-inp" id="cmp-inp" placeholder="Nombre o número…" oninput="cmpSearch(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <div class="cmp-list" id="cmp-list"></div>
     </div>
-    <div class="cmp-list" id="cmp-list"></div>
-  </div>
-  <!-- Compare mode -->
-  <div id="cmp-result" style="display:none">
-    <div class="cmpv-heads" id="cmpv-heads"></div>
-    <div style="padding:14px 16px 0" id="cmpv-stats"></div>
-    <div style="padding:8px 16px 4px;border-top:1px solid var(--bd);margin:10px 16px 0;display:flex;align-items:center;gap:6px" id="cmpv-total"></div>
+    <!-- Compare mode -->
+    <div id="cmp-result" style="display:none">
+      <div class="cmpv-heads" id="cmpv-heads"></div>
+      <div style="padding:14px 16px 0" id="cmpv-stats"></div>
+      <div style="padding:8px 16px 4px;border-top:1px solid var(--bd);margin:10px 16px 0;display:flex;align-items:center;gap:6px" id="cmpv-total"></div>
+    </div>
   </div>
 </div>
 </body>
