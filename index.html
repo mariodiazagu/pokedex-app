@@ -785,6 +785,32 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .mdl-nav-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:5;background:rgba(255,255,255,.82);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12);color:var(--t1)}
 .mdl-nav-prev{left:6px}
 .mdl-nav-next{right:6px}
+/* ── COMPARE PANEL ── */
+#cmp-panel{display:none;position:fixed;inset:0;z-index:2500;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;padding-bottom:calc(var(--sb)+24px)}
+#cmp-panel.on{display:block}
+.cmp-hdr{display:flex;align-items:center;gap:10px;padding:calc(var(--st)+14px) 16px 12px;position:sticky;top:0;background:var(--bg);z-index:1;border-bottom:1px solid var(--bd)}
+.cmp-title{font-size:17px;font-weight:800;color:var(--t1);flex:1}
+.cmp-srch-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.7);border-radius:16px;padding:0 12px;border:1.5px solid var(--bd);margin:12px 16px}
+.cmp-inp{flex:1;border:none;background:none;padding:10px 0;font-family:var(--fn);font-size:15px;color:var(--t1);outline:none}
+.cmp-list{padding:4px 8px}
+.cmp-item{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:14px;cursor:pointer;transition:background .12s}
+.cmp-item:active{background:rgba(0,0,0,.06)}
+.cmp-spr{width:44px;height:44px;image-rendering:pixelated;object-fit:contain;flex-shrink:0}
+.cmp-name{font-size:14px;font-weight:700;color:var(--t1);text-transform:capitalize;flex:1}
+.cmp-num{font-size:11px;color:var(--t3);font-family:var(--px)}
+/* ── COMPARE VIEW ── */
+.cmpv-heads{display:flex;gap:12px;padding:16px 16px 0;align-items:flex-end}
+.cmpv-poke{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.cmpv-vs{font-size:12px;font-weight:900;color:var(--t3);padding-bottom:12px;flex-shrink:0}
+.cmpv-spr{width:80px;height:80px;image-rendering:pixelated;object-fit:contain}
+.cmpv-name{font-size:12px;font-weight:800;color:var(--t1);text-transform:capitalize;text-align:center}
+.cmpv-num{font-size:10px;color:var(--t3)}
+.cmpv-stat-row{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.cmpv-val{font-size:11px;font-weight:800;width:26px;flex-shrink:0}
+.cmpv-bar{flex:1;height:6px;border-radius:99px;background:var(--bd);overflow:hidden}
+.cmpv-bar.flip{transform:scaleX(-1)}
+.cmpv-fill{height:100%;border-radius:99px}
+.cmpv-slbl{font-size:9px;font-weight:700;color:var(--t3);width:46px;text-align:center;flex-shrink:0}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -3578,6 +3604,289 @@ function shareMdl(id){
   }
 }
 
+// ── COMPARE PANEL ──
+const _cmpCache={};
+let _cmpBaseId=null;
+
+function openCmp(id){
+  _cmpBaseId=id;
+  document.getElementById('cmp-title').textContent='Comparar con…';
+  document.getElementById('cmp-back-btn').style.display='none';
+  document.getElementById('cmp-pick').style.display='';
+  document.getElementById('cmp-result').style.display='none';
+  document.getElementById('cmp-inp').value='';
+  document.getElementById('cmp-panel').classList.add('on');
+  cmpSearch('');
+}
+
+function closeCmp(){
+  document.getElementById('cmp-panel').classList.remove('on');
+}
+
+function cmpReset(){
+  document.getElementById('cmp-title').textContent='Comparar con…';
+  document.getElementById('cmp-back-btn').style.display='none';
+  document.getElementById('cmp-pick').style.display='';
+  document.getElementById('cmp-result').style.display='none';
+  document.getElementById('cmp-inp').value='';
+  cmpSearch('');
+}
+
+function cmpSearch(q){
+  const lq=q.trim().toLowerCase();
+  const results=lq
+    ?S.poke.filter(p=>p.name.includes(lq)||String(p.id).startsWith(lq)).slice(0,25)
+    :S.poke.slice(0,30);
+  document.getElementById('cmp-list').innerHTML=results.map(p=>`
+    <div class="cmp-item" onclick="selectCmpPoke(${p.id})">
+      <img class="cmp-spr" src="${iPx(p.id)}" onerror="this.style.opacity=.3">
+      <span class="cmp-name">${cap(p.name)}</span>
+      <span class="cmp-num">#${pad(p.id)}</span>
+    </div>`).join('');
+}
+
+async function selectCmpPoke(id2){
+  document.getElementById('cmp-pick').style.display='none';
+  document.getElementById('cmp-result').style.display='';
+  document.getElementById('cmp-title').textContent='Comparación';
+  document.getElementById('cmp-back-btn').style.display='';
+  document.getElementById('cmpv-heads').innerHTML='<div class="wiki-loading">Cargando…</div>';
+  document.getElementById('cmpv-stats').innerHTML='';
+  document.getElementById('cmpv-total').innerHTML='';
+
+  const id1=_cmpBaseId;
+  try{
+    const [d1,d2]=await Promise.all([
+      _cmpCache[id1]?Promise.resolve(_cmpCache[id1]):fetch('https://pokeapi.co/api/v2/pokemon/'+id1).then(r=>r.json()),
+      _cmpCache[id2]?Promise.resolve(_cmpCache[id2]):fetch('https://pokeapi.co/api/v2/pokemon/'+id2).then(r=>r.json()),
+    ]);
+    _cmpCache[id1]=d1; _cmpCache[id2]=d2;
+
+    const p1=S.poke.find(x=>x.id===id1), p2=S.poke.find(x=>x.id===id2);
+    const sv1={},sv2={};
+    d1.stats.forEach(s=>sv1[s.stat.name]=s.base_stat);
+    d2.stats.forEach(s=>sv2[s.stat.name]=s.base_stat);
+
+    const statOrder=['hp','attack','defense','special-attack','special-defense','speed'];
+    const sN={hp:'HP',attack:'Atq',defense:'Def','special-attack':'AEsp','special-defense':'DEsp',speed:'Vel'};
+    const sC={hp:'#FF5959',attack:'#F5AC78',defense:'#FAE078','special-attack':'#9DB7F5','special-defense':'#A7DB8D',speed:'#FA92B2'};
+
+    function pills(p){
+      return(p?.types||[]).map(t=>{const ti=TYPES.find(x=>x.id===t);return`<span class="htype" style="background:${tc(t)};font-size:9px;padding:2px 7px">${ti?.n||t}</span>`;}).join('');
+    }
+
+    document.getElementById('cmpv-heads').innerHTML=`
+      <div class="cmpv-poke">
+        <img class="cmpv-spr" src="${iPx(id1)}">
+        <div class="cmpv-name">${p1?cap(p1.name):'#'+pad(id1)}</div>
+        <div class="cmpv-num">#${pad(id1)}</div>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:2px">${pills(p1)}</div>
+      </div>
+      <div class="cmpv-vs">VS</div>
+      <div class="cmpv-poke" onclick="cmpReset()" title="Cambiar">
+        <img class="cmpv-spr" src="${iPx(id2)}" style="cursor:pointer">
+        <div class="cmpv-name">${p2?cap(p2.name):'#'+pad(id2)}</div>
+        <div class="cmpv-num">#${pad(id2)}</div>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:2px">${pills(p2)}</div>
+      </div>`;
+
+    document.getElementById('cmpv-stats').innerHTML=statOrder.map(n=>{
+      const s1=sv1[n]||0,s2=sv2[n]||0;
+      const col=sC[n]||'var(--ac)';
+      const w1=Math.round(s1/255*100),w2=Math.round(s2/255*100);
+      const c1=s1>s2?'#4CAF50':s1<s2?'#F44336':'var(--t2)';
+      const c2=s2>s1?'#4CAF50':s2<s1?'#F44336':'var(--t2)';
+      return`<div class="cmpv-stat-row">
+        <span class="cmpv-val" style="color:${c1};text-align:right">${s1}</span>
+        <div class="cmpv-bar flip"><div class="cmpv-fill" style="width:${w1}%;background:${col}"></div></div>
+        <span class="cmpv-slbl">${sN[n]}</span>
+        <div class="cmpv-bar"><div class="cmpv-fill" style="width:${w2}%;background:${col}"></div></div>
+        <span class="cmpv-val" style="color:${c2}">${s2}</span>
+      </div>`;
+    }).join('');
+
+    const t1=Object.values(sv1).reduce((a,b)=>a+b,0);
+    const t2=Object.values(sv2).reduce((a,b)=>a+b,0);
+    const tc1=t1>t2?'#4CAF50':t1<t2?'#F44336':'var(--t2)';
+    const tc2=t2>t1?'#4CAF50':t2<t1?'#F44336':'var(--t2)';
+    document.getElementById('cmpv-total').innerHTML=`
+      <span style="font-size:13px;font-weight:900;color:${tc1};flex:1;text-align:right">${t1}</span>
+      <span style="font-size:10px;font-weight:700;color:var(--t3);padding:0 10px">TOTAL</span>
+      <span style="font-size:13px;font-weight:900;color:${tc2};flex:1">${t2}</span>`;
+
+  }catch(e){
+    document.getElementById('cmpv-heads').innerHTML='<div class="wiki-loading">Error al cargar datos.</div>';
+  }
+}
+
+// ── SHARE IMAGE ──
+// Polyfill roundRect for older iOS
+(function(){
+  const p=CanvasRenderingContext2D.prototype;
+  if(!p.roundRect) p.roundRect=function(x,y,w,h,r){
+    this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);
+    this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);
+    this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);this.closePath();
+  };
+})();
+
+async function shareImg(id){
+  const btn=document.getElementById('qbtn-img');
+  const origHTML=btn?btn.innerHTML:'';
+  if(btn) btn.innerHTML='Generando…';
+
+  // Ensure stats are cached
+  if(!_cmpCache[id]){
+    try{ _cmpCache[id]=await fetch('https://pokeapi.co/api/v2/pokemon/'+id).then(r=>r.json()); }
+    catch(e){}
+  }
+
+  const p=S.poke.find(x=>x.id===id);
+  const pData=_cmpCache[id];
+  const typeColor=p?tc(p.types[0]):'#5A6070';
+  const hex=typeColor.replace('#','');
+  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+
+  const DPR=Math.min(window.devicePixelRatio||1,2);
+  const W=400,H=580;
+  const canvas=document.createElement('canvas');
+  canvas.width=W*DPR; canvas.height=H*DPR;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(DPR,DPR);
+
+  // Background
+  ctx.fillStyle='#f8f8fa';
+  ctx.fillRect(0,0,W,H);
+
+  // Top colour band
+  const grad=ctx.createLinearGradient(0,0,0,220);
+  grad.addColorStop(0,`rgba(${r},${g},${b},.28)`);
+  grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,W,220);
+
+  // Large circle behind sprite
+  ctx.beginPath();
+  ctx.arc(200,120,100,0,Math.PI*2);
+  ctx.fillStyle=`rgba(${r},${g},${b},.12)`;
+  ctx.fill();
+
+  // Pokémon number
+  ctx.fillStyle=`rgba(${r},${g},${b},.9)`;
+  ctx.font='700 13px Inter,-apple-system,sans-serif';
+  ctx.textAlign='left';
+  ctx.fillText('#'+pad(id),22,30);
+
+  // PokéPlanner brand
+  ctx.fillStyle='rgba(0,0,0,.25)';
+  ctx.font='700 12px Inter,-apple-system,sans-serif';
+  ctx.textAlign='right';
+  ctx.fillText('PokéPlanner',W-22,30);
+
+  // Name
+  ctx.fillStyle='#111';
+  const nameFontSize=cap(p?.name||'').length>10?22:28;
+  ctx.font=`800 ${nameFontSize}px Inter,-apple-system,sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText(cap(p?.name||'#'+id),W/2,260);
+
+  // Type badges
+  const types=p?.types||[];
+  const badgeW=60,badgeH=20,gap=8;
+  const totalW=types.length*(badgeW+gap)-gap;
+  types.forEach((t,i)=>{
+    const ti=TYPES.find(x=>x.id===t);
+    const bx=W/2-totalW/2+i*(badgeW+gap);
+    ctx.beginPath();
+    ctx.roundRect(bx,272,badgeW,badgeH,10);
+    ctx.fillStyle=tc(t);
+    ctx.fill();
+    ctx.fillStyle='#fff';
+    ctx.font='700 10px Inter,-apple-system,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText(ti?.n||t,bx+badgeW/2,285);
+  });
+
+  // Stats section card
+  ctx.beginPath();
+  ctx.roundRect(16,306,W-32,H-322,16);
+  ctx.fillStyle='rgba(255,255,255,.85)';
+  ctx.fill();
+
+  // Stats bars
+  const statOrder=['hp','attack','defense','special-attack','special-defense','speed'];
+  const sN={hp:'HP',attack:'Ataque',defense:'Defensa','special-attack':'Atq.Esp','special-defense':'Def.Esp',speed:'Velocidad'};
+  const sC={hp:'#FF5959',attack:'#F5AC78',defense:'#FAE078','special-attack':'#9DB7F5','special-defense':'#A7DB8D',speed:'#FA92B2'};
+  const sv={};
+  if(pData?.stats) pData.stats.forEach(s=>sv[s.stat.name]=s.base_stat);
+
+  statOrder.forEach((n,i)=>{
+    const y=328+i*37;
+    const val=sv[n]||0;
+    const col=sC[n];
+    ctx.fillStyle='rgba(0,0,0,.45)';
+    ctx.font='600 10px Inter,-apple-system,sans-serif';
+    ctx.textAlign='right';
+    ctx.fillText(sN[n],96,y+4);
+    // Bar bg
+    ctx.beginPath();
+    ctx.roundRect(104,y-7,232,10,5);
+    ctx.fillStyle='rgba(0,0,0,.07)';
+    ctx.fill();
+    // Bar fill
+    const fw=Math.round(232*(val/255));
+    if(fw>0){
+      ctx.beginPath();
+      ctx.roundRect(104,y-7,fw,10,5);
+      ctx.fillStyle=col;
+      ctx.fill();
+    }
+    // Value
+    ctx.fillStyle='#333';
+    ctx.font='700 10px Inter,-apple-system,sans-serif';
+    ctx.textAlign='left';
+    ctx.fillText(val,342,y+4);
+  });
+
+  // Total
+  const total=Object.values(sv).reduce((a,b_)=>a+b_,0);
+  ctx.fillStyle='rgba(0,0,0,.35)';
+  ctx.font='700 11px Inter,-apple-system,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('Total  '+total,W/2,H-12);
+
+  // Load sprite and export
+  const img=new Image();
+  img.crossOrigin='anonymous';
+  const done=()=>{
+    if(btn) btn.innerHTML=origHTML;
+    _exportShareImg(canvas,p?cap(p.name):String(id));
+  };
+  img.onload=()=>{ ctx.drawImage(img,60,20,280,220); done(); };
+  img.onerror=()=>done();
+  img.src=iArt(id);
+}
+
+function _exportShareImg(canvas,name){
+  canvas.toBlob(blob=>{
+    if(!blob) return;
+    const file=new File([blob],name+'.png',{type:'image/png'});
+    if(navigator.canShare?.({files:[file]})){
+      navigator.share({files:[file],title:name+' — PokéPlanner'}).catch(()=>_dlImg(canvas,name));
+    } else {
+      _dlImg(canvas,name);
+    }
+  },'image/png');
+}
+
+function _dlImg(canvas,name){
+  const a=document.createElement('a');
+  a.href=canvas.toDataURL('image/png');
+  a.download=name+'.png';
+  a.click();
+}
+
 // ── MOVE POPUP ──
 const _moveCache = {};
 
@@ -5637,6 +5946,16 @@ ${S.set.cardFavKey===favKey?'En Trainer Card':'Trainer Card'}
 Compartir
 </button>
 </div>
+<div class="qrow" style="padding-top:0">
+<button class="qbtn" id="qbtn-cmp" onclick="openCmp(${id})">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="18" rx="1"/><rect x="13" y="3" width="8" height="18" rx="1"/></svg>
+Comparar
+</button>
+<button class="qbtn" id="qbtn-img" onclick="shareImg(${id})">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><polyline points="21 15 16 10 5 21"/></svg>
+Imagen
+</button>
+</div>
 <div class="wiki-section" id="wiki-section"><div class="wiki-inner" id="wiki-content"><div class="wiki-loading">Cargando datos...</div></div></div>
 ${buildVariantSection(base,forms)}
 <div class="msp"></div>
@@ -6299,5 +6618,27 @@ renderGrid();
   </div>
 </div>
 
+<!-- COMPARE PANEL -->
+<div id="cmp-panel">
+  <div class="cmp-hdr">
+    <button class="res-close" onclick="closeCmp()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <span class="cmp-title" id="cmp-title">Comparar con…</span>
+    <button id="cmp-back-btn" onclick="cmpReset()" style="display:none;padding:4px 10px;border-radius:99px;border:1.5px solid var(--bd);background:none;font-family:var(--fn);font-size:11px;font-weight:700;color:var(--t3);cursor:pointer">← Cambiar</button>
+  </div>
+  <!-- Search mode -->
+  <div id="cmp-pick">
+    <div class="cmp-srch-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="cmp-inp" id="cmp-inp" placeholder="Nombre o número…" oninput="cmpSearch(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="cmp-list" id="cmp-list"></div>
+  </div>
+  <!-- Compare mode -->
+  <div id="cmp-result" style="display:none">
+    <div class="cmpv-heads" id="cmpv-heads"></div>
+    <div style="padding:14px 16px 0" id="cmpv-stats"></div>
+    <div style="padding:8px 16px 4px;border-top:1px solid var(--bd);margin:10px 16px 0;display:flex;align-items:center;gap:6px" id="cmpv-total"></div>
+  </div>
+</div>
 </body>
 </html>
