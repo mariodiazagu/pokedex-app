@@ -192,7 +192,7 @@ backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
 
 .card-img{width:68px;height:68px;object-fit:contain;display:block}
 .card-img.px{width:60px;height:60px;image-rendering:pixelated;margin:2px 0}
-.card-img.px.anim{width:48px;height:48px;margin:6px 0}
+.card-img.px.anim{width:60px;height:60px;margin:2px 0}
 .card-img[data-src]{opacity:0;transition:opacity .2s}
 .card-img.loaded{opacity:1}
 .card-name{font-size:9px;font-weight:700;text-align:center;margin:3px 0 4px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1);letter-spacing:1.5px;text-transform:uppercase;font-family:'Silkscreen',monospace}
@@ -538,7 +538,7 @@ font-family:var(--fn);cursor:pointer;transition:all .13s;backdrop-filter:blur(3p
 /* Full-screen image viewer */
 #img-viewer{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;cursor:zoom-out;touch-action:none}
 #img-viewer.on{display:flex}
-#img-viewer-img{max-width:90vw;max-height:90dvh;object-fit:contain;transform-origin:center;transition:transform .1s;user-select:none;-webkit-user-drag:none;image-rendering:auto}
+#img-viewer-img{width:min(80vmin,90vw);height:min(80vmin,90dvh);object-fit:contain;transform-origin:center;transition:transform .1s;user-select:none;-webkit-user-drag:none;image-rendering:auto}
 #img-viewer-img.px{image-rendering:pixelated}
 #img-viewer-close{position:absolute;top:max(env(safe-area-inset-top,16px),20px);right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;line-height:1}
 /* My games grid */
@@ -4587,7 +4587,7 @@ else if(fav)st='border-color:#f0629255;';
 const ov=(fav?`<svg width="9" height="9" viewBox="0 0 24 24" fill="#f06292" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`:'')+
 (team?`<svg width="9" height="9" viewBox="0 0 24 24" fill="#42a5f5" stroke="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`:'');
 const isAnim=imode==='anim'&&p.id<=649;
-const imgUrl=isAnim?`${CDN}/versions/generation-v/black-white/animated/${p.id}.gif`:spOf(p.id,mod,false);
+const imgUrl=isAnim?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${p.id}.gif`:spOf(p.id,mod,false);
 const imgAttrs=eager?`src="${imgUrl}" class="card-img${mod?'':' px'}${isAnim?' anim':''} loaded" data-sprite-id="${p.id}" onerror="onSpriteError(this)"`:
 `data-src="${imgUrl}" src="" class="card-img${mod?'':' px'}${isAnim?' anim':''}" data-sprite-id="${p.id}" onerror="onSpriteError(this)"`;
 const typeColor=p.types[0]?tc(p.types[0]):'#888';
@@ -5027,7 +5027,7 @@ const pxImg=document.getElementById('prev-img-sprite');
 const animImg=document.getElementById('prev-img-anim');
 if(artImg)artImg.src=iArt(25);
 if(pxImg)pxImg.src=iPx(25);
-if(animImg)animImg.src=`${CDN}/versions/generation-v/black-white/animated/25.gif`;
+if(animImg)animImg.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif`;
 const grid=document.getElementById('my-games-grid');
 if(!grid)return;
 const selected=S.set.myGames||[];
