@@ -535,6 +535,12 @@ font-family:var(--fn);cursor:pointer;transition:all .13s;backdrop-filter:blur(3p
 .cfg-preview{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;border-radius:18px;background:var(--bg);border:2px solid transparent;transition:all .15s}
 .cfg-preview.on{border-color:var(--ac);background:rgba(232,24,74,.05)}
 .cfg-preview-lbl{font-size:10px;font-weight:700;color:var(--t2)}
+/* Full-screen image viewer */
+#img-viewer{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;cursor:zoom-out;touch-action:none}
+#img-viewer.on{display:flex}
+#img-viewer-img{max-width:90vw;max-height:90dvh;object-fit:contain;transform-origin:center;transition:transform .1s;user-select:none;-webkit-user-drag:none;image-rendering:auto}
+#img-viewer-img.px{image-rendering:pixelated}
+#img-viewer-close{position:absolute;top:max(env(safe-area-inset-top,16px),20px);right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;line-height:1}
 /* My games grid */
 .mygames-gen{margin-bottom:14px}
 .mygames-gen:last-child{margin-bottom:0}
@@ -1230,25 +1236,22 @@ function sendPasswordReset(){
   </div>
 </div>
 
-<!-- Columnas de la grid -->
+<!-- Estilo de imagen -->
 <div class="cfg-card">
-  <div class="cfg-row">
-    <div>
-      <div class="cfg-label">Estilo de imagen</div>
-      <div class="cfg-sub">Arte oficial o sprites pixelados</div>
-    </div>
-    <button class="cfg-toggle" id="sprite-toggle" onclick="toggleSprite()">
-      <div class="cfg-toggle-knob"></div>
-    </button>
-  </div>
-  <div style="display:flex;gap:8px;margin-top:12px">
-    <div class="cfg-preview" id="prev-modern">
-      <img id="prev-img-modern" style="width:52px;height:52px;object-fit:contain">
+  <div class="cfg-label">Estilo de imagen</div>
+  <div class="cfg-sub" style="margin-top:2px;margin-bottom:12px">Arte oficial, sprites pixelados o sprites animados</div>
+  <div style="display:flex;gap:8px">
+    <div class="cfg-preview" id="prev-art" onclick="setImgMode('art')" style="cursor:pointer">
+      <img id="prev-img-art" style="width:52px;height:52px;object-fit:contain">
       <div class="cfg-preview-lbl">Arte oficial</div>
     </div>
-    <div class="cfg-preview" id="prev-pixel">
-      <img id="prev-img-pixel" style="width:52px;height:52px;object-fit:contain;image-rendering:pixelated">
+    <div class="cfg-preview" id="prev-sprite" onclick="setImgMode('sprite')" style="cursor:pointer">
+      <img id="prev-img-sprite" style="width:52px;height:52px;object-fit:contain;image-rendering:pixelated">
       <div class="cfg-preview-lbl">Sprite</div>
+    </div>
+    <div class="cfg-preview" id="prev-anim" onclick="setImgMode('anim')" style="cursor:pointer">
+      <img id="prev-img-anim" style="width:52px;height:52px;object-fit:contain;image-rendering:pixelated">
+      <div class="cfg-preview-lbl">Animado</div>
     </div>
   </div>
 </div>
@@ -2464,6 +2467,8 @@ if(!f)return'';
 if(mod)return shy?(f.sprites?.official_shiny||iShy(f.id)):(f.sprites?.official||iArt(f.id));
 return shy?(f.sprites?.front_shiny||iPxS(f.id)):(f.sprites?.front_default||iPx(f.id));
 };
+const _imgMode=()=>S.set.imgMode||(S.set.modern?'art':'anim');
+const _modFromMode=()=>_imgMode()==='art';
 const GAMES=[
 {id:'red',n:'Rojo',gen:1,c:'#E53935'},{id:'blue',n:'Azul',gen:1,c:'#1E88E5'},
 {id:'yellow',n:'Amarillo',gen:1,c:'#FDD835'},{id:'firered',n:'Rojo Fuego',gen:1,c:'#F4511E'},
@@ -3016,7 +3021,7 @@ console.warn('[PokéPlanner] Could not fetch types from API:',e);
 
 const S={
 poke:POKE,track:{},favs:new Set(),teams:{},
-set:{modern:true, cols:3, myGames:[], trainerName:'', trainerGender:'male', cardFavKey:null, theme:'magenta', dailyDone:null, showWalker:true},
+set:{modern:true, imgMode:'art', cols:3, myGames:[], trainerName:'', trainerGender:'male', cardFavKey:null, theme:'magenta', dailyDone:null, showWalker:true},
 f:{q:'',types:[],gen:0,rar:null},
 tab:'dex',
 teamGame:null,
@@ -3106,6 +3111,7 @@ function exportData(){
       trainerName: S.set.trainerName,
       trainerGender: S.set.trainerGender,
       modern: S.set.modern,
+      imgMode: S.set.imgMode || 'art',
       cardFavKey: S.set.cardFavKey,
       myGames: S.set.myGames,
       theme: S.set.theme,
@@ -3201,6 +3207,7 @@ const cloudSet = {
 trainerName: S.set.trainerName || '',
 trainerGender: S.set.trainerGender || 'male',
 modern: S.set.modern,
+imgMode: S.set.imgMode || 'art',
 cardFavKey: S.set.cardFavKey || null,
 myGames: S.set.myGames || [],
 theme: S.set.theme || 'magenta',
@@ -3247,10 +3254,11 @@ S.teams = sanitizeTeams(d.teams || {});
 if (d.set) {
 // Only sync trainer profile and sprite pref from cloud
 // Keep device-specific settings (cols, myGames) from localStorage
-const {trainerName, trainerGender, modern} = d.set;
+const {trainerName, trainerGender, modern, imgMode} = d.set;
 if (trainerName !== undefined) S.set.trainerName = trainerName;
 if (trainerGender !== undefined) S.set.trainerGender = trainerGender;
-if (modern !== undefined) S.set.modern = modern;
+if (imgMode !== undefined) S.set.imgMode = imgMode;
+else if (modern !== undefined) { S.set.modern = modern; S.set.imgMode = modern ? 'art' : 'anim'; }
 if (d.set.cardFavKey !== undefined) S.set.cardFavKey = d.set.cardFavKey;
 if (d.set.myGames !== undefined) S.set.myGames = d.set.myGames;
 if (d.set.theme !== undefined) { S.set.theme = d.set.theme; applyTheme(d.set.theme); }
@@ -4567,7 +4575,8 @@ S.fc[bid]=fb;return fb;
 
 function cardHTML(p,eager){
 const caught=isCap(p.id),shy=isShy(p.id),fav=isAnyFav(p.id),team=inTm(p.id);
-const mod=S.set.modern;
+const imode=_imgMode();
+const mod=imode==='art';
 const rar=RAR[p.rarity]||RAR.normal;
 const types=p.types.map(t=>`<span class="tbadge" style="background:${tc(t)}">${cap(t)}</span>`).join('');
 const typeClr=p.types[0]?tc(p.types[0]):'#888';
@@ -4577,7 +4586,7 @@ else if(shy)st='border-color:#ffd54f55;';
 else if(fav)st='border-color:#f0629255;';
 const ov=(fav?`<svg width="9" height="9" viewBox="0 0 24 24" fill="#f06292" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`:'')+
 (team?`<svg width="9" height="9" viewBox="0 0 24 24" fill="#42a5f5" stroke="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`:'');
-const isAnim=(!mod&&p.id<=649);
+const isAnim=imode==='anim'&&p.id<=649;
 const imgUrl=isAnim?`${CDN}/versions/generation-v/black-white/animated/${p.id}.gif`:spOf(p.id,mod,false);
 const imgAttrs=eager?`src="${imgUrl}" class="card-img${mod?'':' px'}${isAnim?' anim':''} loaded" data-sprite-id="${p.id}" onerror="onSpriteError(this)"`:
 `data-src="${imgUrl}" src="" class="card-img${mod?'':' px'}${isAnim?' anim':''}" data-sprite-id="${p.id}" onerror="onSpriteError(this)"`;
@@ -5008,16 +5017,17 @@ const slider=document.getElementById('cols-slider');
 const colsVal=document.getElementById('cols-val');
 if(slider)slider.value=cols;
 if(colsVal)colsVal.textContent=cols;
-const tog=document.getElementById('sprite-toggle');
-if(tog)tog.className=`cfg-toggle${!S.set.modern?' on':''}`;
-const modImg=document.getElementById('prev-img-modern');
-const pxImg=document.getElementById('prev-img-pixel');
-if(modImg)modImg.src=iArt(25);
+const imode=_imgMode();
+['art','sprite','anim'].forEach(m=>{
+  const el=document.getElementById('prev-'+m);
+  if(el)el.className=`cfg-preview${imode===m?' on':''}`;
+});
+const artImg=document.getElementById('prev-img-art');
+const pxImg=document.getElementById('prev-img-sprite');
+const animImg=document.getElementById('prev-img-anim');
+if(artImg)artImg.src=iArt(25);
 if(pxImg)pxImg.src=iPx(25);
-const prevM=document.getElementById('prev-modern');
-const prevP=document.getElementById('prev-pixel');
-if(prevM)prevM.className=`cfg-preview${S.set.modern?' on':''}`;
-if(prevP)prevP.className=`cfg-preview${!S.set.modern?' on':''}`;
+if(animImg)animImg.src=`${CDN}/versions/generation-v/black-white/animated/25.gif`;
 const grid=document.getElementById('my-games-grid');
 if(!grid)return;
 const selected=S.set.myGames||[];
@@ -5047,14 +5057,15 @@ if(accountInfo){
 }
 }
 
-function toggleSprite(){
-S.set.modern=!S.set.modern;
-document.getElementById('sprbtn')?.classList.toggle('on',!S.set.modern);
+function setImgMode(mode){
+S.set.imgMode=mode;
+S.set.modern=(mode==='art');
 scheduleSave();renderGrid();
 if(S.tab==='fav')renderFav();
 if(S.tab==='team')renderTeam();
 if(S.tab==='cfg')renderSettings();
 }
+function toggleSprite(){ setImgMode(_imgMode()==='art'?'sprite':'art'); }
 
 function toggleHelp(e){
 if(e)e.stopPropagation();
@@ -5202,7 +5213,7 @@ w.innerHTML=`<div class="empty"><svg width="44" height="44" viewBox="0 0 24 24" 
 return;
 }
 
-const mod=S.set.modern;
+const mod=_modFromMode();
 const cards=filtered.map(({baseId,formPart,p,form})=>{
 if(!form)return cardHTML(p,true);
 const sp=mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id));
@@ -5312,7 +5323,7 @@ if(!p)return`<div class="tslot"></div>`;
 const formId=slot.formId||slot.pokeId;
 const forms=S.fc[slot.pokeId]||[];
 const form=forms.find(f=>f.id===formId);
-const mod=S.set.modern;
+const mod=_modFromMode();
 const sp=form
 ?(slot.isShiny?(mod?(form.sprites.official_shiny||iShy(form.id)):(form.sprites.front_shiny||iPxS(form.id)))
 :(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id))))
@@ -5369,8 +5380,8 @@ const forms=S.fc[p.id]||[];
 const form=formId?forms.find(f=>f.id===formId):null;
 const inTeam=team.some(s=>s.pokeId===p.id&&(s.formId||s.pokeId)===(formId||p.id));
 const sp=form
-?(S.set.modern?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id)))
-:spOf(p.id,S.set.modern,false);
+?(_modFromMode()?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id)))
+:spOf(p.id,_modFromMode(),false);
 return`<button class="tcap-chip${inTeam?' in-team':''}" onclick="toggleTeamFromCaptured(${p.id},${formId||p.id},'${gid}')"> <img src="${sp}" onerror="this.src='${iPx(p.id)}'"> <span>${cap(p.name)}</span> </button>`;
 }).join('');
 }
@@ -5789,7 +5800,7 @@ ${c.fainted?`<div style="width:100%;max-width:340px;background:rgba(248,113,113,
 }
 
 async function openMdl(id){
-S.mId=id;S.mMod=S.set.modern;S.mShy=false;S.mForms=[];
+S.mId=id;S.mMod=_modFromMode();S.mShy=false;S.mForms=[];
 S.mPreviewForm=null;S.mPreviewShiny=false;
 _vpPoke=id;_vpForm=id;_vpShiny=false;
 const base=S.poke.find(p=>p.id===id);if(!base)return;
@@ -5842,6 +5853,83 @@ if(evoHTML){
 }
 function closeMdl(){document.getElementById('ov').classList.remove('on');document.body.style.overflow='';}
 function ovClick(e){if(e.target.id==='ov')closeMdl();}
+
+// ── Image viewer ──
+(function(){
+let _scale=1,_lastDist=0,_startScale=1;
+let _dragStartY=0,_dragging=false;
+
+function _dist(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);}
+
+window.openImgViewer=function(src,isPx){
+  const v=document.getElementById('img-viewer');
+  const img=document.getElementById('img-viewer-img');
+  if(!v||!img)return;
+  _scale=1;
+  img.style.transform='scale(1)';
+  img.src=src;
+  img.className=isPx?'px':'';
+  v.classList.add('on');
+  document.body.style.overflow='hidden';
+};
+window.closeImgViewer=function(e){
+  if(e&&e.target&&e.target.id==='img-viewer-img')return; // clicks on the image are for zoom
+  const v=document.getElementById('img-viewer');
+  if(v)v.classList.remove('on');
+  document.body.style.overflow='';
+  _scale=1;
+};
+
+document.addEventListener('DOMContentLoaded',function(){
+  const v=document.getElementById('img-viewer');
+  const img=document.getElementById('img-viewer-img');
+  if(!v||!img)return;
+
+  // Double-tap to zoom
+  let _lastTap=0;
+  img.addEventListener('click',function(e){
+    const now=Date.now();
+    if(now-_lastTap<300){
+      _scale=_scale>1?1:2.5;
+      img.style.transition='transform .2s';
+      img.style.transform=`scale(${_scale})`;
+      setTimeout(()=>img.style.transition='transform .1s',200);
+    }
+    _lastTap=now;
+    e.stopPropagation();
+  });
+
+  // Pinch to zoom
+  v.addEventListener('touchstart',function(e){
+    if(e.touches.length===2){
+      _lastDist=_dist(e.touches);
+      _startScale=_scale;
+    } else if(e.touches.length===1){
+      _dragStartY=e.touches[0].clientY;
+      _dragging=true;
+    }
+  },{passive:true});
+  v.addEventListener('touchmove',function(e){
+    if(e.touches.length===2){
+      e.preventDefault();
+      const d=_dist(e.touches);
+      _scale=Math.min(5,Math.max(1,_startScale*(d/_lastDist)));
+      img.style.transition='none';
+      img.style.transform=`scale(${_scale})`;
+    } else if(_dragging&&e.touches.length===1&&_scale<=1){
+      const dy=e.touches[0].clientY-_dragStartY;
+      if(dy>80){
+        _dragging=false;
+        closeImgViewer();
+      }
+    }
+  },{passive:false});
+  v.addEventListener('touchend',function(){
+    _dragging=false;
+    if(_scale<1.1){_scale=1;img.style.transition='transform .15s';img.style.transform='scale(1)';}
+  },{passive:true});
+});
+})();
 
 function _buildFlatTrack(trkKey){
 return[1,2,3,4,5,6,7,8,9].map(gen=>{
@@ -5896,7 +5984,7 @@ const p1=`<div id="mdl-panel-info" class="mdl-panel">
 <button class="shbtn${ps?' on':''}" id="shbtn-hero" onclick="toggleShy()" title="Ver forma shiny">
 <svg width="15" height="15" viewBox="0 0 24 24" fill="${ps?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="${ps?'currentColor':'none'}"/></svg>
 </button>
-<div class="hwrap"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="onSpriteError(this)" onclick="${base.id===151?'mewTap()':''}"></div>
+<div class="hwrap" style="cursor:zoom-in" onclick="openImgViewer('${imgSrc}',${!S.mMod})${base.id===151?';mewTap()':''}"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="onSpriteError(this)"></div>
 <div class="hname">${cap(base.name)}</div>
 ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}${ps?' ✦':''}</div>`:ps?`<div class="hform" style="color:var(--gold)">✦ Shiny</div>`:''}
 <div class="hrar" style="background:${rar.d}18;border-color:${rar.d}55;color:${rar.d}"><span class="hrardot" style="background:${rar.d}"></span>${rar.l}</div>
@@ -6063,8 +6151,13 @@ const sp=isShiny
 :(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id)));
 img.src=sp;
 img.className=`himg${mod?'':' px'}`;
+const hwrap=img.parentElement;
+if(hwrap)hwrap.onclick=()=>openImgViewer(sp,!mod);
 } else if(img){
-img.src=spOf(pokeId,mod,isShiny);
+const sp=spOf(pokeId,mod,isShiny);
+img.src=sp;
+const hwrap=img.parentElement;
+if(hwrap)hwrap.onclick=()=>openImgViewer(sp,!mod);
 }
 // Update hero background
 const dispTypes=form?(form.types||base.types):base.types;
@@ -6145,7 +6238,7 @@ if(mtrackGames)mtrackGames.innerHTML=_buildFlatTrack(trkKey);
 // Each form (including shiny version) is an independent team slot
 function buildVariantSection(base, forms){
 const id=base.id;
-const mod=S.set.modern;
+const mod=_modFromMode();
 const allForms=forms.length?forms:[{id,name:base.name,speciesName:base.name,types:base.types,isDefault:true,sprites:{official:iArt(id),official_shiny:iShy(id),front_default:iPx(id),front_shiny:iPxS(id)}}];
 const loading=forms.length===0?'<span style="font-size:10px;color:var(--t3);font-weight:500;margin-left:5px">Cargando...</span>':'';
 
@@ -6418,6 +6511,7 @@ window.setTrainerGender = setTrainerGender;
 window.updateTrainerUI = updateTrainerUI;
 window.renderSettings = renderSettings;
 window.toggleSprite = toggleSprite;
+window.setImgMode = setImgMode;
 window.onSpriteError = onSpriteError;
 window.toggleHelp = toggleHelp;
 window.closeHelp = closeHelp;
@@ -6500,7 +6594,7 @@ document.getElementById('app').style.display='flex';
 updateHeaderUser(user);
 renderFilters();
 renderGrid();
-document.getElementById('sprbtn')?.classList.toggle('on', !S.set.modern);
+document.getElementById('msprbtn')?.classList.toggle('on', !_modFromMode());
 const sel = document.getElementById('stsel');
 if (sel && (!sel.options.length || sel.options[0].value !== 'all')) {
 sel.innerHTML = '<option value="all">Todos los juegos</option>';
@@ -6602,6 +6696,12 @@ renderGrid();
       </div>
     </div>
   </div>
+</div>
+
+<!-- FULL-SCREEN IMAGE VIEWER -->
+<div id="img-viewer" onclick="closeImgViewer(event)">
+  <button id="img-viewer-close" onclick="closeImgViewer()">&#x2715;</button>
+  <img id="img-viewer-img" src="" alt="">
 </div>
 
 <!-- COMPARE PANEL -->
