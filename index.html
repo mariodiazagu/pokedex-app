@@ -3595,7 +3595,7 @@ function _sfShowEncounter(enc){
 
   // Background — apply to layer div so filter doesn't affect UI elements
   const bgLayer=document.getElementById('sf-enc-bg-layer');
-  if(bgLayer)bgLayer.style.background=(SAFARI_ZONES[enc.zone]?.bg||'#1a1a2a')+' center/cover';
+  if(bgLayer)bgLayer.style.background=SAFARI_ZONES[enc.zone]?.bg||'#1a1a2a';
 
   // Sprite — load static sprite immediately (fast CDN), then upgrade to GIF for gen 1-5
   const img=document.getElementById('sf-enemy-img');
