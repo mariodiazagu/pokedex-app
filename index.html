@@ -946,6 +946,26 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-berry-btn .sf-b-emoji{font-size:16px;line-height:1}
 .sf-berry-btn .sf-b-name{font-family:var(--px);font-size:7px;color:rgba(255,255,255,.7)}
 .sf-berry-btn .sf-b-desc{font-family:var(--px);font-size:6px;color:rgba(255,255,255,.4)}
+/* Collection detail sheet */
+.sf-detail-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:8000;opacity:0;transition:opacity .22s;pointer-events:none}
+.sf-detail-backdrop.on{opacity:1;pointer-events:auto}
+.sf-detail-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-radius:22px 22px 0 0;z-index:8001;padding:0 0 calc(var(--sb,0px)+16px);transform:translateY(100%);transition:transform .28s cubic-bezier(.32,1,.6,1);max-height:85vh;display:flex;flex-direction:column}
+.sf-detail-sheet.on{transform:translateY(0)}
+.sf-detail-handle{width:36px;height:4px;border-radius:2px;background:var(--bd);margin:10px auto 0}
+.sf-detail-body{overflow-y:auto;padding:12px 20px 8px;display:flex;flex-direction:column;gap:14px}
+.sf-detail-hero{display:flex;align-items:center;gap:14px}
+.sf-detail-spr{width:80px;height:80px;object-fit:contain;image-rendering:pixelated;flex-shrink:0}
+.sf-detail-info{flex:1;min-width:0}
+.sf-detail-name{font-size:20px;font-weight:800;color:var(--t1);line-height:1.1}
+.sf-detail-num{font-family:var(--px);font-size:10px;color:var(--t3)}
+.sf-detail-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.sf-detail-tag{font-family:var(--px);font-size:8px;padding:2px 8px;border-radius:6px;color:#fff}
+.sf-detail-rows{display:flex;flex-direction:column;gap:0;background:var(--s1);border-radius:14px;overflow:hidden}
+.sf-detail-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--bd2)}
+.sf-detail-row:last-child{border-bottom:none}
+.sf-detail-row-ico{font-size:16px;flex-shrink:0;width:22px;text-align:center}
+.sf-detail-row-lbl{font-family:var(--px);font-size:9px;color:var(--t3);flex-shrink:0;min-width:90px}
+.sf-detail-row-val{font-size:13px;font-weight:600;color:var(--t1);margin-left:auto;text-align:right}
 /* ─────────────────────────────────────────────────────────── */
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1350,6 +1370,23 @@ function sendPasswordReset(){
       <div id="sf-coll-count" style="font-family:var(--px);font-size:10px;color:var(--t3);margin-left:auto"></div>
     </div>
     <div class="gscroll"><div id="sf-coll-grid" class="sf-coll-grid"></div></div>
+  </div>
+</div>
+
+<!-- Safari collection detail sheet -->
+<div id="sf-detail-backdrop" class="sf-detail-backdrop" onclick="sfCloseDetail()"></div>
+<div id="sf-detail-sheet" class="sf-detail-sheet" role="dialog" aria-modal="true">
+  <div class="sf-detail-handle"></div>
+  <div class="sf-detail-body">
+    <div class="sf-detail-hero">
+      <img id="sf-detail-spr" class="sf-detail-spr" src="" alt="">
+      <div class="sf-detail-info">
+        <div id="sf-detail-name" class="sf-detail-name"></div>
+        <div id="sf-detail-num" class="sf-detail-num"></div>
+        <div id="sf-detail-tags" class="sf-detail-tags"></div>
+      </div>
+    </div>
+    <div id="sf-detail-rows" class="sf-detail-rows"></div>
   </div>
 </div>
 
@@ -3486,10 +3523,19 @@ function _sfShowEncounter(enc){
     const id=enc.poke.id;
     const base='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white';
     const animUrl=enc.shiny?`${base}/animated/shiny/${id}.gif`:`${base}/animated/${id}.gif`;
-    const staticUrl=enc.shiny?`${base}/shiny/${id}.png`:`${base}/${id}.png`;
-    img.onerror=()=>{img.onerror=null;img.src=staticUrl;};
-    img.src=id<=649?animUrl:staticUrl;
+    const staticBWUrl=enc.shiny?`${base}/shiny/${id}.png`:`${base}/${id}.png`;
+    const fallbackUrl=enc.shiny
+      ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`
+      :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+    img.style.opacity='0';
+    img.style.transition='opacity .25s';
     img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
+    img.onload=()=>{img.style.opacity='1';};
+    img.onerror=()=>{
+      img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;};
+      img.src=staticBWUrl;
+    };
+    img.src=id<=649?animUrl:staticBWUrl;
   }
 
   document.getElementById('sf-enemy-name').textContent=cap(enc.poke.name);
@@ -3664,7 +3710,7 @@ async function _sfDoThrow(qteMult,qteMsg){
   document.getElementById('sf-msg-box').textContent=qteMsg;
   await _sfDelay(320);
   const sprite=document.getElementById('sf-enemy-img');
-  if(sprite)sprite.style.animation='sfCaptured .4s forwards';
+  if(sprite){sprite.style.opacity='1';sprite.style.transition='none';sprite.style.animation='sfCaptured .4s forwards';}
   document.getElementById('sf-msg-box').textContent='';
   await _sfDelay(400);
 
@@ -3677,8 +3723,11 @@ async function _sfDoThrow(qteMult,qteMsg){
     document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} capturado!`;
     if(ballEl)ballEl.style.animation='sfBallPulse 1s infinite';
     const key=String(enc.poke.id);
-    if(!S.safari.caught[key]){S.safari.caught[key]={count:0,shiny:enc.shiny,firstDate:Date.now()};}
+    const isNew=!S.safari.caught[key];
+    if(isNew){S.safari.caught[key]={count:0,shiny:enc.shiny,firstDate:Date.now(),firstZone:enc.zone};}
     S.safari.caught[key].count+=enc.pinapActive?2:1;
+    S.safari.caught[key].lastDate=Date.now();
+    S.safari.caught[key].lastZone=enc.zone;
     if(enc.shiny)S.safari.caught[key].shiny=true;
     scheduleSave();
     sfCheckMilestones();
@@ -3795,13 +3844,74 @@ function _sfRenderCollection(){
     const p=S.poke.find(x=>x.id===+id);
     if(!p)return'';
     const sprSrc=data.shiny?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`:`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
-    return`<div class="sf-coll-card${data.shiny?' shiny':''}">
+    return`<div class="sf-coll-card${data.shiny?' shiny':''}" onclick="sfShowDetail('${id}')" style="cursor:pointer">
       <img class="sf-coll-spr" src="${sprSrc}" onerror="this.style.opacity=.3" alt="">
       ${data.shiny?'<div class="sf-coll-shiny-dot">✨</div>':''}
       <div class="sf-coll-name">${cap(p.name)}</div>
       <div class="sf-coll-cnt">x${data.count}</div>
     </div>`;
   }).join('');
+}
+
+function sfShowDetail(id){
+  const data=S.safari.caught[id];
+  const p=S.poke.find(x=>x.id===+id);
+  if(!data||!p)return;
+
+  const tier=_sfTier(p);
+  const sprSrc=data.shiny
+    ?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`
+    :`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
+
+  document.getElementById('sf-detail-spr').src=sprSrc;
+  document.getElementById('sf-detail-name').textContent=cap(p.name);
+  document.getElementById('sf-detail-num').textContent=`#${String(id).padStart(4,'0')}`;
+
+  // Tags
+  const TYPE_COLORS={normal:'#A8A878',fire:'#F08030',water:'#6890F0',electric:'#F8D030',grass:'#78C850',
+    ice:'#98D8D8',fighting:'#C03028',poison:'#A040A0',ground:'#E0C068',flying:'#A890F0',
+    psychic:'#F85888',bug:'#A8B820',rock:'#B8A038',ghost:'#705898',dragon:'#7038F8',
+    dark:'#705848',steel:'#B8B8D0',fairy:'#EE99AC'};
+  const tags=[];
+  if(data.shiny)tags.push(`<span class="sf-detail-tag" style="background:#b8860b">✨ Shiny</span>`);
+  tags.push(`<span class="sf-detail-tag" style="background:${SAFARI_TIER_COLORS[tier]}">${SAFARI_TIER_LABELS[tier]}</span>`);
+  (p.types||[]).forEach(t=>tags.push(`<span class="sf-detail-tag" style="background:${TYPE_COLORS[t]||'#888'}">${t}</span>`));
+  document.getElementById('sf-detail-tags').innerHTML=tags.join('');
+
+  // Rows
+  const fmt=ts=>{
+    if(!ts)return'—';
+    const d=new Date(ts);
+    const now=new Date();
+    const isToday=d.toDateString()===now.toDateString();
+    const isYesterday=d.toDateString()===new Date(now-86400000).toDateString();
+    const time=d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+    if(isToday)return`Hoy a las ${time}`;
+    if(isYesterday)return`Ayer a las ${time}`;
+    return`${d.toLocaleDateString('es',{day:'2-digit',month:'2-digit',year:'numeric'})} · ${time}`;
+  };
+  const zoneName=z=>SAFARI_ZONES[z]?.name??'—';
+  const rows=[
+    {ico:'🎯',lbl:'Total capturado',val:`x${data.count}`},
+    {ico:'📅',lbl:'Primera captura',val:fmt(data.firstDate)},
+    ...(data.count>1?[{ico:'🔄',lbl:'Última captura',val:fmt(data.lastDate)}]:[]),
+    {ico:'🗺️',lbl:'Primera zona',val:zoneName(data.firstZone)},
+    ...(data.lastZone&&data.lastZone!==data.firstZone?[{ico:'📍',lbl:'Última zona',val:zoneName(data.lastZone)}]:[]),
+  ];
+  document.getElementById('sf-detail-rows').innerHTML=rows.map(r=>
+    `<div class="sf-detail-row">
+      <span class="sf-detail-row-ico">${r.ico}</span>
+      <span class="sf-detail-row-lbl">${r.lbl}</span>
+      <span class="sf-detail-row-val">${r.val}</span>
+    </div>`).join('');
+
+  document.getElementById('sf-detail-backdrop').classList.add('on');
+  document.getElementById('sf-detail-sheet').classList.add('on');
+}
+
+function sfCloseDetail(){
+  document.getElementById('sf-detail-backdrop').classList.remove('on');
+  document.getElementById('sf-detail-sheet').classList.remove('on');
 }
 
 // ═══════════════════════════════════════
