@@ -893,10 +893,11 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-ball-fly{position:absolute;width:32px;height:32px;image-rendering:pixelated;object-fit:contain;z-index:5;pointer-events:none;bottom:30%;left:50%;transform:translateX(-50%)}
 .sf-msg-box{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:var(--px);font-size:11px;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.9);background:rgba(0,0,0,.7);border-radius:10px;padding:7px 14px;text-align:center;white-space:nowrap;z-index:4;min-width:160px}
 .sf-act-panel{background:rgba(12,12,12,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 16px 14px;display:flex;flex-direction:column;gap:9px;flex-shrink:0}
-.sf-ball-row{display:flex;gap:8px;justify-content:center}
-.sf-ball-throw{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 10px;border-radius:10px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);cursor:pointer;transition:all .12s;min-width:54px}
-.sf-ball-throw.sel{border-color:#fff;background:rgba(255,255,255,.2)}
-.sf-ball-throw:disabled{opacity:.3;pointer-events:none}
+.sf-ball-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+.sf-ball-row-lbl{font-family:var(--px);font-size:8px;color:rgba(255,255,255,.4);text-align:center;margin-bottom:-4px}
+.sf-ball-throw{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 12px;border-radius:10px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);cursor:pointer;transition:all .15s;min-width:58px;flex:1}
+.sf-ball-throw.sel{border-color:rgba(255,255,255,.9);background:rgba(255,255,255,.18);box-shadow:0 0 12px rgba(255,255,255,.15)}
+.sf-ball-throw:disabled{opacity:.25;pointer-events:none;filter:grayscale(.6)}
 .sf-ball-throw span{font-family:var(--px);font-size:8px;color:rgba(255,255,255,.75)}
 .sf-act-row{display:flex;gap:8px}
 .sf-act-btn{flex:1;font-family:var(--px);font-size:10px;font-weight:700;border:none;border-radius:10px;padding:10px 0;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;gap:5px}
@@ -3528,9 +3529,13 @@ function _sfShowEncounter(enc){
       ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`
       :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     img.style.opacity='0';
-    img.style.transition='opacity .25s';
+    img.style.transition='opacity .3s';
     img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
-    img.onload=()=>{img.style.opacity='1';};
+    // Safari iOS sometimes doesn't fire onload for GIFs — use a timeout safety net
+    let _shown=false;
+    const _show=()=>{if(!_shown){_shown=true;clearTimeout(_t);img.style.opacity='1';}};
+    const _t=setTimeout(_show,1800);
+    img.onload=_show;
     img.onerror=()=>{
       img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;};
       img.src=staticBWUrl;
@@ -3571,16 +3576,20 @@ function _sfRenderBallRow(){
   if(!row)return;
   const b=S.safari.balls;
   const options=[
-    {type:'poke',count:_sfBasicBalls(),label:'Poké'},
-    {type:'ultra',count:b.ultra||0,label:'Ultra'},
-    {type:'master',count:b.master||0,label:'Master'},
-  ].filter(x=>x.count>0);
-  if(!options.length){row.innerHTML='<span style="font-family:var(--px);font-size:9px;color:#888">Sin balls</span>';return;}
-  if(!options.find(o=>o.type===S.safari.selBall))S.safari.selBall=options[0].type;
-  row.innerHTML=options.map(({type,count,label})=>`
-    <button class="sf-ball-throw${S.safari.selBall===type?' sel':''}" onclick="sfSelectBall('${type}')">
-      <img class="sf-ball-ico" src="${SAFARI_BALL_IMGS[type]}" style="width:24px;height:24px" alt="${type}">
-      <span>${label} x${count}</span>
+    {type:'poke',  count:_sfBasicBalls(), label:'Poké'},
+    {type:'ultra', count:b.ultra||0,      label:'Ultra'},
+    {type:'master',count:b.master||0,     label:'Master'},
+  ];
+  const hasAny=options.some(o=>o.count>0);
+  if(!hasAny){row.innerHTML='<span style="font-family:var(--px);font-size:9px;color:#888">Sin Poké Balls</span>';return;}
+  if(!options.find(o=>o.type===S.safari.selBall&&o.count>0))
+    S.safari.selBall=options.find(o=>o.count>0).type;
+  row.innerHTML=`<div class="sf-ball-row-lbl" style="width:100%">Seleccionar ball</div>`
+    +options.map(({type,count,label})=>`
+    <button class="sf-ball-throw${S.safari.selBall===type?' sel':''}"
+      ${count<=0?'disabled':''} onclick="sfSelectBall('${type}')">
+      <img class="sf-ball-ico" src="${SAFARI_BALL_IMGS[type]}" style="width:26px;height:26px" alt="${type}">
+      <span>${label}${count>0?' x'+count:' —'}</span>
     </button>`).join('');
 }
 
