@@ -3224,6 +3224,395 @@ safari:{caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},milest
 };
 
 // ═══════════════════════════════════════
+//  SAFARI GAME
+// ═══════════════════════════════════════
+const SAFARI_ZONES={
+  pradera: {name:'Pradera',  emoji:'🌿', types:['normal','grass','flying','fairy'],   minCatch:0,  bg:'linear-gradient(180deg,#87ceeb 0%,#87ceeb 55%,#7ec850 55%,#5a8a30 100%)'},
+  bosque:  {name:'Bosque',   emoji:'🌲', types:['bug','grass','poison','dark'],       minCatch:0,  bg:'linear-gradient(180deg,#2d5016 0%,#1c3510 50%,#5a3a1a 50%,#3a2010 100%)'},
+  montana: {name:'Montaña',  emoji:'⛰️', types:['rock','fighting','flying','steel'],  minCatch:5,  bg:'linear-gradient(180deg,#9acae0 0%,#9acae0 30%,#a09080 30%,#706050 65%,#6a5a4a 65%,#5a4a3a 100%)'},
+  costa:   {name:'Costa',    emoji:'🏖️', types:['water','normal','psychic'],          minCatch:5,  bg:'linear-gradient(180deg,#87ceeb 0%,#87ceeb 45%,#40b8d8 45%,#1888a8 75%,#e8c870 75%,#c8a850 100%)'},
+  cueva:   {name:'Cueva',    emoji:'🕳️', types:['poison','ground','ghost','dark'],    minCatch:10, bg:'linear-gradient(180deg,#1a1218 0%,#0e0c10 50%,#2e1e14 50%,#1a0e0a 100%)'},
+  mar:     {name:'Mar',      emoji:'🌊', types:['water','dragon','ice'],              minCatch:15, bg:'linear-gradient(180deg,#1a3a6a 0%,#0a2040 40%,#082040 40%,#040f28 100%)'},
+  volcan:  {name:'Volcán',   emoji:'🌋', types:['fire','ground','dragon'],            minCatch:20, bg:'linear-gradient(180deg,#380808 0%,#200404 40%,#5a1408 40%,#781808 70%,#280808 70%,#180404 100%)'},
+  tundra:  {name:'Tundra',   emoji:'❄️', types:['ice','psychic','dragon'],            minCatch:25, bg:'linear-gradient(180deg,#c8e8f4 0%,#a0c0d4 50%,#dce8ee 50%,#b8d0dc 100%)'},
+  ruinas:  {name:'Ruinas',   emoji:'🏛️', types:['psychic','ghost','dragon','steel'],  minCatch:80, bg:'linear-gradient(180deg,#3a2818 0%,#241808 50%,#4a3820 50%,#302210 100%)'},
+  espacio: {name:'Espacio',  emoji:'🌌', types:['dragon','psychic','steel','fairy'],  minCatch:200,bg:'linear-gradient(180deg,#08080e 0%,#04040a 40%,#060610 40%,#020208 100%)'},
+};
+const SAFARI_PSEUDO=new Set([149,248,373,376,445,612,635,706,784,887,998]);
+const SAFARI_TIER_COLORS=['#888','#c47a00','#8B3AA2','#1a6bc1','#d44400','#7b1fa2'];
+const SAFARI_TIER_LABELS=['Común','Poco común','Raro','Ultra/Paradoja','Legendario','Mítico'];
+const SAFARI_CATCH_RATES=[190,90,30,12,3,3];
+const SAFARI_BALL_MULT={poke:1,great:1.5,ultra:2,master:999};
+const SAFARI_MAX_BASIC=25;
+const SAFARI_RENEW_AMOUNT=10;
+const SAFARI_RENEW_MS=60*60*1000; // 1 hour
+const SAFARI_MILESTONES=[
+  {id:'sf_c1',  catches:1,   reward:{great:3},  msg:'¡Primera captura! +3 Super Ball'},
+  {id:'sf_c5',  catches:5,   reward:{great:5},  msg:'5 capturas · +5 Super Ball'},
+  {id:'sf_c10', catches:10,  reward:{great:5},  msg:'10 capturas · +5 Super Ball'},
+  {id:'sf_c25', catches:25,  reward:{ultra:3},  msg:'25 capturas · +3 Ultra Ball'},
+  {id:'sf_c50', catches:50,  reward:{ultra:5},  msg:'50 capturas · +5 Ultra Ball'},
+  {id:'sf_c100',catches:100, reward:{ultra:10}, msg:'100 capturas · +10 Ultra Ball'},
+  {id:'sf_c150',catches:150, reward:{master:1}, msg:'150 capturas · ¡1 Master Ball!'},
+  {id:'sf_c200',catches:200, reward:{ultra:10}, msg:'200 capturas · +10 Ultra Ball'},
+  {id:'sf_c300',catches:300, reward:{master:1}, msg:'300 capturas · ¡1 Master Ball!'},
+  {id:'sf_c500',catches:500, reward:{master:2}, msg:'500 capturas · ¡2 Master Ball!'},
+  {id:'sf_sh1', shinies:1,   reward:{ultra:5},  msg:'¡Primer Shiny! +5 Ultra Ball'},
+  {id:'sf_sh5', shinies:5,   reward:{master:1}, msg:'5 shinies · ¡1 Master Ball!'},
+  {id:'sf_leg', legs:1,      reward:{ultra:5},  msg:'¡Primer legendario! +5 Ultra Ball'},
+];
+
+function _sfTier(poke){
+  if(poke.rarity==='mythical') return 5;
+  if(poke.rarity==='legendary') return 4;
+  if(poke.rarity==='ultrabeast'||poke.rarity==='paradox') return 3;
+  if(SAFARI_PSEUDO.has(poke.id)) return 2;
+  return ((poke.id*2654435761)>>>0)%100<22?1:0;
+}
+function _sfTotalCaught(){return Object.keys(S.safari.caught).length;}
+function _sfTotalShinies(){return Object.values(S.safari.caught).filter(c=>c.shiny).length;}
+function _sfTotalLegs(){return Object.entries(S.safari.caught).filter(([id])=>{const p=S.poke.find(x=>x.id===+id);return p&&(p.rarity==='legendary'||p.rarity==='mythical');}).length;}
+function _sfBasicBalls(){return (S.safari.balls.poke||0)+(S.safari.balls.great||0);}
+
+function sfRenewBalls(){
+  const now=Date.now();
+  const last=S.safari.balls.lastRenew||0;
+  const hours=Math.floor((now-last)/SAFARI_RENEW_MS);
+  if(hours<1)return;
+  const toAdd=hours*SAFARI_RENEW_AMOUNT;
+  const current=_sfBasicBalls();
+  const canAdd=Math.max(0,SAFARI_MAX_BASIC-current);
+  const added=Math.min(toAdd,canAdd);
+  if(added>0){S.safari.balls.poke=Math.min(SAFARI_MAX_BASIC,(S.safari.balls.poke||0)+added);}
+  S.safari.balls.lastRenew=last+(hours*SAFARI_RENEW_MS);
+  scheduleSave();
+}
+
+function sfCheckMilestones(){
+  const total=_sfTotalCaught();
+  const shinies=_sfTotalShinies();
+  const legs=_sfTotalLegs();
+  let awarded=false;
+  for(const m of SAFARI_MILESTONES){
+    if(S.safari.milestones.includes(m.id))continue;
+    const met=(m.catches&&total>=m.catches)||(m.shinies&&shinies>=m.shinies)||(m.legs&&legs>=m.legs);
+    if(!met)continue;
+    S.safari.milestones.push(m.id);
+    if(m.reward.great)S.safari.balls.great=(S.safari.balls.great||0)+m.reward.great;
+    if(m.reward.ultra)S.safari.balls.ultra=(S.safari.balls.ultra||0)+m.reward.ultra;
+    if(m.reward.master)S.safari.balls.master=(S.safari.balls.master||0)+m.reward.master;
+    sfToast(m.msg);
+    awarded=true;
+  }
+  if(awarded)scheduleSave();
+}
+
+function sfToast(msg){
+  const el=document.getElementById('sf-toast');
+  if(!el)return;
+  el.textContent=msg;
+  el.classList.add('on');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('on'),3000);
+}
+
+function sfGetPool(zoneId){
+  const zone=SAFARI_ZONES[zoneId];
+  if(!zone)return[];
+  const total=_sfTotalCaught();
+  return S.poke.filter(p=>{
+    if(!p.types.some(t=>zone.types.includes(t)))return false;
+    const tier=_sfTier(p);
+    if(tier===5&&total<300)return false;
+    if(tier===4&&total<150)return false;
+    if(tier===3&&total<200)return false;
+    if(tier===2&&total<80)return false;
+    if(tier===1&&total<15)return false;
+    return true;
+  });
+}
+
+function sfSpawn(zoneId){
+  const pool=sfGetPool(zoneId);
+  if(!pool.length)return null;
+  const W=[100,18,6,3,2,1];
+  let total=0;
+  const wl=pool.map(p=>{const w=W[_sfTier(p)];total+=w;return{p,w};});
+  let r=Math.random()*total;
+  let poke=pool[0];
+  for(const{p,w}of wl){r-=w;if(r<=0){poke=p;break;}}
+  const tier=_sfTier(poke);
+  const shiny=Math.random()<1/512;
+  const maxHp=[60,90,130,160,200,200][tier];
+  return{poke,hp:maxHp,maxHp,shiny,tier,zone:zoneId,busy:false};
+}
+
+function sfCatchProb(tier,ball,hp,maxHp){
+  if(ball==='master')return 1;
+  const rate=SAFARI_CATCH_RATES[tier];
+  const hpFrac=hp/maxHp;
+  return Math.min(((3*maxHp-2*hp)/(3*maxHp))*(rate/255)*SAFARI_BALL_MULT[ball],1);
+}
+
+// ── SAFARI RENDER ──────────────────────────────────────────
+function renderSafari(){
+  sfRenewBalls();
+  showSafariHome();
+}
+
+function showSafariHome(){
+  document.getElementById('sf-home')?.classList.add('on');
+  document.getElementById('sf-encounter')?.classList.remove('on');
+  document.getElementById('sf-collection')?.classList.remove('on');
+  _sfRenderBalls();
+  _sfRenderZones();
+}
+
+function showSafariCollection(){
+  document.getElementById('sf-home')?.classList.remove('on');
+  document.getElementById('sf-encounter')?.classList.remove('on');
+  document.getElementById('sf-collection')?.classList.add('on');
+  _sfRenderCollection();
+}
+
+function _sfRenderBalls(){
+  const bar=document.getElementById('sf-balls-bar');
+  if(!bar)return;
+  const b=S.safari.balls;
+  const basic=_sfBasicBalls();
+  const now=Date.now();
+  const last=b.lastRenew||now;
+  const msLeft=SAFARI_RENEW_MS-((now-last)%SAFARI_RENEW_MS);
+  const mins=Math.ceil(msLeft/60000);
+  const renewStr=basic>=SAFARI_MAX_BASIC?'(lleno)':mins+'min';
+  const balls=[
+    {type:'poke',count:b.poke||0},
+    {type:'great',count:b.great||0},
+    {type:'ultra',count:b.ultra||0},
+    {type:'master',count:b.master||0},
+  ].filter(x=>x.count>0||(x.type==='poke'));
+  bar.innerHTML=balls.map(({type,count})=>`<div class="sf-ball-item"><div class="sf-ball-ico ${type}"></div><span class="sf-ball-n">x${count}</span></div>`).join('')
+    +`<span class="sf-renew-lbl">↺ ${renewStr} · ${basic}/${SAFARI_MAX_BASIC}</span>`;
+}
+
+function _sfRenderZones(){
+  const grid=document.getElementById('sf-zone-grid');
+  if(!grid)return;
+  const total=_sfTotalCaught();
+  grid.innerHTML=Object.entries(SAFARI_ZONES).map(([id,z])=>{
+    const locked=total<z.minCatch;
+    const pool=sfGetPool(id);
+    return`<div class="sf-zone-card${locked?' locked':''}" onclick="${locked?'':'sfStartEncounter(\''+id+'\')'}">
+      <div class="sf-zone-art" style="background:${z.bg}"><span class="sf-zone-emoji">${z.emoji}</span></div>
+      <div class="sf-zone-body">
+        <div class="sf-zone-name">${z.name}</div>
+        <div class="sf-zone-sub">${pool.length} Pokémon disponibles</div>
+        ${locked?`<div class="sf-zone-lock">🔒 ${z.minCatch} capturas</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function sfStartEncounter(zoneId){
+  if(_sfBasicBalls()<=0&&(S.safari.balls.ultra||0)<=0&&(S.safari.balls.master||0)<=0){
+    sfToast('Sin Poké Balls. Espera la renovación.');
+    return;
+  }
+  const enc=sfSpawn(zoneId);
+  if(!enc){sfToast('No hay Pokémon aquí aún.');return;}
+  S.safari.encounter=enc;
+  _sfShowEncounter(enc);
+}
+
+function _sfShowEncounter(enc){
+  document.getElementById('sf-home')?.classList.remove('on');
+  document.getElementById('sf-encounter')?.classList.add('on');
+  document.getElementById('sf-collection')?.classList.remove('on');
+
+  // Background
+  const bg=document.getElementById('sf-enc-bg');
+  if(bg)bg.style.background=SAFARI_ZONES[enc.zone]?.bg||'#1a1a2a';
+
+  // Sprite
+  const img=document.getElementById('sf-enemy-img');
+  const mode=S.mImgMode||'sprite';
+  const spriteUrl=enc.shiny?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/shiny/${enc.poke.id}.png`
+    :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/${enc.poke.id}.png`;
+  if(img){img.src=spriteUrl;img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');}
+
+  document.getElementById('sf-enemy-name').textContent=cap(enc.poke.name);
+  const tierEl=document.getElementById('sf-enemy-tier');
+  if(tierEl){tierEl.textContent=SAFARI_TIER_LABELS[enc.tier];tierEl.style.background=SAFARI_TIER_COLORS[enc.tier];}
+  const shinyEl=document.getElementById('sf-enemy-shiny');
+  if(shinyEl)shinyEl.style.display=enc.shiny?'':'none';
+
+  _sfUpdateHp(enc.hp,enc.maxHp);
+  document.getElementById('sf-msg-box').textContent=`¡Un ${cap(enc.poke.name)} salvaje apareció!`;
+  document.getElementById('sf-ball-fly').style.display='none';
+
+  _sfRenderBallRow();
+  document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
+  document.getElementById('sf-btn-weak')?.removeAttribute('disabled');
+}
+
+function _sfUpdateHp(hp,max){
+  const fill=document.getElementById('sf-hp-fill');
+  if(!fill)return;
+  const pct=Math.max(0,hp/max*100);
+  fill.style.width=pct+'%';
+  fill.style.background=pct>50?'#4caf50':pct>25?'#ffc107':'#f44336';
+}
+
+function _sfRenderBallRow(){
+  const row=document.getElementById('sf-ball-row');
+  if(!row)return;
+  const b=S.safari.balls;
+  const options=[
+    {type:'poke',count:_sfBasicBalls(),label:'Poké'},
+    {type:'ultra',count:b.ultra||0,label:'Ultra'},
+    {type:'master',count:b.master||0,label:'Master'},
+  ].filter(x=>x.count>0);
+  if(!options.length){row.innerHTML='<span style="font-family:var(--px);font-size:9px;color:#888">Sin balls</span>';return;}
+  if(!options.find(o=>o.type===S.safari.selBall))S.safari.selBall=options[0].type;
+  row.innerHTML=options.map(({type,count,label})=>`
+    <button class="sf-ball-throw${S.safari.selBall===type?' sel':''}" onclick="sfSelectBall('${type}')">
+      <div class="sf-ball-ico ${type}" style="width:22px;height:22px"></div>
+      <span>${label} x${count}</span>
+    </button>`).join('');
+}
+
+function sfSelectBall(type){S.safari.selBall=type;_sfRenderBallRow();}
+
+function safariWeaken(){
+  const enc=S.safari.encounter;
+  if(!enc||enc.busy)return;
+  enc.hp=Math.max(Math.floor(enc.maxHp*0.08),enc.hp-Math.floor(enc.maxHp*0.3));
+  _sfUpdateHp(enc.hp,enc.maxHp);
+  const flee=enc.hp/enc.maxHp<0.1&&Math.random()<0.25;
+  if(flee){
+    document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} huyó!`;
+    _sfDisableActions();
+    setTimeout(showSafariHome,1600);
+    return;
+  }
+  document.getElementById('sf-msg-box').textContent='HP reducido · ¡Más fácil de atrapar!';
+}
+
+async function safariThrow(){
+  const enc=S.safari.encounter;
+  if(!enc||enc.busy)return;
+  const ball=S.safari.selBall||'poke';
+  // Deduct ball
+  if(ball==='poke'||ball==='great'){
+    const basic=_sfBasicBalls();
+    if(basic<=0){sfToast('Sin Poké Balls básicas');return;}
+    if(S.safari.balls.poke>0)S.safari.balls.poke--;
+    else S.safari.balls.great--;
+  } else if(ball==='ultra'){
+    if(!(S.safari.balls.ultra>0)){sfToast('Sin Ultra Balls');return;}
+    S.safari.balls.ultra--;
+  } else if(ball==='master'){
+    if(!(S.safari.balls.master>0)){sfToast('Sin Master Balls');return;}
+    S.safari.balls.master--;
+  }
+  _sfRenderBallRow();
+  enc.busy=true;
+  _sfDisableActions();
+
+  // Ball fly animation
+  const ballEl=document.getElementById('sf-ball-fly');
+  if(ballEl){
+    ballEl.className=`sf-ball-fly sf-ball-ico ${ball}`;
+    ballEl.style.display='block';
+    ballEl.style.animation='none';
+  }
+
+  const prob=sfCatchProb(enc.tier,ball,enc.hp,enc.maxHp);
+  const caught=Math.random()<prob;
+  const shakes=caught?3:Math.floor(Math.random()*3);
+
+  await _sfDelay(350);
+  // Hide sprite → appear to go into ball
+  const sprite=document.getElementById('sf-enemy-img');
+  if(sprite)sprite.style.animation='sfCaptured .4s forwards';
+  document.getElementById('sf-msg-box').textContent='';
+  await _sfDelay(400);
+
+  // Shake animation
+  if(ballEl)ballEl.style.animation='sfBallPulse .5s infinite';
+  for(let i=0;i<shakes;i++){
+    if(ballEl){ballEl.style.animation='sfShake .5s ease';await _sfDelay(520);ballEl.style.animation='none';await _sfDelay(200);}
+  }
+
+  if(caught){
+    document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} capturado!`;
+    if(ballEl)ballEl.style.animation='sfBallPulse 1s infinite';
+    // Record catch
+    const key=String(enc.poke.id);
+    if(!S.safari.caught[key]){S.safari.caught[key]={count:0,shiny:enc.shiny,firstDate:Date.now()};}
+    S.safari.caught[key].count++;
+    if(enc.shiny)S.safari.caught[key].shiny=true;
+    scheduleSave();
+    sfCheckMilestones();
+    await _sfDelay(1800);
+    showSafariHome();
+  } else {
+    // Escape
+    document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} escapó!`;
+    if(sprite){sprite.style.animation='sfEscape .4s forwards';}
+    if(ballEl)ballEl.style.display='none';
+    await _sfDelay(600);
+    sprite.style.animation=enc.shiny?'sfShinyPulse 1.8s infinite':'none';
+    if(_sfBasicBalls()<=0&&!(S.safari.balls.ultra>0)&&!(S.safari.balls.master>0)){
+      document.getElementById('sf-msg-box').textContent='Sin Poké Balls · Regresando...';
+      await _sfDelay(1600);
+      showSafariHome();
+    } else {
+      enc.busy=false;
+      _sfEnableActions();
+    }
+  }
+}
+
+function safariRun(){
+  S.safari.encounter=null;
+  showSafariHome();
+}
+
+function _sfDisableActions(){
+  document.getElementById('sf-btn-throw')?.setAttribute('disabled','');
+  document.getElementById('sf-btn-weak')?.setAttribute('disabled','');
+}
+function _sfEnableActions(){
+  document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
+  document.getElementById('sf-btn-weak')?.removeAttribute('disabled');
+}
+function _sfDelay(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function _sfRenderCollection(){
+  const grid=document.getElementById('sf-coll-grid');
+  const cnt=document.getElementById('sf-coll-count');
+  if(!grid)return;
+  const entries=Object.entries(S.safari.caught).sort((a,b)=>+a[0]-+b[0]);
+  if(cnt)cnt.textContent=entries.length+'/1025';
+  if(!entries.length){
+    grid.innerHTML='<div class="sf-empty" style="grid-column:1/-1"><div class="sf-empty-ico">🎯</div><div class="sf-empty-txt">Aún no has capturado ningún Pokémon.<br>Explora una zona para empezar.</div></div>';
+    return;
+  }
+  grid.innerHTML=entries.map(([id,data])=>{
+    const p=S.poke.find(x=>x.id===+id);
+    if(!p)return'';
+    const sprSrc=data.shiny?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`:`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
+    return`<div class="sf-coll-card${data.shiny?' shiny':''}">
+      <img class="sf-coll-spr" src="${sprSrc}" onerror="this.style.opacity=.3" alt="">
+      ${data.shiny?'<div class="sf-coll-shiny-dot">✨</div>':''}
+      <div class="sf-coll-name">${cap(p.name)}</div>
+      <div class="sf-coll-cnt">x${data.count}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
 //  FIREBASE + AUTH
 // ═══════════════════════════════════════
 const firebaseConfig = {
@@ -3428,6 +3817,7 @@ localStorage.setItem('t', JSON.stringify(S.track));
 localStorage.setItem('fv', JSON.stringify([...S.favs]));
 localStorage.setItem('tms', JSON.stringify(S.teams));
 localStorage.setItem('st', JSON.stringify(S.set));
+localStorage.setItem('sf', JSON.stringify(S.safari));
 } catch(e) {}
 }
 
@@ -3488,6 +3878,7 @@ try { S.track = JSON.parse(localStorage.getItem('t')) || {}; } catch(e){ S.track
 try { S.favs = new Set((JSON.parse(localStorage.getItem('fv')) || []).map(String)); } catch(e){ S.favs = new Set(); }
 try { S.teams = sanitizeTeams(JSON.parse(localStorage.getItem('tms')||'{}')); } catch(e){ S.teams = {}; }
 try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
+try { const d = localStorage.getItem('sf'); if(d) Object.assign(S.safari, JSON.parse(d)); } catch(e){}
 }
 
 function forceRefreshTypes(){
@@ -5317,6 +5708,7 @@ if(t==='team')renderTeam();
 if(t==='stats')drawStats();
 if(t==='cfg')renderSettings();
 if(t==='card')renderTrainerCard();
+if(t==='safari')renderSafari();
 }
 
 function toggleFav(key){
@@ -6852,6 +7244,7 @@ document.getElementById('standalone-step').style.display='none';
 (function(){
 loadFormsCache();
 try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
+try { const d = localStorage.getItem('sf'); if(d) Object.assign(S.safari, JSON.parse(d)); } catch(e){}
 
 // Apply saved columns setting
 applyColsSetting();
