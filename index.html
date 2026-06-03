@@ -544,6 +544,9 @@ font-family:var(--fn);cursor:pointer;transition:all .13s;backdrop-filter:blur(3p
 #img-viewer-img{width:min(80vmin,90vw);height:min(80vmin,90dvh);object-fit:contain;transform-origin:center;transition:transform .1s;user-select:none;-webkit-user-drag:none;image-rendering:auto}
 #img-viewer-img.px{image-rendering:pixelated}
 #img-viewer-close{position:absolute;top:max(env(safe-area-inset-top,16px),20px);right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;line-height:1}
+#img-viewer-modes{position:absolute;bottom:max(env(safe-area-inset-bottom,16px),20px);left:50%;transform:translateX(-50%);display:flex;gap:4px;background:rgba(255,255,255,.1);border-radius:14px;padding:5px}
+#img-viewer .mmode-btn{color:rgba(255,255,255,.45)}
+#img-viewer .mmode-btn.on{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff}
 /* My games grid */
 .mygames-gen{margin-bottom:14px}
 .mygames-gen:last-child{margin-bottom:0}
@@ -5878,6 +5881,32 @@ window.openImgViewer=function(src,isPx){
   img.className=isPx?'px':'';
   v.classList.add('on');
   document.body.style.overflow='hidden';
+  const imode=S.mImgMode||_imgMode();
+  ['art','sprite','anim'].forEach(m=>document.getElementById('viewer-mode-'+m)?.classList.toggle('on',m===imode));
+};
+window.setViewerImgMode=function(mode){
+  if(typeof setMImgMode==='function') setMImgMode(mode);
+  const img=document.getElementById('img-viewer-img');
+  if(!img||!S.mId)return;
+  const ps=S.mPreviewShiny||false;
+  const dispForm=S.mPreviewForm||null;
+  const animId=dispForm?dispForm.id:S.mId;
+  const ABASE='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/';
+  let src;
+  if(mode==='anim'&&animId<=649){
+    src=ps?`${ABASE}shiny/${animId}.gif`:`${ABASE}${animId}.gif`;
+  } else {
+    const mMod=mode==='art';
+    src=dispForm
+      ?(ps?(mMod?(dispForm.sprites.official_shiny||iShy(dispForm.id)):(dispForm.sprites.front_shiny||iPxS(dispForm.id)))
+      :(mMod?(dispForm.sprites.official||iArt(dispForm.id)):(dispForm.sprites.front_default||iPx(dispForm.id))))
+      :spOf(S.mId,mode==='art',ps);
+  }
+  img.src=src;
+  img.className=mode==='art'?'':'px';
+  img.style.transform='scale(1)';
+  _scale=1;
+  ['art','sprite','anim'].forEach(m=>document.getElementById('viewer-mode-'+m)?.classList.toggle('on',m===mode));
 };
 window.closeImgViewer=function(e){
   if(e&&e.target&&e.target.id==='img-viewer-img')return; // clicks on the image are for zoom
@@ -6724,6 +6753,11 @@ renderGrid();
 <div id="img-viewer" onclick="closeImgViewer(event)">
   <button id="img-viewer-close" onclick="closeImgViewer()">&#x2715;</button>
   <img id="img-viewer-img" src="" alt="">
+  <div id="img-viewer-modes">
+    <button class="mmode-btn" id="viewer-mode-art" onclick="setViewerImgMode('art')" title="Arte oficial"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"/><polyline points="21 15 16 10 5 21"/></svg></button>
+    <button class="mmode-btn" id="viewer-mode-sprite" onclick="setViewerImgMode('sprite')" title="Sprite"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07"/></svg></button>
+    <button class="mmode-btn" id="viewer-mode-anim" onclick="setViewerImgMode('anim')" title="Animado"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg></button>
+  </div>
 </div>
 
 <!-- COMPARE PANEL -->
