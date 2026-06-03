@@ -3552,7 +3552,7 @@ function _sfRenderZones(){
   if(!grid)return;
   const total=_sfTotalCaught();
   grid.innerHTML=Object.entries(SAFARI_ZONES).map(([id,z])=>{
-    const locked=!S.safari._adminUnlocked&&total<z.minCatch;
+    const locked=!_sfAdminUnlocked&&total<z.minCatch;
     const pool=sfGetPool(id);
     return`<div class="sf-zone-card${locked?' locked':''}" onclick="${locked?'':'sfStartEncounter(\''+id+'\')'}">
       <div class="sf-zone-art" style="background:${z.bg};background-size:180%"></div>
@@ -3598,17 +3598,24 @@ function _sfShowEncounter(enc){
     img.style.opacity='0';
     img.style.transition='opacity .25s';
     img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
-    let _shown=false;
-    const _show=()=>{if(!_shown){_shown=true;img.style.opacity='1';}};
-    img.onload=_show;
-    img.onerror=()=>{
-      img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;};
-      img.src=staticBWUrl;
-    };
-    img.src=id<=649?animUrl:staticBWUrl;
-    // Show quickly: cached images may not re-fire onload; 400ms fallback covers slow loads
+    const _show=()=>{img.style.opacity='1';};
+    if(id<=649){
+      // Gen 1-5: try animated GIF → BW static → official fallback
+      img.onload=_show;
+      img.onerror=()=>{
+        img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;img.onload=_show;};
+        img.src=staticBWUrl;
+      };
+      img.src=animUrl;
+    } else {
+      // Gen 6+: no BW sprite exists, go directly to official sprite
+      img.onload=_show;
+      img.onerror=null;
+      img.src=fallbackUrl;
+    }
+    // Fast-path for cached images; 500ms safety net for iOS GIF
     if(img.complete&&img.naturalWidth>0)_show();
-    else setTimeout(_show,400);
+    else setTimeout(_show,500);
   }
 
   document.getElementById('sf-enemy-name').textContent=cap(enc.poke.name);
@@ -3989,7 +3996,7 @@ function sfShowWhere(id){
   const total=_sfTotalCaught();
   const zones=Object.entries(SAFARI_ZONES)
     .filter(([,z])=>p.types.some(t=>z.types.includes(t)))
-    .map(([zid,z])=>({zid,z,locked:!S.safari._adminUnlocked&&total<z.minCatch}));
+    .map(([zid,z])=>({zid,z,locked:!_sfAdminUnlocked&&total<z.minCatch}));
   const rateLabels=['Muy común','Poco común','Raro','Muy raro','Legendario','Mítico'];
 
   const spr=document.getElementById('sf-detail-spr');
@@ -4086,7 +4093,8 @@ function sfCloseDetail(){
 
 const ADMIN_EMAIL = 'mario.diazagu@gmail.com';
 let _sfTestMode = false;
-let _sfRealSafari = null; // backup of S.safari when test mode is on
+let _sfRealSafari = null;
+let _sfAdminUnlocked = false; // runtime-only, never persisted
 
 function _isAdmin() {
   return currentUser && currentUser.email === ADMIN_EMAIL;
@@ -4118,6 +4126,7 @@ function sfToggleTestMode() {
       _sfRealSafari = null;
     }
     _sfTestMode = false;
+    _sfAdminUnlocked = false;
     document.getElementById('sf-test-banner').style.display = 'none';
   } else {
     // Enter test mode — save real data, load test state
@@ -4170,7 +4179,7 @@ function adminUnlockZones() {
   if (!S.safari.milestones) S.safari.milestones = [];
   const needed = Math.max(maxCatch, Object.keys(S.safari.caught || {}).length);
   // add a fake milestone marker to satisfy minCatch checks
-  S.safari._adminUnlocked = true;
+  _sfAdminUnlocked = true;
   scheduleSave();
   _adminToast('Zonas desbloqueadas');
   if (document.getElementById('sf-home')?.classList.contains('on')) _sfRenderZones();
@@ -4179,7 +4188,7 @@ function adminUnlockZones() {
 function adminClearCaught() {
   if (!confirm('¿Borrar todos los pokémon capturados?')) return;
   S.safari.caught = {};
-  S.safari._adminUnlocked = undefined;
+  _sfAdminUnlocked = false;
   scheduleSave();
   _adminToast('Pokémon borrados');
   if (document.getElementById('sf-home')?.classList.contains('on')) renderSafari();
@@ -4453,6 +4462,7 @@ if (d.set.companion !== undefined) S.companion = d.set.companion;
 if (d.set.glass !== undefined) { S.set.glass = d.set.glass; applyGlass(d.set.glass); }
 }
 if (d.safari) Object.assign(S.safari, d.safari);
+delete S.safari._adminUnlocked; // runtime-only flag, never load from storage
 if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
 } else {
 loadFromLocalStorage();
@@ -4484,6 +4494,7 @@ try { S.favs = new Set((JSON.parse(localStorage.getItem('fv')) || []).map(String
 try { S.teams = sanitizeTeams(JSON.parse(localStorage.getItem('tms')||'{}')); } catch(e){ S.teams = {}; }
 try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
 try { const d = localStorage.getItem('sf'); if(d) Object.assign(S.safari, JSON.parse(d)); } catch(e){}
+delete S.safari._adminUnlocked;
 if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
 }
 
