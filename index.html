@@ -893,10 +893,6 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-enc-name{font-family:var(--px);font-size:11px;color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.9)}
 .sf-enc-tags{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:center}
 .sf-enc-tag{font-family:var(--px);font-size:8px;padding:1px 6px;border-radius:5px;color:#fff;text-shadow:none}
-.sf-hp-row{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.65);border-radius:6px;padding:3px 8px;min-width:120px}
-.sf-hp-lbl{font-family:var(--px);font-size:8px;color:#9f9;flex-shrink:0}
-.sf-hp-track{flex:1;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden}
-.sf-hp-fill{height:100%;background:#4caf50;border-radius:4px;transition:width .4s,background .4s}
 .sf-ball-fly{position:absolute;image-rendering:pixelated;object-fit:contain;z-index:5;pointer-events:none;display:none}
 @keyframes sfBallThrow{
   0%  {top:78%;left:calc(54% - 27px);width:54px;height:54px;opacity:1;transform:rotate(0deg)}
@@ -915,7 +911,6 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-act-btn{flex:1;font-family:var(--px);font-size:10px;font-weight:700;border:none;border-radius:10px;padding:10px 0;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;gap:5px}
 .sf-act-btn:active{transform:scale(.93)}
 .sf-act-btn.throw{background:var(--ac);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.4)}
-.sf-act-btn.weak{background:rgba(255,255,255,.1);color:#ddd;border:2px solid rgba(255,255,255,.2)}
 .sf-act-btn.run{background:#2a2a2a;color:#888;border:2px solid #3a3a3a}
 .sf-act-btn:disabled{opacity:.35;pointer-events:none}
 /* Collection filters */
@@ -965,9 +960,6 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-turn-dot.on{background:rgba(76,175,80,.9);transform:scale(1.1)}
 .sf-turn-dot.warn{background:rgba(255,152,0,.9)}
 .sf-turn-dot.danger{background:rgba(244,67,54,.9);animation:sfPanicFlash .5s infinite}
-/* Panic */
-.sf-hp-fill.panic{animation:sfPanicFlash .5s infinite}
-.sf-panic-tag{font-family:var(--px);font-size:8px;background:#f44336;color:#fff;padding:1px 6px;border-radius:5px;animation:sfPanicFlash .7s infinite}
 /* Berries */
 .sf-berry-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
 .sf-berry-btn{display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 7px;border-radius:9px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);cursor:pointer;min-width:48px;transition:all .12s}
@@ -1371,11 +1363,6 @@ function sendPasswordReset(){
         <div class="sf-enc-tags">
           <div id="sf-enemy-tier" class="sf-enc-tag"></div>
           <div id="sf-enemy-shiny" class="sf-enc-tag" style="display:none;background:#b8860b">✨ Shiny</div>
-          <div id="sf-enemy-panic" class="sf-panic-tag" style="display:none">⚡ PÁNICO</div>
-        </div>
-        <div class="sf-hp-row">
-          <span class="sf-hp-lbl">HP</span>
-          <div class="sf-hp-track"><div id="sf-hp-fill" class="sf-hp-fill" style="width:100%"></div></div>
         </div>
       </div>
       <img id="sf-ball-fly" class="sf-ball-fly" src="" style="display:none" alt="">
@@ -1391,7 +1378,6 @@ function sendPasswordReset(){
       <div id="sf-berry-row" class="sf-berry-row" style="display:none"></div>
       <div id="sf-ball-row" class="sf-ball-row"></div>
       <div class="sf-act-row">
-        <button class="sf-act-btn weak" id="sf-btn-weak" onclick="safariWeaken()">⚔ Debilitar</button>
         <button class="sf-act-btn throw" id="sf-btn-throw" onclick="sfThrowOrQte()">🎯 Lanzar</button>
         <button class="sf-act-btn run" onclick="safariRun()">↩ Huir</button>
       </div>
@@ -3408,7 +3394,7 @@ const SAFARI_ZONES={
 const SAFARI_PSEUDO=new Set([149,248,373,376,445,612,635,706,784,887,998]);
 const SAFARI_TIER_COLORS=['#888','#c47a00','#8B3AA2','#1a6bc1','#d44400','#7b1fa2'];
 const SAFARI_TIER_LABELS=['Común','Poco común','Raro','Ultra/Paradoja','Legendario','Mítico'];
-const SAFARI_CATCH_RATES=[128,90,45,15,5,3]; // tier 0 (común) → tier 5 (mítico)
+const SAFARI_CATCH_RATES=[64,45,22,8,3,2]; // tier 0 (común) → tier 5 (mítico)
 const SAFARI_BALL_MULT={poke:1,great:1.5,ultra:2,master:999};
 const SAFARI_BALL_IMGS={
   poke:  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png',
@@ -3419,7 +3405,8 @@ const SAFARI_BALL_IMGS={
 const SAFARI_MAX_BASIC=25;
 const SAFARI_RENEW_AMOUNT=10;
 const SAFARI_RENEW_MS=60*60*1000; // 1 hour
-const SAFARI_TURN_MAX=[10,8,6,5,4,3];    // max turns per tier before flee
+const SAFARI_TURN_MAX=[10,8,6,5,5,4];    // max turns per tier before flee
+const SAFARI_FLEE_RATE=[0.10,0.15,0.10,0.05,0,0]; // flee chance per missed throw by tier
 const SAFARI_QTE_DUR=[1800,1500,1200,1000,850,700]; // ms per QTE cycle by tier
 const SAFARI_QTE_TARGET=[88,74,60,48,36,26];        // green ring px by tier (big=easy, small=hard)
 const SAFARI_COIN_RATE=[1,2,5,10,25,50];            // coins per catch by tier (shiny ×2)
@@ -3587,21 +3574,17 @@ function sfSpawn(zoneId){
   for(const{p,w}of wl){r-=w;if(r<=0){poke=p;break;}}
   const tier=_sfTier(poke);
   const shiny=Math.random()<1/512;
-  const maxHp=[60,90,130,160,200,200][tier];
   const turnsMax=SAFARI_TURN_MAX[tier];
-  return{poke,hp:maxHp,maxHp,shiny,tier,zone:zoneId,busy:false,
-    turnsLeft:turnsMax,maxTurns:turnsMax,panic:false,
+  return{poke,shiny,tier,zone:zoneId,busy:false,
+    turnsLeft:turnsMax,maxTurns:turnsMax,
     razzActive:false,nanabActive:false,pinapActive:false,
     qteStart:0,qteDuration:SAFARI_QTE_DUR[tier]};
 }
 
-function sfCatchProb(tier,ball,hp,maxHp,qteMult=1,panic=false,razz=false){
+function sfCatchProb(tier,ball,qteMult=1,razz=false){
   if(ball==='master')return 1;
   const rate=SAFARI_CATCH_RATES[tier];
-  // HP factor: 0.5 at full HP → 1.0 at 0 HP (real games use similar curve)
-  const hpFactor=(2*maxHp-hp)/(2*maxHp);
-  let prob=hpFactor*(rate/255)*SAFARI_BALL_MULT[ball]*qteMult;
-  if(panic)prob*=0.5;
+  let prob=(rate/255)*SAFARI_BALL_MULT[ball]*qteMult;
   if(razz)prob*=1.6;
   return Math.min(prob,1);
 }
@@ -3715,9 +3698,6 @@ function _sfShowEncounter(enc){
   const shinyEl=document.getElementById('sf-enemy-shiny');
   if(shinyEl)shinyEl.style.display=enc.shiny?'':'none';
 
-  _sfUpdateHp(enc.hp,enc.maxHp);
-  document.getElementById('sf-enemy-panic').style.display='none';
-  document.getElementById('sf-hp-fill').classList.remove('panic');
   document.getElementById('sf-msg-box').textContent=`¡Un ${cap(enc.poke.name)} salvaje apareció!`;
   document.getElementById('sf-ball-fly').style.display='none';
   document.getElementById('sf-qte-overlay').style.display='none';
@@ -3726,15 +3706,6 @@ function _sfShowEncounter(enc){
   _sfRenderTurns();
   _sfRenderBerryRow();
   document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
-  document.getElementById('sf-btn-weak')?.removeAttribute('disabled');
-}
-
-function _sfUpdateHp(hp,max){
-  const fill=document.getElementById('sf-hp-fill');
-  if(!fill)return;
-  const pct=Math.max(0,hp/max*100);
-  fill.style.width=pct+'%';
-  fill.style.background=pct>50?'#4caf50':pct>25?'#ffc107':'#f44336';
 }
 
 function _sfRenderBallRow(){
@@ -3761,34 +3732,6 @@ function _sfRenderBallRow(){
 }
 
 function sfSelectBall(type){S.safari.selBall=type;_sfRenderBallRow();}
-
-function safariWeaken(){
-  const enc=S.safari.encounter;
-  if(!enc||enc.busy)return;
-  enc.hp=Math.max(Math.floor(enc.maxHp*0.05),enc.hp-Math.floor(enc.maxHp*0.3));
-  _sfUpdateHp(enc.hp,enc.maxHp);
-  const hpPct=enc.hp/enc.maxHp;
-
-  if(!enc.panic&&hpPct<0.15){
-    enc.panic=true;
-    document.getElementById('sf-enemy-panic').style.display='';
-    document.getElementById('sf-hp-fill').classList.add('panic');
-    document.getElementById('sf-msg-box').textContent='⚡ ¡PÁNICO! ¡Más difícil! Lanza ya';
-    if(Math.random()<0.25){
-      _sfDisableActions();
-      setTimeout(()=>{
-        document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} huyó del pánico!`;
-        setTimeout(showSafariHome,1500);
-      },700);
-      return;
-    }
-    _sfUseTurn();
-    return;
-  }
-
-  document.getElementById('sf-msg-box').textContent=enc.panic?'⚡ ¡PÁNICO! Lanza pronto':'HP reducido · ¡Más fácil de atrapar!';
-  _sfUseTurn();
-}
 
 let _sfQteActive=false;
 function sfThrowOrQte(){if(_sfQteActive)sfQteTap();else safariThrow();}
@@ -3817,7 +3760,6 @@ function safariThrow(){
   _sfQteActive=true;
   const btn=document.getElementById('sf-btn-throw');
   if(btn){btn.textContent='🎯 ¡AHORA!';btn.classList.add('qte-active');}
-  document.getElementById('sf-btn-weak')?.setAttribute('disabled','');
   sfQteStart();
 }
 
@@ -3896,9 +3838,10 @@ async function _sfDoThrow(qteMult,qteMsg){
     if(!fled)_sfEnableActions();
     return;
   }
+  const nanabWasActive=enc.nanabActive;
   enc.nanabActive=false;
 
-  const prob=sfCatchProb(enc.tier,ball,enc.hp,enc.maxHp,qteMult,enc.panic,enc.razzActive);
+  const prob=sfCatchProb(enc.tier,ball,qteMult,enc.razzActive);
   enc.razzActive=false;
   // 3-shake system: each shake is independent with P = ∛(prob)
   // so P(pass all 3) = prob — same expected catch rate, but realistic 0-3 shake drama
@@ -3939,12 +3882,12 @@ async function _sfDoThrow(qteMult,qteMsg){
     const key=String(enc.poke.id);
     const isNew=!S.safari.caught[key];
     if(isNew){S.safari.caught[key]={count:0,shiny:enc.shiny,firstDate:Date.now(),firstZone:enc.zone};}
-    S.safari.caught[key].count+=enc.pinapActive?2:1;
+    S.safari.caught[key].count+=1;
     S.safari.caught[key].lastDate=Date.now();
     S.safari.caught[key].lastZone=enc.zone;
     if(enc.shiny)S.safari.caught[key].shiny=true;
-    // Earn coins
-    const coinsEarned=SAFARI_COIN_RATE[enc.tier]*(enc.shiny?2:1);
+    // Earn coins (Pinap ×2 coins, shiny ×2 coins)
+    const coinsEarned=SAFARI_COIN_RATE[enc.tier]*(enc.shiny?2:1)*(enc.pinapActive?2:1);
     S.safari.coins=(S.safari.coins||0)+coinsEarned;
     // Streak reward every 25 total catches
     const prev=S.safari.catchTotal||0;
@@ -3961,6 +3904,15 @@ async function _sfDoThrow(qteMult,qteMsg){
     await _sfDelay(600);
     sprite.style.animation=enc.shiny?'sfShinyPulse 1.8s infinite':'none';
     enc.busy=false;
+    // Flee check: Pokémon may run away after escaping the ball
+    const fleeRate=SAFARI_FLEE_RATE[enc.tier]||0;
+    if(fleeRate>0&&Math.random()<fleeRate*(nanabWasActive?0.3:1)){
+      document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} huyó!`;
+      _sfDisableActions();
+      S.safari.encounter=null;
+      setTimeout(showSafariHome,1600);
+      return;
+    }
     const fled=_sfUseTurn();
     if(fled)return;
     if((S.safari.balls.poke||0)<=0&&(S.safari.balls.great||0)<=0&&!S.safari.balls.ultra&&!S.safari.balls.master){
@@ -4010,8 +3962,8 @@ function _sfRenderBerryRow(){
   const b=S.safari.berries;
   const defs=[
     {type:'razz', emoji:'🍓',name:'Razz',  desc:'+60% captura', active:enc?.razzActive},
-    {type:'nanab',emoji:'🍌',name:'Nanab', desc:'No esquiva',    active:enc?.nanabActive},
-    {type:'pinap',emoji:'🍍',name:'Pinap', desc:'x2 conteo',    active:enc?.pinapActive},
+    {type:'nanab',emoji:'🍌',name:'Nanab', desc:'-70% huida',    active:enc?.nanabActive},
+    {type:'pinap',emoji:'🍍',name:'Pinap', desc:'x2 monedas',   active:enc?.pinapActive},
   ];
   const hasAny=defs.some(d=>(b[d.type]||0)>0||d.active);
   row.style.display=hasAny?'flex':'none';
@@ -4037,18 +3989,16 @@ function safariUseBerry(type){
   else if(type==='pinap'){enc.pinapActive=true;}
   scheduleSave();
   _sfRenderBerryRow();
-  const msgs={razz:'🍓 Razz · Más fácil de atrapar',nanab:'🍌 Nanab · No esquivará',pinap:'🍍 Pinap · Contará el doble'};
+  const msgs={razz:'🍓 Razz · Más fácil de atrapar',nanab:'🍌 Nanab · Menos probable que huya',pinap:'🍍 Pinap · x2 monedas al capturar'};
   document.getElementById('sf-msg-box').textContent=msgs[type];
 }
 
 function _sfDisableActions(){
   document.getElementById('sf-btn-throw')?.setAttribute('disabled','');
-  document.getElementById('sf-btn-weak')?.setAttribute('disabled','');
   _sfRestoreThrowBtn();
 }
 function _sfEnableActions(){
   document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
-  document.getElementById('sf-btn-weak')?.removeAttribute('disabled');
   _sfRestoreThrowBtn();
 }
 function _sfDelay(ms){return new Promise(r=>setTimeout(r,ms));}
