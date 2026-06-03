@@ -3412,7 +3412,7 @@ const SAFARI_RENEW_MS=60*60*1000; // 1 hour
 const SAFARI_TURN_MAX=[10,8,6,5,5,4];    // max turns per tier before flee
 const SAFARI_FLEE_RATE=[0.10,0.15,0.10,0.05,0,0]; // flee chance per missed throw by tier
 const SAFARI_QTE_DUR=[1800,1500,1200,1000,850,700]; // ms per QTE cycle by tier
-const SAFARI_QTE_TARGET=[88,74,60,48,36,26];        // green ring px by tier (big=easy, small=hard)
+const SAFARI_QTE_TARGET=[70,56,44,34,24,16];        // green ring px by tier (big=easy, small=hard)
 const SAFARI_COIN_RATE=[1,2,5,10,25,50];            // coins per catch by tier (shiny ×2)
 const SAFARI_DODGE=[0,0,0.12,0.18,0.25,0.30];      // dodge chance per tier
 const SAFARI_MILESTONES=[
@@ -3500,6 +3500,9 @@ const SF_SHOP=[
   {id:'great5', label:'5 Super Balls',  ico:'⭐', price:15, reward:{great:5}},
   {id:'ultra3', label:'3 Ultra Balls',  ico:'🔵', price:30, reward:{ultra:3}},
   {id:'master1',label:'1 Master Ball',  ico:'💜', price:100,reward:{master:1}},
+  {id:'razz3',  label:'3 Razz Berries', ico:'🍓', price:8,  reward:{razz:3}},
+  {id:'nanab3', label:'3 Nanab Berries',ico:'🍌', price:6,  reward:{nanab:3}},
+  {id:'pinap3', label:'3 Pinap Berries',ico:'🍍', price:10, reward:{pinap:3}},
 ];
 
 function sfShowShop(){
@@ -3527,10 +3530,16 @@ function sfBuyBall(itemId){
   if(!item)return;
   if((S.safari.coins||0)<item.price){sfToast('Monedas insuficientes');return;}
   S.safari.coins-=item.price;
-  if(item.reward.poke) S.safari.balls.poke=(S.safari.balls.poke||0)+item.reward.poke;
-  if(item.reward.great)S.safari.balls.great=(S.safari.balls.great||0)+item.reward.great;
-  if(item.reward.ultra)S.safari.balls.ultra=(S.safari.balls.ultra||0)+item.reward.ultra;
+  if(item.reward.poke)  S.safari.balls.poke=(S.safari.balls.poke||0)+item.reward.poke;
+  if(item.reward.great) S.safari.balls.great=(S.safari.balls.great||0)+item.reward.great;
+  if(item.reward.ultra) S.safari.balls.ultra=(S.safari.balls.ultra||0)+item.reward.ultra;
   if(item.reward.master)S.safari.balls.master=(S.safari.balls.master||0)+item.reward.master;
+  if(item.reward.razz||item.reward.nanab||item.reward.pinap){
+    if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+    if(item.reward.razz) S.safari.berries.razz=(S.safari.berries.razz||0)+item.reward.razz;
+    if(item.reward.nanab)S.safari.berries.nanab=(S.safari.berries.nanab||0)+item.reward.nanab;
+    if(item.reward.pinap)S.safari.berries.pinap=(S.safari.berries.pinap||0)+item.reward.pinap;
+  }
   scheduleSave();
   sfShowShop(); // refresh shop with updated coins
   _sfRenderBalls();
