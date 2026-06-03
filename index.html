@@ -890,7 +890,12 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-hp-lbl{font-family:var(--px);font-size:8px;color:#9f9;flex-shrink:0}
 .sf-hp-track{flex:1;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden}
 .sf-hp-fill{height:100%;background:#4caf50;border-radius:4px;transition:width .4s,background .4s}
-.sf-ball-fly{position:absolute;width:32px;height:32px;image-rendering:pixelated;object-fit:contain;z-index:5;pointer-events:none;bottom:30%;left:50%;transform:translateX(-50%)}
+.sf-ball-fly{position:absolute;image-rendering:pixelated;object-fit:contain;z-index:5;pointer-events:none;display:none}
+@keyframes sfBallThrow{
+  0%  {top:78%;left:calc(54% - 27px);width:54px;height:54px;opacity:1;transform:rotate(0deg)}
+  45% {top:38%;left:calc(50% - 24px);width:48px;height:48px;opacity:1;transform:rotate(-270deg)}
+  100%{top:16%;left:calc(50% - 22px);width:44px;height:44px;opacity:1;transform:rotate(-540deg)}
+}
 .sf-msg-box{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:var(--px);font-size:11px;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.9);background:rgba(0,0,0,.7);border-radius:10px;padding:7px 14px;text-align:center;white-space:nowrap;z-index:4;min-width:160px}
 .sf-act-panel{background:rgba(12,12,12,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 16px 14px;display:flex;flex-direction:column;gap:9px;flex-shrink:0}
 .sf-ball-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
@@ -3552,7 +3557,7 @@ function _sfRenderZones(){
   if(!grid)return;
   const total=_sfTotalCaught();
   grid.innerHTML=Object.entries(SAFARI_ZONES).map(([id,z])=>{
-    const locked=!S.safari._adminUnlocked&&total<z.minCatch;
+    const locked=!_sfAdminUnlocked&&total<z.minCatch;
     const pool=sfGetPool(id);
     return`<div class="sf-zone-card${locked?' locked':''}" onclick="${locked?'':'sfStartEncounter(\''+id+'\')'}">
       <div class="sf-zone-art" style="background:${z.bg};background-size:180%"></div>
@@ -3598,17 +3603,24 @@ function _sfShowEncounter(enc){
     img.style.opacity='0';
     img.style.transition='opacity .25s';
     img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
-    let _shown=false;
-    const _show=()=>{if(!_shown){_shown=true;img.style.opacity='1';}};
-    img.onload=_show;
-    img.onerror=()=>{
-      img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;};
-      img.src=staticBWUrl;
-    };
-    img.src=id<=649?animUrl:staticBWUrl;
-    // Show quickly: cached images may not re-fire onload; 400ms fallback covers slow loads
+    const _show=()=>{img.style.opacity='1';};
+    if(id<=649){
+      // Gen 1-5: try animated GIF → BW static → official fallback
+      img.onload=_show;
+      img.onerror=()=>{
+        img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;img.onload=_show;};
+        img.src=staticBWUrl;
+      };
+      img.src=animUrl;
+    } else {
+      // Gen 6+: no BW sprite exists, go directly to official sprite
+      img.onload=_show;
+      img.onerror=null;
+      img.src=fallbackUrl;
+    }
+    // Fast-path for cached images; 500ms safety net for iOS GIF
     if(img.complete&&img.naturalWidth>0)_show();
-    else setTimeout(_show,400);
+    else setTimeout(_show,500);
   }
 
   document.getElementById('sf-enemy-name').textContent=cap(enc.poke.name);
@@ -3644,10 +3656,11 @@ function _sfRenderBallRow(){
   if(!row)return;
   const b=S.safari.balls;
   const options=[
-    {type:'poke',  count:_sfBasicBalls(), label:'Poké'},
-    {type:'ultra', count:b.ultra||0,      label:'Ultra'},
-    {type:'master',count:b.master||0,     label:'Master'},
-  ];
+    {type:'poke',  count:b.poke||0,  label:'Poké'},
+    {type:'great', count:b.great||0, label:'Super'},
+    {type:'ultra', count:b.ultra||0, label:'Ultra'},
+    {type:'master',count:b.master||0,label:'Master'},
+  ].filter(o=>o.count>0||o.type==='poke');
   const hasAny=options.some(o=>o.count>0);
   if(!hasAny){row.innerHTML='<span style="font-family:var(--px);font-size:9px;color:#888">Sin Poké Balls</span>';return;}
   if(!options.find(o=>o.type===S.safari.selBall&&o.count>0))
@@ -3698,10 +3711,13 @@ function safariThrow(){
   const enc=S.safari.encounter;
   if(!enc||enc.busy)return;
   const ball=S.safari.selBall||'poke';
-  if(ball==='poke'||ball==='great'){
-    if(_sfBasicBalls()<=0){sfToast('Sin Poké Balls básicas');return;}
-    if(S.safari.balls.poke>0)S.safari.balls.poke--;
-    else S.safari.balls.great--;
+  const b=S.safari.balls;
+  if(ball==='poke'){
+    if(!(b.poke>0)){sfToast('Sin Poké Balls');return;}
+    b.poke--;
+  } else if(ball==='great'){
+    if(!(b.great>0)){sfToast('Sin Super Balls');return;}
+    b.great--;
   } else if(ball==='ultra'){
     if(!S.safari.balls.ultra){sfToast('Sin Ultra Balls');return;}
     S.safari.balls.ultra--;
@@ -3790,30 +3806,40 @@ async function _sfDoThrow(qteMult,qteMsg){
   }
   enc.nanabActive=false;
 
-  // Ball fly
-  const ballEl=document.getElementById('sf-ball-fly');
-  if(ballEl){ballEl.src=SAFARI_BALL_IMGS[ball];ballEl.style.display='block';ballEl.style.animation='none';}
-
   const prob=sfCatchProb(enc.tier,ball,enc.hp,enc.maxHp,qteMult,enc.panic,enc.razzActive);
   enc.razzActive=false;
   const caught=Math.random()<prob;
   const shakes=caught?3:Math.floor(Math.random()*3);
 
+  // Launch ball — fly from bottom to Pokémon position
+  const ballEl=document.getElementById('sf-ball-fly');
+  const _ballAt=(anim)=>{
+    if(!ballEl)return;
+    ballEl.style.cssText=`display:block;position:absolute;top:16%;left:calc(50% - 22px);width:44px;height:44px;image-rendering:pixelated;object-fit:contain;z-index:5;pointer-events:none;animation:${anim}`;
+  };
+  if(ballEl){
+    ballEl.src=SAFARI_BALL_IMGS[ball];
+    ballEl.style.cssText='display:block;position:absolute;top:78%;left:calc(54% - 27px);width:54px;height:54px;image-rendering:pixelated;object-fit:contain;z-index:5;pointer-events:none;animation:sfBallThrow .42s cubic-bezier(.2,.6,.4,1) forwards';
+  }
+
   document.getElementById('sf-msg-box').textContent=qteMsg;
-  await _sfDelay(320);
+  await _sfDelay(300); // ball arriving at Pokémon
   const sprite=document.getElementById('sf-enemy-img');
   if(sprite){sprite.style.opacity='1';sprite.style.transition='none';sprite.style.animation='sfCaptured .4s forwards';}
   document.getElementById('sf-msg-box').textContent='';
-  await _sfDelay(400);
+  await _sfDelay(420); // sfCaptured completes
 
-  if(ballEl)ballEl.style.animation='sfBallPulse .5s infinite';
+  _ballAt('sfBallPulse .5s infinite');
   for(let i=0;i<shakes;i++){
-    if(ballEl){ballEl.style.animation='sfShake .5s ease';await _sfDelay(520);ballEl.style.animation='none';await _sfDelay(200);}
+    _ballAt('sfShake .5s ease');
+    await _sfDelay(520);
+    _ballAt('none');
+    await _sfDelay(200);
   }
 
   if(caught){
     document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} capturado!`;
-    if(ballEl)ballEl.style.animation='sfBallPulse 1s infinite';
+    _ballAt('sfBallPulse 1s infinite');
     const key=String(enc.poke.id);
     const isNew=!S.safari.caught[key];
     if(isNew){S.safari.caught[key]={count:0,shiny:enc.shiny,firstDate:Date.now(),firstZone:enc.zone};}
@@ -3834,7 +3860,7 @@ async function _sfDoThrow(qteMult,qteMsg){
     enc.busy=false;
     const fled=_sfUseTurn();
     if(fled)return;
-    if(_sfBasicBalls()<=0&&!S.safari.balls.ultra&&!S.safari.balls.master){
+    if((S.safari.balls.poke||0)<=0&&(S.safari.balls.great||0)<=0&&!S.safari.balls.ultra&&!S.safari.balls.master){
       document.getElementById('sf-msg-box').textContent='Sin Poké Balls · Regresando...';
       await _sfDelay(1600);
       showSafariHome();
@@ -3989,7 +4015,7 @@ function sfShowWhere(id){
   const total=_sfTotalCaught();
   const zones=Object.entries(SAFARI_ZONES)
     .filter(([,z])=>p.types.some(t=>z.types.includes(t)))
-    .map(([zid,z])=>({zid,z,locked:!S.safari._adminUnlocked&&total<z.minCatch}));
+    .map(([zid,z])=>({zid,z,locked:!_sfAdminUnlocked&&total<z.minCatch}));
   const rateLabels=['Muy común','Poco común','Raro','Muy raro','Legendario','Mítico'];
 
   const spr=document.getElementById('sf-detail-spr');
@@ -4086,7 +4112,8 @@ function sfCloseDetail(){
 
 const ADMIN_EMAIL = 'mario.diazagu@gmail.com';
 let _sfTestMode = false;
-let _sfRealSafari = null; // backup of S.safari when test mode is on
+let _sfRealSafari = null;
+let _sfAdminUnlocked = false; // runtime-only, never persisted
 
 function _isAdmin() {
   return currentUser && currentUser.email === ADMIN_EMAIL;
@@ -4118,6 +4145,7 @@ function sfToggleTestMode() {
       _sfRealSafari = null;
     }
     _sfTestMode = false;
+    _sfAdminUnlocked = false;
     document.getElementById('sf-test-banner').style.display = 'none';
   } else {
     // Enter test mode — save real data, load test state
@@ -4170,7 +4198,7 @@ function adminUnlockZones() {
   if (!S.safari.milestones) S.safari.milestones = [];
   const needed = Math.max(maxCatch, Object.keys(S.safari.caught || {}).length);
   // add a fake milestone marker to satisfy minCatch checks
-  S.safari._adminUnlocked = true;
+  _sfAdminUnlocked = true;
   scheduleSave();
   _adminToast('Zonas desbloqueadas');
   if (document.getElementById('sf-home')?.classList.contains('on')) _sfRenderZones();
@@ -4179,7 +4207,7 @@ function adminUnlockZones() {
 function adminClearCaught() {
   if (!confirm('¿Borrar todos los pokémon capturados?')) return;
   S.safari.caught = {};
-  S.safari._adminUnlocked = undefined;
+  _sfAdminUnlocked = false;
   scheduleSave();
   _adminToast('Pokémon borrados');
   if (document.getElementById('sf-home')?.classList.contains('on')) renderSafari();
@@ -4453,6 +4481,7 @@ if (d.set.companion !== undefined) S.companion = d.set.companion;
 if (d.set.glass !== undefined) { S.set.glass = d.set.glass; applyGlass(d.set.glass); }
 }
 if (d.safari) Object.assign(S.safari, d.safari);
+delete S.safari._adminUnlocked; // runtime-only flag, never load from storage
 if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
 } else {
 loadFromLocalStorage();
@@ -4484,6 +4513,7 @@ try { S.favs = new Set((JSON.parse(localStorage.getItem('fv')) || []).map(String
 try { S.teams = sanitizeTeams(JSON.parse(localStorage.getItem('tms')||'{}')); } catch(e){ S.teams = {}; }
 try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
 try { const d = localStorage.getItem('sf'); if(d) Object.assign(S.safari, JSON.parse(d)); } catch(e){}
+delete S.safari._adminUnlocked;
 if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
 }
 
