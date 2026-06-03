@@ -93,6 +93,9 @@ cursor:pointer;flex-shrink:0;color:var(--t3);
 }
 .ibtn.on{background:var(--ac);color:#fff}
 .ibtn:active{transform:scale(.9)}
+.mmode-btns{display:flex;gap:2px;align-items:center}
+.mmode-btn{width:28px;height:28px;border-radius:9px;border:1.5px solid transparent;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .15s;padding:0;flex-shrink:0}
+.mmode-btn.on{background:rgba(255,255,255,.7);border-color:var(--bd);color:var(--t1)}
 
 /* ── TABS -- floating pill bar ── */
 .tabs{
@@ -1324,7 +1327,11 @@ function sendPasswordReset(){
   <div class="mhdr">
     <button class="ibtn" onclick="closeMdl()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <span class="mnum" id="mnum">#001</span>
-    <button class="ibtn" id="msprbtn" onclick="toggleMSprite()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07"/></svg></button>
+    <div class="mmode-btns">
+      <button class="mmode-btn" id="mmode-art" onclick="setMImgMode('art')" title="Arte oficial"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"/><polyline points="21 15 16 10 5 21"/></svg></button>
+      <button class="mmode-btn" id="mmode-sprite" onclick="setMImgMode('sprite')" title="Sprite"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07"/></svg></button>
+      <button class="mmode-btn" id="mmode-anim" onclick="setMImgMode('anim')" title="Animado"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg></button>
+    </div>
   </div>
   <div class="mbody" id="mbody"></div>
 </div>
@@ -3025,7 +3032,7 @@ set:{modern:true, imgMode:'art', cols:3, myGames:[], trainerName:'', trainerGend
 f:{q:'',types:[],gen:0,rar:null},
 tab:'dex',
 teamGame:null,
-mId:null,mForms:[],mFi:0,mMod:true,mShy:false,
+mId:null,mForms:[],mFi:0,mMod:true,mImgMode:'art',mShy:false,
 fc:{},filtered:[],rendered:0,PAGE:60,
 desc:{},
 mPreviewForm:null,
@@ -5800,7 +5807,7 @@ ${c.fainted?`<div style="width:100%;max-width:340px;background:rgba(248,113,113,
 }
 
 async function openMdl(id){
-S.mId=id;S.mMod=_modFromMode();S.mShy=false;S.mForms=[];
+S.mId=id;S.mImgMode=_imgMode();S.mMod=S.mImgMode==='art';S.mShy=false;S.mForms=[];
 S.mPreviewForm=null;S.mPreviewShiny=false;
 _vpPoke=id;_vpForm=id;_vpShiny=false;
 const base=S.poke.find(p=>p.id===id);if(!base)return;
@@ -5959,15 +5966,22 @@ const trkData=S.track?.[trkKey]||{};
 const capC=Object.values(trkData).filter(g=>g?.captured).length;
 const totalG=activeGames().length||GAMES.length;
 
-const imgSrc=dispForm
-?(ps?(S.mMod?(dispForm.sprites.official_shiny||iShy(dispForm.id)):(dispForm.sprites.front_shiny||iPxS(dispForm.id)))
-:(S.mMod?(dispForm.sprites.official||iArt(dispForm.id)):(dispForm.sprites.front_default||iPx(dispForm.id))))
-:spOf(id,S.mMod,ps);
+const mMod=S.mImgMode==='art';
+S.mMod=mMod;
+const animId=dispForm?dispForm.id:id;
+const useAnim=S.mImgMode==='anim'&&animId<=649;
+const ANIM_BASE='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/';
+const imgSrc=useAnim
+?(ps?`${ANIM_BASE}shiny/${animId}.gif`:`${ANIM_BASE}${animId}.gif`)
+:(dispForm
+?(ps?(mMod?(dispForm.sprites.official_shiny||iShy(dispForm.id)):(dispForm.sprites.front_shiny||iPxS(dispForm.id)))
+:(mMod?(dispForm.sprites.official||iArt(dispForm.id)):(dispForm.sprites.front_default||iPx(dispForm.id))))
+:spOf(id,mMod,ps));
 const dispName=dispForm&&(dispForm.id!==id||dispForm.isCostume)
 ?fmtF(dispForm.isCostume?(dispForm.formName||dispForm.name):dispForm.name,dispForm.speciesName)
 :null;
 document.getElementById('mnum').textContent=`#${pad(id)}`;
-document.getElementById('msprbtn').classList.toggle('on',!S.mMod);
+['art','sprite','anim'].forEach(m=>{document.getElementById('mmode-'+m)?.classList.toggle('on',S.mImgMode===m);});
 const tPills=dispTypes.map(t=>{const ti=TYPES.find(x=>x.id===t);return`<span class="htype" style="background:${tc(t)}">${ti?.n||t}</span>`;}).join('');
 const tSmallPills=dispTypes.map(t=>{const ti=TYPES.find(x=>x.id===t);return`<span class="htype" style="background:${tc(t)};font-size:10px;padding:3px 10px">${ti?.n||t}</span>`;}).join('');
 
@@ -5984,7 +5998,7 @@ const p1=`<div id="mdl-panel-info" class="mdl-panel">
 <button class="shbtn${ps?' on':''}" id="shbtn-hero" onclick="toggleShy()" title="Ver forma shiny">
 <svg width="15" height="15" viewBox="0 0 24 24" fill="${ps?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="${ps?'currentColor':'none'}"/></svg>
 </button>
-<div class="hwrap" style="cursor:zoom-in" onclick="openImgViewer('${imgSrc}',${!S.mMod})${base.id===151?';mewTap()':''}"><img id="mimg" class="himg${S.mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="onSpriteError(this)"></div>
+<div class="hwrap" style="cursor:zoom-in" onclick="openImgViewer('${imgSrc}',${!mMod})${base.id===151?';mewTap()':''}"><img id="mimg" class="himg${mMod?'':' px'}" src="${imgSrc}" alt="${base.name}" onerror="onSpriteError(this)"></div>
 <div class="hname">${cap(base.name)}</div>
 ${dispName?`<div class="hform" style="${ps?'color:var(--gold)':''}">${dispName}${ps?' ✦':''}</div>`:ps?`<div class="hform" style="color:var(--gold)">✦ Shiny</div>`:''}
 <div class="hrar" style="background:${rar.d}18;border-color:${rar.d}55;color:${rar.d}"><span class="hrardot" style="background:${rar.d}"></span>${rar.l}</div>
@@ -6102,7 +6116,8 @@ body.addEventListener('touchend',onE,{passive:true});
 body._sw={s:onS,e:onE};
 }
 
-function toggleMSprite(){S.mMod=!S.mMod;const b=S.poke.find(p=>p.id===S.mId);if(b)buildMdl(b,S.mForms);}
+function setMImgMode(mode){S.mImgMode=mode;S.mMod=mode==='art';const b=S.poke.find(p=>p.id===S.mId);if(b)buildMdl(b,S.mForms);}
+function toggleMSprite(){setMImgMode(S.mImgMode==='art'?'sprite':'art');}
 
 function toggleShy(){
 S.mPreviewShiny=!S.mPreviewShiny;
@@ -6145,16 +6160,22 @@ if(!hero){buildMdl(base,S.mForms);return;}
 // Update image
 const img=document.getElementById('mimg');
 const mod=S.mMod;
+const vAnimId=form?form.id:pokeId;
+const vUseAnim=S.mImgMode==='anim'&&vAnimId<=649;
+const ANIM_BASE2='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/';
 if(img&&form){
-const sp=isShiny
-?(mod?(form.sprites.official_shiny||iShy(form.id)):(form.sprites.front_shiny||iPxS(form.id)))
-:(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id)));
+const sp=vUseAnim
+?(isShiny?`${ANIM_BASE2}shiny/${vAnimId}.gif`:`${ANIM_BASE2}${vAnimId}.gif`)
+:(isShiny?(mod?(form.sprites.official_shiny||iShy(form.id)):(form.sprites.front_shiny||iPxS(form.id)))
+:(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id))));
 img.src=sp;
 img.className=`himg${mod?'':' px'}`;
 const hwrap=img.parentElement;
 if(hwrap)hwrap.onclick=()=>openImgViewer(sp,!mod);
 } else if(img){
-const sp=spOf(pokeId,mod,isShiny);
+const sp=vUseAnim&&pokeId<=649
+?(isShiny?`${ANIM_BASE2}shiny/${pokeId}.gif`:`${ANIM_BASE2}${pokeId}.gif`)
+:spOf(pokeId,mod,isShiny);
 img.src=sp;
 const hwrap=img.parentElement;
 if(hwrap)hwrap.onclick=()=>openImgViewer(sp,!mod);
@@ -6557,6 +6578,7 @@ if(typeof closeMovePopup !== "undefined") window.closeMovePopup = closeMovePopup
 if(typeof openResources !== "undefined") window.openResources = openResources;
 if(typeof closeResources !== "undefined") window.closeResources = closeResources;
 window.toggleMSprite = toggleMSprite;
+window.setMImgMode = setMImgMode;
 window.toggleShy = toggleShy;
 window.doFav = doFav;
 window.previewVariant = previewVariant;
