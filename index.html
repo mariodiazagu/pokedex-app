@@ -1333,6 +1333,9 @@ function sendPasswordReset(){
       <div class="sf-ptitle">Safari</div>
       <button class="ibtn" onclick="showSafariCollection()" title="Colección" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
     </div>
+    <div id="sf-test-banner" style="display:none;margin:0 0 8px;padding:6px 12px;border-radius:10px;background:#E53935;color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;text-align:center;text-transform:uppercase">
+      ⚗️ MODO PRUEBA — datos aislados
+    </div>
     <div id="sf-balls-bar" class="sf-balls-bar"></div>
     <div class="gscroll">
       <div id="sf-zone-grid" class="sf-zone-grid"></div>
@@ -1539,6 +1542,46 @@ function sendPasswordReset(){
       Importar datos
     </button>
     <input type="file" id="import-file-inp" accept=".json,application/json" style="display:none" onchange="importData(this.files[0]);this.value=''">
+  </div>
+</div>
+
+<!-- Admin Panel (email-gated) -->
+<div class="cfg-card" id="admin-panel-card" style="display:none;border:1.5px solid #E53935;background:#E5393508">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <div class="cfg-label" style="color:#E53935;margin:0">Panel Admin</div>
+    <div style="margin-left:auto;font-size:10px;font-weight:700;color:#E53935;opacity:.6">PRIVADO</div>
+  </div>
+
+  <!-- Test mode toggle -->
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--s2);border:1.5px solid var(--bd);margin-bottom:12px">
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700;color:var(--t1)">Modo Prueba</div>
+      <div style="font-size:11px;color:var(--t3);margin-top:2px">Safari aislado · no afecta tu progreso real</div>
+    </div>
+    <button id="admin-test-toggle" onclick="sfToggleTestMode()" style="width:44px;height:26px;border-radius:13px;border:none;cursor:pointer;transition:background .2s;padding:0;position:relative;background:#ccc">
+      <span style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;display:block" id="admin-test-knob"></span>
+    </button>
+  </div>
+
+  <!-- Admin actions -->
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Acciones</div>
+    <button onclick="adminFillBalls()" style="padding:10px 14px;border-radius:12px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer;text-align:left">
+      ⚾ Rellenar todas las balls (99 de cada)
+    </button>
+    <button onclick="adminGiveBerries()" style="padding:10px 14px;border-radius:12px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer;text-align:left">
+      🍓 Dar 50 bayas de cada tipo
+    </button>
+    <button onclick="adminUnlockZones()" style="padding:10px 14px;border-radius:12px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer;text-align:left">
+      🗺️ Desbloquear todas las zonas
+    </button>
+    <button onclick="adminClearCaught()" style="padding:10px 14px;border-radius:12px;border:1.5px solid #ff980022;background:#ff980008;font-family:var(--fn);font-size:13px;font-weight:700;color:#e65100;cursor:pointer;text-align:left">
+      🗑️ Borrar pokémon capturados
+    </button>
+    <button onclick="adminFullReset()" style="padding:10px 14px;border-radius:12px;border:1.5px solid #E5393522;background:#E5393508;font-family:var(--fn);font-size:13px;font-weight:700;color:#E53935;cursor:pointer;text-align:left">
+      ⚠️ Reset completo del Safari
+    </button>
   </div>
 </div>
 
@@ -3501,7 +3544,7 @@ function _sfRenderZones(){
   if(!grid)return;
   const total=_sfTotalCaught();
   grid.innerHTML=Object.entries(SAFARI_ZONES).map(([id,z])=>{
-    const locked=total<z.minCatch;
+    const locked=!S.safari._adminUnlocked&&total<z.minCatch;
     const pool=sfGetPool(id);
     return`<div class="sf-zone-card${locked?' locked':''}" onclick="${locked?'':'sfStartEncounter(\''+id+'\')'}">
       <div class="sf-zone-art" style="background:${z.bg};background-size:180%"></div>
@@ -3920,7 +3963,7 @@ function sfShowWhere(id){
   const total=_sfTotalCaught();
   const zones=Object.entries(SAFARI_ZONES)
     .filter(([,z])=>p.types.some(t=>z.types.includes(t)))
-    .map(([zid,z])=>({zid,z,locked:total<z.minCatch}));
+    .map(([zid,z])=>({zid,z,locked:!S.safari._adminUnlocked&&total<z.minCatch}));
   const rateLabels=['Muy común','Poco común','Raro','Muy raro','Legendario','Mítico'];
 
   const spr=document.getElementById('sf-detail-spr');
@@ -4011,6 +4054,129 @@ function sfShowDetail(id){
 function sfCloseDetail(){
   document.getElementById('sf-detail-backdrop').classList.remove('on');
   document.getElementById('sf-detail-sheet').classList.remove('on');
+}
+
+// ── ADMIN PANEL + TEST MODE ──────────────────────────────────
+
+const ADMIN_EMAIL = 'mario.diazagu@gmail.com';
+let _sfTestMode = false;
+let _sfRealSafari = null; // backup of S.safari when test mode is on
+
+function _isAdmin() {
+  return currentUser && currentUser.email === ADMIN_EMAIL;
+}
+
+function _updateAdminPanel() {
+  const card = document.getElementById('admin-panel-card');
+  if (!card) return;
+  card.style.display = _isAdmin() ? '' : 'none';
+  _updateTestToggleUI();
+}
+
+function _updateTestToggleUI() {
+  const toggle = document.getElementById('admin-test-toggle');
+  const knob = document.getElementById('admin-test-knob');
+  if (!toggle || !knob) return;
+  toggle.style.background = _sfTestMode ? '#E53935' : '#ccc';
+  knob.style.transform = _sfTestMode ? 'translateX(18px)' : 'translateX(0)';
+}
+
+function sfToggleTestMode() {
+  if (_sfTestMode) {
+    // Exit test mode — restore real safari
+    try { localStorage.setItem('sf_test', JSON.stringify(S.safari)); } catch(e) {}
+    if (_sfRealSafari) {
+      S.safari = _sfRealSafari;
+      _sfRealSafari = null;
+    }
+    _sfTestMode = false;
+    document.getElementById('sf-test-banner').style.display = 'none';
+  } else {
+    // Enter test mode — save real data, load test state
+    _sfRealSafari = JSON.parse(JSON.stringify(S.safari));
+    let testState = null;
+    try { const d = localStorage.getItem('sf_test'); if (d) testState = JSON.parse(d); } catch(e) {}
+    S.safari = testState || {
+      caught: {},
+      balls: {poke: 10, great: 0, ultra: 0, master: 0, lastRenew: null},
+      berries: {razz: 0, nanab: 0, pinap: 0},
+      milestones: [],
+      selBall: 'poke'
+    };
+    if (!S.safari.berries) S.safari.berries = {razz:0,nanab:0,pinap:0};
+    _sfTestMode = true;
+    document.getElementById('sf-test-banner').style.display = '';
+  }
+  _updateTestToggleUI();
+  if (document.getElementById('pg-safari')?.classList.contains('on') ||
+      document.getElementById('sf-home')?.classList.contains('on')) {
+    renderSafari();
+  }
+}
+
+function _sfCurrentSafari() {
+  return S.safari;
+}
+
+function adminFillBalls() {
+  S.safari.balls.poke = 99;
+  S.safari.balls.great = 99;
+  S.safari.balls.ultra = 99;
+  S.safari.balls.master = 99;
+  scheduleSave();
+  _adminToast('Balls rellenadas');
+  if (document.getElementById('sf-home')?.classList.contains('on')) _sfRenderBalls();
+}
+
+function adminGiveBerries() {
+  if (!S.safari.berries) S.safari.berries = {razz:0,nanab:0,pinap:0};
+  S.safari.berries.razz += 50;
+  S.safari.berries.nanab += 50;
+  S.safari.berries.pinap += 50;
+  scheduleSave();
+  _adminToast('Bayas añadidas');
+}
+
+function adminUnlockZones() {
+  const maxCatch = Math.max(...Object.values(SAFARI_ZONES).map(z => z.minCatch));
+  if (!S.safari.milestones) S.safari.milestones = [];
+  const needed = Math.max(maxCatch, Object.keys(S.safari.caught || {}).length);
+  // add a fake milestone marker to satisfy minCatch checks
+  S.safari._adminUnlocked = true;
+  scheduleSave();
+  _adminToast('Zonas desbloqueadas');
+  if (document.getElementById('sf-home')?.classList.contains('on')) _sfRenderZones();
+}
+
+function adminClearCaught() {
+  if (!confirm('¿Borrar todos los pokémon capturados?')) return;
+  S.safari.caught = {};
+  S.safari._adminUnlocked = undefined;
+  scheduleSave();
+  _adminToast('Pokémon borrados');
+  if (document.getElementById('sf-home')?.classList.contains('on')) renderSafari();
+}
+
+function adminFullReset() {
+  if (!confirm('¿Reset completo del Safari? Se perderán balls, bayas y capturados.')) return;
+  S.safari = {caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},berries:{razz:0,nanab:0,pinap:0},milestones:[],selBall:'poke'};
+  scheduleSave();
+  _adminToast('Safari reseteado');
+  if (document.getElementById('sf-home')?.classList.contains('on')) renderSafari();
+}
+
+function _adminToast(msg) {
+  let t = document.getElementById('admin-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'admin-toast';
+    t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#E53935;color:#fff;font-size:12px;font-weight:700;padding:8px 18px;border-radius:20px;z-index:9999;pointer-events:none;transition:opacity .3s';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._to);
+  t._to = setTimeout(() => { t.style.opacity = '0'; }, 2000);
 }
 
 // ═══════════════════════════════════════
@@ -4197,14 +4363,16 @@ dark: S.set.dark||false,
 companion: S.companion || {hp:80,energy:80,hunger:70,mood:75,lastVisit:null,fainted:false,faintCount:0,history:[]},
 glass: S.set.glass || 45,
 };
-await db.collection('users').doc(currentUser.uid).set({
+const cloudData = {
 track: S.track,
 favs: [...S.favs],
 teams: S.teams,
 set: cloudSet,
-safari: S.safari,
 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-}, { merge: true });
+};
+// In test mode, never write safari data to Firestore
+if (!_sfTestMode) cloudData.safari = _sfRealSafari || S.safari;
+await db.collection('users').doc(currentUser.uid).set(cloudData, { merge: true });
 setSyncing(false);
 } catch(e) {
 console.error('Save error:', e);
@@ -4219,7 +4387,12 @@ localStorage.setItem('t', JSON.stringify(S.track));
 localStorage.setItem('fv', JSON.stringify([...S.favs]));
 localStorage.setItem('tms', JSON.stringify(S.teams));
 localStorage.setItem('st', JSON.stringify(S.set));
-localStorage.setItem('sf', JSON.stringify(S.safari));
+if (_sfTestMode) {
+  // In test mode: write current (test) state to sf_test, keep sf untouched
+  localStorage.setItem('sf_test', JSON.stringify(S.safari));
+} else {
+  localStorage.setItem('sf', JSON.stringify(S.safari));
+}
 } catch(e) {}
 }
 
@@ -5967,6 +6140,7 @@ if(teamImg){teamImg.src=sprite;teamImg.style.display=hasName?'block':'none';}
 }
 
 function renderSettings(){
+_updateAdminPanel();
 const walkerTog=document.getElementById('walker-toggle');
 if(walkerTog)walkerTog.className=`cfg-toggle${S.set.showWalker?' on':''}`;
 const darkTog=document.getElementById('dark-toggle');
@@ -7611,6 +7785,12 @@ window.setGlass = setGlass;
 window.applyColsSetting = applyColsSetting;
 window.isPwUnlocked = isPwUnlocked;
 window.setPwUnlocked = setPwUnlocked;
+window.sfToggleTestMode = sfToggleTestMode;
+window.adminFillBalls = adminFillBalls;
+window.adminGiveBerries = adminGiveBerries;
+window.adminUnlockZones = adminUnlockZones;
+window.adminClearCaught = adminClearCaught;
+window.adminFullReset = adminFullReset;
 
 auth.onAuthStateChanged(async user => {
 dbg('onAuthStateChanged: ' + (user ? user.email : 'null'));
@@ -7630,6 +7810,7 @@ sel.innerHTML = '<option value="all">Todos los juegos</option>';
 GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.n; sel.appendChild(o); });
 }
 updateTrainerUI();
+_updateAdminPanel();
 setTimeout(fetchTypesInBackground, 1500);
 setTimeout(initWalker, 500);
 setTimeout(showWhatsNew, 800);
@@ -7638,6 +7819,7 @@ updateCompanionOnVisit();
 } else {
 // Not logged in -- show Google sign-in
 currentUser = null;
+_updateAdminPanel();
 document.getElementById('app').style.display='none';
 document.getElementById('auth-screen').classList.remove('hidden');
 // Mostrar siempre el botón de Google; el standalone-step es fallback
