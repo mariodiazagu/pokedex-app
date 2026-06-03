@@ -2464,18 +2464,24 @@ const POKE_DB=[
 ];
 
 const CDN='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
+const RAW='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
 const iArt=id=>`${CDN}/other/official-artwork/${id}.png`;
 const iShy=id=>`${CDN}/other/official-artwork/shiny/${id}.png`;
 const iPx=id=>`${CDN}/${id}.png`;
 const iPxS=id=>`${CDN}/shiny/${id}.png`;
-const spOf=(id,mod,shy)=>mod?(shy?iShy(id):iArt(id)):(shy?iPxS(id):iPx(id));
+// BW Gen5 static sprites — same 96px canvas as the animated GIFs
+const iPxBW=id=>`${RAW}/versions/generation-v/black-white/${id}.png`;
+const iPxBWS=id=>`${RAW}/versions/generation-v/black-white/shiny/${id}.png`;
+// For sprite mode, use BW sprites on Gen1-5 (id≤649) so canvas matches animated GIFs
+const iPxN=(id,shy)=>id<=649?(shy?iPxBWS(id):iPxBW(id)):(shy?iPxS(id):iPx(id));
+const spOf=(id,mod,shy)=>mod?(shy?iShy(id):iArt(id)):iPxN(id,shy);
 const STAT_COLORS={hp:'#FF5959',attack:'#F5AC78',defense:'#FAE078','special-attack':'#9DB7F5','special-defense':'#A7DB8D',speed:'#FA92B2'};
 const STAT_ORDER=['hp','attack','defense','special-attack','special-defense','speed'];
 const TYPE_CHART={normal:{fighting:2,ghost:0},fire:{water:2,rock:2,ground:2,fire:.5,grass:.5,ice:.5,bug:.5,steel:.5,fairy:.5},water:{electric:2,grass:2,water:.5,fire:.5,ice:.5,steel:.5},grass:{fire:2,ice:2,poison:2,flying:2,bug:2,water:.5,grass:.5,electric:.5,ground:.5},electric:{ground:2,electric:.5,flying:.5,steel:.5},ice:{fire:2,fighting:2,rock:2,steel:2,ice:.5},fighting:{flying:2,psychic:2,fairy:2,bug:.5,rock:.5,dark:.5},poison:{ground:2,psychic:2,fighting:.5,poison:.5,bug:.5,grass:.5,fairy:.5},ground:{water:2,grass:2,ice:2,rock:.5,poison:.5,electric:0},flying:{electric:2,ice:2,rock:2,fighting:.5,bug:.5,grass:.5,ground:0},psychic:{bug:2,ghost:2,dark:2,fighting:.5,psychic:.5},bug:{fire:2,flying:2,rock:2,fighting:.5,ground:.5,grass:.5},rock:{water:2,grass:2,fighting:2,ground:2,steel:2,normal:.5,fire:.5,poison:.5,flying:.5},ghost:{ghost:2,dark:2,poison:.5,bug:.5,normal:0,fighting:0},dragon:{ice:2,dragon:2,fairy:2,fire:.5,water:.5,grass:.5,electric:.5},dark:{fighting:2,bug:2,fairy:2,ghost:.5,dark:.5,psychic:0},steel:{fire:2,fighting:2,ground:2,normal:.5,grass:.5,ice:.5,flying:.5,psychic:.5,bug:.5,rock:.5,dragon:.5,steel:.5,poison:0},fairy:{poison:2,steel:2,fighting:.5,bug:.5,dark:.5,dragon:0}};
 const fmSp=(f,mod,shy)=>{
 if(!f)return'';
 if(mod)return shy?(f.sprites?.official_shiny||iShy(f.id)):(f.sprites?.official||iArt(f.id));
-return shy?(f.sprites?.front_shiny||iPxS(f.id)):(f.sprites?.front_default||iPx(f.id));
+return shy?(f.sprites?.front_shiny||iPxN(f.id,true)):(f.sprites?.front_default||iPxN(f.id,false));
 };
 const _imgMode=()=>S.set.imgMode||(S.set.modern?'art':'anim');
 const _modFromMode=()=>_imgMode()==='art';
@@ -5036,7 +5042,7 @@ const artImg=document.getElementById('prev-img-art');
 const pxImg=document.getElementById('prev-img-sprite');
 const animImg=document.getElementById('prev-img-anim');
 if(artImg)artImg.src=iArt(25);
-if(pxImg)pxImg.src=iPx(25);
+if(pxImg)pxImg.src=iPxBW(25);
 if(animImg)animImg.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif`;
 const grid=document.getElementById('my-games-grid');
 if(!grid)return;
@@ -5898,8 +5904,8 @@ window.setViewerImgMode=function(mode){
   } else {
     const mMod=mode==='art';
     src=dispForm
-      ?(ps?(mMod?(dispForm.sprites.official_shiny||iShy(dispForm.id)):(dispForm.sprites.front_shiny||iPxS(dispForm.id)))
-      :(mMod?(dispForm.sprites.official||iArt(dispForm.id)):(dispForm.sprites.front_default||iPx(dispForm.id))))
+      ?(ps?(mMod?(dispForm.sprites.official_shiny||iShy(dispForm.id)):(dispForm.sprites.front_shiny||iPxN(dispForm.id,true)))
+      :(mMod?(dispForm.sprites.official||iArt(dispForm.id)):(dispForm.sprites.front_default||iPxN(dispForm.id,false))))
       :spOf(S.mId,mode==='art',ps);
   }
   img.src=src;
@@ -6003,8 +6009,8 @@ const ANIM_BASE='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprite
 const imgSrc=useAnim
 ?(ps?`${ANIM_BASE}shiny/${animId}.gif`:`${ANIM_BASE}${animId}.gif`)
 :(dispForm
-?(ps?(mMod?(dispForm.sprites.official_shiny||iShy(dispForm.id)):(dispForm.sprites.front_shiny||iPxS(dispForm.id)))
-:(mMod?(dispForm.sprites.official||iArt(dispForm.id)):(dispForm.sprites.front_default||iPx(dispForm.id))))
+?(ps?(mMod?(dispForm.sprites.official_shiny||iShy(dispForm.id)):(dispForm.sprites.front_shiny||iPxN(dispForm.id,true)))
+:(mMod?(dispForm.sprites.official||iArt(dispForm.id)):(dispForm.sprites.front_default||iPxN(dispForm.id,false))))
 :spOf(id,mMod,ps));
 const dispName=dispForm&&(dispForm.id!==id||dispForm.isCostume)
 ?fmtF(dispForm.isCostume?(dispForm.formName||dispForm.name):dispForm.name,dispForm.speciesName)
@@ -6195,8 +6201,8 @@ const ANIM_BASE2='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprit
 if(img&&form){
 const sp=vUseAnim
 ?(isShiny?`${ANIM_BASE2}shiny/${vAnimId}.gif`:`${ANIM_BASE2}${vAnimId}.gif`)
-:(isShiny?(mod?(form.sprites.official_shiny||iShy(form.id)):(form.sprites.front_shiny||iPxS(form.id)))
-:(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id))));
+:(isShiny?(mod?(form.sprites.official_shiny||iShy(form.id)):(form.sprites.front_shiny||iPxN(form.id,true)))
+:(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPxN(form.id,false))));
 img.src=sp;
 img.className=`himg${mod?'':' px'}`;
 const hwrap=img.parentElement;
