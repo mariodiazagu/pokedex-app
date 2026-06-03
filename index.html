@@ -3227,16 +3227,16 @@ safari:{caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},milest
 //  SAFARI GAME
 // ═══════════════════════════════════════
 const SAFARI_ZONES={
-  pradera: {name:'Pradera',  emoji:'🌿', types:['normal','grass','flying','fairy'],   minCatch:0,  bg:'linear-gradient(180deg,#87ceeb 0%,#87ceeb 55%,#7ec850 55%,#5a8a30 100%)'},
-  bosque:  {name:'Bosque',   emoji:'🌲', types:['bug','grass','poison','dark'],       minCatch:0,  bg:'linear-gradient(180deg,#2d5016 0%,#1c3510 50%,#5a3a1a 50%,#3a2010 100%)'},
-  montana: {name:'Montaña',  emoji:'⛰️', types:['rock','fighting','flying','steel'],  minCatch:5,  bg:'linear-gradient(180deg,#9acae0 0%,#9acae0 30%,#a09080 30%,#706050 65%,#6a5a4a 65%,#5a4a3a 100%)'},
-  costa:   {name:'Costa',    emoji:'🏖️', types:['water','normal','psychic'],          minCatch:5,  bg:'linear-gradient(180deg,#87ceeb 0%,#87ceeb 45%,#40b8d8 45%,#1888a8 75%,#e8c870 75%,#c8a850 100%)'},
-  cueva:   {name:'Cueva',    emoji:'🕳️', types:['poison','ground','ghost','dark'],    minCatch:10, bg:'linear-gradient(180deg,#1a1218 0%,#0e0c10 50%,#2e1e14 50%,#1a0e0a 100%)'},
-  mar:     {name:'Mar',      emoji:'🌊', types:['water','dragon','ice'],              minCatch:15, bg:'linear-gradient(180deg,#1a3a6a 0%,#0a2040 40%,#082040 40%,#040f28 100%)'},
-  volcan:  {name:'Volcán',   emoji:'🌋', types:['fire','ground','dragon'],            minCatch:20, bg:'linear-gradient(180deg,#380808 0%,#200404 40%,#5a1408 40%,#781808 70%,#280808 70%,#180404 100%)'},
-  tundra:  {name:'Tundra',   emoji:'❄️', types:['ice','psychic','dragon'],            minCatch:25, bg:'linear-gradient(180deg,#c8e8f4 0%,#a0c0d4 50%,#dce8ee 50%,#b8d0dc 100%)'},
-  ruinas:  {name:'Ruinas',   emoji:'🏛️', types:['psychic','ghost','dragon','steel'],  minCatch:80, bg:'linear-gradient(180deg,#3a2818 0%,#241808 50%,#4a3820 50%,#302210 100%)'},
-  espacio: {name:'Espacio',  emoji:'🌌', types:['dragon','psychic','steel','fairy'],  minCatch:200,bg:'linear-gradient(180deg,#08080e 0%,#04040a 40%,#060610 40%,#020208 100%)'},
+  pradera: {name:'Pradera',  emoji:'🌿', types:['normal','grass','flying','fairy'],   minCatch:0,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/pradera.png') center/cover no-repeat"},
+  bosque:  {name:'Bosque',   emoji:'🌲', types:['bug','grass','poison','dark'],       minCatch:0,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/bosque.png') center/cover no-repeat"},
+  montana: {name:'Montaña',  emoji:'⛰️', types:['rock','fighting','flying','steel'],  minCatch:5,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/montana.png') center/cover no-repeat"},
+  costa:   {name:'Costa',    emoji:'🏖️', types:['water','normal','psychic'],          minCatch:5,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/costa.png') center/cover no-repeat"},
+  cueva:   {name:'Cueva',    emoji:'🕳️', types:['poison','ground','ghost','dark'],    minCatch:10, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/cueva.png') center/cover no-repeat"},
+  mar:     {name:'Mar',      emoji:'🌊', types:['water','dragon','ice'],              minCatch:15, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/mar.png') center/cover no-repeat"},
+  volcan:  {name:'Volcán',   emoji:'🌋', types:['fire','ground','dragon'],            minCatch:20, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/volcan.png') center/cover no-repeat"},
+  tundra:  {name:'Tundra',   emoji:'❄️', types:['ice','psychic','dragon'],            minCatch:25, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/tundra.png') center/cover no-repeat"},
+  ruinas:  {name:'Ruinas',   emoji:'🏛️', types:['psychic','ghost','dragon','steel'],  minCatch:80, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/ruinas.png') center/cover no-repeat"},
+  espacio: {name:'Espacio',  emoji:'🌌', types:['dragon','psychic','steel','fairy'],  minCatch:200,bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/espacio.png') center/cover no-repeat"},
 };
 const SAFARI_PSEUDO=new Set([149,248,373,376,445,612,635,706,784,887,998]);
 const SAFARI_TIER_COLORS=['#888','#c47a00','#8B3AA2','#1a6bc1','#d44400','#7b1fa2'];
@@ -3801,6 +3801,7 @@ track: S.track,
 favs: [...S.favs],
 teams: S.teams,
 set: cloudSet,
+safari: S.safari,
 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
 }, { merge: true });
 setSyncing(false);
@@ -3849,6 +3850,7 @@ if (d.set.dark !== undefined) { S.set.dark = d.set.dark; applyDark(d.set.dark); 
 if (d.set.companion !== undefined) S.companion = d.set.companion;
 if (d.set.glass !== undefined) { S.set.glass = d.set.glass; applyGlass(d.set.glass); }
 }
+if (d.safari) Object.assign(S.safari, d.safari);
 } else {
 loadFromLocalStorage();
 if (Object.keys(S.track).length > 0 || S.favs.size > 0) {
