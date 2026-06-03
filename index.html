@@ -2805,8 +2805,8 @@ if(!img){ _walkerRAF = requestAnimationFrame(_companionLoop); return; }
 // Move horizontally when walking
 if(_walkerState2 === 'walk'){
   _walkerX += _walkerSpeed * 16 * _walkerDir;
-  if(_walkerX > 88){ _walkerX = 88; _walkerDir = -1; img.style.transform='scaleX(-1)'; }
-  if(_walkerX < 5){ _walkerX = 5; _walkerDir = 1; img.style.transform='scaleX(1)'; }
+  if(_walkerX > 88){ _walkerX = 88; _walkerDir = -1; img.style.transform='scaleX(1)'; }
+  if(_walkerX < 5){ _walkerX = 5; _walkerDir = 1; img.style.transform='scaleX(-1)'; }
   img.style.left = _walkerX + '%';
 }
 
