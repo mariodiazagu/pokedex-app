@@ -3529,9 +3529,13 @@ function _sfShowEncounter(enc){
       ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`
       :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     img.style.opacity='0';
-    img.style.transition='opacity .25s';
+    img.style.transition='opacity .3s';
     img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
-    img.onload=()=>{img.style.opacity='1';};
+    // Safari iOS sometimes doesn't fire onload for GIFs — use a timeout safety net
+    let _shown=false;
+    const _show=()=>{if(!_shown){_shown=true;clearTimeout(_t);img.style.opacity='1';}};
+    const _t=setTimeout(_show,1800);
+    img.onload=_show;
     img.onerror=()=>{
       img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;};
       img.src=staticBWUrl;
