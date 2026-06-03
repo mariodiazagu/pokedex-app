@@ -893,6 +893,7 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-enc-name{font-family:var(--px);font-size:11px;color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.9)}
 .sf-enc-tags{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:center}
 .sf-enc-tag{font-family:var(--px);font-size:8px;padding:1px 6px;border-radius:5px;color:#fff;text-shadow:none}
+.sf-enc-caught-tag{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3)}
 .sf-ball-fly{position:absolute;image-rendering:pixelated;object-fit:contain;z-index:5;pointer-events:none;display:none}
 @keyframes sfBallThrow{
   0%  {top:78%;left:calc(54% - 27px);width:54px;height:54px;opacity:1;transform:rotate(0deg)}
@@ -1363,6 +1364,9 @@ function sendPasswordReset(){
         <div class="sf-enc-tags">
           <div id="sf-enemy-tier" class="sf-enc-tag"></div>
           <div id="sf-enemy-shiny" class="sf-enc-tag" style="display:none;background:#b8860b">✨ Shiny</div>
+          <div id="sf-enemy-caught-tag" class="sf-enc-tag sf-enc-caught-tag" style="display:none">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" width="10" height="10" style="image-rendering:pixelated;vertical-align:middle"> Ya cazado
+          </div>
         </div>
       </div>
       <img id="sf-ball-fly" class="sf-ball-fly" src="" style="display:none" alt="">
@@ -3394,7 +3398,7 @@ const SAFARI_ZONES={
 const SAFARI_PSEUDO=new Set([149,248,373,376,445,612,635,706,784,887,998]);
 const SAFARI_TIER_COLORS=['#888','#c47a00','#8B3AA2','#1a6bc1','#d44400','#7b1fa2'];
 const SAFARI_TIER_LABELS=['Común','Poco común','Raro','Ultra/Paradoja','Legendario','Mítico'];
-const SAFARI_CATCH_RATES=[64,45,22,8,3,2]; // tier 0 (común) → tier 5 (mítico)
+const SAFARI_CATCH_RATES=[50,45,22,8,3,2]; // tier 0 (común) → tier 5 (mítico)
 const SAFARI_BALL_MULT={poke:1,great:1.5,ultra:2,master:999};
 const SAFARI_BALL_IMGS={
   poke:  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png',
@@ -3697,6 +3701,8 @@ function _sfShowEncounter(enc){
   if(tierEl){tierEl.textContent=SAFARI_TIER_LABELS[enc.tier];tierEl.style.background=SAFARI_TIER_COLORS[enc.tier];}
   const shinyEl=document.getElementById('sf-enemy-shiny');
   if(shinyEl)shinyEl.style.display=enc.shiny?'':'none';
+  const caughtTagEl=document.getElementById('sf-enemy-caught-tag');
+  if(caughtTagEl)caughtTagEl.style.display=S.safari.caught[String(enc.poke.id)]?'':'none';
 
   document.getElementById('sf-msg-box').textContent=`¡Un ${cap(enc.poke.name)} salvaje apareció!`;
   document.getElementById('sf-ball-fly').style.display='none';
