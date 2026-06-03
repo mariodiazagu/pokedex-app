@@ -3379,7 +3379,7 @@ const SAFARI_ZONES={
 const SAFARI_PSEUDO=new Set([149,248,373,376,445,612,635,706,784,887,998]);
 const SAFARI_TIER_COLORS=['#888','#c47a00','#8B3AA2','#1a6bc1','#d44400','#7b1fa2'];
 const SAFARI_TIER_LABELS=['Común','Poco común','Raro','Ultra/Paradoja','Legendario','Mítico'];
-const SAFARI_CATCH_RATES=[190,90,30,12,3,3];
+const SAFARI_CATCH_RATES=[200,110,45,15,5,3]; // tier 0 (común) → tier 5 (mítico)
 const SAFARI_BALL_MULT={poke:1,great:1.5,ultra:2,master:999};
 const SAFARI_BALL_IMGS={
   poke:  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png',
@@ -3511,10 +3511,12 @@ function sfSpawn(zoneId){
 function sfCatchProb(tier,ball,hp,maxHp,qteMult=1,panic=false,razz=false){
   if(ball==='master')return 1;
   const rate=SAFARI_CATCH_RATES[tier];
-  let prob=((3*maxHp-2*hp)/(3*maxHp))*(rate/255)*SAFARI_BALL_MULT[ball];
+  // HP factor: 0.5 at full HP → 1.0 at 0 HP (real games use similar curve)
+  const hpFactor=(2*maxHp-hp)/(2*maxHp);
+  let prob=hpFactor*(rate/255)*SAFARI_BALL_MULT[ball]*qteMult;
   if(panic)prob*=0.5;
   if(razz)prob*=1.6;
-  return Math.min(prob*qteMult,1);
+  return Math.min(prob,1);
 }
 
 // ── SAFARI RENDER ──────────────────────────────────────────
@@ -3796,8 +3798,12 @@ async function _sfDoThrow(qteMult,qteMsg){
 
   const prob=sfCatchProb(enc.tier,ball,enc.hp,enc.maxHp,qteMult,enc.panic,enc.razzActive);
   enc.razzActive=false;
-  const caught=Math.random()<prob;
-  const shakes=caught?3:Math.floor(Math.random()*3);
+  // 3-shake system: each shake is independent with P = ∛(prob)
+  // so P(pass all 3) = prob — same expected catch rate, but realistic 0-3 shake drama
+  const shakeP=Math.cbrt(prob);
+  let shakes=0;
+  for(let i=0;i<3;i++){if(Math.random()<shakeP)shakes++;else break;}
+  const caught=(shakes===3);
 
   // Launch ball — fly from bottom to Pokémon position
   const ballEl=document.getElementById('sf-ball-fly');
