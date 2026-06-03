@@ -864,12 +864,7 @@ html.dark #resources-panel,html.dark #move-popup-sheet{background:#1A1A1A}
 .sf-ptitle{font-family:var(--px);font-size:14px;font-weight:700;color:var(--t1)}
 .sf-balls-bar{display:flex;gap:10px;align-items:center;padding:8px 16px 6px;flex-shrink:0;border-bottom:1px solid var(--bd);flex-wrap:wrap}
 .sf-ball-item{display:flex;align-items:center;gap:4px}
-.sf-ball-ico{width:18px;height:18px;border-radius:50%;border:2px solid rgba(0,0,0,.2);overflow:hidden;position:relative;flex-shrink:0}
-.sf-ball-ico::after{content:'';position:absolute;left:0;right:0;top:calc(50% - 1px);height:2px;background:rgba(0,0,0,.3)}
-.sf-ball-ico.poke{background:linear-gradient(180deg,#e53935 50%,#fff 50%)}
-.sf-ball-ico.great{background:linear-gradient(180deg,#1565c0 50%,#fff 50%)}
-.sf-ball-ico.ultra{background:linear-gradient(180deg,#fbc02d 50%,#111 50%)}
-.sf-ball-ico.master{background:linear-gradient(180deg,#7b1fa2 50%,#e91e63 50%)}
+.sf-ball-ico{width:20px;height:20px;image-rendering:pixelated;flex-shrink:0;object-fit:contain}
 .sf-ball-n{font-family:var(--px);font-size:9px;font-weight:700;color:var(--t1)}
 .sf-renew-lbl{font-family:var(--px);font-size:8px;color:var(--t3);margin-left:auto}
 .sf-zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 16px 24px}
@@ -886,7 +881,7 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-zone-lock{font-family:var(--px);font-size:8px;color:var(--ac);margin-top:2px}
 .sf-enc-bg{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:0}
 .sf-enc-enemy{position:absolute;top:12%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:2}
-.sf-enc-sprite{width:96px;height:96px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(2px 4px 8px rgba(0,0,0,.5))}
+.sf-enc-sprite{width:min(150px,38vw);height:min(150px,38vw);object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 16px rgba(255,255,255,.35)) drop-shadow(2px 6px 14px rgba(0,0,0,.9))}
 .sf-enc-sprite.shiny{animation:sfShinyPulse 1.8s infinite}
 .sf-enc-name{font-family:var(--px);font-size:11px;color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.9)}
 .sf-enc-tags{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:center}
@@ -895,7 +890,7 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-hp-lbl{font-family:var(--px);font-size:8px;color:#9f9;flex-shrink:0}
 .sf-hp-track{flex:1;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden}
 .sf-hp-fill{height:100%;background:#4caf50;border-radius:4px;transition:width .4s,background .4s}
-.sf-ball-fly{position:absolute;width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,0,0,.35);z-index:5;pointer-events:none;bottom:30%;left:50%;transform:translateX(-50%)}
+.sf-ball-fly{position:absolute;width:32px;height:32px;image-rendering:pixelated;object-fit:contain;z-index:5;pointer-events:none;bottom:30%;left:50%;transform:translateX(-50%)}
 .sf-msg-box{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:var(--px);font-size:11px;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.9);background:rgba(0,0,0,.7);border-radius:10px;padding:7px 14px;text-align:center;white-space:nowrap;z-index:4;min-width:160px}
 .sf-act-panel{background:rgba(12,12,12,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 16px 14px;display:flex;flex-direction:column;gap:9px;flex-shrink:0}
 .sf-ball-row{display:flex;gap:8px;justify-content:center}
@@ -926,7 +921,7 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 @keyframes sfShake{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}40%{transform:rotate(14deg)}60%{transform:rotate(-10deg)}80%{transform:rotate(10deg)}}
 @keyframes sfCaptured{0%{transform:scale(1);opacity:1}30%{transform:scale(.05);opacity:1}100%{transform:scale(0);opacity:0}}
 @keyframes sfEscape{0%{transform:scale(0) rotate(180deg);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
-@keyframes sfBallPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.5)}50%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
+@keyframes sfBallPulse{0%,100%{filter:drop-shadow(0 0 2px rgba(255,255,255,.4))}50%{filter:drop-shadow(0 0 10px rgba(255,255,255,.95))}}
 @keyframes sfPanicFlash{0%,100%{opacity:1}50%{opacity:.25}}
 /* QTE */
 .sf-qte-overlay{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -1327,7 +1322,7 @@ function sendPasswordReset(){
           <div class="sf-hp-track"><div id="sf-hp-fill" class="sf-hp-fill" style="width:100%"></div></div>
         </div>
       </div>
-      <div id="sf-ball-fly" class="sf-ball-fly sf-ball-ico poke" style="display:none"></div>
+      <img id="sf-ball-fly" class="sf-ball-fly" src="" style="display:none" alt="">
       <div id="sf-msg-box" class="sf-msg-box"></div>
       <!-- QTE overlay -->
       <div id="sf-qte-overlay" class="sf-qte-overlay" style="display:none" onclick="sfQteTap()">
@@ -3276,6 +3271,12 @@ const SAFARI_TIER_COLORS=['#888','#c47a00','#8B3AA2','#1a6bc1','#d44400','#7b1fa
 const SAFARI_TIER_LABELS=['Común','Poco común','Raro','Ultra/Paradoja','Legendario','Mítico'];
 const SAFARI_CATCH_RATES=[190,90,30,12,3,3];
 const SAFARI_BALL_MULT={poke:1,great:1.5,ultra:2,master:999};
+const SAFARI_BALL_IMGS={
+  poke:  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png',
+  great: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png',
+  ultra: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png',
+  master:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png',
+};
 const SAFARI_MAX_BASIC=25;
 const SAFARI_RENEW_AMOUNT=10;
 const SAFARI_RENEW_MS=60*60*1000; // 1 hour
@@ -3437,7 +3438,7 @@ function _sfRenderBalls(){
     {type:'ultra',count:b.ultra||0},
     {type:'master',count:b.master||0},
   ].filter(x=>x.count>0||(x.type==='poke'));
-  bar.innerHTML=balls.map(({type,count})=>`<div class="sf-ball-item"><div class="sf-ball-ico ${type}"></div><span class="sf-ball-n">x${count}</span></div>`).join('')
+  bar.innerHTML=balls.map(({type,count})=>`<div class="sf-ball-item"><img class="sf-ball-ico" src="${SAFARI_BALL_IMGS[type]}" alt="${type}"><span class="sf-ball-n">x${count}</span></div>`).join('')
     +`<span class="sf-renew-lbl">↺ ${renewStr} · ${basic}/${SAFARI_MAX_BASIC}</span>`;
 }
 
@@ -3481,10 +3482,15 @@ function _sfShowEncounter(enc){
 
   // Sprite
   const img=document.getElementById('sf-enemy-img');
-  const mode=S.mImgMode||'sprite';
-  const spriteUrl=enc.shiny?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/shiny/${enc.poke.id}.png`
-    :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/${enc.poke.id}.png`;
-  if(img){img.src=spriteUrl;img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');}
+  if(img){
+    const id=enc.poke.id;
+    const base='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white';
+    const animUrl=enc.shiny?`${base}/animated/shiny/${id}.gif`:`${base}/animated/${id}.gif`;
+    const staticUrl=enc.shiny?`${base}/shiny/${id}.png`:`${base}/${id}.png`;
+    img.onerror=()=>{img.onerror=null;img.src=staticUrl;};
+    img.src=id<=649?animUrl:staticUrl;
+    img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
+  }
 
   document.getElementById('sf-enemy-name').textContent=cap(enc.poke.name);
   const tierEl=document.getElementById('sf-enemy-tier');
@@ -3527,7 +3533,7 @@ function _sfRenderBallRow(){
   if(!options.find(o=>o.type===S.safari.selBall))S.safari.selBall=options[0].type;
   row.innerHTML=options.map(({type,count,label})=>`
     <button class="sf-ball-throw${S.safari.selBall===type?' sel':''}" onclick="sfSelectBall('${type}')">
-      <div class="sf-ball-ico ${type}" style="width:22px;height:22px"></div>
+      <img class="sf-ball-ico" src="${SAFARI_BALL_IMGS[type]}" style="width:24px;height:24px" alt="${type}">
       <span>${label} x${count}</span>
     </button>`).join('');
 }
@@ -3648,7 +3654,7 @@ async function _sfDoThrow(qteMult,qteMsg){
 
   // Ball fly
   const ballEl=document.getElementById('sf-ball-fly');
-  if(ballEl){ballEl.className=`sf-ball-fly sf-ball-ico ${ball}`;ballEl.style.display='block';ballEl.style.animation='none';}
+  if(ballEl){ballEl.src=SAFARI_BALL_IMGS[ball];ballEl.style.display='block';ballEl.style.animation='none';}
 
   const prob=sfCatchProb(enc.tier,ball,enc.hp,enc.maxHp,qteMult,enc.panic,enc.razzActive);
   enc.razzActive=false;
