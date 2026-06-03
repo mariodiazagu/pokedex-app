@@ -873,6 +873,7 @@ html.dark #resources-panel,html.dark #move-popup-sheet{background:#1A1A1A}
 .sf-zone-card.locked{opacity:.5;cursor:not-allowed}
 .sf-zone-art{height:70px;display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;position:relative}
 .sf-zone-art img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated;position:absolute;inset:0}
+.sf-zone-art-bg{position:absolute;inset:0;background-size:180%;background-position:center;filter:grayscale(1) sepia(.4) hue-rotate(220deg) saturate(2.5)}
 .sf-zone-art .sf-zone-emoji{position:relative;z-index:1;font-size:34px;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.4))}
 .sf-zone-body{background:rgba(255,255,255,.9);padding:6px 10px 8px}
 html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
@@ -880,6 +881,7 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-zone-sub{font-size:9px;color:var(--t3);margin-top:2px}
 .sf-zone-lock{font-family:var(--px);font-size:8px;color:var(--ac);margin-top:2px}
 .sf-enc-bg{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:0}
+.sf-enc-bg-layer{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;filter:grayscale(1) sepia(.35) hue-rotate(220deg) saturate(2.2) brightness(.85)}
 .sf-enc-enemy{position:absolute;top:12%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:2}
 .sf-enc-sprite{width:min(150px,38vw);height:min(150px,38vw);object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 16px rgba(255,255,255,.35)) drop-shadow(2px 6px 14px rgba(0,0,0,.9))}
 .sf-enc-sprite.shiny{animation:sfShinyPulse 1.8s infinite}
@@ -1351,6 +1353,7 @@ function sendPasswordReset(){
   <!-- ENCOUNTER -->
   <div id="sf-encounter" class="sf-screen">
     <div id="sf-enc-bg" class="sf-enc-bg">
+      <div id="sf-enc-bg-layer" class="sf-enc-bg-layer"></div>
       <div class="sf-enc-enemy" id="sf-enemy">
         <img id="sf-enemy-img" class="sf-enc-sprite" src="" alt="">
         <div id="sf-enemy-name" class="sf-enc-name"></div>
@@ -3562,7 +3565,10 @@ function _sfRenderZones(){
     const locked=!_sfAdminUnlocked&&total<z.minCatch;
     const pool=sfGetPool(id);
     return`<div class="sf-zone-card${locked?' locked':''}" onclick="${locked?'':'sfStartEncounter(\''+id+'\')'}">
-      <div class="sf-zone-art" style="background:${z.bg};background-size:180%"></div>
+      <div class="sf-zone-art">
+        <div class="sf-zone-art-bg" style="background:${z.bg}"></div>
+        <span class="sf-zone-emoji">${z.emoji}</span>
+      </div>
       <div class="sf-zone-body">
         <div class="sf-zone-name">${z.name}</div>
         <div class="sf-zone-sub">${pool.length} Pokémon disponibles</div>
@@ -3588,9 +3594,9 @@ function _sfShowEncounter(enc){
   document.getElementById('sf-encounter')?.classList.add('on');
   document.getElementById('sf-collection')?.classList.remove('on');
 
-  // Background
-  const bg=document.getElementById('sf-enc-bg');
-  if(bg)bg.style.background=SAFARI_ZONES[enc.zone]?.bg||'#1a1a2a';
+  // Background — apply to layer div so filter doesn't affect UI elements
+  const bgLayer=document.getElementById('sf-enc-bg-layer');
+  if(bgLayer)bgLayer.style.background=(SAFARI_ZONES[enc.zone]?.bg||'#1a1a2a')+' center/cover';
 
   // Sprite — load static sprite immediately (fast CDN), then upgrade to GIF for gen 1-5
   const img=document.getElementById('sf-enemy-img');
