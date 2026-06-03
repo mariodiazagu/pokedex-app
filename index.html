@@ -927,6 +927,30 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 @keyframes sfCaptured{0%{transform:scale(1);opacity:1}30%{transform:scale(.05);opacity:1}100%{transform:scale(0);opacity:0}}
 @keyframes sfEscape{0%{transform:scale(0) rotate(180deg);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
 @keyframes sfBallPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.5)}50%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
+@keyframes sfPanicFlash{0%,100%{opacity:1}50%{opacity:.25}}
+/* QTE */
+.sf-qte-overlay{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sf-qte-ring{position:absolute;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);left:50%;top:50%}
+.sf-qte-ring-perfect{width:56px;height:56px;border:3px solid rgba(76,175,80,.9);box-shadow:0 0 12px rgba(76,175,80,.7)}
+.sf-qte-ring-good{width:96px;height:96px;border:2px solid rgba(255,193,7,.7);box-shadow:0 0 8px rgba(255,193,7,.4)}
+.sf-qte-ring-outer{width:200px;height:200px;border:4px solid rgba(255,255,255,.95);box-shadow:0 0 16px rgba(255,255,255,.4)}
+/* Turn dots */
+.sf-turns-row{display:flex;align-items:center;justify-content:center;gap:5px;padding:2px 0}
+.sf-turn-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .2s,transform .2s}
+.sf-turn-dot.on{background:rgba(76,175,80,.9);transform:scale(1.1)}
+.sf-turn-dot.warn{background:rgba(255,152,0,.9)}
+.sf-turn-dot.danger{background:rgba(244,67,54,.9);animation:sfPanicFlash .5s infinite}
+/* Panic */
+.sf-hp-fill.panic{animation:sfPanicFlash .5s infinite}
+.sf-panic-tag{font-family:var(--px);font-size:8px;background:#f44336;color:#fff;padding:1px 6px;border-radius:5px;animation:sfPanicFlash .7s infinite}
+/* Berries */
+.sf-berry-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.sf-berry-btn{display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 7px;border-radius:9px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);cursor:pointer;min-width:48px;transition:all .12s}
+.sf-berry-btn.used{border-color:#4caf50;background:rgba(76,175,80,.2)}
+.sf-berry-btn:disabled{opacity:.25;pointer-events:none}
+.sf-berry-btn .sf-b-emoji{font-size:16px;line-height:1}
+.sf-berry-btn .sf-b-name{font-family:var(--px);font-size:7px;color:rgba(255,255,255,.7)}
+.sf-berry-btn .sf-b-desc{font-family:var(--px);font-size:6px;color:rgba(255,255,255,.4)}
 /* ─────────────────────────────────────────────────────────── */
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1296,6 +1320,7 @@ function sendPasswordReset(){
         <div class="sf-enc-tags">
           <div id="sf-enemy-tier" class="sf-enc-tag"></div>
           <div id="sf-enemy-shiny" class="sf-enc-tag" style="display:none;background:#b8860b">✨ Shiny</div>
+          <div id="sf-enemy-panic" class="sf-panic-tag" style="display:none">⚡ PÁNICO</div>
         </div>
         <div class="sf-hp-row">
           <span class="sf-hp-lbl">HP</span>
@@ -1304,8 +1329,16 @@ function sendPasswordReset(){
       </div>
       <div id="sf-ball-fly" class="sf-ball-fly sf-ball-ico poke" style="display:none"></div>
       <div id="sf-msg-box" class="sf-msg-box"></div>
+      <!-- QTE overlay -->
+      <div id="sf-qte-overlay" class="sf-qte-overlay" style="display:none" onclick="sfQteTap()">
+        <div class="sf-qte-ring sf-qte-ring-good"></div>
+        <div class="sf-qte-ring sf-qte-ring-perfect"></div>
+        <div id="sf-qte-outer" class="sf-qte-ring sf-qte-ring-outer"></div>
+      </div>
     </div>
     <div class="sf-act-panel">
+      <div id="sf-turns-row" class="sf-turns-row"></div>
+      <div id="sf-berry-row" class="sf-berry-row" style="display:none"></div>
       <div id="sf-ball-row" class="sf-ball-row"></div>
       <div class="sf-act-row">
         <button class="sf-act-btn weak" id="sf-btn-weak" onclick="safariWeaken()">⚔ Debilitar</button>
@@ -3220,7 +3253,7 @@ mPreviewForm:null,
 mPreviewShiny:false,
 ff:{gen:0,types:[],rarity:''}, // fav filters
 companion:{hp:100, energy:80, hunger:70, mood:75, lastVisit:null, fainted:false, faintedAt:null, faintCount:0}, // tamagotchi state
-safari:{caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},milestones:[],selBall:'poke'},
+safari:{caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},berries:{razz:0,nanab:0,pinap:0},milestones:[],selBall:'poke'},
 };
 
 // ═══════════════════════════════════════
@@ -3246,20 +3279,23 @@ const SAFARI_BALL_MULT={poke:1,great:1.5,ultra:2,master:999};
 const SAFARI_MAX_BASIC=25;
 const SAFARI_RENEW_AMOUNT=10;
 const SAFARI_RENEW_MS=60*60*1000; // 1 hour
+const SAFARI_TURN_MAX=[10,8,6,5,4,3];    // max turns per tier before flee
+const SAFARI_QTE_DUR=[1800,1500,1200,1000,850,700]; // ms QTE ring shrink by tier
+const SAFARI_DODGE=[0,0,0.12,0.18,0.25,0.30];      // dodge chance per tier
 const SAFARI_MILESTONES=[
-  {id:'sf_c1',  catches:1,   reward:{great:3},  msg:'¡Primera captura! +3 Super Ball'},
-  {id:'sf_c5',  catches:5,   reward:{great:5},  msg:'5 capturas · +5 Super Ball'},
-  {id:'sf_c10', catches:10,  reward:{great:5},  msg:'10 capturas · +5 Super Ball'},
-  {id:'sf_c25', catches:25,  reward:{ultra:3},  msg:'25 capturas · +3 Ultra Ball'},
-  {id:'sf_c50', catches:50,  reward:{ultra:5},  msg:'50 capturas · +5 Ultra Ball'},
-  {id:'sf_c100',catches:100, reward:{ultra:10}, msg:'100 capturas · +10 Ultra Ball'},
-  {id:'sf_c150',catches:150, reward:{master:1}, msg:'150 capturas · ¡1 Master Ball!'},
-  {id:'sf_c200',catches:200, reward:{ultra:10}, msg:'200 capturas · +10 Ultra Ball'},
-  {id:'sf_c300',catches:300, reward:{master:1}, msg:'300 capturas · ¡1 Master Ball!'},
-  {id:'sf_c500',catches:500, reward:{master:2}, msg:'500 capturas · ¡2 Master Ball!'},
-  {id:'sf_sh1', shinies:1,   reward:{ultra:5},  msg:'¡Primer Shiny! +5 Ultra Ball'},
-  {id:'sf_sh5', shinies:5,   reward:{master:1}, msg:'5 shinies · ¡1 Master Ball!'},
-  {id:'sf_leg', legs:1,      reward:{ultra:5},  msg:'¡Primer legendario! +5 Ultra Ball'},
+  {id:'sf_c1',  catches:1,   reward:{great:3},                    msg:'¡Primera captura! +3 Super Ball'},
+  {id:'sf_c5',  catches:5,   reward:{great:5,razz:3},             msg:'5 capturas · +5 Super Ball +3 Razz'},
+  {id:'sf_c10', catches:10,  reward:{great:5,nanab:2},            msg:'10 capturas · +5 Super Ball +2 Nanab'},
+  {id:'sf_c25', catches:25,  reward:{ultra:3,razz:5},             msg:'25 capturas · +3 Ultra Ball +5 Razz'},
+  {id:'sf_c50', catches:50,  reward:{ultra:5,nanab:3,pinap:2},    msg:'50 capturas · +5 Ultra +3 Nanab +2 Pinap'},
+  {id:'sf_c100',catches:100, reward:{ultra:10,razz:5,nanab:5},    msg:'100 capturas · +10 Ultra +5 Razz +5 Nanab'},
+  {id:'sf_c150',catches:150, reward:{master:1,pinap:5},           msg:'150 capturas · ¡1 Master Ball! +5 Pinap'},
+  {id:'sf_c200',catches:200, reward:{ultra:10,razz:5,pinap:5},    msg:'200 capturas · +10 Ultra +5 Razz +5 Pinap'},
+  {id:'sf_c300',catches:300, reward:{master:1,razz:10,nanab:10},  msg:'300 capturas · ¡1 Master! +10 Razz +10 Nanab'},
+  {id:'sf_c500',catches:500, reward:{master:2,pinap:10},          msg:'500 capturas · ¡2 Master Ball! +10 Pinap'},
+  {id:'sf_sh1', shinies:1,   reward:{ultra:5,razz:3},             msg:'¡Primer Shiny! +5 Ultra Ball +3 Razz'},
+  {id:'sf_sh5', shinies:5,   reward:{master:1,pinap:5},           msg:'5 shinies · ¡1 Master Ball! +5 Pinap'},
+  {id:'sf_leg', legs:1,      reward:{ultra:5,nanab:3},            msg:'¡Primer legendario! +5 Ultra Ball +3 Nanab'},
 ];
 
 function _sfTier(poke){
@@ -3301,6 +3337,10 @@ function sfCheckMilestones(){
     if(m.reward.great)S.safari.balls.great=(S.safari.balls.great||0)+m.reward.great;
     if(m.reward.ultra)S.safari.balls.ultra=(S.safari.balls.ultra||0)+m.reward.ultra;
     if(m.reward.master)S.safari.balls.master=(S.safari.balls.master||0)+m.reward.master;
+    if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+    if(m.reward.razz)S.safari.berries.razz=(S.safari.berries.razz||0)+m.reward.razz;
+    if(m.reward.nanab)S.safari.berries.nanab=(S.safari.berries.nanab||0)+m.reward.nanab;
+    if(m.reward.pinap)S.safari.berries.pinap=(S.safari.berries.pinap||0)+m.reward.pinap;
     sfToast(m.msg);
     awarded=true;
   }
@@ -3344,14 +3384,20 @@ function sfSpawn(zoneId){
   const tier=_sfTier(poke);
   const shiny=Math.random()<1/512;
   const maxHp=[60,90,130,160,200,200][tier];
-  return{poke,hp:maxHp,maxHp,shiny,tier,zone:zoneId,busy:false};
+  const turnsMax=SAFARI_TURN_MAX[tier];
+  return{poke,hp:maxHp,maxHp,shiny,tier,zone:zoneId,busy:false,
+    turnsLeft:turnsMax,maxTurns:turnsMax,panic:false,
+    razzActive:false,nanabActive:false,pinapActive:false,
+    qteStart:0,qteDuration:SAFARI_QTE_DUR[tier]};
 }
 
-function sfCatchProb(tier,ball,hp,maxHp){
+function sfCatchProb(tier,ball,hp,maxHp,qteMult=1,panic=false,razz=false){
   if(ball==='master')return 1;
   const rate=SAFARI_CATCH_RATES[tier];
-  const hpFrac=hp/maxHp;
-  return Math.min(((3*maxHp-2*hp)/(3*maxHp))*(rate/255)*SAFARI_BALL_MULT[ball],1);
+  let prob=((3*maxHp-2*hp)/(3*maxHp))*(rate/255)*SAFARI_BALL_MULT[ball];
+  if(panic)prob*=0.5;
+  if(razz)prob*=1.6;
+  return Math.min(prob*qteMult,1);
 }
 
 // ── SAFARI RENDER ──────────────────────────────────────────
@@ -3447,10 +3493,15 @@ function _sfShowEncounter(enc){
   if(shinyEl)shinyEl.style.display=enc.shiny?'':'none';
 
   _sfUpdateHp(enc.hp,enc.maxHp);
+  document.getElementById('sf-enemy-panic').style.display='none';
+  document.getElementById('sf-hp-fill').classList.remove('panic');
   document.getElementById('sf-msg-box').textContent=`¡Un ${cap(enc.poke.name)} salvaje apareció!`;
   document.getElementById('sf-ball-fly').style.display='none';
+  document.getElementById('sf-qte-overlay').style.display='none';
 
   _sfRenderBallRow();
+  _sfRenderTurns();
+  _sfRenderBerryRow();
   document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
   document.getElementById('sf-btn-weak')?.removeAttribute('disabled');
 }
@@ -3486,59 +3537,131 @@ function sfSelectBall(type){S.safari.selBall=type;_sfRenderBallRow();}
 function safariWeaken(){
   const enc=S.safari.encounter;
   if(!enc||enc.busy)return;
-  enc.hp=Math.max(Math.floor(enc.maxHp*0.08),enc.hp-Math.floor(enc.maxHp*0.3));
+  enc.hp=Math.max(Math.floor(enc.maxHp*0.05),enc.hp-Math.floor(enc.maxHp*0.3));
   _sfUpdateHp(enc.hp,enc.maxHp);
-  const flee=enc.hp/enc.maxHp<0.1&&Math.random()<0.25;
-  if(flee){
-    document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} huyó!`;
-    _sfDisableActions();
-    setTimeout(showSafariHome,1600);
+  const hpPct=enc.hp/enc.maxHp;
+
+  if(!enc.panic&&hpPct<0.15){
+    enc.panic=true;
+    document.getElementById('sf-enemy-panic').style.display='';
+    document.getElementById('sf-hp-fill').classList.add('panic');
+    document.getElementById('sf-msg-box').textContent='⚡ ¡PÁNICO! ¡Más difícil! Lanza ya';
+    if(Math.random()<0.25){
+      _sfDisableActions();
+      setTimeout(()=>{
+        document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} huyó del pánico!`;
+        setTimeout(showSafariHome,1500);
+      },700);
+      return;
+    }
+    _sfUseTurn();
     return;
   }
-  document.getElementById('sf-msg-box').textContent='HP reducido · ¡Más fácil de atrapar!';
+
+  document.getElementById('sf-msg-box').textContent=enc.panic?'⚡ ¡PÁNICO! Lanza pronto':'HP reducido · ¡Más fácil de atrapar!';
+  _sfUseTurn();
 }
 
-async function safariThrow(){
+function safariThrow(){
   const enc=S.safari.encounter;
   if(!enc||enc.busy)return;
   const ball=S.safari.selBall||'poke';
-  // Deduct ball
   if(ball==='poke'||ball==='great'){
-    const basic=_sfBasicBalls();
-    if(basic<=0){sfToast('Sin Poké Balls básicas');return;}
+    if(_sfBasicBalls()<=0){sfToast('Sin Poké Balls básicas');return;}
     if(S.safari.balls.poke>0)S.safari.balls.poke--;
     else S.safari.balls.great--;
   } else if(ball==='ultra'){
-    if(!(S.safari.balls.ultra>0)){sfToast('Sin Ultra Balls');return;}
+    if(!S.safari.balls.ultra){sfToast('Sin Ultra Balls');return;}
     S.safari.balls.ultra--;
   } else if(ball==='master'){
-    if(!(S.safari.balls.master>0)){sfToast('Sin Master Balls');return;}
+    if(!S.safari.balls.master){sfToast('Sin Master Balls');return;}
     S.safari.balls.master--;
   }
   _sfRenderBallRow();
   enc.busy=true;
   _sfDisableActions();
+  sfQteStart();
+}
 
-  // Ball fly animation
-  const ballEl=document.getElementById('sf-ball-fly');
-  if(ballEl){
-    ballEl.className=`sf-ball-fly sf-ball-ico ${ball}`;
-    ballEl.style.display='block';
-    ballEl.style.animation='none';
+function safariRun(){
+  if(_sfQteTimeout){clearTimeout(_sfQteTimeout);_sfQteTimeout=null;}
+  document.getElementById('sf-qte-overlay').style.display='none';
+  S.safari.encounter=null;
+  showSafariHome();
+}
+
+// ── QTE ──────────────────────────────────────────────────────
+let _sfQteTimeout=null;
+function sfQteStart(){
+  const enc=S.safari.encounter;
+  if(!enc)return;
+  enc.qteStart=Date.now();
+  const dur=enc.qteDuration;
+  const overlay=document.getElementById('sf-qte-overlay');
+  const outer=document.getElementById('sf-qte-outer');
+  if(overlay)overlay.style.display='flex';
+  if(outer){
+    outer.style.transition='none';
+    outer.style.width='200px';outer.style.height='200px';outer.style.opacity='1';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      outer.style.transition=`width ${dur}ms linear,height ${dur}ms linear,opacity ${dur}ms linear`;
+      outer.style.width='0px';outer.style.height='0px';outer.style.opacity='.15';
+    }));
   }
+  document.getElementById('sf-msg-box').textContent='¡Toca para lanzar!';
+  _sfQteTimeout=setTimeout(()=>sfQteTap(true),dur+120);
+}
 
-  const prob=sfCatchProb(enc.tier,ball,enc.hp,enc.maxHp);
+function sfQteTap(auto=false){
+  if(_sfQteTimeout){clearTimeout(_sfQteTimeout);_sfQteTimeout=null;}
+  const enc=S.safari.encounter;
+  if(!enc||!enc.qteStart)return;
+  document.getElementById('sf-qte-overlay').style.display='none';
+
+  const ratio=Math.min((Date.now()-enc.qteStart)/enc.qteDuration,1);
+  const size=200*(1-ratio); // outer ring current size
+  let qteMult,qteMsg;
+  if(auto){qteMult=0.55;qteMsg='¡Muy tarde!';}
+  else if(size>=50&&size<=90){qteMult=1.5;qteMsg='✨ ¡Excelente!';}
+  else if(size>=32&&size<=115){qteMult=1.2;qteMsg='¡Buen tiro!';}
+  else if(ratio<0.18){qteMult=0.7;qteMsg='¡Muy pronto!';}
+  else{qteMult=0.85;qteMsg='Tiro normal';}
+  enc.qteStart=0;
+  _sfDoThrow(qteMult,qteMsg);
+}
+
+async function _sfDoThrow(qteMult,qteMsg){
+  const enc=S.safari.encounter;
+  const ball=S.safari.selBall||'poke';
+
+  // Dodge check (tier 2+ only, Nanab berry prevents it)
+  const dodge=SAFARI_DODGE[enc.tier];
+  if(dodge>0&&!enc.nanabActive&&Math.random()<dodge){
+    document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} esquivó la Pokéball!`;
+    enc.nanabActive=false;
+    enc.busy=false;
+    const fled=_sfUseTurn();
+    if(!fled)_sfEnableActions();
+    return;
+  }
+  enc.nanabActive=false;
+
+  // Ball fly
+  const ballEl=document.getElementById('sf-ball-fly');
+  if(ballEl){ballEl.className=`sf-ball-fly sf-ball-ico ${ball}`;ballEl.style.display='block';ballEl.style.animation='none';}
+
+  const prob=sfCatchProb(enc.tier,ball,enc.hp,enc.maxHp,qteMult,enc.panic,enc.razzActive);
+  enc.razzActive=false;
   const caught=Math.random()<prob;
   const shakes=caught?3:Math.floor(Math.random()*3);
 
-  await _sfDelay(350);
-  // Hide sprite → appear to go into ball
+  document.getElementById('sf-msg-box').textContent=qteMsg;
+  await _sfDelay(320);
   const sprite=document.getElementById('sf-enemy-img');
   if(sprite)sprite.style.animation='sfCaptured .4s forwards';
   document.getElementById('sf-msg-box').textContent='';
   await _sfDelay(400);
 
-  // Shake animation
   if(ballEl)ballEl.style.animation='sfBallPulse .5s infinite';
   for(let i=0;i<shakes;i++){
     if(ballEl){ballEl.style.animation='sfShake .5s ease';await _sfDelay(520);ballEl.style.animation='none';await _sfDelay(200);}
@@ -3547,36 +3670,99 @@ async function safariThrow(){
   if(caught){
     document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} capturado!`;
     if(ballEl)ballEl.style.animation='sfBallPulse 1s infinite';
-    // Record catch
     const key=String(enc.poke.id);
     if(!S.safari.caught[key]){S.safari.caught[key]={count:0,shiny:enc.shiny,firstDate:Date.now()};}
-    S.safari.caught[key].count++;
+    S.safari.caught[key].count+=enc.pinapActive?2:1;
     if(enc.shiny)S.safari.caught[key].shiny=true;
     scheduleSave();
     sfCheckMilestones();
     await _sfDelay(1800);
     showSafariHome();
   } else {
-    // Escape
     document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} escapó!`;
-    if(sprite){sprite.style.animation='sfEscape .4s forwards';}
+    if(sprite)sprite.style.animation='sfEscape .4s forwards';
     if(ballEl)ballEl.style.display='none';
     await _sfDelay(600);
     sprite.style.animation=enc.shiny?'sfShinyPulse 1.8s infinite':'none';
-    if(_sfBasicBalls()<=0&&!(S.safari.balls.ultra>0)&&!(S.safari.balls.master>0)){
+    enc.busy=false;
+    const fled=_sfUseTurn();
+    if(fled)return;
+    if(_sfBasicBalls()<=0&&!S.safari.balls.ultra&&!S.safari.balls.master){
       document.getElementById('sf-msg-box').textContent='Sin Poké Balls · Regresando...';
       await _sfDelay(1600);
       showSafariHome();
     } else {
-      enc.busy=false;
       _sfEnableActions();
     }
   }
 }
 
-function safariRun(){
-  S.safari.encounter=null;
-  showSafariHome();
+// ── TURNS ────────────────────────────────────────────────────
+function _sfUseTurn(){
+  const enc=S.safari.encounter;
+  if(!enc)return true;
+  enc.turnsLeft=Math.max(0,enc.turnsLeft-1);
+  _sfRenderTurns();
+  if(enc.turnsLeft<=0){
+    document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} huyó!`;
+    _sfDisableActions();
+    setTimeout(showSafariHome,1600);
+    return true;
+  }
+  if(enc.turnsLeft===1)sfToast('¡Última oportunidad!');
+  return false;
+}
+
+function _sfRenderTurns(){
+  const enc=S.safari.encounter;
+  const row=document.getElementById('sf-turns-row');
+  if(!row||!enc)return;
+  const max=enc.maxTurns,left=enc.turnsLeft;
+  row.innerHTML=Array.from({length:max},(_,i)=>{
+    const active=i<left;
+    const cls=active?(left<=2?'danger':left<=Math.ceil(max*0.4)?'warn':'on'):'';
+    return`<div class="sf-turn-dot${cls?' '+cls:''}"></div>`;
+  }).join('');
+}
+
+// ── BERRIES ──────────────────────────────────────────────────
+function _sfRenderBerryRow(){
+  const enc=S.safari.encounter;
+  const row=document.getElementById('sf-berry-row');
+  if(!row)return;
+  if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+  const b=S.safari.berries;
+  const defs=[
+    {type:'razz', emoji:'🍓',name:'Razz',  desc:'+60% captura', active:enc?.razzActive},
+    {type:'nanab',emoji:'🍌',name:'Nanab', desc:'No esquiva',    active:enc?.nanabActive},
+    {type:'pinap',emoji:'🍍',name:'Pinap', desc:'x2 conteo',    active:enc?.pinapActive},
+  ];
+  const hasAny=defs.some(d=>(b[d.type]||0)>0||d.active);
+  row.style.display=hasAny?'flex':'none';
+  if(!hasAny)return;
+  row.innerHTML=defs.map(({type,emoji,name,desc,active})=>`
+    <button class="sf-berry-btn${active?' used':''}" ${(b[type]||0)<=0&&!active?'disabled':''}
+      onclick="safariUseBerry('${type}')">
+      <span class="sf-b-emoji">${emoji}</span>
+      <span class="sf-b-name">${name}${(b[type]||0)>0?' x'+(b[type]):'✓'}</span>
+      <span class="sf-b-desc">${desc}</span>
+    </button>`).join('');
+}
+
+function safariUseBerry(type){
+  const enc=S.safari.encounter;
+  if(!enc||enc.busy)return;
+  if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+  const b=S.safari.berries;
+  if(!(b[type]>0))return;
+  b[type]--;
+  if(type==='razz'){enc.razzActive=true;}
+  else if(type==='nanab'){enc.nanabActive=true;}
+  else if(type==='pinap'){enc.pinapActive=true;}
+  scheduleSave();
+  _sfRenderBerryRow();
+  const msgs={razz:'🍓 Razz · Más fácil de atrapar',nanab:'🍌 Nanab · No esquivará',pinap:'🍍 Pinap · Contará el doble'};
+  document.getElementById('sf-msg-box').textContent=msgs[type];
 }
 
 function _sfDisableActions(){
@@ -3851,6 +4037,7 @@ if (d.set.companion !== undefined) S.companion = d.set.companion;
 if (d.set.glass !== undefined) { S.set.glass = d.set.glass; applyGlass(d.set.glass); }
 }
 if (d.safari) Object.assign(S.safari, d.safari);
+if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
 } else {
 loadFromLocalStorage();
 if (Object.keys(S.track).length > 0 || S.favs.size > 0) {
@@ -3881,6 +4068,7 @@ try { S.favs = new Set((JSON.parse(localStorage.getItem('fv')) || []).map(String
 try { S.teams = sanitizeTeams(JSON.parse(localStorage.getItem('tms')||'{}')); } catch(e){ S.teams = {}; }
 try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
 try { const d = localStorage.getItem('sf'); if(d) Object.assign(S.safari, JSON.parse(d)); } catch(e){}
+if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
 }
 
 function forceRefreshTypes(){
@@ -7247,6 +7435,7 @@ document.getElementById('standalone-step').style.display='none';
 loadFormsCache();
 try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
 try { const d = localStorage.getItem('sf'); if(d) Object.assign(S.safari, JSON.parse(d)); } catch(e){}
+if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
 
 // Apply saved columns setting
 applyColsSetting();
