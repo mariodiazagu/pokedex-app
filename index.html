@@ -3689,9 +3689,17 @@ function _sfShowEncounter(enc){
     const cdn='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
     const staticUrl=enc.shiny?`${cdn}/shiny/${id}.png`:`${cdn}/${id}.png`;
     img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
+    img.style.animation='none';   // clear sfCaptured forwards fill (opacity:0,scale:0)
+    img.style.transform='';
     img.style.opacity='1';
     img.style.transition='';
-    img.onload=null;img.onerror=null;
+    img.onload=null;
+    img.onerror=()=>{
+      const fallback=enc.shiny
+        ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`
+        :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+      img.onerror=null;img.src=fallback;
+    };
     img.src=staticUrl;
     // Silently upgrade to animated GIF for gen 1-5
     if(id<=649){
