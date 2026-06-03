@@ -6753,7 +6753,7 @@ renderGrid();
 <div id="img-viewer" onclick="closeImgViewer(event)">
   <button id="img-viewer-close" onclick="closeImgViewer()">&#x2715;</button>
   <img id="img-viewer-img" src="" alt="">
-  <div id="img-viewer-modes">
+  <div id="img-viewer-modes" onclick="event.stopPropagation()">
     <button class="mmode-btn" id="viewer-mode-art" onclick="setViewerImgMode('art')" title="Arte oficial"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"/><polyline points="21 15 16 10 5 21"/></svg></button>
     <button class="mmode-btn" id="viewer-mode-sprite" onclick="setViewerImgMode('sprite')" title="Sprite"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07"/></svg></button>
     <button class="mmode-btn" id="viewer-mode-anim" onclick="setViewerImgMode('anim')" title="Animado"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg></button>
