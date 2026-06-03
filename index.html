@@ -832,14 +832,102 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .cmpv-bar.flip{transform:scaleX(-1)}
 .cmpv-fill{height:100%;border-radius:99px}
 .cmpv-slbl{font-size:9px;font-weight:700;color:var(--t3);width:46px;text-align:center;flex-shrink:0}
-/* ── DARK MODE OVERRIDES ── */
+/* ── DARK MODE ──────────────────────────────────────────── */
+html.dark{
+  --bg:       #1A1A1A;
+  --s1:       rgba(255,255,255,0.07);
+  --s2:       rgba(255,255,255,0.05);
+  --s3:       rgba(255,255,255,0.07);
+  --t1:       #F0F0F0;
+  --t2:       #AAAAAA;
+  --t3:       #666666;
+  --bd:       rgba(255,255,255,0.12);
+  --bd2:      rgba(255,255,255,0.07);
+  --shadow:   0 2px 12px rgba(0,0,0,.4);
+  --shadow-md:0 8px 32px rgba(0,0,0,.5);
+  --shadow-lg:0 16px 48px rgba(0,0,0,.6);
+}
 html.dark #mdl{background:rgba(28,28,28,0.97)}
-html.dark .mmode-btn.on{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2);color:#fff}
+html.dark .hdr-wrap{background:rgba(26,26,26,.92)}
 html.dark .srch-wrap{background:rgba(255,255,255,.07)}
 html.dark .nav-btn.on{background:rgba(255,255,255,.08)}
+html.dark .mmode-btn.on{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2);color:#fff}
 html.dark input,html.dark textarea,html.dark select{background:rgba(255,255,255,.07);color:var(--t1)}
-html.dark .hdr-wrap{background:rgba(26,26,26,.92)}
 html.dark #resources-panel,html.dark #move-popup-sheet{background:#1A1A1A}
+/* ─────────────────────────────────────────────────────── */
+/* ── SAFARI ───────────────────────────────────────────────────── */
+#pg-safari{display:none;flex-direction:column;padding:0;overflow:hidden}
+#pg-safari.on{display:flex}
+.sf-screen{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.sf-screen.on{display:flex}
+.sf-phdr{display:flex;align-items:center;gap:10px;padding:10px 16px 8px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.sf-ptitle{font-family:var(--px);font-size:14px;font-weight:700;color:var(--t1)}
+.sf-balls-bar{display:flex;gap:10px;align-items:center;padding:8px 16px 6px;flex-shrink:0;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.sf-ball-item{display:flex;align-items:center;gap:4px}
+.sf-ball-ico{width:18px;height:18px;border-radius:50%;border:2px solid rgba(0,0,0,.2);overflow:hidden;position:relative;flex-shrink:0}
+.sf-ball-ico::after{content:'';position:absolute;left:0;right:0;top:calc(50% - 1px);height:2px;background:rgba(0,0,0,.3)}
+.sf-ball-ico.poke{background:linear-gradient(180deg,#e53935 50%,#fff 50%)}
+.sf-ball-ico.great{background:linear-gradient(180deg,#1565c0 50%,#fff 50%)}
+.sf-ball-ico.ultra{background:linear-gradient(180deg,#fbc02d 50%,#111 50%)}
+.sf-ball-ico.master{background:linear-gradient(180deg,#7b1fa2 50%,#e91e63 50%)}
+.sf-ball-n{font-family:var(--px);font-size:9px;font-weight:700;color:var(--t1)}
+.sf-renew-lbl{font-family:var(--px);font-size:8px;color:var(--t3);margin-left:auto}
+.sf-zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 16px 24px}
+.sf-zone-card{border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:3px 3px 0 rgba(0,0,0,.18);border:2px solid rgba(0,0,0,.1);transition:transform .1s}
+.sf-zone-card:active:not(.locked){transform:scale(.95)}
+.sf-zone-card.locked{opacity:.5;cursor:not-allowed}
+.sf-zone-art{height:70px;display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;position:relative}
+.sf-zone-art img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated;position:absolute;inset:0}
+.sf-zone-art .sf-zone-emoji{position:relative;z-index:1;font-size:34px;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.4))}
+.sf-zone-body{background:rgba(255,255,255,.9);padding:6px 10px 8px}
+html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
+.sf-zone-name{font-family:var(--px);font-size:10px;font-weight:700;color:var(--t1)}
+.sf-zone-sub{font-size:9px;color:var(--t3);margin-top:2px}
+.sf-zone-lock{font-family:var(--px);font-size:8px;color:var(--ac);margin-top:2px}
+.sf-enc-bg{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:0}
+.sf-enc-enemy{position:absolute;top:12%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:2}
+.sf-enc-sprite{width:96px;height:96px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(2px 4px 8px rgba(0,0,0,.5))}
+.sf-enc-sprite.shiny{animation:sfShinyPulse 1.8s infinite}
+.sf-enc-name{font-family:var(--px);font-size:11px;color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.9)}
+.sf-enc-tags{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:center}
+.sf-enc-tag{font-family:var(--px);font-size:8px;padding:1px 6px;border-radius:5px;color:#fff;text-shadow:none}
+.sf-hp-row{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.65);border-radius:6px;padding:3px 8px;min-width:120px}
+.sf-hp-lbl{font-family:var(--px);font-size:8px;color:#9f9;flex-shrink:0}
+.sf-hp-track{flex:1;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden}
+.sf-hp-fill{height:100%;background:#4caf50;border-radius:4px;transition:width .4s,background .4s}
+.sf-ball-fly{position:absolute;width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,0,0,.35);z-index:5;pointer-events:none;bottom:30%;left:50%;transform:translateX(-50%)}
+.sf-msg-box{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:var(--px);font-size:11px;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.9);background:rgba(0,0,0,.7);border-radius:10px;padding:7px 14px;text-align:center;white-space:nowrap;z-index:4;min-width:160px}
+.sf-act-panel{background:rgba(12,12,12,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 16px 14px;display:flex;flex-direction:column;gap:9px;flex-shrink:0}
+.sf-ball-row{display:flex;gap:8px;justify-content:center}
+.sf-ball-throw{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 10px;border-radius:10px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);cursor:pointer;transition:all .12s;min-width:54px}
+.sf-ball-throw.sel{border-color:#fff;background:rgba(255,255,255,.2)}
+.sf-ball-throw:disabled{opacity:.3;pointer-events:none}
+.sf-ball-throw span{font-family:var(--px);font-size:8px;color:rgba(255,255,255,.75)}
+.sf-act-row{display:flex;gap:8px}
+.sf-act-btn{flex:1;font-family:var(--px);font-size:10px;font-weight:700;border:none;border-radius:10px;padding:10px 0;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;gap:5px}
+.sf-act-btn:active{transform:scale(.93)}
+.sf-act-btn.throw{background:var(--ac);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.sf-act-btn.weak{background:rgba(255,255,255,.1);color:#ddd;border:2px solid rgba(255,255,255,.2)}
+.sf-act-btn.run{background:#2a2a2a;color:#888;border:2px solid #3a3a3a}
+.sf-act-btn:disabled{opacity:.35;pointer-events:none}
+.sf-coll-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px 24px}
+.sf-coll-card{background:var(--s1);border-radius:12px;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;border:2px solid var(--bd);box-shadow:2px 2px 0 rgba(0,0,0,.08)}
+.sf-coll-card.shiny{border-color:#c8a800;background:rgba(255,215,0,.06)}
+.sf-coll-spr{width:48px;height:48px;object-fit:contain;image-rendering:pixelated}
+.sf-coll-name{font-family:var(--px);font-size:7px;color:var(--t2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;padding:0 2px}
+.sf-coll-cnt{font-family:var(--px);font-size:8px;color:var(--ac)}
+.sf-coll-shiny-dot{font-size:9px}
+.sf-toast{position:fixed;bottom:calc(var(--sb,0px) + 78px);left:50%;transform:translateX(-50%) translateY(8px);background:var(--ac);color:#fff;font-family:var(--px);font-size:10px;padding:8px 16px;border-radius:10px;z-index:9900;box-shadow:0 4px 16px rgba(0,0,0,.4);pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;white-space:nowrap;max-width:80vw;text-align:center}
+.sf-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.sf-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px;padding:32px}
+.sf-empty-ico{font-size:48px;opacity:.4}
+.sf-empty-txt{font-family:var(--px);font-size:11px;color:var(--t3);text-align:center;line-height:1.6}
+@keyframes sfShinyPulse{0%,100%{filter:drop-shadow(2px 4px 8px rgba(0,0,0,.5)) brightness(1)}50%{filter:drop-shadow(0 0 18px gold) brightness(1.5)}}
+@keyframes sfShake{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}40%{transform:rotate(14deg)}60%{transform:rotate(-10deg)}80%{transform:rotate(10deg)}}
+@keyframes sfCaptured{0%{transform:scale(1);opacity:1}30%{transform:scale(.05);opacity:1}100%{transform:scale(0);opacity:0}}
+@keyframes sfEscape{0%{transform:scale(0) rotate(180deg);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes sfBallPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.5)}50%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
+/* ─────────────────────────────────────────────────────────── */
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -1187,6 +1275,56 @@ function sendPasswordReset(){
   <div class="gscroll" style="padding:0 16px 24px"><div id="trainer-card-wrap"></div></div>
 </div>
 
+<div class="pg" id="pg-safari">
+  <!-- HOME: ball bar + zone grid -->
+  <div id="sf-home" class="sf-screen on">
+    <div class="sf-phdr">
+      <div class="sf-ptitle">Safari</div>
+      <button class="ibtn" onclick="showSafariCollection()" title="Colección" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
+    </div>
+    <div id="sf-balls-bar" class="sf-balls-bar"></div>
+    <div class="gscroll">
+      <div id="sf-zone-grid" class="sf-zone-grid"></div>
+    </div>
+  </div>
+  <!-- ENCOUNTER -->
+  <div id="sf-encounter" class="sf-screen">
+    <div id="sf-enc-bg" class="sf-enc-bg">
+      <div class="sf-enc-enemy" id="sf-enemy">
+        <img id="sf-enemy-img" class="sf-enc-sprite" src="" alt="">
+        <div id="sf-enemy-name" class="sf-enc-name"></div>
+        <div class="sf-enc-tags">
+          <div id="sf-enemy-tier" class="sf-enc-tag"></div>
+          <div id="sf-enemy-shiny" class="sf-enc-tag" style="display:none;background:#b8860b">✨ Shiny</div>
+        </div>
+        <div class="sf-hp-row">
+          <span class="sf-hp-lbl">HP</span>
+          <div class="sf-hp-track"><div id="sf-hp-fill" class="sf-hp-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+      <div id="sf-ball-fly" class="sf-ball-fly sf-ball-ico poke" style="display:none"></div>
+      <div id="sf-msg-box" class="sf-msg-box"></div>
+    </div>
+    <div class="sf-act-panel">
+      <div id="sf-ball-row" class="sf-ball-row"></div>
+      <div class="sf-act-row">
+        <button class="sf-act-btn weak" id="sf-btn-weak" onclick="safariWeaken()">⚔ Debilitar</button>
+        <button class="sf-act-btn throw" id="sf-btn-throw" onclick="safariThrow()">🎯 Lanzar</button>
+        <button class="sf-act-btn run" onclick="safariRun()">↩ Huir</button>
+      </div>
+    </div>
+  </div>
+  <!-- COLLECTION -->
+  <div id="sf-collection" class="sf-screen">
+    <div class="sf-phdr">
+      <button class="ibtn" onclick="showSafariHome()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="sf-ptitle">Mi Colección</div>
+      <div id="sf-coll-count" style="font-family:var(--px);font-size:10px;color:var(--t3);margin-left:auto"></div>
+    </div>
+    <div class="gscroll"><div id="sf-coll-grid" class="sf-coll-grid"></div></div>
+  </div>
+</div>
+
 <div class="pg" id="pg-cfg">
   <div class="phdr"><div class="ptitle">Ajustes</div></div>
   <div class="gscroll" style="padding:0 16px">
@@ -1338,6 +1476,10 @@ function sendPasswordReset(){
   <button class="tab" id="tb-team" onclick="goTab('team')">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     <span class="tab-lbl">Equipo</span>
+  </button>
+  <button class="tab" id="tb-safari" onclick="goTab('safari')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
+    <span class="tab-lbl">Safari</span>
   </button>
 
   </div>
@@ -2598,55 +2740,24 @@ const t=THEMES[themeId]||THEMES.magenta;
 const root=document.documentElement;
 root.style.setProperty('--ac',t.ac);
 root.style.setProperty('--ac2',t.ac2);
-root.style.setProperty('--bg',t.bg||'#EDEDED');
-root.style.setProperty('--s2',t.s2);
-root.style.setProperty('--s3',t.s3);
-root.style.setProperty('--bd',t.bd);
 root.style.setProperty('--red',t.ac);
 root.style.setProperty('--acg',t.ac+'22');
-document.body.style.backgroundImage=`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
+document.body.style.backgroundImage=S.set.dark
+?`radial-gradient(circle,rgba(255,255,255,0.06) var(--dot-size),transparent var(--dot-size))`
+:`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
 const avatar=document.getElementById('hdr-trainer-avatar');
 if(avatar){
 avatar.style.background=t.ac;
 avatar.style.borderColor=t.ac;
 avatar.style.boxShadow=`0 2px 8px ${t.ac}55`;
 }
-applyDark(S.set.dark||false);
 }
 
 function applyDark(isDark){
-const root=document.documentElement;
-root.classList.toggle('dark',isDark);
-if(isDark){
-root.style.setProperty('--bg','#1A1A1A');
-root.style.setProperty('--s1','rgba(255,255,255,0.07)');
-root.style.setProperty('--s2','rgba(255,255,255,0.05)');
-root.style.setProperty('--s3','rgba(255,255,255,0.07)');
-root.style.setProperty('--t1','#F0F0F0');
-root.style.setProperty('--t2','#AAAAAA');
-root.style.setProperty('--t3','#666666');
-root.style.setProperty('--bd','rgba(255,255,255,0.12)');
-root.style.setProperty('--bd2','rgba(255,255,255,0.07)');
-root.style.setProperty('--shadow','0 2px 12px rgba(0,0,0,.4)');
-root.style.setProperty('--shadow-md','0 8px 32px rgba(0,0,0,.5)');
-root.style.setProperty('--shadow-lg','0 16px 48px rgba(0,0,0,.6)');
-document.body.style.backgroundImage=`radial-gradient(circle,rgba(255,255,255,0.06) var(--dot-size),transparent var(--dot-size))`;
-}else{
-root.style.removeProperty('--s1');
-root.style.removeProperty('--t1');
-root.style.removeProperty('--t2');
-root.style.removeProperty('--t3');
-root.style.removeProperty('--bd2');
-root.style.removeProperty('--shadow-md');
-root.style.removeProperty('--shadow-lg');
-const t=THEMES[S.set.theme||'magenta']||THEMES.magenta;
-root.style.setProperty('--bg',t.bg||'#EDEDED');
-root.style.setProperty('--s2',t.s2);
-root.style.setProperty('--s3',t.s3);
-root.style.setProperty('--bd',t.bd);
-root.style.setProperty('--shadow','0 2px 12px rgba(0,0,0,.08)');
-document.body.style.backgroundImage=`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
-}
+document.documentElement.classList.toggle('dark',isDark);
+document.body.style.backgroundImage=isDark
+?`radial-gradient(circle,rgba(255,255,255,0.06) var(--dot-size),transparent var(--dot-size))`
+:`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
 }
 
 function setTheme(themeId){
@@ -3109,7 +3220,397 @@ mPreviewForm:null,
 mPreviewShiny:false,
 ff:{gen:0,types:[],rarity:''}, // fav filters
 companion:{hp:100, energy:80, hunger:70, mood:75, lastVisit:null, fainted:false, faintedAt:null, faintCount:0}, // tamagotchi state
+safari:{caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},milestones:[],selBall:'poke'},
 };
+
+// ═══════════════════════════════════════
+//  SAFARI GAME
+// ═══════════════════════════════════════
+const SAFARI_ZONES={
+  pradera: {name:'Pradera',  emoji:'🌿', types:['normal','grass','flying','fairy'],   minCatch:0,  bg:'linear-gradient(180deg,#87ceeb 0%,#87ceeb 55%,#7ec850 55%,#5a8a30 100%)'},
+  bosque:  {name:'Bosque',   emoji:'🌲', types:['bug','grass','poison','dark'],       minCatch:0,  bg:'linear-gradient(180deg,#2d5016 0%,#1c3510 50%,#5a3a1a 50%,#3a2010 100%)'},
+  montana: {name:'Montaña',  emoji:'⛰️', types:['rock','fighting','flying','steel'],  minCatch:5,  bg:'linear-gradient(180deg,#9acae0 0%,#9acae0 30%,#a09080 30%,#706050 65%,#6a5a4a 65%,#5a4a3a 100%)'},
+  costa:   {name:'Costa',    emoji:'🏖️', types:['water','normal','psychic'],          minCatch:5,  bg:'linear-gradient(180deg,#87ceeb 0%,#87ceeb 45%,#40b8d8 45%,#1888a8 75%,#e8c870 75%,#c8a850 100%)'},
+  cueva:   {name:'Cueva',    emoji:'🕳️', types:['poison','ground','ghost','dark'],    minCatch:10, bg:'linear-gradient(180deg,#1a1218 0%,#0e0c10 50%,#2e1e14 50%,#1a0e0a 100%)'},
+  mar:     {name:'Mar',      emoji:'🌊', types:['water','dragon','ice'],              minCatch:15, bg:'linear-gradient(180deg,#1a3a6a 0%,#0a2040 40%,#082040 40%,#040f28 100%)'},
+  volcan:  {name:'Volcán',   emoji:'🌋', types:['fire','ground','dragon'],            minCatch:20, bg:'linear-gradient(180deg,#380808 0%,#200404 40%,#5a1408 40%,#781808 70%,#280808 70%,#180404 100%)'},
+  tundra:  {name:'Tundra',   emoji:'❄️', types:['ice','psychic','dragon'],            minCatch:25, bg:'linear-gradient(180deg,#c8e8f4 0%,#a0c0d4 50%,#dce8ee 50%,#b8d0dc 100%)'},
+  ruinas:  {name:'Ruinas',   emoji:'🏛️', types:['psychic','ghost','dragon','steel'],  minCatch:80, bg:'linear-gradient(180deg,#3a2818 0%,#241808 50%,#4a3820 50%,#302210 100%)'},
+  espacio: {name:'Espacio',  emoji:'🌌', types:['dragon','psychic','steel','fairy'],  minCatch:200,bg:'linear-gradient(180deg,#08080e 0%,#04040a 40%,#060610 40%,#020208 100%)'},
+};
+const SAFARI_PSEUDO=new Set([149,248,373,376,445,612,635,706,784,887,998]);
+const SAFARI_TIER_COLORS=['#888','#c47a00','#8B3AA2','#1a6bc1','#d44400','#7b1fa2'];
+const SAFARI_TIER_LABELS=['Común','Poco común','Raro','Ultra/Paradoja','Legendario','Mítico'];
+const SAFARI_CATCH_RATES=[190,90,30,12,3,3];
+const SAFARI_BALL_MULT={poke:1,great:1.5,ultra:2,master:999};
+const SAFARI_MAX_BASIC=25;
+const SAFARI_RENEW_AMOUNT=10;
+const SAFARI_RENEW_MS=60*60*1000; // 1 hour
+const SAFARI_MILESTONES=[
+  {id:'sf_c1',  catches:1,   reward:{great:3},  msg:'¡Primera captura! +3 Super Ball'},
+  {id:'sf_c5',  catches:5,   reward:{great:5},  msg:'5 capturas · +5 Super Ball'},
+  {id:'sf_c10', catches:10,  reward:{great:5},  msg:'10 capturas · +5 Super Ball'},
+  {id:'sf_c25', catches:25,  reward:{ultra:3},  msg:'25 capturas · +3 Ultra Ball'},
+  {id:'sf_c50', catches:50,  reward:{ultra:5},  msg:'50 capturas · +5 Ultra Ball'},
+  {id:'sf_c100',catches:100, reward:{ultra:10}, msg:'100 capturas · +10 Ultra Ball'},
+  {id:'sf_c150',catches:150, reward:{master:1}, msg:'150 capturas · ¡1 Master Ball!'},
+  {id:'sf_c200',catches:200, reward:{ultra:10}, msg:'200 capturas · +10 Ultra Ball'},
+  {id:'sf_c300',catches:300, reward:{master:1}, msg:'300 capturas · ¡1 Master Ball!'},
+  {id:'sf_c500',catches:500, reward:{master:2}, msg:'500 capturas · ¡2 Master Ball!'},
+  {id:'sf_sh1', shinies:1,   reward:{ultra:5},  msg:'¡Primer Shiny! +5 Ultra Ball'},
+  {id:'sf_sh5', shinies:5,   reward:{master:1}, msg:'5 shinies · ¡1 Master Ball!'},
+  {id:'sf_leg', legs:1,      reward:{ultra:5},  msg:'¡Primer legendario! +5 Ultra Ball'},
+];
+
+function _sfTier(poke){
+  if(poke.rarity==='mythical') return 5;
+  if(poke.rarity==='legendary') return 4;
+  if(poke.rarity==='ultrabeast'||poke.rarity==='paradox') return 3;
+  if(SAFARI_PSEUDO.has(poke.id)) return 2;
+  return ((poke.id*2654435761)>>>0)%100<22?1:0;
+}
+function _sfTotalCaught(){return Object.keys(S.safari.caught).length;}
+function _sfTotalShinies(){return Object.values(S.safari.caught).filter(c=>c.shiny).length;}
+function _sfTotalLegs(){return Object.entries(S.safari.caught).filter(([id])=>{const p=S.poke.find(x=>x.id===+id);return p&&(p.rarity==='legendary'||p.rarity==='mythical');}).length;}
+function _sfBasicBalls(){return (S.safari.balls.poke||0)+(S.safari.balls.great||0);}
+
+function sfRenewBalls(){
+  const now=Date.now();
+  const last=S.safari.balls.lastRenew||0;
+  const hours=Math.floor((now-last)/SAFARI_RENEW_MS);
+  if(hours<1)return;
+  const toAdd=hours*SAFARI_RENEW_AMOUNT;
+  const current=_sfBasicBalls();
+  const canAdd=Math.max(0,SAFARI_MAX_BASIC-current);
+  const added=Math.min(toAdd,canAdd);
+  if(added>0){S.safari.balls.poke=Math.min(SAFARI_MAX_BASIC,(S.safari.balls.poke||0)+added);}
+  S.safari.balls.lastRenew=last+(hours*SAFARI_RENEW_MS);
+  scheduleSave();
+}
+
+function sfCheckMilestones(){
+  const total=_sfTotalCaught();
+  const shinies=_sfTotalShinies();
+  const legs=_sfTotalLegs();
+  let awarded=false;
+  for(const m of SAFARI_MILESTONES){
+    if(S.safari.milestones.includes(m.id))continue;
+    const met=(m.catches&&total>=m.catches)||(m.shinies&&shinies>=m.shinies)||(m.legs&&legs>=m.legs);
+    if(!met)continue;
+    S.safari.milestones.push(m.id);
+    if(m.reward.great)S.safari.balls.great=(S.safari.balls.great||0)+m.reward.great;
+    if(m.reward.ultra)S.safari.balls.ultra=(S.safari.balls.ultra||0)+m.reward.ultra;
+    if(m.reward.master)S.safari.balls.master=(S.safari.balls.master||0)+m.reward.master;
+    sfToast(m.msg);
+    awarded=true;
+  }
+  if(awarded)scheduleSave();
+}
+
+function sfToast(msg){
+  const el=document.getElementById('sf-toast');
+  if(!el)return;
+  el.textContent=msg;
+  el.classList.add('on');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('on'),3000);
+}
+
+function sfGetPool(zoneId){
+  const zone=SAFARI_ZONES[zoneId];
+  if(!zone)return[];
+  const total=_sfTotalCaught();
+  return S.poke.filter(p=>{
+    if(!p.types.some(t=>zone.types.includes(t)))return false;
+    const tier=_sfTier(p);
+    if(tier===5&&total<300)return false;
+    if(tier===4&&total<150)return false;
+    if(tier===3&&total<200)return false;
+    if(tier===2&&total<80)return false;
+    if(tier===1&&total<15)return false;
+    return true;
+  });
+}
+
+function sfSpawn(zoneId){
+  const pool=sfGetPool(zoneId);
+  if(!pool.length)return null;
+  const W=[100,18,6,3,2,1];
+  let total=0;
+  const wl=pool.map(p=>{const w=W[_sfTier(p)];total+=w;return{p,w};});
+  let r=Math.random()*total;
+  let poke=pool[0];
+  for(const{p,w}of wl){r-=w;if(r<=0){poke=p;break;}}
+  const tier=_sfTier(poke);
+  const shiny=Math.random()<1/512;
+  const maxHp=[60,90,130,160,200,200][tier];
+  return{poke,hp:maxHp,maxHp,shiny,tier,zone:zoneId,busy:false};
+}
+
+function sfCatchProb(tier,ball,hp,maxHp){
+  if(ball==='master')return 1;
+  const rate=SAFARI_CATCH_RATES[tier];
+  const hpFrac=hp/maxHp;
+  return Math.min(((3*maxHp-2*hp)/(3*maxHp))*(rate/255)*SAFARI_BALL_MULT[ball],1);
+}
+
+// ── SAFARI RENDER ──────────────────────────────────────────
+function renderSafari(){
+  sfRenewBalls();
+  showSafariHome();
+}
+
+function showSafariHome(){
+  document.getElementById('sf-home')?.classList.add('on');
+  document.getElementById('sf-encounter')?.classList.remove('on');
+  document.getElementById('sf-collection')?.classList.remove('on');
+  _sfRenderBalls();
+  _sfRenderZones();
+}
+
+function showSafariCollection(){
+  document.getElementById('sf-home')?.classList.remove('on');
+  document.getElementById('sf-encounter')?.classList.remove('on');
+  document.getElementById('sf-collection')?.classList.add('on');
+  _sfRenderCollection();
+}
+
+function _sfRenderBalls(){
+  const bar=document.getElementById('sf-balls-bar');
+  if(!bar)return;
+  const b=S.safari.balls;
+  const basic=_sfBasicBalls();
+  const now=Date.now();
+  const last=b.lastRenew||now;
+  const msLeft=SAFARI_RENEW_MS-((now-last)%SAFARI_RENEW_MS);
+  const mins=Math.ceil(msLeft/60000);
+  const renewStr=basic>=SAFARI_MAX_BASIC?'(lleno)':mins+'min';
+  const balls=[
+    {type:'poke',count:b.poke||0},
+    {type:'great',count:b.great||0},
+    {type:'ultra',count:b.ultra||0},
+    {type:'master',count:b.master||0},
+  ].filter(x=>x.count>0||(x.type==='poke'));
+  bar.innerHTML=balls.map(({type,count})=>`<div class="sf-ball-item"><div class="sf-ball-ico ${type}"></div><span class="sf-ball-n">x${count}</span></div>`).join('')
+    +`<span class="sf-renew-lbl">↺ ${renewStr} · ${basic}/${SAFARI_MAX_BASIC}</span>`;
+}
+
+function _sfRenderZones(){
+  const grid=document.getElementById('sf-zone-grid');
+  if(!grid)return;
+  const total=_sfTotalCaught();
+  grid.innerHTML=Object.entries(SAFARI_ZONES).map(([id,z])=>{
+    const locked=total<z.minCatch;
+    const pool=sfGetPool(id);
+    return`<div class="sf-zone-card${locked?' locked':''}" onclick="${locked?'':'sfStartEncounter(\''+id+'\')'}">
+      <div class="sf-zone-art" style="background:${z.bg}"><span class="sf-zone-emoji">${z.emoji}</span></div>
+      <div class="sf-zone-body">
+        <div class="sf-zone-name">${z.name}</div>
+        <div class="sf-zone-sub">${pool.length} Pokémon disponibles</div>
+        ${locked?`<div class="sf-zone-lock">🔒 ${z.minCatch} capturas</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function sfStartEncounter(zoneId){
+  if(_sfBasicBalls()<=0&&(S.safari.balls.ultra||0)<=0&&(S.safari.balls.master||0)<=0){
+    sfToast('Sin Poké Balls. Espera la renovación.');
+    return;
+  }
+  const enc=sfSpawn(zoneId);
+  if(!enc){sfToast('No hay Pokémon aquí aún.');return;}
+  S.safari.encounter=enc;
+  _sfShowEncounter(enc);
+}
+
+function _sfShowEncounter(enc){
+  document.getElementById('sf-home')?.classList.remove('on');
+  document.getElementById('sf-encounter')?.classList.add('on');
+  document.getElementById('sf-collection')?.classList.remove('on');
+
+  // Background
+  const bg=document.getElementById('sf-enc-bg');
+  if(bg)bg.style.background=SAFARI_ZONES[enc.zone]?.bg||'#1a1a2a';
+
+  // Sprite
+  const img=document.getElementById('sf-enemy-img');
+  const mode=S.mImgMode||'sprite';
+  const spriteUrl=enc.shiny?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/shiny/${enc.poke.id}.png`
+    :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/${enc.poke.id}.png`;
+  if(img){img.src=spriteUrl;img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');}
+
+  document.getElementById('sf-enemy-name').textContent=cap(enc.poke.name);
+  const tierEl=document.getElementById('sf-enemy-tier');
+  if(tierEl){tierEl.textContent=SAFARI_TIER_LABELS[enc.tier];tierEl.style.background=SAFARI_TIER_COLORS[enc.tier];}
+  const shinyEl=document.getElementById('sf-enemy-shiny');
+  if(shinyEl)shinyEl.style.display=enc.shiny?'':'none';
+
+  _sfUpdateHp(enc.hp,enc.maxHp);
+  document.getElementById('sf-msg-box').textContent=`¡Un ${cap(enc.poke.name)} salvaje apareció!`;
+  document.getElementById('sf-ball-fly').style.display='none';
+
+  _sfRenderBallRow();
+  document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
+  document.getElementById('sf-btn-weak')?.removeAttribute('disabled');
+}
+
+function _sfUpdateHp(hp,max){
+  const fill=document.getElementById('sf-hp-fill');
+  if(!fill)return;
+  const pct=Math.max(0,hp/max*100);
+  fill.style.width=pct+'%';
+  fill.style.background=pct>50?'#4caf50':pct>25?'#ffc107':'#f44336';
+}
+
+function _sfRenderBallRow(){
+  const row=document.getElementById('sf-ball-row');
+  if(!row)return;
+  const b=S.safari.balls;
+  const options=[
+    {type:'poke',count:_sfBasicBalls(),label:'Poké'},
+    {type:'ultra',count:b.ultra||0,label:'Ultra'},
+    {type:'master',count:b.master||0,label:'Master'},
+  ].filter(x=>x.count>0);
+  if(!options.length){row.innerHTML='<span style="font-family:var(--px);font-size:9px;color:#888">Sin balls</span>';return;}
+  if(!options.find(o=>o.type===S.safari.selBall))S.safari.selBall=options[0].type;
+  row.innerHTML=options.map(({type,count,label})=>`
+    <button class="sf-ball-throw${S.safari.selBall===type?' sel':''}" onclick="sfSelectBall('${type}')">
+      <div class="sf-ball-ico ${type}" style="width:22px;height:22px"></div>
+      <span>${label} x${count}</span>
+    </button>`).join('');
+}
+
+function sfSelectBall(type){S.safari.selBall=type;_sfRenderBallRow();}
+
+function safariWeaken(){
+  const enc=S.safari.encounter;
+  if(!enc||enc.busy)return;
+  enc.hp=Math.max(Math.floor(enc.maxHp*0.08),enc.hp-Math.floor(enc.maxHp*0.3));
+  _sfUpdateHp(enc.hp,enc.maxHp);
+  const flee=enc.hp/enc.maxHp<0.1&&Math.random()<0.25;
+  if(flee){
+    document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} huyó!`;
+    _sfDisableActions();
+    setTimeout(showSafariHome,1600);
+    return;
+  }
+  document.getElementById('sf-msg-box').textContent='HP reducido · ¡Más fácil de atrapar!';
+}
+
+async function safariThrow(){
+  const enc=S.safari.encounter;
+  if(!enc||enc.busy)return;
+  const ball=S.safari.selBall||'poke';
+  // Deduct ball
+  if(ball==='poke'||ball==='great'){
+    const basic=_sfBasicBalls();
+    if(basic<=0){sfToast('Sin Poké Balls básicas');return;}
+    if(S.safari.balls.poke>0)S.safari.balls.poke--;
+    else S.safari.balls.great--;
+  } else if(ball==='ultra'){
+    if(!(S.safari.balls.ultra>0)){sfToast('Sin Ultra Balls');return;}
+    S.safari.balls.ultra--;
+  } else if(ball==='master'){
+    if(!(S.safari.balls.master>0)){sfToast('Sin Master Balls');return;}
+    S.safari.balls.master--;
+  }
+  _sfRenderBallRow();
+  enc.busy=true;
+  _sfDisableActions();
+
+  // Ball fly animation
+  const ballEl=document.getElementById('sf-ball-fly');
+  if(ballEl){
+    ballEl.className=`sf-ball-fly sf-ball-ico ${ball}`;
+    ballEl.style.display='block';
+    ballEl.style.animation='none';
+  }
+
+  const prob=sfCatchProb(enc.tier,ball,enc.hp,enc.maxHp);
+  const caught=Math.random()<prob;
+  const shakes=caught?3:Math.floor(Math.random()*3);
+
+  await _sfDelay(350);
+  // Hide sprite → appear to go into ball
+  const sprite=document.getElementById('sf-enemy-img');
+  if(sprite)sprite.style.animation='sfCaptured .4s forwards';
+  document.getElementById('sf-msg-box').textContent='';
+  await _sfDelay(400);
+
+  // Shake animation
+  if(ballEl)ballEl.style.animation='sfBallPulse .5s infinite';
+  for(let i=0;i<shakes;i++){
+    if(ballEl){ballEl.style.animation='sfShake .5s ease';await _sfDelay(520);ballEl.style.animation='none';await _sfDelay(200);}
+  }
+
+  if(caught){
+    document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} capturado!`;
+    if(ballEl)ballEl.style.animation='sfBallPulse 1s infinite';
+    // Record catch
+    const key=String(enc.poke.id);
+    if(!S.safari.caught[key]){S.safari.caught[key]={count:0,shiny:enc.shiny,firstDate:Date.now()};}
+    S.safari.caught[key].count++;
+    if(enc.shiny)S.safari.caught[key].shiny=true;
+    scheduleSave();
+    sfCheckMilestones();
+    await _sfDelay(1800);
+    showSafariHome();
+  } else {
+    // Escape
+    document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} escapó!`;
+    if(sprite){sprite.style.animation='sfEscape .4s forwards';}
+    if(ballEl)ballEl.style.display='none';
+    await _sfDelay(600);
+    sprite.style.animation=enc.shiny?'sfShinyPulse 1.8s infinite':'none';
+    if(_sfBasicBalls()<=0&&!(S.safari.balls.ultra>0)&&!(S.safari.balls.master>0)){
+      document.getElementById('sf-msg-box').textContent='Sin Poké Balls · Regresando...';
+      await _sfDelay(1600);
+      showSafariHome();
+    } else {
+      enc.busy=false;
+      _sfEnableActions();
+    }
+  }
+}
+
+function safariRun(){
+  S.safari.encounter=null;
+  showSafariHome();
+}
+
+function _sfDisableActions(){
+  document.getElementById('sf-btn-throw')?.setAttribute('disabled','');
+  document.getElementById('sf-btn-weak')?.setAttribute('disabled','');
+}
+function _sfEnableActions(){
+  document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
+  document.getElementById('sf-btn-weak')?.removeAttribute('disabled');
+}
+function _sfDelay(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function _sfRenderCollection(){
+  const grid=document.getElementById('sf-coll-grid');
+  const cnt=document.getElementById('sf-coll-count');
+  if(!grid)return;
+  const entries=Object.entries(S.safari.caught).sort((a,b)=>+a[0]-+b[0]);
+  if(cnt)cnt.textContent=entries.length+'/1025';
+  if(!entries.length){
+    grid.innerHTML='<div class="sf-empty" style="grid-column:1/-1"><div class="sf-empty-ico">🎯</div><div class="sf-empty-txt">Aún no has capturado ningún Pokémon.<br>Explora una zona para empezar.</div></div>';
+    return;
+  }
+  grid.innerHTML=entries.map(([id,data])=>{
+    const p=S.poke.find(x=>x.id===+id);
+    if(!p)return'';
+    const sprSrc=data.shiny?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`:`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
+    return`<div class="sf-coll-card${data.shiny?' shiny':''}">
+      <img class="sf-coll-spr" src="${sprSrc}" onerror="this.style.opacity=.3" alt="">
+      ${data.shiny?'<div class="sf-coll-shiny-dot">✨</div>':''}
+      <div class="sf-coll-name">${cap(p.name)}</div>
+      <div class="sf-coll-cnt">x${data.count}</div>
+    </div>`;
+  }).join('');
+}
 
 // ═══════════════════════════════════════
 //  FIREBASE + AUTH
@@ -3316,6 +3817,7 @@ localStorage.setItem('t', JSON.stringify(S.track));
 localStorage.setItem('fv', JSON.stringify([...S.favs]));
 localStorage.setItem('tms', JSON.stringify(S.teams));
 localStorage.setItem('st', JSON.stringify(S.set));
+localStorage.setItem('sf', JSON.stringify(S.safari));
 } catch(e) {}
 }
 
@@ -3376,6 +3878,7 @@ try { S.track = JSON.parse(localStorage.getItem('t')) || {}; } catch(e){ S.track
 try { S.favs = new Set((JSON.parse(localStorage.getItem('fv')) || []).map(String)); } catch(e){ S.favs = new Set(); }
 try { S.teams = sanitizeTeams(JSON.parse(localStorage.getItem('tms')||'{}')); } catch(e){ S.teams = {}; }
 try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
+try { const d = localStorage.getItem('sf'); if(d) Object.assign(S.safari, JSON.parse(d)); } catch(e){}
 }
 
 function forceRefreshTypes(){
@@ -5165,24 +5668,24 @@ function initScrollHide(){
   const tb=document.getElementById('top-bar');
   const fb=document.getElementById('filter-bar');
   if(!gs||!tb||!fb)return;
-  let lastY=0,hidden=false;
+  let lastY=0,hidden=false,accDown=0;
   function show(){
     if(!hidden)return;
-    hidden=false;
+    hidden=false;accDown=0;
     tb.style.marginTop='';
     fb.style.marginTop='';
   }
   function hide(){
     if(hidden)return;
-    hidden=true;
+    hidden=true;accDown=0;
     tb.style.marginTop='-'+tb.offsetHeight+'px';
     fb.style.marginTop='-'+fb.offsetHeight+'px';
   }
   gs.addEventListener('scroll',function(){
     const y=gs.scrollTop;
     const dy=y-lastY; lastY=y;
-    if(dy>8&&y>80)hide();
-    else if(dy<-5)show();
+    if(dy>0){accDown+=dy;if(accDown>50&&y>80)hide();}
+    else{accDown=0;if(dy<-8)show();}
   },{passive:true});
   window._showTopBar=show;
 }
@@ -5205,6 +5708,7 @@ if(t==='team')renderTeam();
 if(t==='stats')drawStats();
 if(t==='cfg')renderSettings();
 if(t==='card')renderTrainerCard();
+if(t==='safari')renderSafari();
 }
 
 function toggleFav(key){
@@ -6740,12 +7244,13 @@ document.getElementById('standalone-step').style.display='none';
 (function(){
 loadFormsCache();
 try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
+try { const d = localStorage.getItem('sf'); if(d) Object.assign(S.safari, JSON.parse(d)); } catch(e){}
 
 // Apply saved columns setting
 applyColsSetting();
 // Apply saved theme
 applyTheme(S.set.theme||'magenta');
-// Apply dark mode (must come after theme to override neutral vars)
+// Apply saved dark mode
 applyDark(S.set.dark||false);
 // Apply saved glass opacity
 applyGlass(S.set.glass||45);
@@ -6768,6 +7273,8 @@ renderGrid();
 })();
 
 </script>
+
+<div id="sf-toast" class="sf-toast"></div>
 
 <div id="walker-wrap" style="position:fixed;bottom:0;left:0;right:0;pointer-events:none;z-index:150;display:none">
   <img id="walker-img" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:40px;height:40px;object-fit:contain;image-rendering:pixelated;pointer-events:all;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));left:10%;transition:left .06s linear,bottom .2s,transform .15s" onclick="walkerClick()">
