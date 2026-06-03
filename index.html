@@ -906,10 +906,21 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-act-btn.weak{background:rgba(255,255,255,.1);color:#ddd;border:2px solid rgba(255,255,255,.2)}
 .sf-act-btn.run{background:#2a2a2a;color:#888;border:2px solid #3a3a3a}
 .sf-act-btn:disabled{opacity:.35;pointer-events:none}
-.sf-coll-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px 24px}
-.sf-coll-card{background:var(--s1);border-radius:12px;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;border:2px solid var(--bd);box-shadow:2px 2px 0 rgba(0,0,0,.08)}
+/* Collection filters */
+.sf-coll-filters{padding:8px 12px 6px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.sf-coll-search-wrap{position:relative}
+.sf-coll-search-wrap input{width:100%;padding:7px 10px 7px 30px;border-radius:20px;border:1.5px solid var(--bd);background:var(--s1);color:var(--t1);font-size:13px;font-family:var(--fn);outline:none;box-sizing:border-box}
+.sf-coll-filter-row{display:flex;gap:6px}
+.sf-filter-btn{font-family:var(--px);font-size:8px;padding:4px 10px;border-radius:14px;border:1.5px solid var(--bd);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s;flex:1}
+.sf-filter-btn.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+/* Collection grid */
+.sf-coll-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px 12px 24px}
+.sf-coll-card{background:var(--s1);border-radius:10px;padding:6px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;border:2px solid var(--bd);box-shadow:2px 2px 0 rgba(0,0,0,.08);transition:transform .1s}
+.sf-coll-card:active{transform:scale(.93)}
 .sf-coll-card.shiny{border-color:#c8a800;background:rgba(255,215,0,.06)}
-.sf-coll-spr{width:48px;height:48px;object-fit:contain;image-rendering:pixelated}
+.sf-coll-card.missing{background:var(--s2);border-color:transparent;opacity:.55}
+.sf-coll-spr{width:44px;height:44px;object-fit:contain;image-rendering:pixelated}
+.sf-coll-sil{filter:brightness(0);opacity:.7}
 .sf-coll-name{font-family:var(--px);font-size:7px;color:var(--t2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;padding:0 2px}
 .sf-coll-cnt{font-family:var(--px);font-size:8px;color:var(--ac)}
 .sf-coll-shiny-dot{font-size:9px}
@@ -1367,8 +1378,19 @@ function sendPasswordReset(){
   <div id="sf-collection" class="sf-screen">
     <div class="sf-phdr">
       <button class="ibtn" onclick="showSafariHome()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <div class="sf-ptitle">Mi Colección</div>
+      <div class="sf-ptitle">Pokédex Safari</div>
       <div id="sf-coll-count" style="font-family:var(--px);font-size:10px;color:var(--t3);margin-left:auto"></div>
+    </div>
+    <div class="sf-coll-filters">
+      <div class="sf-coll-search-wrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="sf-coll-search" type="search" placeholder="Buscar..." oninput="_sfRenderCollection()">
+      </div>
+      <div class="sf-coll-filter-row">
+        <button class="sf-filter-btn" id="sf-f-all"     onclick="sfSetCollFilter('all')">Todos</button>
+        <button class="sf-filter-btn" id="sf-f-caught"  onclick="sfSetCollFilter('caught')">Capturados</button>
+        <button class="sf-filter-btn" id="sf-f-missing" onclick="sfSetCollFilter('missing')">Por capturar</button>
+      </div>
     </div>
     <div class="gscroll"><div id="sf-coll-grid" class="sf-coll-grid"></div></div>
   </div>
@@ -3453,12 +3475,6 @@ function showSafariHome(){
   _sfRenderZones();
 }
 
-function showSafariCollection(){
-  document.getElementById('sf-home')?.classList.remove('on');
-  document.getElementById('sf-encounter')?.classList.remove('on');
-  document.getElementById('sf-collection')?.classList.add('on');
-  _sfRenderCollection();
-}
 
 function _sfRenderBalls(){
   const bar=document.getElementById('sf-balls-bar');
@@ -3839,27 +3855,99 @@ function _sfEnableActions(){
 }
 function _sfDelay(ms){return new Promise(r=>setTimeout(r,ms));}
 
+let _sfCollFilter='all';
+
+function sfSetCollFilter(f){
+  _sfCollFilter=f;
+  document.querySelectorAll('.sf-filter-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('sf-f-'+f)?.classList.add('on');
+  _sfRenderCollection();
+}
+
+function showSafariCollection(){
+  document.getElementById('sf-home')?.classList.remove('on');
+  document.getElementById('sf-encounter')?.classList.remove('on');
+  document.getElementById('sf-collection')?.classList.add('on');
+  // Set active filter button
+  document.querySelectorAll('.sf-filter-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('sf-f-'+_sfCollFilter)?.classList.add('on');
+  _sfRenderCollection();
+}
+
 function _sfRenderCollection(){
   const grid=document.getElementById('sf-coll-grid');
   const cnt=document.getElementById('sf-coll-count');
   if(!grid)return;
-  const entries=Object.entries(S.safari.caught).sort((a,b)=>+a[0]-+b[0]);
-  if(cnt)cnt.textContent=entries.length+'/1025';
-  if(!entries.length){
-    grid.innerHTML='<div class="sf-empty" style="grid-column:1/-1"><div class="sf-empty-ico">🎯</div><div class="sf-empty-txt">Aún no has capturado ningún Pokémon.<br>Explora una zona para empezar.</div></div>';
+  const search=(document.getElementById('sf-coll-search')?.value||'').toLowerCase().trim();
+  const caughtCount=Object.keys(S.safari.caught).length;
+  if(cnt)cnt.textContent=`${caughtCount}/1025`;
+
+  let pool=S.poke?[...S.poke].sort((a,b)=>a.id-b.id):[];
+  if(_sfCollFilter==='caught') pool=pool.filter(p=>S.safari.caught[String(p.id)]);
+  if(_sfCollFilter==='missing') pool=pool.filter(p=>!S.safari.caught[String(p.id)]);
+  if(search) pool=pool.filter(p=>p.name.toLowerCase().includes(search)||String(p.id).includes(search));
+
+  if(!pool.length){
+    grid.innerHTML='<div class="sf-empty" style="grid-column:1/-1"><div class="sf-empty-ico">🔍</div><div class="sf-empty-txt">Sin resultados.</div></div>';
     return;
   }
-  grid.innerHTML=entries.map(([id,data])=>{
-    const p=S.poke.find(x=>x.id===+id);
-    if(!p)return'';
-    const sprSrc=data.shiny?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`:`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
-    return`<div class="sf-coll-card${data.shiny?' shiny':''}" onclick="sfShowDetail('${id}')" style="cursor:pointer">
-      <img class="sf-coll-spr" src="${sprSrc}" onerror="this.style.opacity=.3" alt="">
-      ${data.shiny?'<div class="sf-coll-shiny-dot">✨</div>':''}
-      <div class="sf-coll-name">${cap(p.name)}</div>
-      <div class="sf-coll-cnt">x${data.count}</div>
-    </div>`;
+
+  grid.innerHTML=pool.map(p=>{
+    const id=String(p.id);
+    const data=S.safari.caught[id];
+    const sprSrc=data?.shiny
+      ?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`
+      :`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
+    if(data){
+      return`<div class="sf-coll-card${data.shiny?' shiny':''}" onclick="sfShowDetail('${id}')">
+        <img class="sf-coll-spr" src="${sprSrc}" loading="lazy" onerror="this.style.opacity=.3" alt="">
+        ${data.shiny?'<div class="sf-coll-shiny-dot">✨</div>':''}
+        <div class="sf-coll-name">${cap(p.name)}</div>
+        <div class="sf-coll-cnt">x${data.count}</div>
+      </div>`;
+    }else{
+      return`<div class="sf-coll-card missing" onclick="sfShowWhere('${id}')">
+        <img class="sf-coll-spr sf-coll-sil" src="${sprSrc}" loading="lazy" alt="">
+      </div>`;
+    }
   }).join('');
+}
+
+function sfShowWhere(id){
+  const p=S.poke.find(x=>x.id===+id);
+  if(!p)return;
+  const tier=_sfTier(p);
+  const total=_sfTotalCaught();
+  const zones=Object.entries(SAFARI_ZONES)
+    .filter(([,z])=>p.types.some(t=>z.types.includes(t)))
+    .map(([zid,z])=>({zid,z,locked:total<z.minCatch}));
+  const rateLabels=['Muy común','Poco común','Raro','Muy raro','Legendario','Mítico'];
+
+  const spr=document.getElementById('sf-detail-spr');
+  spr.src=`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
+  spr.style.filter='brightness(0)';
+  document.getElementById('sf-detail-name').textContent='???';
+  document.getElementById('sf-detail-num').textContent=`#${String(id).padStart(4,'0')}`;
+  document.getElementById('sf-detail-tags').innerHTML=
+    `<span class="sf-detail-tag" style="background:${SAFARI_TIER_COLORS[tier]}">${SAFARI_TIER_LABELS[tier]}</span>`+
+    `<span class="sf-detail-tag" style="background:rgba(255,255,255,.15);color:var(--t2)">${rateLabels[tier]}</span>`;
+
+  const zoneRows=zones.length
+    ?zones.map(({z,locked})=>`<div class="sf-detail-row">
+        <span class="sf-detail-row-ico">${z.emoji}</span>
+        <span class="sf-detail-row-lbl">${z.name}</span>
+        <span class="sf-detail-row-val">${locked?`🔒 ${z.minCatch} capturas`:'Disponible'}</span>
+      </div>`).join('')
+    :`<div class="sf-detail-row"><span style="font-size:11px;color:var(--t3)">No aparece en ninguna zona conocida</span></div>`;
+
+  document.getElementById('sf-detail-rows').innerHTML=
+    `<div class="sf-detail-row" style="border-radius:14px 14px 0 0">
+      <span class="sf-detail-row-ico">📍</span>
+      <span class="sf-detail-row-lbl" style="font-weight:700;color:var(--t1)">Dónde encontrarlo</span>
+    </div>${zoneRows}`;
+
+  document.getElementById('sf-detail-backdrop').classList.add('on');
+  document.getElementById('sf-detail-sheet').classList.add('on');
 }
 
 function sfShowDetail(id){
@@ -3872,7 +3960,9 @@ function sfShowDetail(id){
     ?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`
     :`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
 
-  document.getElementById('sf-detail-spr').src=sprSrc;
+  const detSpr=document.getElementById('sf-detail-spr');
+  detSpr.src=sprSrc;
+  detSpr.style.filter=''; // reset silhouette filter if coming from sfShowWhere
   document.getElementById('sf-detail-name').textContent=cap(p.name);
   document.getElementById('sf-detail-num').textContent=`#${String(id).padStart(4,'0')}`;
 
