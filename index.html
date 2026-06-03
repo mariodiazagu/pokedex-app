@@ -863,6 +863,11 @@ html.dark #resources-panel,html.dark #move-popup-sheet{background:#1A1A1A}
 .sf-phdr{display:flex;align-items:center;gap:10px;padding:10px 16px 8px;border-bottom:1px solid var(--bd);flex-shrink:0}
 .sf-ptitle{font-family:var(--px);font-size:14px;font-weight:700;color:var(--t1)}
 .sf-balls-bar{display:flex;gap:10px;align-items:center;padding:8px 16px 6px;flex-shrink:0;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.sf-coins-chip{margin-left:auto;display:flex;align-items:center;gap:4px;font-family:var(--px);font-size:10px;font-weight:700;color:var(--t1);background:rgba(255,193,7,.15);border:1px solid rgba(255,193,7,.4);border-radius:20px;padding:3px 10px;cursor:pointer}
+.sf-shop-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--bd)}
+.sf-shop-item:last-child{border-bottom:none}
+.sf-shop-buy{background:var(--ac);color:#fff;border:none;border-radius:10px;font-family:var(--px);font-size:9px;font-weight:700;padding:6px 12px;cursor:pointer}
+.sf-shop-buy:disabled{opacity:.35;cursor:default}
 .sf-ball-item{display:flex;align-items:center;gap:4px}
 .sf-ball-ico{width:20px;height:20px;image-rendering:pixelated;flex-shrink:0;object-fit:contain}
 .sf-ball-n{font-family:var(--px);font-size:9px;font-weight:700;color:var(--t1)}
@@ -1344,7 +1349,8 @@ function sendPasswordReset(){
   <div id="sf-home" class="sf-screen on">
     <div class="sf-phdr">
       <div class="sf-ptitle">Safari</div>
-      <button class="ibtn" onclick="showSafariCollection()" title="Colección" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
+      <button class="ibtn" onclick="sfShowShop()" title="Tienda" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></button>
+      <button class="ibtn" onclick="showSafariCollection()" title="Colección"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
     </div>
     <div id="sf-test-banner" style="display:none;margin:0 0 8px;padding:6px 12px;border-radius:10px;background:#E53935;color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;text-align:center;text-transform:uppercase">
       ⚗️ MODO PRUEBA — datos aislados
@@ -1430,6 +1436,19 @@ function sendPasswordReset(){
     <div id="sf-detail-dex-wrap" style="display:none;padding:8px 16px 4px">
       <button onclick="sfOpenPokedex()" style="width:100%;padding:11px;border-radius:12px;border:none;background:var(--ac);color:#fff;font-family:var(--px);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.04em">Ver en Pokédex →</button>
     </div>
+  </div>
+</div>
+
+<!-- Safari shop sheet -->
+<div id="sf-shop-backdrop" class="sf-detail-backdrop" onclick="sfCloseShop()"></div>
+<div id="sf-shop-sheet" class="sf-detail-sheet" role="dialog" aria-modal="true">
+  <div class="sf-detail-handle"></div>
+  <div class="sf-detail-body">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px">
+      <div style="font-family:var(--px);font-size:13px;font-weight:700;color:var(--t1)">Tienda Safari</div>
+      <div id="sf-shop-coins-display" style="font-family:var(--px);font-size:11px;font-weight:700;color:#c8a000">🪙 0</div>
+    </div>
+    <div id="sf-shop-items"></div>
   </div>
 </div>
 
@@ -3402,7 +3421,8 @@ const SAFARI_RENEW_AMOUNT=10;
 const SAFARI_RENEW_MS=60*60*1000; // 1 hour
 const SAFARI_TURN_MAX=[10,8,6,5,4,3];    // max turns per tier before flee
 const SAFARI_QTE_DUR=[1800,1500,1200,1000,850,700]; // ms per QTE cycle by tier
-const SAFARI_QTE_TARGET=[120,100,80,62,48,36];     // green ring px by tier (big=easy, small=hard)
+const SAFARI_QTE_TARGET=[88,74,60,48,36,26];        // green ring px by tier (big=easy, small=hard)
+const SAFARI_COIN_RATE=[1,2,5,10,25,50];            // coins per catch by tier (shiny ×2)
 const SAFARI_DODGE=[0,0,0.12,0.18,0.25,0.30];      // dodge chance per tier
 const SAFARI_MILESTONES=[
   {id:'sf_c1',  catches:1,   reward:{great:3},                    msg:'¡Primera captura! +3 Super Ball'},
@@ -3467,6 +3487,62 @@ function sfCheckMilestones(){
     awarded=true;
   }
   if(awarded)scheduleSave();
+}
+
+function sfStreakReward(n){
+  let reward;
+  if(n<=4)      reward={great:5};
+  else if(n<=11)reward={ultra:3};
+  else          reward={ultra:3,coins:10};
+  if(reward.great) S.safari.balls.great=(S.safari.balls.great||0)+reward.great;
+  if(reward.ultra) S.safari.balls.ultra=(S.safari.balls.ultra||0)+reward.ultra;
+  if(reward.coins) S.safari.coins=(S.safari.coins||0)+reward.coins;
+  const parts=[];
+  if(reward.great)parts.push(`+${reward.great} Super Ball`);
+  if(reward.ultra)parts.push(`+${reward.ultra} Ultra Ball`);
+  if(reward.coins)parts.push(`+${reward.coins} 🪙`);
+  sfToast(`¡Racha x${n*25}! ${parts.join(' · ')}`);
+}
+
+const SF_SHOP=[
+  {id:'poke10', label:'10 Poké Balls',  ico:'🔴', price:5,  reward:{poke:10}},
+  {id:'great5', label:'5 Super Balls',  ico:'⭐', price:15, reward:{great:5}},
+  {id:'ultra3', label:'3 Ultra Balls',  ico:'🔵', price:30, reward:{ultra:3}},
+  {id:'master1',label:'1 Master Ball',  ico:'💜', price:100,reward:{master:1}},
+];
+
+function sfShowShop(){
+  const coins=S.safari.coins||0;
+  document.getElementById('sf-shop-coins-display').textContent=`🪙 ${coins}`;
+  document.getElementById('sf-shop-items').innerHTML=SF_SHOP.map(item=>`
+    <div class="sf-shop-item">
+      <div>
+        <div style="font-family:var(--px);font-size:11px;font-weight:700;color:var(--t1)">${item.ico} ${item.label}</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:2px">Precio: ${item.price} 🪙</div>
+      </div>
+      <button class="sf-shop-buy" onclick="sfBuyBall('${item.id}')" ${coins<item.price?'disabled':''}>Comprar</button>
+    </div>`).join('');
+  document.getElementById('sf-shop-backdrop').classList.add('on');
+  document.getElementById('sf-shop-sheet').classList.add('on');
+}
+
+function sfCloseShop(){
+  document.getElementById('sf-shop-backdrop').classList.remove('on');
+  document.getElementById('sf-shop-sheet').classList.remove('on');
+}
+
+function sfBuyBall(itemId){
+  const item=SF_SHOP.find(i=>i.id===itemId);
+  if(!item)return;
+  if((S.safari.coins||0)<item.price){sfToast('Monedas insuficientes');return;}
+  S.safari.coins-=item.price;
+  if(item.reward.poke) S.safari.balls.poke=(S.safari.balls.poke||0)+item.reward.poke;
+  if(item.reward.great)S.safari.balls.great=(S.safari.balls.great||0)+item.reward.great;
+  if(item.reward.ultra)S.safari.balls.ultra=(S.safari.balls.ultra||0)+item.reward.ultra;
+  if(item.reward.master)S.safari.balls.master=(S.safari.balls.master||0)+item.reward.master;
+  scheduleSave();
+  sfShowShop(); // refresh shop with updated coins
+  _sfRenderBalls();
 }
 
 function sfToast(msg){
@@ -3562,7 +3638,8 @@ function _sfRenderBalls(){
     {type:'master',count:b.master||0},
   ].filter(x=>x.count>0||(x.type==='poke'));
   bar.innerHTML=balls.map(({type,count})=>`<div class="sf-ball-item"><img class="sf-ball-ico" src="${SAFARI_BALL_IMGS[type]}" alt="${type}"><span class="sf-ball-n">x${count}</span></div>`).join('')
-    +`<span class="sf-renew-lbl">↺ ${renewStr} · ${basic}/${SAFARI_MAX_BASIC}</span>`;
+    +`<span class="sf-renew-lbl">↺ ${renewStr} · ${basic}/${SAFARI_MAX_BASIC}</span>`
+    +`<span class="sf-coins-chip" onclick="sfShowShop()">🪙 ${S.safari.coins||0}</span>`;
 }
 
 function _sfRenderZones(){
@@ -3860,6 +3937,13 @@ async function _sfDoThrow(qteMult,qteMsg){
     S.safari.caught[key].lastDate=Date.now();
     S.safari.caught[key].lastZone=enc.zone;
     if(enc.shiny)S.safari.caught[key].shiny=true;
+    // Earn coins
+    const coinsEarned=SAFARI_COIN_RATE[enc.tier]*(enc.shiny?2:1);
+    S.safari.coins=(S.safari.coins||0)+coinsEarned;
+    // Streak reward every 25 total catches
+    const prev=S.safari.catchTotal||0;
+    S.safari.catchTotal=prev+1;
+    if(Math.floor(S.safari.catchTotal/25)>Math.floor(prev/25))sfStreakReward(Math.floor(S.safari.catchTotal/25));
     scheduleSave();
     sfCheckMilestones();
     await _sfDelay(1800);
@@ -4245,7 +4329,7 @@ function adminClearCaught() {
 
 function adminFullReset() {
   if (!confirm('¿Reset completo del Safari? Se perderán balls, bayas y capturados.')) return;
-  S.safari = {caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},berries:{razz:0,nanab:0,pinap:0},milestones:[],selBall:'poke'};
+  S.safari = {caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},berries:{razz:0,nanab:0,pinap:0},milestones:[],selBall:'poke',coins:0,catchTotal:0};
   scheduleSave();
   _adminToast('Safari reseteado');
   if (document.getElementById('sf-home')?.classList.contains('on')) renderSafari();
