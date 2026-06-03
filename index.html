@@ -1366,7 +1366,7 @@ function sendPasswordReset(){
       <div id="sf-enc-bg-layer" class="sf-enc-bg-layer"></div>
       <button class="sf-enc-info-btn" onclick="sfEncInfo()" title="Ver en Pokédex">i</button>
       <div class="sf-enc-enemy" id="sf-enemy">
-        <img id="sf-enemy-img" class="sf-enc-sprite" src="" alt="">
+        <img id="sf-enemy-img" class="sf-enc-sprite" alt="">
         <div id="sf-enemy-name" class="sf-enc-name"></div>
         <div class="sf-enc-tags">
           <div id="sf-enemy-tier" class="sf-enc-tag"></div>
@@ -3682,28 +3682,26 @@ function _sfShowEncounter(enc){
   const bgLayer=document.getElementById('sf-enc-bg-layer');
   if(bgLayer)bgLayer.style.background=SAFARI_ZONES[enc.zone]?.bg||'#1a1a2a';
 
-  // Sprite — load static sprite immediately (fast CDN), then upgrade to GIF for gen 1-5
-  const img=document.getElementById('sf-enemy-img');
-  if(img){
+  // Sprite — replace element entirely to avoid iOS error/animation stale state
+  const oldImg=document.getElementById('sf-enemy-img');
+  if(oldImg){
     const id=enc.poke.id;
     const cdn='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
+    const raw='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
     const staticUrl=enc.shiny?`${cdn}/shiny/${id}.png`:`${cdn}/${id}.png`;
+    const fallbackUrl=enc.shiny?`${raw}/shiny/${id}.png`:`${raw}/${id}.png`;
+    // Fresh element — no stale src, animation, or inline styles from previous encounter
+    const img=document.createElement('img');
+    img.id='sf-enemy-img';
+    img.alt='';
     img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
-    img.style.animation='none';   // clear sfCaptured forwards fill (opacity:0,scale:0)
-    img.style.transform='';
     img.style.opacity='1';
-    img.style.transition='';
-    img.onload=null;
-    img.onerror=()=>{
-      const fallback=enc.shiny
-        ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`
-        :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-      img.onerror=null;img.src=fallback;
-    };
+    img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;};
     img.src=staticUrl;
+    oldImg.replaceWith(img);
     // Silently upgrade to animated GIF for gen 1-5
     if(id<=649){
-      const gifBase='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
+      const gifBase=`${raw}/versions/generation-v/black-white/animated`;
       const gifUrl=enc.shiny?`${gifBase}/shiny/${id}.gif`:`${gifBase}/${id}.gif`;
       const anim=new Image();
       anim.onload=()=>{if(document.getElementById('sf-enemy-img')===img)img.src=anim.src;};
