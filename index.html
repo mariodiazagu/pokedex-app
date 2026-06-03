@@ -5149,24 +5149,24 @@ function initScrollHide(){
   const tb=document.getElementById('top-bar');
   const fb=document.getElementById('filter-bar');
   if(!gs||!tb||!fb)return;
-  let lastY=0,hidden=false;
+  let lastY=0,hidden=false,accDown=0;
   function show(){
     if(!hidden)return;
-    hidden=false;
+    hidden=false;accDown=0;
     tb.style.marginTop='';
     fb.style.marginTop='';
   }
   function hide(){
     if(hidden)return;
-    hidden=true;
+    hidden=true;accDown=0;
     tb.style.marginTop='-'+tb.offsetHeight+'px';
     fb.style.marginTop='-'+fb.offsetHeight+'px';
   }
   gs.addEventListener('scroll',function(){
     const y=gs.scrollTop;
     const dy=y-lastY; lastY=y;
-    if(dy>8&&y>80)hide();
-    else if(dy<-5)show();
+    if(dy>0){accDown+=dy;if(accDown>50&&y>80)hide();}
+    else{accDown=0;if(dy<-8)show();}
   },{passive:true});
   window._showTopBar=show;
 }
