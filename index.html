@@ -1566,8 +1566,8 @@ function sendPasswordReset(){
     </button>
   </div>
 
-  <!-- Admin actions -->
-  <div style="display:flex;flex-direction:column;gap:8px">
+  <!-- Admin actions (only visible in test mode) -->
+  <div id="admin-actions-section" style="display:none;flex-direction:column;gap:8px">
     <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Acciones</div>
     <button onclick="adminFillBalls()" style="padding:10px 14px;border-radius:12px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer;text-align:left">
       ⚾ Rellenar todas las balls (99 de cada)
@@ -4105,6 +4105,8 @@ function _updateTestToggleUI() {
   if (!toggle || !knob) return;
   toggle.style.background = _sfTestMode ? '#E53935' : '#ccc';
   knob.style.transform = _sfTestMode ? 'translateX(18px)' : 'translateX(0)';
+  const actions = document.getElementById('admin-actions-section');
+  if (actions) actions.style.display = _sfTestMode ? 'flex' : 'none';
 }
 
 function sfToggleTestMode() {
