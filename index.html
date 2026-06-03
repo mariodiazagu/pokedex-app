@@ -949,9 +949,9 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 /* QTE */
 .sf-qte-overlay{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .sf-qte-ring{position:absolute;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);left:50%;top:50%}
-.sf-qte-ring-perfect{width:56px;height:56px;border:3px solid rgba(76,175,80,.9);box-shadow:0 0 12px rgba(76,175,80,.7)}
-.sf-qte-ring-good{width:96px;height:96px;border:2px solid rgba(255,193,7,.7);box-shadow:0 0 8px rgba(255,193,7,.4)}
-.sf-qte-ring-outer{width:200px;height:200px;border:4px solid rgba(255,255,255,.95);box-shadow:0 0 16px rgba(255,255,255,.4)}
+.sf-qte-ring-target{border:3px solid rgba(76,175,80,.9);box-shadow:0 0 14px rgba(76,175,80,.7)}
+.sf-qte-ring-outer{width:160px;height:160px;border:4px solid rgba(255,255,255,.9);box-shadow:0 0 16px rgba(255,255,255,.4)}
+@keyframes sfQteCycle{0%{width:160px;height:160px;opacity:.9}100%{width:10px;height:10px;opacity:.15}}
 @keyframes sfQteBtnPulse{0%,100%{transform:scale(1);box-shadow:0 4px 12px rgba(229,57,53,.4)}50%{transform:scale(1.06);box-shadow:0 0 22px rgba(229,57,53,.9)}}
 .sf-act-btn.throw.qte-active{background:linear-gradient(135deg,#e53935,#ff5722)!important;border-color:#e53935!important;animation:sfQteBtnPulse .55s infinite;color:#fff!important;font-size:15px!important}
 /* Turn dots */
@@ -1376,8 +1376,7 @@ function sendPasswordReset(){
       <div id="sf-msg-box" class="sf-msg-box"></div>
       <!-- QTE overlay -->
       <div id="sf-qte-overlay" class="sf-qte-overlay" style="display:none" onclick="sfQteTap()">
-        <div class="sf-qte-ring sf-qte-ring-good"></div>
-        <div class="sf-qte-ring sf-qte-ring-perfect"></div>
+        <div id="sf-qte-target" class="sf-qte-ring sf-qte-ring-target"></div>
         <div id="sf-qte-outer" class="sf-qte-ring sf-qte-ring-outer"></div>
       </div>
     </div>
@@ -3402,7 +3401,8 @@ const SAFARI_MAX_BASIC=25;
 const SAFARI_RENEW_AMOUNT=10;
 const SAFARI_RENEW_MS=60*60*1000; // 1 hour
 const SAFARI_TURN_MAX=[10,8,6,5,4,3];    // max turns per tier before flee
-const SAFARI_QTE_DUR=[1800,1500,1200,1000,850,700]; // ms QTE ring shrink by tier
+const SAFARI_QTE_DUR=[1800,1500,1200,1000,850,700]; // ms per QTE cycle by tier
+const SAFARI_QTE_TARGET=[120,100,80,62,48,36];     // green ring px by tier (big=easy, small=hard)
 const SAFARI_DODGE=[0,0,0.12,0.18,0.25,0.30];      // dodge chance per tier
 const SAFARI_MILESTONES=[
   {id:'sf_c1',  catches:1,   reward:{great:3},                    msg:'¡Primera captura! +3 Super Ball'},
@@ -3753,19 +3753,21 @@ function sfQteStart(){
   if(!enc)return;
   enc.qteStart=Date.now();
   const dur=enc.qteDuration;
+  const target=SAFARI_QTE_TARGET[enc.tier]||80;
   const overlay=document.getElementById('sf-qte-overlay');
   const outer=document.getElementById('sf-qte-outer');
+  const targetRing=document.getElementById('sf-qte-target');
   if(overlay)overlay.style.display='flex';
+  if(targetRing){targetRing.style.width=target+'px';targetRing.style.height=target+'px';}
   if(outer){
-    outer.style.transition='none';
-    outer.style.width='200px';outer.style.height='200px';outer.style.opacity='1';
+    outer.style.animation='none';
+    outer.style.width='160px';outer.style.height='160px';outer.style.opacity='.9';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      outer.style.transition=`width ${dur}ms linear,height ${dur}ms linear,opacity ${dur}ms linear`;
-      outer.style.width='0px';outer.style.height='0px';outer.style.opacity='.15';
+      outer.style.animation=`sfQteCycle ${dur}ms linear infinite`;
     }));
   }
-  document.getElementById('sf-msg-box').textContent='¡Toca para lanzar!';
-  _sfQteTimeout=setTimeout(()=>sfQteTap(true),dur+120);
+  document.getElementById('sf-msg-box').textContent='¡Lanza en el círculo verde!';
+  _sfQteTimeout=setTimeout(()=>sfQteTap(true),dur*3+100);
 }
 
 function _sfRestoreThrowBtn(){
@@ -3779,16 +3781,20 @@ function sfQteTap(auto=false){
   _sfRestoreThrowBtn();
   const enc=S.safari.encounter;
   if(!enc||!enc.qteStart)return;
+  const outer=document.getElementById('sf-qte-outer');
+  if(outer)outer.style.animation='none';
   document.getElementById('sf-qte-overlay').style.display='none';
-
-  const ratio=Math.min((Date.now()-enc.qteStart)/enc.qteDuration,1);
-  const size=200*(1-ratio); // outer ring current size
+  const dur=enc.qteDuration;
+  const target=SAFARI_QTE_TARGET[enc.tier]||80;
+  const elapsed=Date.now()-enc.qteStart;
+  const cyclePos=(elapsed%dur)/dur; // 0→1 within current cycle
+  const size=160-cyclePos*150;      // 160→10 px, matches CSS animation
   let qteMult,qteMsg;
-  if(auto){qteMult=0.55;qteMsg='¡Muy tarde!';}
-  else if(size>=50&&size<=90){qteMult=1.5;qteMsg='✨ ¡Excelente!';}
-  else if(size>=32&&size<=115){qteMult=1.2;qteMsg='¡Buen tiro!';}
-  else if(ratio<0.18){qteMult=0.7;qteMsg='¡Muy pronto!';}
-  else{qteMult=0.85;qteMsg='Tiro normal';}
+  if(auto)                   {qteMult=0.55;qteMsg='¡Muy tarde!';}
+  else if(size<=target/2)    {qteMult=2.0; qteMsg='✨ ¡Excelente!';}
+  else if(size<=target)      {qteMult=1.5; qteMsg='⭐ ¡Buen tiro!';}
+  else if(size<=target*1.3)  {qteMult=1.2; qteMsg='¡Bien!';}
+  else                       {qteMult=0.85;qteMsg='Tiro normal';}
   enc.qteStart=0;
   _sfDoThrow(qteMult,qteMsg);
 }
