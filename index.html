@@ -3801,6 +3801,7 @@ track: S.track,
 favs: [...S.favs],
 teams: S.teams,
 set: cloudSet,
+safari: S.safari,
 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
 }, { merge: true });
 setSyncing(false);
@@ -3849,6 +3850,7 @@ if (d.set.dark !== undefined) { S.set.dark = d.set.dark; applyDark(d.set.dark); 
 if (d.set.companion !== undefined) S.companion = d.set.companion;
 if (d.set.glass !== undefined) { S.set.glass = d.set.glass; applyGlass(d.set.glass); }
 }
+if (d.safari) Object.assign(S.safari, d.safari);
 } else {
 loadFromLocalStorage();
 if (Object.keys(S.track).length > 0 || S.favs.size > 0) {
