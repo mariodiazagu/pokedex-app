@@ -832,14 +832,29 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .cmpv-bar.flip{transform:scaleX(-1)}
 .cmpv-fill{height:100%;border-radius:99px}
 .cmpv-slbl{font-size:9px;font-weight:700;color:var(--t3);width:46px;text-align:center;flex-shrink:0}
-/* ── DARK MODE OVERRIDES ── */
+/* ── DARK MODE ──────────────────────────────────────────── */
+html.dark{
+  --bg:       #1A1A1A;
+  --s1:       rgba(255,255,255,0.07);
+  --s2:       rgba(255,255,255,0.05);
+  --s3:       rgba(255,255,255,0.07);
+  --t1:       #F0F0F0;
+  --t2:       #AAAAAA;
+  --t3:       #666666;
+  --bd:       rgba(255,255,255,0.12);
+  --bd2:      rgba(255,255,255,0.07);
+  --shadow:   0 2px 12px rgba(0,0,0,.4);
+  --shadow-md:0 8px 32px rgba(0,0,0,.5);
+  --shadow-lg:0 16px 48px rgba(0,0,0,.6);
+}
 html.dark #mdl{background:rgba(28,28,28,0.97)}
-html.dark .mmode-btn.on{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2);color:#fff}
+html.dark .hdr-wrap{background:rgba(26,26,26,.92)}
 html.dark .srch-wrap{background:rgba(255,255,255,.07)}
 html.dark .nav-btn.on{background:rgba(255,255,255,.08)}
+html.dark .mmode-btn.on{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2);color:#fff}
 html.dark input,html.dark textarea,html.dark select{background:rgba(255,255,255,.07);color:var(--t1)}
-html.dark .hdr-wrap{background:rgba(26,26,26,.92)}
 html.dark #resources-panel,html.dark #move-popup-sheet{background:#1A1A1A}
+/* ─────────────────────────────────────────────────────── */
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -2598,55 +2613,24 @@ const t=THEMES[themeId]||THEMES.magenta;
 const root=document.documentElement;
 root.style.setProperty('--ac',t.ac);
 root.style.setProperty('--ac2',t.ac2);
-root.style.setProperty('--bg',t.bg||'#EDEDED');
-root.style.setProperty('--s2',t.s2);
-root.style.setProperty('--s3',t.s3);
-root.style.setProperty('--bd',t.bd);
 root.style.setProperty('--red',t.ac);
 root.style.setProperty('--acg',t.ac+'22');
-document.body.style.backgroundImage=`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
+document.body.style.backgroundImage=S.set.dark
+?`radial-gradient(circle,rgba(255,255,255,0.06) var(--dot-size),transparent var(--dot-size))`
+:`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
 const avatar=document.getElementById('hdr-trainer-avatar');
 if(avatar){
 avatar.style.background=t.ac;
 avatar.style.borderColor=t.ac;
 avatar.style.boxShadow=`0 2px 8px ${t.ac}55`;
 }
-applyDark(S.set.dark||false);
 }
 
 function applyDark(isDark){
-const root=document.documentElement;
-root.classList.toggle('dark',isDark);
-if(isDark){
-root.style.setProperty('--bg','#1A1A1A');
-root.style.setProperty('--s1','rgba(255,255,255,0.07)');
-root.style.setProperty('--s2','rgba(255,255,255,0.05)');
-root.style.setProperty('--s3','rgba(255,255,255,0.07)');
-root.style.setProperty('--t1','#F0F0F0');
-root.style.setProperty('--t2','#AAAAAA');
-root.style.setProperty('--t3','#666666');
-root.style.setProperty('--bd','rgba(255,255,255,0.12)');
-root.style.setProperty('--bd2','rgba(255,255,255,0.07)');
-root.style.setProperty('--shadow','0 2px 12px rgba(0,0,0,.4)');
-root.style.setProperty('--shadow-md','0 8px 32px rgba(0,0,0,.5)');
-root.style.setProperty('--shadow-lg','0 16px 48px rgba(0,0,0,.6)');
-document.body.style.backgroundImage=`radial-gradient(circle,rgba(255,255,255,0.06) var(--dot-size),transparent var(--dot-size))`;
-}else{
-root.style.removeProperty('--s1');
-root.style.removeProperty('--t1');
-root.style.removeProperty('--t2');
-root.style.removeProperty('--t3');
-root.style.removeProperty('--bd2');
-root.style.removeProperty('--shadow-md');
-root.style.removeProperty('--shadow-lg');
-const t=THEMES[S.set.theme||'magenta']||THEMES.magenta;
-root.style.setProperty('--bg',t.bg||'#EDEDED');
-root.style.setProperty('--s2',t.s2);
-root.style.setProperty('--s3',t.s3);
-root.style.setProperty('--bd',t.bd);
-root.style.setProperty('--shadow','0 2px 12px rgba(0,0,0,.08)');
-document.body.style.backgroundImage=`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
-}
+document.documentElement.classList.toggle('dark',isDark);
+document.body.style.backgroundImage=isDark
+?`radial-gradient(circle,rgba(255,255,255,0.06) var(--dot-size),transparent var(--dot-size))`
+:`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
 }
 
 function setTheme(themeId){
@@ -6745,7 +6729,7 @@ try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.pars
 applyColsSetting();
 // Apply saved theme
 applyTheme(S.set.theme||'magenta');
-// Apply dark mode (must come after theme to override neutral vars)
+// Apply saved dark mode
 applyDark(S.set.dark||false);
 // Apply saved glass opacity
 applyGlass(S.set.glass||45);
