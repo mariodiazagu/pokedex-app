@@ -3567,7 +3567,6 @@ function _sfRenderZones(){
     return`<div class="sf-zone-card${locked?' locked':''}" onclick="${locked?'':'sfStartEncounter(\''+id+'\')'}">
       <div class="sf-zone-art">
         <div class="sf-zone-art-bg" style="background:${z.bg}"></div>
-        <span class="sf-zone-emoji">${z.emoji}</span>
       </div>
       <div class="sf-zone-body">
         <div class="sf-zone-name">${z.name}</div>
@@ -4321,6 +4320,7 @@ function exportData(){
       cols: S.set.cols,
     },
     companion: S.companion || null,
+    safari: S.safari || null,
   };
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], {type:'application/json'});
@@ -4359,6 +4359,10 @@ function importData(file){
         if(data.set.glass !== undefined) applyGlass(data.set.glass);
       }
       if(data.companion) S.companion = data.companion;
+      if(data.safari){
+        Object.assign(S.safari, data.safari);
+        delete S.safari._adminUnlocked;
+      }
       scheduleSave();
       renderGrid();
       if(S.tab==='fav') renderFav();
