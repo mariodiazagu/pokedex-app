@@ -3523,10 +3523,19 @@ function _sfShowEncounter(enc){
     const id=enc.poke.id;
     const base='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white';
     const animUrl=enc.shiny?`${base}/animated/shiny/${id}.gif`:`${base}/animated/${id}.gif`;
-    const staticUrl=enc.shiny?`${base}/shiny/${id}.png`:`${base}/${id}.png`;
-    img.onerror=()=>{img.onerror=null;img.src=staticUrl;};
-    img.src=id<=649?animUrl:staticUrl;
+    const staticBWUrl=enc.shiny?`${base}/shiny/${id}.png`:`${base}/${id}.png`;
+    const fallbackUrl=enc.shiny
+      ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`
+      :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+    img.style.opacity='0';
+    img.style.transition='opacity .25s';
     img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
+    img.onload=()=>{img.style.opacity='1';};
+    img.onerror=()=>{
+      img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;};
+      img.src=staticBWUrl;
+    };
+    img.src=id<=649?animUrl:staticBWUrl;
   }
 
   document.getElementById('sf-enemy-name').textContent=cap(enc.poke.name);
@@ -3701,7 +3710,7 @@ async function _sfDoThrow(qteMult,qteMsg){
   document.getElementById('sf-msg-box').textContent=qteMsg;
   await _sfDelay(320);
   const sprite=document.getElementById('sf-enemy-img');
-  if(sprite)sprite.style.animation='sfCaptured .4s forwards';
+  if(sprite){sprite.style.opacity='1';sprite.style.transition='none';sprite.style.animation='sfCaptured .4s forwards';}
   document.getElementById('sf-msg-box').textContent='';
   await _sfDelay(400);
 
