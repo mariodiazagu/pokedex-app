@@ -3504,7 +3504,7 @@ function _sfRenderZones(){
     const locked=total<z.minCatch;
     const pool=sfGetPool(id);
     return`<div class="sf-zone-card${locked?' locked':''}" onclick="${locked?'':'sfStartEncounter(\''+id+'\')'}">
-      <div class="sf-zone-art" style="background:${z.bg}"><span class="sf-zone-emoji">${z.emoji}</span></div>
+      <div class="sf-zone-art" style="background:${z.bg};background-size:180%"></div>
       <div class="sf-zone-body">
         <div class="sf-zone-name">${z.name}</div>
         <div class="sf-zone-sub">${pool.length} Pokémon disponibles</div>
