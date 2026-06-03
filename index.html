@@ -941,6 +941,8 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-qte-ring-perfect{width:56px;height:56px;border:3px solid rgba(76,175,80,.9);box-shadow:0 0 12px rgba(76,175,80,.7)}
 .sf-qte-ring-good{width:96px;height:96px;border:2px solid rgba(255,193,7,.7);box-shadow:0 0 8px rgba(255,193,7,.4)}
 .sf-qte-ring-outer{width:200px;height:200px;border:4px solid rgba(255,255,255,.95);box-shadow:0 0 16px rgba(255,255,255,.4)}
+@keyframes sfQteBtnPulse{0%,100%{transform:scale(1);box-shadow:0 4px 12px rgba(229,57,53,.4)}50%{transform:scale(1.06);box-shadow:0 0 22px rgba(229,57,53,.9)}}
+.sf-act-btn.throw.qte-active{background:linear-gradient(135deg,#e53935,#ff5722)!important;border-color:#e53935!important;animation:sfQteBtnPulse .55s infinite;color:#fff!important;font-size:15px!important}
 /* Turn dots */
 .sf-turns-row{display:flex;align-items:center;justify-content:center;gap:5px;padding:2px 0}
 .sf-turn-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .2s,transform .2s}
@@ -1372,7 +1374,7 @@ function sendPasswordReset(){
       <div id="sf-ball-row" class="sf-ball-row"></div>
       <div class="sf-act-row">
         <button class="sf-act-btn weak" id="sf-btn-weak" onclick="safariWeaken()">⚔ Debilitar</button>
-        <button class="sf-act-btn throw" id="sf-btn-throw" onclick="safariThrow()">🎯 Lanzar</button>
+        <button class="sf-act-btn throw" id="sf-btn-throw" onclick="sfThrowOrQte()">🎯 Lanzar</button>
         <button class="sf-act-btn run" onclick="safariRun()">↩ Huir</button>
       </div>
     </div>
@@ -3358,16 +3360,16 @@ safari:{caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},berrie
 //  SAFARI GAME
 // ═══════════════════════════════════════
 const SAFARI_ZONES={
-  pradera: {name:'Pradera',  emoji:'🌿', types:['normal','grass','flying','fairy'],   minCatch:0,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/pradera.png') center/cover no-repeat"},
-  bosque:  {name:'Bosque',   emoji:'🌲', types:['bug','grass','poison','dark'],       minCatch:0,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/bosque.png') center/cover no-repeat"},
-  montana: {name:'Montaña',  emoji:'⛰️', types:['rock','fighting','flying','steel'],  minCatch:5,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/montana.png') center/cover no-repeat"},
-  costa:   {name:'Costa',    emoji:'🏖️', types:['water','normal','psychic'],          minCatch:5,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/costa.png') center/cover no-repeat"},
-  cueva:   {name:'Cueva',    emoji:'🕳️', types:['poison','ground','ghost','dark'],    minCatch:10, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/cueva.png') center/cover no-repeat"},
-  mar:     {name:'Mar',      emoji:'🌊', types:['water','dragon','ice'],              minCatch:15, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/mar.png') center/cover no-repeat"},
-  volcan:  {name:'Volcán',   emoji:'🌋', types:['fire','ground','dragon'],            minCatch:20, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/volcan.png') center/cover no-repeat"},
-  tundra:  {name:'Tundra',   emoji:'❄️', types:['ice','psychic','dragon'],            minCatch:25, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/tundra.png') center/cover no-repeat"},
-  ruinas:  {name:'Ruinas',   emoji:'🏛️', types:['psychic','ghost','dragon','steel'],  minCatch:80, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/ruinas.png') center/cover no-repeat"},
-  espacio: {name:'Espacio',  emoji:'🌌', types:['dragon','psychic','steel','fairy'],  minCatch:200,bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/espacio.png') center/cover no-repeat"},
+  pradera: {name:'Pradera',  emoji:'🌿', types:['normal','grass','flying','fairy'],   primaryTypes:['normal','grass','flying'],  minCatch:0,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/pradera.png') center/cover no-repeat"},
+  bosque:  {name:'Bosque',   emoji:'🌲', types:['bug','grass','poison','dark'],       primaryTypes:['bug','grass','poison'],     minCatch:0,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/bosque.png') center/cover no-repeat"},
+  montana: {name:'Montaña',  emoji:'⛰️', types:['rock','fighting','flying','steel'],  primaryTypes:['rock','fighting','steel'],  minCatch:5,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/montana.png') center/cover no-repeat"},
+  costa:   {name:'Costa',    emoji:'🏖️', types:['water','normal','psychic'],          primaryTypes:['water','normal'],           minCatch:5,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/costa.png') center/cover no-repeat"},
+  cueva:   {name:'Cueva',    emoji:'🕳️', types:['poison','ground','ghost','dark'],    primaryTypes:['poison','ground','ghost'],  minCatch:10, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/cueva.png') center/cover no-repeat"},
+  mar:     {name:'Mar',      emoji:'🌊', types:['water','dragon','ice'],              primaryTypes:['water','ice'],              minCatch:15, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/mar.png') center/cover no-repeat"},
+  volcan:  {name:'Volcán',   emoji:'🌋', types:['fire','ground','dragon'],            primaryTypes:['fire','ground'],            minCatch:20, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/volcan.png') center/cover no-repeat"},
+  tundra:  {name:'Tundra',   emoji:'❄️', types:['ice','psychic','dragon'],            primaryTypes:['ice','dragon'],             minCatch:25, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/tundra.png') center/cover no-repeat"},
+  ruinas:  {name:'Ruinas',   emoji:'🏛️', types:['psychic','ghost','dragon','steel'],  primaryTypes:['psychic','ghost'],          minCatch:80, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/ruinas.png') center/cover no-repeat"},
+  espacio: {name:'Espacio',  emoji:'🌌', types:['dragon','psychic','steel','fairy'],  primaryTypes:['dragon','psychic','steel'], minCatch:200,bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/espacio.png') center/cover no-repeat"},
 };
 const SAFARI_PSEUDO=new Set([149,248,373,376,445,612,635,706,784,887,998]);
 const SAFARI_TIER_COLORS=['#888','#c47a00','#8B3AA2','#1a6bc1','#d44400','#7b1fa2'];
@@ -3480,8 +3482,14 @@ function sfSpawn(zoneId){
   const pool=sfGetPool(zoneId);
   if(!pool.length)return null;
   const W=[100,18,6,3,2,1];
+  const primary=SAFARI_ZONES[zoneId]?.primaryTypes||SAFARI_ZONES[zoneId]?.types||[];
   let total=0;
-  const wl=pool.map(p=>{const w=W[_sfTier(p)];total+=w;return{p,w};});
+  const wl=pool.map(p=>{
+    const isPrimary=p.types.some(t=>primary.includes(t));
+    let w=W[_sfTier(p)];
+    if(!isPrimary)w=Math.max(1,Math.round(w*0.12)); // secondary-type match: ~12% weight
+    total+=w;return{p,w};
+  });
   let r=Math.random()*total;
   let poke=pool[0];
   for(const{p,w}of wl){r-=w;if(r<=0){poke=p;break;}}
@@ -3588,18 +3596,19 @@ function _sfShowEncounter(enc){
       ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`
       :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     img.style.opacity='0';
-    img.style.transition='opacity .3s';
+    img.style.transition='opacity .25s';
     img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
-    // Safari iOS sometimes doesn't fire onload for GIFs — use a timeout safety net
     let _shown=false;
-    const _show=()=>{if(!_shown){_shown=true;clearTimeout(_t);img.style.opacity='1';}};
-    const _t=setTimeout(_show,1800);
+    const _show=()=>{if(!_shown){_shown=true;img.style.opacity='1';}};
     img.onload=_show;
     img.onerror=()=>{
       img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;};
       img.src=staticBWUrl;
     };
     img.src=id<=649?animUrl:staticBWUrl;
+    // Show quickly: cached images may not re-fire onload; 400ms fallback covers slow loads
+    if(img.complete&&img.naturalWidth>0)_show();
+    else setTimeout(_show,400);
   }
 
   document.getElementById('sf-enemy-name').textContent=cap(enc.poke.name);
@@ -3682,6 +3691,9 @@ function safariWeaken(){
   _sfUseTurn();
 }
 
+let _sfQteActive=false;
+function sfThrowOrQte(){if(_sfQteActive)sfQteTap();else safariThrow();}
+
 function safariThrow(){
   const enc=S.safari.encounter;
   if(!enc||enc.busy)return;
@@ -3699,13 +3711,18 @@ function safariThrow(){
   }
   _sfRenderBallRow();
   enc.busy=true;
-  _sfDisableActions();
+  // Keep throw button active as the QTE tap target — change label + pulse
+  _sfQteActive=true;
+  const btn=document.getElementById('sf-btn-throw');
+  if(btn){btn.textContent='🎯 ¡AHORA!';btn.classList.add('qte-active');}
+  document.getElementById('sf-btn-weak')?.setAttribute('disabled','');
   sfQteStart();
 }
 
 function safariRun(){
   if(_sfQteTimeout){clearTimeout(_sfQteTimeout);_sfQteTimeout=null;}
   document.getElementById('sf-qte-overlay').style.display='none';
+  _sfRestoreThrowBtn();
   S.safari.encounter=null;
   showSafariHome();
 }
@@ -3732,8 +3749,15 @@ function sfQteStart(){
   _sfQteTimeout=setTimeout(()=>sfQteTap(true),dur+120);
 }
 
+function _sfRestoreThrowBtn(){
+  _sfQteActive=false;
+  const btn=document.getElementById('sf-btn-throw');
+  if(btn){btn.textContent='🎯 Lanzar';btn.classList.remove('qte-active');}
+}
+
 function sfQteTap(auto=false){
   if(_sfQteTimeout){clearTimeout(_sfQteTimeout);_sfQteTimeout=null;}
+  _sfRestoreThrowBtn();
   const enc=S.safari.encounter;
   if(!enc||!enc.qteStart)return;
   document.getElementById('sf-qte-overlay').style.display='none';
@@ -3891,10 +3915,12 @@ function safariUseBerry(type){
 function _sfDisableActions(){
   document.getElementById('sf-btn-throw')?.setAttribute('disabled','');
   document.getElementById('sf-btn-weak')?.setAttribute('disabled','');
+  _sfRestoreThrowBtn();
 }
 function _sfEnableActions(){
   document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
   document.getElementById('sf-btn-weak')?.removeAttribute('disabled');
+  _sfRestoreThrowBtn();
 }
 function _sfDelay(ms){return new Promise(r=>setTimeout(r,ms));}
 
@@ -7785,6 +7811,7 @@ window.setGlass = setGlass;
 window.applyColsSetting = applyColsSetting;
 window.isPwUnlocked = isPwUnlocked;
 window.setPwUnlocked = setPwUnlocked;
+window.sfThrowOrQte = sfThrowOrQte;
 window.sfToggleTestMode = sfToggleTestMode;
 window.adminFillBalls = adminFillBalls;
 window.adminGiveBerries = adminGiveBerries;
