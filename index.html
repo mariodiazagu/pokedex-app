@@ -3590,37 +3590,25 @@ function _sfShowEncounter(enc){
   const bg=document.getElementById('sf-enc-bg');
   if(bg)bg.style.background=SAFARI_ZONES[enc.zone]?.bg||'#1a1a2a';
 
-  // Sprite
+  // Sprite — load static sprite immediately (fast CDN), then upgrade to GIF for gen 1-5
   const img=document.getElementById('sf-enemy-img');
   if(img){
     const id=enc.poke.id;
-    const base='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white';
-    const animUrl=enc.shiny?`${base}/animated/shiny/${id}.gif`:`${base}/animated/${id}.gif`;
-    const staticBWUrl=enc.shiny?`${base}/shiny/${id}.png`:`${base}/${id}.png`;
-    const fallbackUrl=enc.shiny
-      ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`
-      :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-    img.style.opacity='0';
-    img.style.transition='opacity .25s';
+    const cdn='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
+    const staticUrl=enc.shiny?`${cdn}/shiny/${id}.png`:`${cdn}/${id}.png`;
     img.className='sf-enc-sprite'+(enc.shiny?' shiny':'');
-    const _show=()=>{img.style.opacity='1';};
+    img.style.opacity='1';
+    img.style.transition='';
+    img.onload=null;img.onerror=null;
+    img.src=staticUrl;
+    // Silently upgrade to animated GIF for gen 1-5
     if(id<=649){
-      // Gen 1-5: try animated GIF → BW static → official fallback
-      img.onload=_show;
-      img.onerror=()=>{
-        img.onerror=()=>{img.onerror=null;img.src=fallbackUrl;img.onload=_show;};
-        img.src=staticBWUrl;
-      };
-      img.src=animUrl;
-    } else {
-      // Gen 6+: no BW sprite exists, go directly to official sprite
-      img.onload=_show;
-      img.onerror=null;
-      img.src=fallbackUrl;
+      const gifBase='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
+      const gifUrl=enc.shiny?`${gifBase}/shiny/${id}.gif`:`${gifBase}/${id}.gif`;
+      const anim=new Image();
+      anim.onload=()=>{if(document.getElementById('sf-enemy-img')===img)img.src=anim.src;};
+      anim.src=gifUrl;
     }
-    // Fast-path for cached images; 500ms safety net for iOS GIF
-    if(img.complete&&img.naturalWidth>0)_show();
-    else setTimeout(_show,500);
   }
 
   document.getElementById('sf-enemy-name').textContent=cap(enc.poke.name);
