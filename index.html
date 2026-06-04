@@ -3614,7 +3614,7 @@ function sfSpawn(zoneId){
 function sfCatchProb(catchRate,ball,qteMult=1,razz=false){
   if(ball==='master')return 1;
   let prob=(catchRate/255)*SAFARI_BALL_MULT[ball]*qteMult;
-  if(razz)prob*=1.6;
+  if(razz)prob*=1.1;
   return Math.min(prob,1);
 }
 
@@ -3999,7 +3999,7 @@ function _sfRenderBerryRow(){
   if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
   const b=S.safari.berries;
   const defs=[
-    {type:'razz', emoji:'🍓',name:'Razz',  desc:'+60% captura', active:enc?.razzActive},
+    {type:'razz', emoji:'🍓',name:'Razz',  desc:'+10% captura', active:enc?.razzActive},
     {type:'nanab',emoji:'🍌',name:'Nanab', desc:'-70% huida',    active:enc?.nanabActive},
     {type:'pinap',emoji:'🍍',name:'Pinap', desc:'x2 monedas',   active:enc?.pinapActive},
   ];
