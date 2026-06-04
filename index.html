@@ -4319,10 +4319,12 @@ function adminUnlockZones() {
 function adminClearCaught() {
   if (!confirm('¿Borrar todos los pokémon capturados?')) return;
   S.safari.caught = {};
+  S.safari.milestones = [];
   _sfAdminUnlocked = false;
   scheduleSave();
   _adminToast('Pokémon borrados');
   if (document.getElementById('sf-home')?.classList.contains('on')) renderSafari();
+  if (document.getElementById('sf-collection')?.classList.contains('on')) _sfRenderCollection();
 }
 
 function adminFullReset() {
@@ -4544,7 +4546,7 @@ set: cloudSet,
 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
 };
 // In test mode, never write safari data to Firestore
-if (!_sfTestMode) cloudData.safari = _sfRealSafari || S.safari;
+if (!_sfTestMode) cloudData.safari = S.safari;
 await db.collection('users').doc(currentUser.uid).set(cloudData, { merge: true });
 setSyncing(false);
 } catch(e) {
