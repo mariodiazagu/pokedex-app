@@ -5105,6 +5105,7 @@ const ADMIN_EMAIL = 'mario.diazagu@gmail.com';
 let _sfTestMode = false;
 let _sfRealSafari = null;
 let _sfAdminUnlocked = false; // runtime-only, never persisted
+let _safariCloudReady = false; // true only after successful Firestore load
 
 function _isAdmin() {
   return currentUser && currentUser.email === ADMIN_EMAIL;
@@ -5456,8 +5457,8 @@ teams: S.teams,
 set: cloudSet,
 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
 };
-// In test mode, never write safari data to Firestore
-if (!_sfTestMode) cloudData.safari = S.safari;
+// Only write safari when cloud load completed — prevents overwriting Firestore with empty state on network failure
+if (!_sfTestMode && _safariCloudReady) cloudData.safari = S.safari;
 await db.collection('users').doc(currentUser.uid).set(cloudData, { merge: true });
 setSyncing(false);
 } catch(e) {
@@ -5513,8 +5514,10 @@ if (d.set.glass !== undefined) { S.set.glass = d.set.glass; applyGlass(d.set.gla
 if (d.safari) Object.assign(S.safari, d.safari);
 delete S.safari._adminUnlocked; // runtime-only flag, never load from storage
 if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+_safariCloudReady = true;
 } else {
 loadFromLocalStorage();
+_safariCloudReady = true; // new user, safe to start saving
 if (Object.keys(S.track).length > 0 || S.favs.size > 0) {
 scheduleSave();
 }
@@ -5522,6 +5525,7 @@ scheduleSave();
 } catch(e) {
 console.error('Load error:', e);
 loadFromLocalStorage();
+// _safariCloudReady stays false — don't overwrite Firestore with empty state
 }
 }
 
