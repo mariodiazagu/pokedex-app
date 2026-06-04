@@ -1580,6 +1580,11 @@ function sendPasswordReset(){
       Importar datos
     </button>
     <input type="file" id="import-file-inp" accept=".json,application/json" style="display:none" onchange="importData(this.files[0]);this.value=''">
+    <button onclick="document.getElementById('import-safari-inp').click()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Restaurar backup Safari
+    </button>
+    <input type="file" id="import-safari-inp" accept=".json,application/json" style="display:none" onchange="importSafariBackup(this.files[0]);this.value=''">
   </div>
 </div>
 
@@ -4494,6 +4499,28 @@ function importData(file){
       alert('¡Datos importados correctamente!');
     } catch(err){
       alert('Error al importar: ' + (err.message || 'Archivo no válido.'));
+    }
+  };
+  reader.readAsText(file);
+}
+
+function importSafariBackup(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(typeof data !== 'object' || !data.caught)
+        throw new Error('El archivo no parece un backup de Safari.');
+      const count = Object.keys(data.caught).length;
+      if(!confirm(`¿Restaurar backup Safari?\n\n${count} Pokémon capturados serán restaurados. Se sobrescribirá tu colección actual.`)) return;
+      S.safari.caught = data.caught;
+      if(data.milestones) S.safari.milestones = data.milestones;
+      scheduleSave();
+      if(document.getElementById('sf-collection')?.classList.contains('on')) _sfRenderCollection();
+      alert(`✅ Backup restaurado — ${count} Pokémon recuperados.`);
+    } catch(err){
+      alert('Error al restaurar: ' + (err.message || 'Archivo no válido.'));
     }
   };
   reader.readAsText(file);
