@@ -4290,11 +4290,9 @@ function _sfShowCatchCard(data){
       </div>
     </div>`:''}
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
-      <div style="display:flex;gap:8px">
-        <button class="sf-cc-btn primary" onclick="sfCatchCardStay()">🎯 Seguir aquí</button>
-        <button class="sf-cc-btn secondary" onclick="sfCatchCardClose()">🗺️ Cambiar zona</button>
-      </div>
-      <button class="sf-cc-btn secondary" onclick="sfShareCatch()">📤 Compartir captura</button>
+      <button class="sf-cc-btn primary" onclick="sfCatchCardStay()">🎯 Siguiente Pokémon</button>
+      <button class="sf-cc-btn secondary" onclick="sfCatchCardClose()">🗺️ Cambiar zona</button>
+      <button class="sf-cc-btn secondary" onclick="sfShareCatch()">📤 Compartir</button>
     </div>`;
   const card=document.getElementById('sf-catch-card');
   card.style.display='flex';
