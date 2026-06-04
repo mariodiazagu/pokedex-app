@@ -952,6 +952,7 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-hold-bar{width:22px;height:180px;background:rgba(0,0,0,.55);border-radius:11px;position:relative;overflow:hidden;border:2px solid rgba(255,255,255,.2)}
 .sf-hold-fill{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,.75);border-radius:0 0 9px 9px}
 .sf-hold-zone{position:absolute;left:0;right:0;background:rgba(76,175,80,.85);box-shadow:0 0 10px rgba(76,175,80,.7)}
+.sf-hold-center{position:absolute;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 6px rgba(255,255,255,.9);pointer-events:none;z-index:2}
 .sf-hold-lbl{font-family:var(--px);font-size:7px;color:rgba(255,255,255,.8);text-align:center;white-space:nowrap;letter-spacing:.5px}
 @keyframes sfHoldPulse{0%,100%{box-shadow:0 3px 0 rgba(0,0,0,.4)}50%{box-shadow:0 0 18px rgba(76,175,80,.8),0 3px 0 rgba(0,0,0,.4)}}
 .sf-act-btn.throw.holding{background:linear-gradient(135deg,#2e7d32,#66bb6a)!important;animation:sfHoldPulse .55s infinite}
@@ -1375,6 +1376,7 @@ function sendPasswordReset(){
       <div id="sf-hold-wrap" class="sf-hold-wrap" style="display:none">
         <div class="sf-hold-bar">
           <div id="sf-hold-zone" class="sf-hold-zone"></div>
+          <div id="sf-hold-center" class="sf-hold-center" style="display:none"></div>
           <div id="sf-hold-fill" class="sf-hold-fill" style="height:0%"></div>
         </div>
         <div class="sf-hold-lbl">Suelta</div>
@@ -3780,8 +3782,10 @@ function sfHoldBegin(e){
   const wrap=document.getElementById('sf-hold-wrap');
   const zone=document.getElementById('sf-hold-zone');
   const fill=document.getElementById('sf-hold-fill');
+  const center=document.getElementById('sf-hold-center');
   if(wrap)wrap.style.display='flex';
   if(zone){zone.style.bottom=(_sfHoldZoneStart*100)+'%';zone.style.height=(zoneSize*100)+'%';}
+  if(center){center.style.display='block';center.style.bottom=((_sfHoldZoneStart+zoneSize/2)*100)+'%';}
   if(fill)fill.style.height='0%';
   document.getElementById('sf-btn-throw')?.classList.add('holding');
   document.getElementById('sf-msg-box').textContent='¡Suelta en la zona verde!';
@@ -3803,6 +3807,7 @@ function sfHoldRelease(){
   const dur=SAFARI_HOLD_DUR[enc.tier];
   const p=Math.min((Date.now()-_sfHoldStartTime)/dur,1);
   document.getElementById('sf-hold-wrap').style.display='none';
+  document.getElementById('sf-hold-center').style.display='none';
   document.getElementById('sf-btn-throw')?.classList.remove('holding');
   const zoneCenter=(_sfHoldZoneStart+_sfHoldZoneEnd)/2;
   const zoneHalf=(_sfHoldZoneEnd-_sfHoldZoneStart)/2;
