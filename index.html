@@ -3819,7 +3819,7 @@ function sfHoldBegin(e){
     } else if(p>=1&&_sfHoldActive){
       // cycle completed — shrink zone and restart
       _sfHoldCycle++;
-      const newHalf=_sfHoldOrigZoneHalf*Math.pow(0.5,_sfHoldCycle);
+      const newHalf=_sfHoldOrigZoneHalf*Math.pow(0.5,Math.floor(_sfHoldCycle/2));
       _sfHoldApplyZone(zone,center,newHalf);
       if(fill)fill.style.height='0%';
       _sfHoldStartTime=Date.now();
