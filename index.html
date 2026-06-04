@@ -3589,15 +3589,15 @@ function sfSpawn(zoneId){
   const shiny=Math.random()<1/512;
   const turnsMax=SAFARI_TURN_MAX[tier];
   return{poke,shiny,tier,zone:zoneId,busy:false,
+    catchRate:SAFARI_CATCH_RATES[tier], // updated async with real value from PokéAPI
     turnsLeft:turnsMax,maxTurns:turnsMax,
     razzActive:false,nanabActive:false,pinapActive:false,
     qteStart:0,qteDuration:SAFARI_QTE_DUR[tier]};
 }
 
-function sfCatchProb(tier,ball,qteMult=1,razz=false){
+function sfCatchProb(catchRate,ball,qteMult=1,razz=false){
   if(ball==='master')return 1;
-  const rate=SAFARI_CATCH_RATES[tier];
-  let prob=(rate/255)*SAFARI_BALL_MULT[ball]*qteMult;
+  let prob=(catchRate/255)*SAFARI_BALL_MULT[ball]*qteMult;
   if(razz)prob*=1.6;
   return Math.min(prob,1);
 }
@@ -3658,7 +3658,7 @@ function _sfRenderZones(){
   }).join('');
 }
 
-function sfStartEncounter(zoneId){
+async function sfStartEncounter(zoneId){
   if(_sfBasicBalls()<=0&&(S.safari.balls.ultra||0)<=0&&(S.safari.balls.master||0)<=0){
     sfToast('Sin Poké Balls. Espera la renovación.');
     return;
@@ -3667,6 +3667,12 @@ function sfStartEncounter(zoneId){
   if(!enc){sfToast('No hay Pokémon aquí aún.');return;}
   S.safari.encounter=enc;
   _sfShowEncounter(enc);
+  // Fetch real capture_rate in background — already cached if user viewed the Pokédex card
+  try{
+    const spec=await _fetchSpecies(enc.poke.id);
+    if(S.safari.encounter===enc&&spec.capture_rate!=null)
+      enc.catchRate=spec.capture_rate;
+  }catch(e){}
 }
 
 function _sfShowEncounter(enc){
@@ -3856,7 +3862,7 @@ async function _sfDoThrow(qteMult,qteMsg){
   const nanabWasActive=enc.nanabActive;
   enc.nanabActive=false;
 
-  const prob=sfCatchProb(enc.tier,ball,qteMult,enc.razzActive);
+  const prob=sfCatchProb(enc.catchRate,ball,qteMult,enc.razzActive);
   enc.razzActive=false;
   // 3-shake system: each shake is independent with P = ∛(prob)
   // so P(pass all 3) = prob — same expected catch rate, but realistic 0-3 shake drama
