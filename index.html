@@ -3860,7 +3860,7 @@ function sfSpawn(zoneId){
   for(const{p,w}of wl){r-=w;if(r<=0){poke=p;break;}}
   const tier=_sfTier(poke);
   const amuletOn=(S.safari.amulet?.expiresAt||0)>Date.now();
-  const shiny=Math.random()<(amuletOn?1/64:1/512);
+  const shiny=Math.random()<(amuletOn?0.05:1/512);
   const turnsMax=SAFARI_TURN_MAX[tier];
   return{poke,shiny,tier,zone:zoneId,busy:false,
     catchRate:SAFARI_CATCH_RATES[tier], // updated async with real value from PokéAPI
