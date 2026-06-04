@@ -957,8 +957,8 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-auction-tab.on{background:var(--ac);color:#fff}
 .sf-ahist-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--s1);border:1.5px solid var(--bd);margin-bottom:8px}
 /* Catch card */
-#sf-catch-card{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto}
-.sf-cc-wrap{max-width:420px;margin:0 auto;padding:20px 16px 48px}
+#sf-catch-card{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto;flex-direction:column;align-items:center;justify-content:center}
+.sf-cc-wrap{width:100%;max-width:420px;padding:16px 16px 32px}
 .sf-cc-poke-box{border-radius:24px;padding:28px 20px 20px;text-align:center;margin-bottom:14px;position:relative}
 .sf-cc-shiny-badge{font-family:var(--px);font-size:9px;background:linear-gradient(90deg,#f0c000,#ff8c00);color:#fff;padding:3px 12px;border-radius:20px;letter-spacing:.5px;display:inline-block;margin-bottom:8px;animation:sfShinyPulse 1.8s infinite}
 .sf-cc-name{font-family:var(--px);font-size:22px;font-weight:900;color:var(--t1);margin:8px 0 4px}
@@ -4289,17 +4289,26 @@ function _sfShowCatchCard(data){
         ${data.heldItem.special?`<div style="font-family:var(--px);font-size:8px;color:#e65100;margin-top:2px">✨ ¡Probabilidad shiny ×8 durante 2 min!</div>`:''}
       </div>
     </div>`:''}
-    <div style="display:flex;gap:10px;margin-top:8px">
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+      <button class="sf-cc-btn primary" onclick="sfCatchCardStay()">🎯 Siguiente Pokémon</button>
+      <button class="sf-cc-btn secondary" onclick="sfCatchCardClose()">🗺️ Cambiar zona</button>
       <button class="sf-cc-btn secondary" onclick="sfShareCatch()">📤 Compartir</button>
-      <button class="sf-cc-btn primary" onclick="sfCatchCardClose()">🎯 Seguir cazando</button>
     </div>`;
-  document.getElementById('sf-catch-card').style.display='block';
+  const card=document.getElementById('sf-catch-card');
+  card.style.display='flex';
   _sfAmuletHudTick();
 }
 function sfCatchCardClose(){
   document.getElementById('sf-catch-card').style.display='none';
   _sfCatchData=null;
   showSafariHome();
+}
+function sfCatchCardStay(){
+  const zone=_sfCatchData?.zone;
+  document.getElementById('sf-catch-card').style.display='none';
+  _sfCatchData=null;
+  if(zone) sfStartEncounter(zone);
+  else showSafariHome();
 }
 async function sfShareCatch(){
   if(!_sfCatchData)return;
@@ -4784,7 +4793,7 @@ async function _sfDoThrow(qteMult,qteMsg){
     sfCheckMilestones();
     sfCheckSafariMedals();
     await _sfDelay(900);
-    _sfShowCatchCard({poke:enc.poke,shiny:enc.shiny,tier:enc.tier,gender,nature,coinsEarned,heldItem,isNew});
+    _sfShowCatchCard({poke:enc.poke,shiny:enc.shiny,tier:enc.tier,gender,nature,coinsEarned,heldItem,isNew,zone:enc.zone});
   } else {
     document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} escapó!`;
     if(sprite)sprite.style.animation='sfEscape .4s forwards';
@@ -8889,6 +8898,7 @@ window.sfCloseAuction = sfCloseAuction;
 window.sfBidAuction = sfBidAuction;
 window._sfAucTabSwitch = _sfAucTabSwitch;
 window.sfCatchCardClose = sfCatchCardClose;
+window.sfCatchCardStay = sfCatchCardStay;
 window.sfShareCatch = sfShareCatch;
 window.sfShowMedals = sfShowMedals;
 window.sfCloseMedals = sfCloseMedals;
