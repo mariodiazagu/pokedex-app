@@ -5105,6 +5105,7 @@ const ADMIN_EMAIL = 'mario.diazagu@gmail.com';
 let _sfTestMode = false;
 let _sfRealSafari = null;
 let _sfAdminUnlocked = false; // runtime-only, never persisted
+let _safariCloudReady = false; // true only after successful Firestore load
 
 function _isAdmin() {
   return currentUser && currentUser.email === ADMIN_EMAIL;
@@ -5253,6 +5254,10 @@ appId: "1:271473943519:web:dd19d57e54086b72981a6a"
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+db.enablePersistence({ synchronizeTabs: true }).catch(e => {
+  if (e.code === 'failed-precondition') console.warn('Firestore persistence: múltiples tabs abiertas');
+  else if (e.code === 'unimplemented') console.warn('Firestore persistence: navegador no compatible');
+});
 let currentUser = null;
 let syncTimeout = null;
 
@@ -5427,6 +5432,8 @@ if (dot) dot.classList.toggle('syncing', on);
 // ── FIRESTORE SAVE (debounced 600ms to avoid hammering) ──
 function scheduleSave() {
 if (!currentUser) { saveToLocalStorage(); return; }
+// Don't write to Firestore until initial cloud load completed — prevents overwriting real data with empty state on network failure
+if (!_safariCloudReady) { saveToLocalStorage(); return; }
 setSyncing(true);
 clearTimeout(syncTimeout);
 // Always save device settings locally
@@ -5485,7 +5492,7 @@ if (_sfTestMode) {
 // ── LOAD USER DATA ──
 async function loadUserData(uid) {
 try {
-const timeoutPromise = new Promise((_,reject) => setTimeout(() => reject(new Error('Firestore timeout')), 6000));
+const timeoutPromise = new Promise((_,reject) => setTimeout(() => reject(new Error('Firestore timeout')), 20000));
 const doc = await Promise.race([db.collection('users').doc(uid).get(), timeoutPromise]);
 if (doc.exists) {
 const d = doc.data();
@@ -5513,8 +5520,10 @@ if (d.set.glass !== undefined) { S.set.glass = d.set.glass; applyGlass(d.set.gla
 if (d.safari) Object.assign(S.safari, d.safari);
 delete S.safari._adminUnlocked; // runtime-only flag, never load from storage
 if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+_safariCloudReady = true;
 } else {
 loadFromLocalStorage();
+_safariCloudReady = true; // new user, safe to start saving
 if (Object.keys(S.track).length > 0 || S.favs.size > 0) {
 scheduleSave();
 }
@@ -5522,6 +5531,7 @@ scheduleSave();
 } catch(e) {
 console.error('Load error:', e);
 loadFromLocalStorage();
+// _safariCloudReady stays false — don't overwrite Firestore with empty state
 }
 }
 
