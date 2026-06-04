@@ -921,6 +921,10 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-coll-filter-row{display:flex;gap:6px}
 .sf-filter-btn{font-family:var(--px);font-size:8px;padding:4px 10px;border-radius:14px;border:1.5px solid var(--bd);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s;flex:1}
 .sf-filter-btn.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+/* Collection extra filter rows */
+.sf-coll-fi-row{display:flex;gap:5px;overflow-x:auto;padding:2px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sf-coll-fi-row::-webkit-scrollbar{display:none}
+.sf-fi-pill{font-family:var(--px);font-size:7px;padding:3px 9px;border-radius:12px;border:1.5px solid var(--bd);background:transparent;color:var(--t2);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s}
 /* Collection grid */
 .sf-coll-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px 12px 24px}
 .sf-coll-card{background:var(--s1);border-radius:10px;padding:6px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;border:2px solid var(--bd);box-shadow:2px 2px 0 rgba(0,0,0,.08);transition:transform .1s;position:relative;cursor:pointer}
@@ -1409,6 +1413,9 @@ function sendPasswordReset(){
         <button class="sf-filter-btn" id="sf-f-caught"  onclick="sfSetCollFilter('caught')">Capturados</button>
         <button class="sf-filter-btn" id="sf-f-missing" onclick="sfSetCollFilter('missing')">Por capturar</button>
       </div>
+      <div id="sf-f-type-row" class="sf-coll-fi-row"></div>
+      <div id="sf-f-gen-row" class="sf-coll-fi-row"></div>
+      <div id="sf-f-tier-row" class="sf-coll-fi-row"></div>
     </div>
     <div class="gscroll"><div id="sf-coll-grid" class="sf-coll-grid"></div></div>
   </div>
@@ -4009,6 +4016,9 @@ function _sfEnableActions(){
 function _sfDelay(ms){return new Promise(r=>setTimeout(r,ms));}
 
 let _sfCollFilter='all';
+let _sfCollFilterType=null;
+let _sfCollFilterGen=0;
+let _sfCollFilterTier=null;
 
 function sfSetCollFilter(f){
   _sfCollFilter=f;
@@ -4016,14 +4026,36 @@ function sfSetCollFilter(f){
   document.getElementById('sf-f-'+f)?.classList.add('on');
   _sfRenderCollection();
 }
+function sfSetCollFilterType(t){_sfCollFilterType=_sfCollFilterType===t?null:t;_sfRenderCollFilterRows();_sfRenderCollection();}
+function sfSetCollFilterGen(g){_sfCollFilterGen=_sfCollFilterGen===g?0:g;_sfRenderCollFilterRows();_sfRenderCollection();}
+function sfSetCollFilterTier(t){_sfCollFilterTier=_sfCollFilterTier===t?null:t;_sfRenderCollFilterRows();_sfRenderCollection();}
+
+function _sfRenderCollFilterRows(){
+  const typeRow=document.getElementById('sf-f-type-row');
+  const genRow=document.getElementById('sf-f-gen-row');
+  const tierRow=document.getElementById('sf-f-tier-row');
+  if(typeRow)typeRow.innerHTML=TYPES.map(t=>{
+    const on=_sfCollFilterType===t.id;
+    return`<button class="sf-fi-pill" style="background:${on?t.c:t.c+'22'};border-color:${on?t.c:t.c+'55'};color:${on?'#fff':t.c+'cc'}" onclick="sfSetCollFilterType('${t.id}')">${t.n}</button>`;
+  }).join('');
+  if(genRow)genRow.innerHTML=[0,1,2,3,4,5,6,7,8,9].map(g=>{
+    const on=_sfCollFilterGen===g;
+    return`<button class="sf-fi-pill${on?' on':''}" onclick="sfSetCollFilterGen(${g})">${g===0?'Todas':GNS[g]}</button>`;
+  }).join('');
+  if(tierRow)tierRow.innerHTML=SAFARI_TIER_LABELS.map((lbl,i)=>{
+    const on=_sfCollFilterTier===i;
+    const c=SAFARI_TIER_COLORS[i];
+    return`<button class="sf-fi-pill" style="background:${on?c:c+'22'};border-color:${on?c:c+'66'};color:${on?'#fff':c}" onclick="sfSetCollFilterTier(${i})">${lbl}</button>`;
+  }).join('');
+}
 
 function showSafariCollection(){
   document.getElementById('sf-home')?.classList.remove('on');
   document.getElementById('sf-encounter')?.classList.remove('on');
   document.getElementById('sf-collection')?.classList.add('on');
-  // Set active filter button
   document.querySelectorAll('.sf-filter-btn').forEach(b=>b.classList.remove('on'));
   document.getElementById('sf-f-'+_sfCollFilter)?.classList.add('on');
+  _sfRenderCollFilterRows();
   _sfRenderCollection();
 }
 
@@ -4038,6 +4070,9 @@ function _sfRenderCollection(){
   let pool=S.poke?[...S.poke].sort((a,b)=>a.id-b.id):[];
   if(_sfCollFilter==='caught') pool=pool.filter(p=>S.safari.caught[String(p.id)]);
   if(_sfCollFilter==='missing') pool=pool.filter(p=>!S.safari.caught[String(p.id)]);
+  if(_sfCollFilterType!=null) pool=pool.filter(p=>p.types.includes(_sfCollFilterType));
+  if(_sfCollFilterGen) pool=pool.filter(p=>genOf(p.id)===_sfCollFilterGen);
+  if(_sfCollFilterTier!=null) pool=pool.filter(p=>_sfTier(p)===_sfCollFilterTier);
   if(search) pool=pool.filter(p=>p.name.toLowerCase().includes(search)||String(p.id).includes(search));
 
   if(!pool.length){
@@ -4220,6 +4255,7 @@ function sfToggleTestMode() {
       _sfRealSafari = null;
     }
     _sfTestMode = false;
+    try { localStorage.removeItem('sf_tm'); } catch(e) {}
     _sfAdminUnlocked = false;
     document.getElementById('sf-test-banner').style.display = 'none';
   } else {
@@ -4236,6 +4272,7 @@ function sfToggleTestMode() {
     };
     if (!S.safari.berries) S.safari.berries = {razz:0,nanab:0,pinap:0};
     _sfTestMode = true;
+    try { localStorage.setItem('sf_tm','1'); } catch(e) {}
     document.getElementById('sf-test-banner').style.display = '';
   }
   _updateTestToggleUI();
@@ -7973,6 +8010,16 @@ loadFormsCache();
 try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.parse(d)); } catch(e){}
 try { const d = localStorage.getItem('sf'); if(d) Object.assign(S.safari, JSON.parse(d)); } catch(e){}
 if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+// Auto-restore test mode if it was active before the last reload
+if(localStorage.getItem('sf_tm')==='1'){
+  _sfRealSafari=JSON.parse(JSON.stringify(S.safari));
+  let _ts=null;
+  try{const d=localStorage.getItem('sf_test');if(d)_ts=JSON.parse(d);}catch(e){}
+  S.safari=_ts||{caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},berries:{razz:0,nanab:0,pinap:0},milestones:[],selBall:'poke'};
+  if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+  _sfTestMode=true;
+  setTimeout(()=>{const b=document.getElementById('sf-test-banner');if(b)b.style.display='';},0);
+}
 
 // Apply saved columns setting
 applyColsSetting();
