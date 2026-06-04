@@ -5428,6 +5428,8 @@ if (dot) dot.classList.toggle('syncing', on);
 // ── FIRESTORE SAVE (debounced 600ms to avoid hammering) ──
 function scheduleSave() {
 if (!currentUser) { saveToLocalStorage(); return; }
+// Don't write to Firestore until initial cloud load completed — prevents overwriting real data with empty state on network failure
+if (!_safariCloudReady) { saveToLocalStorage(); return; }
 setSyncing(true);
 clearTimeout(syncTimeout);
 // Always save device settings locally
@@ -5457,8 +5459,8 @@ teams: S.teams,
 set: cloudSet,
 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
 };
-// Only write safari when cloud load completed — prevents overwriting Firestore with empty state on network failure
-if (!_sfTestMode && _safariCloudReady) cloudData.safari = S.safari;
+// In test mode, never write safari data to Firestore
+if (!_sfTestMode) cloudData.safari = S.safari;
 await db.collection('users').doc(currentUser.uid).set(cloudData, { merge: true });
 setSyncing(false);
 } catch(e) {
