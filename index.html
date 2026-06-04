@@ -914,6 +914,12 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-act-btn.throw{background:var(--ac);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.4);touch-action:none}
 .sf-act-btn.run{background:#2a2a2a;color:#888;border:2px solid #3a3a3a}
 .sf-act-btn:disabled{opacity:.35;pointer-events:none}
+/* Help screen */
+.sf-help-card{display:flex;gap:12px;align-items:flex-start;background:var(--s1);border-radius:14px;padding:12px 14px;border:1.5px solid var(--bd)}
+.sf-help-ico{font-size:22px;flex-shrink:0;margin-top:1px}
+.sf-help-title{font-family:var(--px);font-size:10px;font-weight:800;color:var(--t1);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.sf-help-body{font-size:12px;color:var(--t2);line-height:1.55}
+.sf-help-row{margin-bottom:5px;display:flex;align-items:center;gap:7px}
 /* Collection filters */
 .sf-coll-filters{padding:8px 12px 6px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--bd);flex-shrink:0}
 .sf-coll-search-wrap{position:relative}
@@ -1349,6 +1355,7 @@ function sendPasswordReset(){
       <div class="sf-ptitle">Safari</div>
       <button class="ibtn" onclick="sfShowShop()" title="Tienda" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></button>
       <button class="ibtn" onclick="showSafariCollection()" title="Colección"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
+      <button class="ibtn" onclick="sfShowHelp()" title="Cómo funciona"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
     </div>
     <div id="sf-test-banner" style="display:none;margin:0 0 8px;padding:6px 12px;border-radius:10px;background:#E53935;color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;text-align:center;text-transform:uppercase">
       ⚗️ MODO PRUEBA — datos aislados
@@ -1394,6 +1401,94 @@ function sendPasswordReset(){
         <button class="sf-act-btn throw" id="sf-btn-throw" onpointerdown="sfHoldBegin(event)" onpointerup="sfHoldRelease()" onpointercancel="sfHoldRelease()" oncontextmenu="return false">🎯 Lanzar</button>
         <button class="sf-act-btn run" onclick="safariRun()">↩ Huir</button>
       </div>
+    </div>
+  </div>
+  <!-- HELP -->
+  <div id="sf-help" class="sf-screen">
+    <div class="sf-phdr">
+      <button class="ibtn" onclick="sfCloseHelp()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="sf-ptitle">Cómo funciona</div>
+    </div>
+    <div class="gscroll" style="padding:12px 14px 32px;display:flex;flex-direction:column;gap:12px">
+
+      <div class="sf-help-card">
+        <div class="sf-help-ico">🗺️</div>
+        <div>
+          <div class="sf-help-title">Zonas</div>
+          <div class="sf-help-body">El Safari tiene distintas zonas según el hábitat. Cada zona tiene sus propios Pokémon según el tipo. Desbloqueas nuevas zonas al ir capturando más Pokémon.</div>
+        </div>
+      </div>
+
+      <div class="sf-help-card">
+        <div class="sf-help-ico">🎯</div>
+        <div>
+          <div class="sf-help-title">Lanzar la Pokéball</div>
+          <div class="sf-help-body">Mantén pulsado el botón <b>Lanzar</b>. Aparece una barra que sube — suéltala cuando la barra esté dentro de la zona verde para aumentar tus probabilidades de captura.</div>
+        </div>
+      </div>
+
+      <div class="sf-help-card">
+        <div class="sf-help-ico">🟢</div>
+        <div>
+          <div class="sf-help-title">Zona verde y ciclos</div>
+          <div class="sf-help-body">Si la barra llega al 100% sin soltar, vuelve a empezar. Cada dos ciclos la zona verde se hace la mitad de grande — cuanto más esperes, más difícil acertar. El punto blanco central es la zona <b>Excelente</b> (×2).</div>
+        </div>
+      </div>
+
+      <div class="sf-help-card">
+        <div class="sf-help-ico">⭐</div>
+        <div>
+          <div class="sf-help-title">Puntuación del tiro</div>
+          <div class="sf-help-body">
+            <div class="sf-help-row"><span style="color:#fff;background:#388e3c;border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800">✨ Excelente</span> Centro exacto — ×2 prob.</div>
+            <div class="sf-help-row"><span style="color:#fff;background:#1976d2;border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800">⭐ Buen tiro</span> Dentro de la zona — ×1.5 prob.</div>
+            <div class="sf-help-row"><span style="color:#fff;background:#f57c00;border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800">¡Bien!</span> Borde de la zona — ×1.2 prob.</div>
+            <div class="sf-help-row"><span style="color:var(--t2);background:var(--s2);border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800">Normal</span> Fuera — ×0.85 prob.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sf-help-card">
+        <div class="sf-help-ico">🔢</div>
+        <div>
+          <div class="sf-help-title">Turnos</div>
+          <div class="sf-help-body">Cada Pokémon tiene un límite de intentos. Los comunes tienen <b>menos turnos</b> (3) y los míticos <b>más</b> (16). Si se agotan, el Pokémon huye.</div>
+        </div>
+      </div>
+
+      <div class="sf-help-card">
+        <div class="sf-help-ico">🍓</div>
+        <div>
+          <div class="sf-help-title">Bayas</div>
+          <div class="sf-help-body">
+            <div class="sf-help-row"><b>Razz 🍓</b> — +10% probabilidad de captura ese turno.</div>
+            <div class="sf-help-row"><b>Nanab 🍌</b> — reduce la probabilidad de huida un 70%.</div>
+            <div class="sf-help-row"><b>Pinap 🍍</b> — dobla las monedas si capturas ese turno.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sf-help-card">
+        <div class="sf-help-ico">🔵</div>
+        <div>
+          <div class="sf-help-title">Tipos de Pokéball</div>
+          <div class="sf-help-body">
+            <div class="sf-help-row"><b>Poké Ball 🔴</b> — multiplicador ×1</div>
+            <div class="sf-help-row"><b>Super Ball ⭐</b> — multiplicador ×1.5</div>
+            <div class="sf-help-row"><b>Ultra Ball 🔵</b> — multiplicador ×2</div>
+            <div class="sf-help-row"><b>Master Ball 💜</b> — captura garantizada</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sf-help-card">
+        <div class="sf-help-ico">🪙</div>
+        <div>
+          <div class="sf-help-title">Monedas</div>
+          <div class="sf-help-body">Ganas monedas al capturar Pokémon. Los más raros dan más monedas. Úsalas en la <b>Tienda</b> para comprar más Pokéballs y bayas.</div>
+        </div>
+      </div>
+
     </div>
   </div>
   <!-- COLLECTION -->
@@ -3628,8 +3723,18 @@ function showSafariHome(){
   document.getElementById('sf-home')?.classList.add('on');
   document.getElementById('sf-encounter')?.classList.remove('on');
   document.getElementById('sf-collection')?.classList.remove('on');
+  document.getElementById('sf-help')?.classList.remove('on');
   _sfRenderBalls();
   _sfRenderZones();
+}
+
+function sfShowHelp(){
+  document.getElementById('sf-home')?.classList.remove('on');
+  document.getElementById('sf-help')?.classList.add('on');
+}
+function sfCloseHelp(){
+  document.getElementById('sf-help')?.classList.remove('on');
+  document.getElementById('sf-home')?.classList.add('on');
 }
 
 
