@@ -4317,12 +4317,20 @@ function adminUnlockZones() {
 }
 
 function adminClearCaught() {
-  if (!confirm('¿Borrar todos los pokémon capturados?')) return;
+  if (!confirm('¿Borrar todos los pokémon capturados?\n\nSe descargará un backup automáticamente antes de borrar.')) return;
+  // Download backup before clearing
+  const backup = {exportedAt: new Date().toISOString(), caught: S.safari.caught, milestones: S.safari.milestones};
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `safari-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
   S.safari.caught = {};
   S.safari.milestones = [];
   _sfAdminUnlocked = false;
   scheduleSave();
-  _adminToast('Pokémon borrados');
+  _adminToast('Pokémon borrados — backup descargado');
   if (document.getElementById('sf-home')?.classList.contains('on')) renderSafari();
   if (document.getElementById('sf-collection')?.classList.contains('on')) _sfRenderCollection();
 }
