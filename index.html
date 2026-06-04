@@ -5488,7 +5488,7 @@ if (_sfTestMode) {
 // ── LOAD USER DATA ──
 async function loadUserData(uid) {
 try {
-const timeoutPromise = new Promise((_,reject) => setTimeout(() => reject(new Error('Firestore timeout')), 6000));
+const timeoutPromise = new Promise((_,reject) => setTimeout(() => reject(new Error('Firestore timeout')), 20000));
 const doc = await Promise.race([db.collection('users').doc(uid).get(), timeoutPromise]);
 if (doc.exists) {
 const d = doc.data();
