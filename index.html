@@ -8755,11 +8755,11 @@ renderGrid();
   img.onload=()=>{
     try{
       const c=document.createElement('canvas');
-      c.width=c.height=32;
-      c.getContext('2d').drawImage(img,0,0,32,32);
+      c.width=c.height=64;
+      c.getContext('2d').drawImage(img,0,0,64,64);
       const url=c.toDataURL('image/png');
       const s=document.createElement('style');
-      s.textContent=`*{cursor:url(${url}) 16 16,auto!important}`;
+      s.textContent=`*{cursor:url(${url}) 32 32,auto!important}`;
       document.head.appendChild(s);
     }catch(e){}
   };
