@@ -3771,7 +3771,16 @@ function _sfRenderBallRow(){
 
 function sfSelectBall(type){S.safari.selBall=type;_sfRenderBallRow();}
 
-let _sfHoldActive=false,_sfHoldRaf=null,_sfHoldStartTime=0,_sfHoldZoneStart=0,_sfHoldZoneEnd=0;
+let _sfHoldActive=false,_sfHoldRaf=null,_sfHoldStartTime=0;
+let _sfHoldZoneStart=0,_sfHoldZoneEnd=0,_sfHoldCycle=0,_sfHoldZoneCenter=0,_sfHoldOrigZoneHalf=0;
+
+function _sfHoldApplyZone(zone,center,half){
+  const visible=half>0.015;
+  _sfHoldZoneStart=visible?Math.max(0.02,_sfHoldZoneCenter-half):0.5;
+  _sfHoldZoneEnd  =visible?Math.min(0.98,_sfHoldZoneCenter+half):0.5;
+  if(zone){zone.style.bottom=(_sfHoldZoneStart*100)+'%';zone.style.height=(visible?(half*2*100):0)+'%';}
+  if(center){center.style.display=visible?'block':'none';if(visible)center.style.bottom=(_sfHoldZoneCenter*100)+'%';}
+}
 
 function sfHoldBegin(e){
   const enc=S.safari.encounter;
@@ -3787,26 +3796,35 @@ function sfHoldBegin(e){
   _sfRenderBallRow();
   enc.busy=true;
   _sfHoldActive=true;
-  _sfHoldStartTime=Date.now();
+  _sfHoldCycle=0;
   const zoneSize=SAFARI_HOLD_ZONE[enc.tier];
-  _sfHoldZoneStart=0.15+Math.random()*(0.70-zoneSize);
-  _sfHoldZoneEnd=_sfHoldZoneStart+zoneSize;
+  _sfHoldZoneCenter=0.15+Math.random()*(0.70-zoneSize)+zoneSize/2;
+  _sfHoldOrigZoneHalf=zoneSize/2;
   const wrap=document.getElementById('sf-hold-wrap');
   const zone=document.getElementById('sf-hold-zone');
   const fill=document.getElementById('sf-hold-fill');
   const center=document.getElementById('sf-hold-center');
   if(wrap)wrap.style.display='flex';
-  if(zone){zone.style.bottom=(_sfHoldZoneStart*100)+'%';zone.style.height=(zoneSize*100)+'%';}
-  if(center){center.style.display='block';center.style.bottom=((_sfHoldZoneStart+zoneSize/2)*100)+'%';}
+  _sfHoldApplyZone(zone,center,_sfHoldOrigZoneHalf);
   if(fill)fill.style.height='0%';
   document.getElementById('sf-btn-throw')?.classList.add('holding');
   document.getElementById('sf-msg-box').textContent='¡Suelta en la zona verde!';
+  _sfHoldStartTime=Date.now();
   const dur=SAFARI_HOLD_DUR[enc.tier];
   (function tick(){
     const p=Math.min((Date.now()-_sfHoldStartTime)/dur,1);
     if(fill)fill.style.height=(p*100)+'%';
-    if(p<1&&_sfHoldActive){_sfHoldRaf=requestAnimationFrame(tick);}
-    else if(p>=1&&_sfHoldActive){sfHoldRelease();}
+    if(p<1&&_sfHoldActive){
+      _sfHoldRaf=requestAnimationFrame(tick);
+    } else if(p>=1&&_sfHoldActive){
+      // cycle completed — shrink zone and restart
+      _sfHoldCycle++;
+      const newHalf=_sfHoldOrigZoneHalf*Math.pow(0.5,_sfHoldCycle);
+      _sfHoldApplyZone(zone,center,newHalf);
+      if(fill)fill.style.height='0%';
+      _sfHoldStartTime=Date.now();
+      _sfHoldRaf=requestAnimationFrame(tick);
+    }
   })();
 }
 
@@ -3825,7 +3843,8 @@ function sfHoldRelease(){
   const zoneHalf=(_sfHoldZoneEnd-_sfHoldZoneStart)/2;
   const dist=Math.abs(p-zoneCenter);
   let qteMult,qteMsg;
-  if(dist<zoneHalf*0.35)     {qteMult=2.0;qteMsg='✨ ¡Excelente!';}
+  if(zoneHalf<0.015)         {qteMult=0.85;qteMsg='Tiro normal';}
+  else if(dist<zoneHalf*0.35){qteMult=2.0;qteMsg='✨ ¡Excelente!';}
   else if(dist<zoneHalf)     {qteMult=1.5;qteMsg='⭐ ¡Buen tiro!';}
   else if(dist<zoneHalf*1.5) {qteMult=1.2;qteMsg='¡Bien!';}
   else                       {qteMult=0.85;qteMsg='Tiro normal';}
