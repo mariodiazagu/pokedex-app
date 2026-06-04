@@ -920,6 +920,30 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-help-title{font-family:var(--px);font-size:10px;font-weight:800;color:var(--t1);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
 .sf-help-body{font-size:12px;color:var(--t2);line-height:1.55}
 .sf-help-row{margin-bottom:5px;display:flex;align-items:center;gap:7px}
+/* Weather */
+.sf-weather-chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--px);font-size:8px;font-weight:700;padding:3px 9px;border-radius:10px;background:var(--s2);color:var(--t1);border:1.5px solid var(--bd)}
+/* Chain indicator */
+.sf-chain-pill{font-family:var(--px);font-size:8px;font-weight:700;padding:3px 12px;border-radius:10px;background:rgba(255,140,0,.18);color:#ff9800;border:1.5px solid rgba(255,140,0,.4);text-align:center}
+/* Zone progress */
+.sf-zone-prog{height:3px;background:rgba(255,255,255,.15);border-radius:2px;margin-top:5px;overflow:hidden}
+.sf-zone-prog-fill{height:100%;border-radius:2px;transition:width .4s}
+/* Incense button on zone card */
+.sf-incense-btn{font-family:var(--px);font-size:7px;font-weight:700;padding:3px 8px;border-radius:8px;border:1.5px solid rgba(255,200,0,.45);background:rgba(255,200,0,.08);color:#ffc107;cursor:pointer;margin-top:5px;display:inline-block}
+.sf-incense-btn:disabled{opacity:.4;cursor:default}
+.sf-incense-active{color:#ff9800;border-color:rgba(255,152,0,.6)!important;background:rgba(255,152,0,.15)!important}
+/* Auction screen */
+.sf-auction-card{background:var(--s1);border-radius:18px;border:2px solid var(--bd);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center}
+.sf-auction-price{font-family:var(--px);font-size:22px;font-weight:900;color:#c8a000}
+.sf-auction-timer{font-family:var(--px);font-size:9px;color:var(--t3);letter-spacing:.4px}
+.sf-auction-bid-btn{width:100%;padding:13px;border-radius:14px;border:none;background:var(--ac);color:#fff;font-family:var(--px);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.05em;margin-top:4px}
+.sf-auction-bid-btn:disabled{opacity:.4;cursor:default}
+/* Medals */
+.sf-medal-card{background:var(--s1);border-radius:12px;border:2px solid var(--bd);padding:12px;display:flex;align-items:center;gap:12px}
+.sf-medal-card.earned{border-color:var(--ac)}
+.sf-medal-ico{font-size:26px;flex-shrink:0}
+.sf-medal-name{font-family:var(--px);font-size:9px;font-weight:800;color:var(--t1);text-transform:uppercase;letter-spacing:.3px}
+.sf-medal-desc{font-size:11px;color:var(--t3);margin-top:2px;line-height:1.4}
+.sf-medal-reward{font-size:10px;color:var(--ac);margin-top:3px;font-weight:700}
 /* Collection filters */
 .sf-coll-filters{padding:8px 12px 6px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--bd);flex-shrink:0}
 .sf-coll-search-wrap{position:relative}
@@ -1355,7 +1379,13 @@ function sendPasswordReset(){
       <div class="sf-ptitle">Safari</div>
       <button class="ibtn" onclick="sfShowShop()" title="Tienda" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></button>
       <button class="ibtn" onclick="showSafariCollection()" title="Colección"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
+      <button class="ibtn" onclick="sfShowAuction()" title="Subasta">🔨</button>
+      <button class="ibtn" onclick="sfShowMedals()" title="Medallas Safari">🏅</button>
       <button class="ibtn" onclick="sfShowHelp()" title="Cómo funciona"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
+    </div>
+    <div id="sf-weather-bar" style="display:flex;align-items:center;justify-content:space-between;padding:0 2px 4px;gap:8px">
+      <div id="sf-weather-chip" class="sf-weather-chip"></div>
+      <div id="sf-incense-global" style="display:none;font-family:var(--px);font-size:8px;font-weight:700;color:#ff9800">🕯️ <span id="sf-incense-timer-lbl"></span></div>
     </div>
     <div id="sf-test-banner" style="display:none;margin:0 0 8px;padding:6px 12px;border-radius:10px;background:#E53935;color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;text-align:center;text-transform:uppercase">
       ⚗️ MODO PRUEBA — datos aislados
@@ -1395,6 +1425,7 @@ function sendPasswordReset(){
     </div>
     <div class="sf-act-panel">
       <div id="sf-turns-row" class="sf-turns-row"></div>
+      <div id="sf-chain-wrap" style="display:none;padding:0 12px 4px"><div id="sf-chain-pill" class="sf-chain-pill"></div></div>
       <div id="sf-berry-row" class="sf-berry-row" style="display:none"></div>
       <div id="sf-ball-row" class="sf-ball-row"></div>
       <div class="sf-act-row">
@@ -1402,6 +1433,26 @@ function sendPasswordReset(){
         <button class="sf-act-btn run" onclick="safariRun()">↩ Huir</button>
       </div>
     </div>
+  </div>
+  <!-- AUCTION -->
+  <div id="sf-auction" class="sf-screen">
+    <div class="sf-phdr">
+      <button class="ibtn" onclick="sfCloseAuction()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="sf-ptitle">Subasta</div>
+      <div id="sf-auction-coins" style="font-family:var(--px);font-size:10px;color:#c8a000;margin-left:auto"></div>
+    </div>
+    <div class="gscroll" style="padding:14px 14px 32px">
+      <div id="sf-auction-content"></div>
+    </div>
+  </div>
+  <!-- MEDALS -->
+  <div id="sf-medals" class="sf-screen">
+    <div class="sf-phdr">
+      <button class="ibtn" onclick="sfCloseMedals()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="sf-ptitle">Medallas Safari</div>
+      <div id="sf-medals-count" style="font-family:var(--px);font-size:10px;color:var(--t3);margin-left:auto"></div>
+    </div>
+    <div class="gscroll"><div id="sf-medals-grid" style="display:flex;flex-direction:column;gap:8px;padding:12px 14px 32px"></div></div>
   </div>
   <!-- HELP -->
   <div id="sf-help" class="sf-screen">
@@ -1530,6 +1581,9 @@ function sendPasswordReset(){
       </div>
     </div>
     <div id="sf-detail-rows" class="sf-detail-rows"></div>
+    <div id="sf-detail-exchange-wrap" style="display:none;padding:4px 16px">
+      <button onclick="sfExchangeFromDetail()" style="width:100%;padding:11px;border-radius:12px;border:1.5px solid var(--bd);background:var(--s2);color:var(--t1);font-family:var(--px);font-size:10px;font-weight:700;cursor:pointer">🔄 Intercambiar duplicado · <span id="sf-exchange-coins-preview"></span></button>
+    </div>
     <div id="sf-detail-dex-wrap" style="display:none;padding:8px 16px 4px">
       <button onclick="sfOpenPokedex()" style="width:100%;padding:11px;border-radius:12px;border:none;background:var(--ac);color:#fff;font-family:var(--px);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.04em">Ver en Pokédex →</button>
     </div>
@@ -3510,6 +3564,45 @@ const SAFARI_ZONES={
 const SAFARI_PSEUDO=new Set([149,248,373,376,445,612,635,706,784,887,998]);
 const SAFARI_TIER_COLORS=['#888','#c47a00','#8B3AA2','#1a6bc1','#d44400','#7b1fa2'];
 const SAFARI_TIER_LABELS=['Común','Poco común','Raro','Ultra/Paradoja','Legendario','Mítico'];
+const SAFARI_WEATHER=[
+  {id:'sunny', emoji:'☀️', name:'Soleado',  types:['fire','grass','ground'],       mult:1.10},
+  {id:'rain',  emoji:'🌧️',name:'Lluvia',   types:['water','bug','electric'],      mult:0.95},
+  {id:'snow',  emoji:'❄️', name:'Nieve',    types:['ice','steel'],                 mult:0.95},
+  {id:'fog',   emoji:'🌫️',name:'Niebla',   types:['ghost','dark','dragon'],       mult:1.05},
+  {id:'storm', emoji:'⛈️',name:'Tormenta', types:['electric','flying','dragon'],  mult:0.90},
+  {id:'wind',  emoji:'💨', name:'Viento',   types:['flying','normal','fairy'],     mult:1.00},
+  {id:'cloudy',emoji:'☁️', name:'Nublado',  types:['normal','rock','poison'],      mult:1.00},
+];
+const SAFARI_MEDALS=[
+  {id:'sm_first',    emoji:'🎯',label:'Primera sangre',     desc:'Tu primera captura en el Safari',                         reward:{poke:5},    check:s=>s.catchTotal>=1},
+  {id:'sm_catch50',  emoji:'🏆',label:'Medio centenar',     desc:'50 capturas en total',                                    reward:{ultra:3},   check:s=>s.catchTotal>=50},
+  {id:'sm_catch200', emoji:'🏆',label:'Veterano',           desc:'200 capturas en total',                                   reward:{master:1},  check:s=>s.catchTotal>=200},
+  {id:'sm_shiny1',   emoji:'✨',label:'¡Shiny!',            desc:'Captura tu primer Pokémon shiny',                         reward:{ultra:3},   check:s=>Object.values(s.caught||{}).some(c=>c.shiny)},
+  {id:'sm_shiny5',   emoji:'✨',label:'Cazador de brillos', desc:'5 Pokémon shiny capturados',                              reward:{ultra:5},   check:s=>Object.values(s.caught||{}).filter(c=>c.shiny).length>=5},
+  {id:'sm_chain5',   emoji:'🔥',label:'Racha x5',           desc:'Cadena de 5 capturas del mismo tipo seguidas',            reward:{razz:5},    check:s=>(s.chain?.maxCount||0)>=5},
+  {id:'sm_chain10',  emoji:'🔥',label:'Racha x10',          desc:'Cadena de 10 capturas del mismo tipo seguidas',           reward:{ultra:3},   check:s=>(s.chain?.maxCount||0)>=10},
+  {id:'sm_leg1',     emoji:'🏅',label:'Leyenda',            desc:'Captura tu primer Pokémon legendario',                    reward:{ultra:5},   check:s=>Object.keys(s.caught||{}).some(id=>{const p=S.poke?.find(x=>x.id===+id);return p&&_sfTier(p)===4;})},
+  {id:'sm_myth1',    emoji:'💎',label:'Mítico',             desc:'Captura tu primer Pokémon mítico',                        reward:{master:1},  check:s=>Object.keys(s.caught||{}).some(id=>{const p=S.poke?.find(x=>x.id===+id);return p&&_sfTier(p)===5;})},
+  {id:'sm_weather',  emoji:'🌤️',label:'Meteorólogo',        desc:'Captura un Pokémon boosteado por el clima actual',        reward:{nanab:5},   check:s=>(s.weatherBoostCatch||0)>=1},
+  {id:'sm_incense1', emoji:'🕯️',label:'Rastro oloroso',    desc:'Usa un incienso en una zona',                             reward:{razz:3},    check:s=>(s.incenseUsed||0)>=1},
+  {id:'sm_exchange1',emoji:'🔄',label:'Primer trueque',     desc:'Intercambia tu primer duplicado por monedas',             reward:{coins:30},  check:s=>(s.exchangeCount||0)>=1},
+  {id:'sm_auction1', emoji:'🔨',label:'Pujador',            desc:'Reclama tu primer Pokémon en subasta',                    reward:{great:10},  check:s=>(s.auctionWins||0)>=1},
+  {id:'sm_rich',     emoji:'🪙',label:'Rico en monedas',    desc:'Acumula 500 monedas totales ganadas',                     reward:{ultra:5},   check:s=>(s.coinsEarned||0)>=500},
+  {id:'sm_shop10',   emoji:'🛒',label:'Comprador habitual', desc:'Compra 10 objetos en la tienda',                          reward:{coins:50},  check:s=>(s.shopBuyCount||0)>=10},
+  {id:'sm_zone_pradera',emoji:'🌿',label:'Pradera completa',desc:'Captura todos los Pokémon de la Pradera',                 reward:{ultra:5},   check:_=>sfZoneCompletion('pradera').pct>=100},
+  {id:'sm_zone_bosque', emoji:'🌲',label:'Bosque completo', desc:'Captura todos los Pokémon del Bosque',                    reward:{ultra:5},   check:_=>sfZoneCompletion('bosque').pct>=100},
+  {id:'sm_zone_montana',emoji:'⛰️',label:'Montaña completa',desc:'Captura todos los Pokémon de la Montaña',                reward:{ultra:5},   check:_=>sfZoneCompletion('montana').pct>=100},
+  {id:'sm_zone_costa',  emoji:'🏖️',label:'Costa completa', desc:'Captura todos los Pokémon de la Costa',                   reward:{ultra:5},   check:_=>sfZoneCompletion('costa').pct>=100},
+  {id:'sm_zone_cueva',  emoji:'🕳️',label:'Cueva completa', desc:'Captura todos los Pokémon de la Cueva',                   reward:{ultra:5},   check:_=>sfZoneCompletion('cueva').pct>=100},
+  {id:'sm_zone_mar',    emoji:'🌊',label:'Mar completo',    desc:'Captura todos los Pokémon del Mar',                       reward:{ultra:5},   check:_=>sfZoneCompletion('mar').pct>=100},
+  {id:'sm_zone_volcan', emoji:'🌋',label:'Volcán completo', desc:'Captura todos los Pokémon del Volcán',                    reward:{ultra:5},   check:_=>sfZoneCompletion('volcan').pct>=100},
+  {id:'sm_zone_tundra', emoji:'❄️',label:'Tundra completa', desc:'Captura todos los Pokémon de la Tundra',                  reward:{ultra:5},   check:_=>sfZoneCompletion('tundra').pct>=100},
+  {id:'sm_zone_ruinas', emoji:'🏛️',label:'Ruinas completas',desc:'Captura todos los Pokémon de las Ruinas',                reward:{master:1},  check:_=>sfZoneCompletion('ruinas').pct>=100},
+  {id:'sm_zone_espacio',emoji:'🌌',label:'Espacio completo',desc:'Captura todos los Pokémon del Espacio',                   reward:{master:2},  check:_=>sfZoneCompletion('espacio').pct>=100},
+  {id:'sm_gen1',emoji:'🔴',label:'Kanto completo',          desc:'Captura al menos una especie de cada Pokémon de Gen I',   reward:{master:1},  check:_=>_sfGenComplete(1)},
+  {id:'sm_gen2',emoji:'🌿',label:'Johto completo',          desc:'Captura al menos una especie de cada Pokémon de Gen II',  reward:{master:1},  check:_=>_sfGenComplete(2)},
+  {id:'sm_gen3',emoji:'💧',label:'Hoenn completo',          desc:'Captura al menos una especie de cada Pokémon de Gen III', reward:{master:1},  check:_=>_sfGenComplete(3)},
+];
 const SAFARI_CATCH_RATES=[50,45,22,8,3,2]; // tier 0 (común) → tier 5 (mítico)
 const SAFARI_BALL_MULT={poke:1,great:1.5,ultra:2,master:999};
 const SAFARI_BALL_IMGS={
@@ -3614,7 +3707,8 @@ const SF_SHOP=[
   {id:'master1',label:'1 Master Ball',  ico:'💜', price:100,reward:{master:1}},
   {id:'razz3',  label:'3 Razz Berries', ico:'🍓', price:8,  reward:{razz:3}},
   {id:'nanab3', label:'3 Nanab Berries',ico:'🍌', price:6,  reward:{nanab:3}},
-  {id:'pinap3', label:'3 Pinap Berries',ico:'🍍', price:10, reward:{pinap:3}},
+  {id:'pinap3',   label:'3 Pinap Berries', ico:'🍍', price:10, reward:{pinap:3}},
+  {id:'incense1', label:'1 Incienso',      ico:'🕯️', price:20, reward:{incense:1}},
 ];
 
 function sfShowShop(){
@@ -3646,13 +3740,16 @@ function sfBuyBall(itemId){
   if(item.reward.great) S.safari.balls.great=(S.safari.balls.great||0)+item.reward.great;
   if(item.reward.ultra) S.safari.balls.ultra=(S.safari.balls.ultra||0)+item.reward.ultra;
   if(item.reward.master)S.safari.balls.master=(S.safari.balls.master||0)+item.reward.master;
-  if(item.reward.razz||item.reward.nanab||item.reward.pinap){
+  if(item.reward.razz||item.reward.nanab||item.reward.pinap||item.reward.incense){
     if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
-    if(item.reward.razz) S.safari.berries.razz=(S.safari.berries.razz||0)+item.reward.razz;
-    if(item.reward.nanab)S.safari.berries.nanab=(S.safari.berries.nanab||0)+item.reward.nanab;
-    if(item.reward.pinap)S.safari.berries.pinap=(S.safari.berries.pinap||0)+item.reward.pinap;
+    if(item.reward.razz)    S.safari.berries.razz   =(S.safari.berries.razz   ||0)+item.reward.razz;
+    if(item.reward.nanab)   S.safari.berries.nanab  =(S.safari.berries.nanab  ||0)+item.reward.nanab;
+    if(item.reward.pinap)   S.safari.berries.pinap  =(S.safari.berries.pinap  ||0)+item.reward.pinap;
+    if(item.reward.incense) S.safari.berries.incense=(S.safari.berries.incense||0)+item.reward.incense;
   }
+  S.safari.shopBuyCount=(S.safari.shopBuyCount||0)+1;
   scheduleSave();
+  sfCheckSafariMedals();
   sfShowShop(); // refresh shop with updated coins
   _sfRenderBalls();
 }
@@ -3687,11 +3784,16 @@ function sfSpawn(zoneId){
   if(!pool.length)return null;
   const W=[100,18,6,3,2,1];
   const primary=SAFARI_ZONES[zoneId]?.primaryTypes||SAFARI_ZONES[zoneId]?.types||[];
+  const weather=sfGetWeather();
+  const incenseActive=S.safari.incense?.zoneId===zoneId&&(S.safari.incense?.expiresAt||0)>Date.now();
   let total=0;
   const wl=pool.map(p=>{
     const isPrimary=p.types.some(t=>primary.includes(t));
-    let w=W[_sfTier(p)];
+    const tier=_sfTier(p);
+    let w=W[tier];
     if(!isPrimary)w=Math.max(1,Math.round(w*0.12)); // secondary-type match: ~12% weight
+    if(p.types.some(t=>weather.types.includes(t)))w=Math.round(w*2); // weather doubles spawn weight
+    if(incenseActive&&tier>=2)w=Math.round(w*3); // incense triples rare+ spawn weight
     total+=w;return{p,w};
   });
   let r=Math.random()*total;
@@ -3706,10 +3808,12 @@ function sfSpawn(zoneId){
     razzActive:false,nanabActive:false,pinapActive:false};
 }
 
-function sfCatchProb(catchRate,ball,qteMult=1,razz=false){
+function sfCatchProb(catchRate,ball,qteMult=1,razz=false,weatherMult=1,chainBonus=0){
   if(ball==='master')return 1;
   let prob=(catchRate/255)*SAFARI_BALL_MULT[ball]*qteMult;
   if(razz)prob*=1.1;
+  prob*=weatherMult;
+  prob+=chainBonus;
   return Math.min(prob,1);
 }
 
@@ -3724,8 +3828,11 @@ function showSafariHome(){
   document.getElementById('sf-encounter')?.classList.remove('on');
   document.getElementById('sf-collection')?.classList.remove('on');
   document.getElementById('sf-help')?.classList.remove('on');
+  document.getElementById('sf-auction')?.classList.remove('on');
+  document.getElementById('sf-medals')?.classList.remove('on');
   _sfRenderBalls();
   _sfRenderZones();
+  _sfUpdateWeatherChip();
 }
 
 function sfShowHelp(){
@@ -3735,6 +3842,240 @@ function sfShowHelp(){
 function sfCloseHelp(){
   document.getElementById('sf-help')?.classList.remove('on');
   document.getElementById('sf-home')?.classList.add('on');
+}
+
+// ── WEATHER ──
+function sfGetWeather(){
+  const slot=Math.floor(Date.now()/(2*60*60*1000));
+  return SAFARI_WEATHER[slot%SAFARI_WEATHER.length];
+}
+function _sfUpdateWeatherChip(){
+  const chip=document.getElementById('sf-weather-chip');
+  if(!chip)return;
+  const w=sfGetWeather();
+  const nextSlot=(Math.floor(Date.now()/(2*60*60*1000))+1)*2*60*60*1000;
+  const mins=Math.ceil((nextSlot-Date.now())/60000);
+  chip.textContent=`${w.emoji} ${w.name} · ${mins}min`;
+  chip.title=w.types.length?`Pokémon boosteados: ${w.types.join(', ')}`:'Sin bonus de tipo';
+  // Incense global timer
+  const ig=document.getElementById('sf-incense-global');
+  const tl=document.getElementById('sf-incense-timer-lbl');
+  const inc=S.safari.incense;
+  const incActive=inc&&inc.expiresAt>Date.now();
+  if(ig)ig.style.display=incActive?'':'none';
+  if(tl&&incActive)tl.textContent=`Incienso en ${SAFARI_ZONES[inc.zoneId]?.name||inc.zoneId} · ${Math.ceil((inc.expiresAt-Date.now())/60000)}min`;
+}
+
+// ── ZONE COMPLETION ──
+function sfZoneCompletion(zoneId){
+  if(!S.poke)return{caught:0,total:0,pct:0};
+  const zone=SAFARI_ZONES[zoneId];
+  if(!zone)return{caught:0,total:0,pct:0};
+  const pool=S.poke.filter(p=>p.types.some(t=>zone.types.includes(t)));
+  if(!pool.length)return{caught:0,total:0,pct:0};
+  const c=pool.filter(p=>S.safari.caught[String(p.id)]).length;
+  return{caught:c,total:pool.length,pct:Math.round(c/pool.length*100)};
+}
+
+// ── INCENSE ──
+function sfUseIncense(zoneId){
+  if((S.safari.berries?.incense||0)<=0){sfToast('Sin Incienso');return;}
+  S.safari.berries.incense--;
+  S.safari.incense={zoneId,expiresAt:Date.now()+5*60*1000};
+  S.safari.incenseUsed=(S.safari.incenseUsed||0)+1;
+  scheduleSave();
+  _sfRenderZones();
+  _sfUpdateWeatherChip();
+  sfCheckSafariMedals();
+  sfToast(`🕯️ Incienso activo en ${SAFARI_ZONES[zoneId]?.name} — 5 minutos`);
+}
+
+// ── CATCH CHAIN DISPLAY ──
+function _sfUpdateChainDisplay(){
+  const wrap=document.getElementById('sf-chain-wrap');
+  const pill=document.getElementById('sf-chain-pill');
+  const count=S.safari.chain?.count||0;
+  if(!wrap||!pill)return;
+  if(count>=2){
+    wrap.style.display='block';
+    const bonus=Math.min(count*3,25);
+    pill.textContent=`🔥 Racha x${count} ${S.safari.chain.type?'· '+S.safari.chain.type:''} · +${bonus}% captura`;
+  }else{
+    wrap.style.display='none';
+  }
+}
+
+// ── AUCTION ──
+let _sfAuctionInterval=null;
+function sfAuctionSlot(){return Math.floor(Date.now()/(4*60*60*1000));}
+function sfAuctionPoke(slot){
+  if(!S.poke)return null;
+  const pool=S.poke.filter(p=>{const t=_sfTier(p);return t>=1&&t<=3;});
+  if(!pool.length)return null;
+  const idx=((slot*2654435761)>>>0)%pool.length;
+  const poke=pool[idx];
+  const tier=_sfTier(poke);
+  const minPrice=SAFARI_COIN_RATE[tier]*3;
+  const maxPrice=SAFARI_COIN_RATE[tier]*12;
+  const elapsed=Date.now()-slot*4*60*60*1000;
+  const dur=4*60*60*1000;
+  const t=Math.min(elapsed/dur,1);
+  const currentPrice=Math.max(Math.round(maxPrice-(maxPrice-minPrice)*t),minPrice);
+  return{poke,tier,minPrice,maxPrice,currentPrice,timeLeft:Math.max(dur-elapsed,0),slot};
+}
+function sfShowAuction(){
+  document.getElementById('sf-home')?.classList.remove('on');
+  document.getElementById('sf-auction')?.classList.add('on');
+  _sfRenderAuction();
+  if(_sfAuctionInterval)clearInterval(_sfAuctionInterval);
+  _sfAuctionInterval=setInterval(_sfRenderAuction,30000);
+}
+function sfCloseAuction(){
+  if(_sfAuctionInterval){clearInterval(_sfAuctionInterval);_sfAuctionInterval=null;}
+  document.getElementById('sf-auction')?.classList.remove('on');
+  document.getElementById('sf-home')?.classList.add('on');
+}
+function _sfRenderAuction(){
+  const el=document.getElementById('sf-auction-content');
+  const coinsEl=document.getElementById('sf-auction-coins');
+  if(!el)return;
+  const coins=S.safari.coins||0;
+  if(coinsEl)coinsEl.textContent=`🪙 ${coins}`;
+  const slot=sfAuctionSlot();
+  const data=sfAuctionPoke(slot);
+  if(!data){el.innerHTML='<div style="text-align:center;color:var(--t3);padding:40px 16px">Sin datos disponibles. ¡Sigue jugando!</div>';return;}
+  const already=S.safari.auctions?.[slot];
+  const id=String(data.poke.id);
+  const sprSrc=`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
+  const h=Math.floor(data.timeLeft/3600000);
+  const m=Math.floor((data.timeLeft%3600000)/60000);
+  const tc=SAFARI_TIER_COLORS[data.tier];
+  el.innerHTML=`
+    <div class="sf-auction-card">
+      <div style="font-family:var(--px);font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px">Subasta actual</div>
+      <img src="${sprSrc}" style="width:96px;height:96px;image-rendering:pixelated" onerror="this.style.opacity=.3" alt="">
+      <div style="font-family:var(--px);font-size:15px;font-weight:900;color:var(--t1)">${cap(data.poke.name)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+        <span style="font-family:var(--px);font-size:8px;padding:2px 8px;border-radius:8px;background:${tc};color:#fff">${SAFARI_TIER_LABELS[data.tier]}</span>
+        ${data.poke.types.map(t=>`<span style="font-family:var(--px);font-size:8px;padding:2px 8px;border-radius:8px;background:${TYPES.find(x=>x.id===t)?.c||'#888'};color:#fff">${TYPES.find(x=>x.id===t)?.n||t}</span>`).join('')}
+      </div>
+      ${already
+        ?`<div style="font-family:var(--px);font-size:11px;color:#4caf50;font-weight:700">✅ Ya reclamaste esta subasta</div>`
+        :`<div class="sf-auction-price">${data.currentPrice} 🪙</div>
+          <div class="sf-auction-timer">⏳ ${h}h ${m}min restantes · precio sigue bajando</div>
+          <div style="font-size:10px;color:var(--t3)">Mín: ${data.minPrice} 🪙 · Máx: ${data.maxPrice} 🪙</div>
+          <button class="sf-auction-bid-btn" onclick="sfBidAuction(${slot},${data.currentPrice})" ${coins<data.currentPrice?'disabled':''}>Reclamar por ${data.currentPrice} 🪙</button>`
+      }
+    </div>
+    <div style="margin-top:14px;font-family:var(--px);font-size:9px;color:var(--t3);text-align:center;line-height:1.6">Nueva subasta cada 4 horas<br>El precio baja cuanto más esperas</div>`;
+}
+function sfBidAuction(slot,price){
+  const data=sfAuctionPoke(slot);
+  if(!data)return;
+  if((S.safari.coins||0)<price){sfToast('Monedas insuficientes');return;}
+  if(S.safari.auctions?.[slot]){sfToast('Ya reclamaste esta subasta');return;}
+  S.safari.coins-=price;
+  if(!S.safari.auctions)S.safari.auctions={};
+  S.safari.auctions[slot]={won:true,paid:price};
+  S.safari.auctionWins=(S.safari.auctionWins||0)+1;
+  const key=String(data.poke.id);
+  if(!S.safari.caught[key])S.safari.caught[key]={count:0,shiny:false,firstDate:Date.now(),firstZone:'auction'};
+  S.safari.caught[key].count++;
+  S.safari.caught[key].lastDate=Date.now();
+  scheduleSave();
+  sfCheckSafariMedals();
+  _sfRenderAuction();
+  sfToast(`🔨 ¡${cap(data.poke.name)} conseguido por ${price} 🪙!`);
+}
+
+// ── EXCHANGE ──
+function sfExchangeFromDetail(){
+  const id=_sfDetailId;
+  if(!id)return;
+  const data=S.safari.caught[id];
+  const p=S.poke?.find(x=>x.id===+id);
+  if(!data||!p||data.count<=1)return;
+  const tier=_sfTier(p);
+  const coins=SAFARI_COIN_RATE[tier]*3;
+  data.count--;
+  S.safari.coins=(S.safari.coins||0)+coins;
+  S.safari.coinsEarned=(S.safari.coinsEarned||0)+coins;
+  S.safari.exchangeCount=(S.safari.exchangeCount||0)+1;
+  scheduleSave();
+  sfCheckSafariMedals();
+  sfToast(`🔄 +${coins} 🪙 por ${cap(p.name)}`);
+  sfShowDetail(id);
+}
+
+// ── MEDALS ──
+function sfShowMedals(){
+  document.getElementById('sf-home')?.classList.remove('on');
+  document.getElementById('sf-medals')?.classList.add('on');
+  _sfRenderMedals();
+}
+function sfCloseMedals(){
+  document.getElementById('sf-medals')?.classList.remove('on');
+  document.getElementById('sf-home')?.classList.add('on');
+}
+function _sfRenderMedals(){
+  const grid=document.getElementById('sf-medals-grid');
+  const cnt=document.getElementById('sf-medals-count');
+  if(!grid)return;
+  const earned=S.safari.medals||[];
+  if(cnt)cnt.textContent=`${earned.length}/${SAFARI_MEDALS.length}`;
+  grid.innerHTML=SAFARI_MEDALS.map(m=>{
+    const done=earned.includes(m.id);
+    return`<div class="sf-medal-card${done?' earned':''}">
+      <div class="sf-medal-ico" style="${done?'':'filter:grayscale(1);opacity:.3'}">${m.emoji}</div>
+      <div style="flex:1;min-width:0">
+        <div class="sf-medal-name" style="${done?'color:var(--ac)':''}">${m.label}</div>
+        <div class="sf-medal-desc">${m.desc}</div>
+        <div class="sf-medal-reward" style="${done?'':'color:var(--t3)'}">${done?'✓ ':''}Premio: ${_sfRewardStr(m.reward)}</div>
+      </div>
+      <div style="font-size:18px">${done?'✅':'🔒'}</div>
+    </div>`;
+  }).join('');
+}
+function _sfRewardStr(r){
+  const p=[];
+  if(r.poke)  p.push(`${r.poke} Poké Ball`);
+  if(r.great) p.push(`${r.great} Super Ball`);
+  if(r.ultra) p.push(`${r.ultra} Ultra Ball`);
+  if(r.master)p.push(`${r.master} Master Ball`);
+  if(r.razz)  p.push(`${r.razz} Razz`);
+  if(r.nanab) p.push(`${r.nanab} Nanab`);
+  if(r.pinap) p.push(`${r.pinap} Pinap`);
+  if(r.coins) p.push(`${r.coins} 🪙`);
+  return p.join(', ')||'—';
+}
+function sfCheckSafariMedals(){
+  if(!S.safari.medals)S.safari.medals=[];
+  let awarded=false;
+  for(const m of SAFARI_MEDALS){
+    if(S.safari.medals.includes(m.id))continue;
+    let met=false;
+    try{met=m.check(S.safari);}catch(e){}
+    if(!met)continue;
+    S.safari.medals.push(m.id);
+    if(m.reward.poke)  S.safari.balls.poke  =(S.safari.balls.poke  ||0)+m.reward.poke;
+    if(m.reward.great) S.safari.balls.great =(S.safari.balls.great ||0)+m.reward.great;
+    if(m.reward.ultra) S.safari.balls.ultra =(S.safari.balls.ultra ||0)+m.reward.ultra;
+    if(m.reward.master)S.safari.balls.master=(S.safari.balls.master||0)+m.reward.master;
+    if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+    if(m.reward.razz)  S.safari.berries.razz =(S.safari.berries.razz ||0)+m.reward.razz;
+    if(m.reward.nanab) S.safari.berries.nanab=(S.safari.berries.nanab||0)+m.reward.nanab;
+    if(m.reward.pinap) S.safari.berries.pinap=(S.safari.berries.pinap||0)+m.reward.pinap;
+    if(m.reward.coins) S.safari.coins=(S.safari.coins||0)+m.reward.coins;
+    sfToast(`🏅 ¡Medalla desbloqueada: ${m.label}!`);
+    awarded=true;
+  }
+  if(awarded)scheduleSave();
+}
+function _sfGenComplete(gen){
+  if(!S.poke)return false;
+  const pool=S.poke.filter(p=>genOf(p.id)===gen);
+  if(!pool.length)return false;
+  return pool.every(p=>S.safari.caught[String(p.id)]);
 }
 
 
@@ -3763,17 +4104,31 @@ function _sfRenderZones(){
   const grid=document.getElementById('sf-zone-grid');
   if(!grid)return;
   const total=_sfTotalCaught();
+  const weather=sfGetWeather();
+  const incense=S.safari.incense;
   grid.innerHTML=Object.entries(SAFARI_ZONES).map(([id,z])=>{
     const locked=!_sfAdminUnlocked&&total<z.minCatch;
     const pool=sfGetPool(id);
+    const {caught:zc,total:zt,pct:zpct}=sfZoneCompletion(id);
+    const weatherBoosted=z.types.some(t=>weather.types.includes(t));
+    const incenseActive=incense?.zoneId===id&&(incense?.expiresAt||0)>Date.now();
+    const incenseMins=incenseActive?Math.ceil((incense.expiresAt-Date.now())/60000):0;
+    const hasIncense=(S.safari.berries?.incense||0)>0;
     return`<div class="sf-zone-card${locked?' locked':''}" onclick="${locked?'':'sfStartEncounter(\''+id+'\')'}">
       <div class="sf-zone-art">
         <div class="sf-zone-art-bg" style="background:${z.bg}"></div>
+        ${weatherBoosted?`<div style="position:absolute;top:4px;left:5px;font-size:15px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))">${weather.emoji}</div>`:''}
+        ${incenseActive?`<div style="position:absolute;top:4px;right:5px;font-size:15px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))">🕯️</div>`:''}
       </div>
       <div class="sf-zone-body">
         <div class="sf-zone-name">${z.name}</div>
         <div class="sf-zone-sub">${pool.length} Pokémon disponibles</div>
         ${locked?`<div class="sf-zone-lock">🔒 ${z.minCatch} capturas</div>`:''}
+        ${!locked&&zt>0?`<div class="sf-zone-prog"><div class="sf-zone-prog-fill" style="width:${zpct}%;background:${zpct>=100?'#4caf50':'var(--ac)'}"></div></div>
+          <div style="font-family:var(--px);font-size:7px;color:var(--t3);margin-top:2px">${zc}/${zt} · ${zpct}%</div>`:''}
+        ${!locked?(incenseActive
+          ?`<div class="sf-incense-btn sf-incense-active">🕯️ Incienso activo · ${incenseMins}min</div>`
+          :`<button class="sf-incense-btn" onclick="event.stopPropagation();sfUseIncense('${id}')" ${hasIncense?'':'disabled'}>🕯️ Incienso (${S.safari.berries?.incense||0})</button>`):''}
       </div>
     </div>`;
   }).join('');
@@ -3848,6 +4203,7 @@ function _sfShowEncounter(enc){
   _sfRenderBallRow();
   _sfRenderTurns();
   _sfRenderBerryRow();
+  _sfUpdateChainDisplay();
   document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
 }
 
@@ -3984,7 +4340,10 @@ async function _sfDoThrow(qteMult,qteMsg){
   const nanabWasActive=enc.nanabActive;
   enc.nanabActive=false;
 
-  const prob=sfCatchProb(enc.catchRate,ball,qteMult,enc.razzActive);
+  const weather=sfGetWeather();
+  const weatherMult=enc.poke.types.some(t=>weather.types.includes(t))?weather.mult:1;
+  const chainBonus=Math.min(((S.safari.chain?.count||0)*0.03),0.25);
+  const prob=sfCatchProb(enc.catchRate,ball,qteMult,enc.razzActive,weatherMult,chainBonus);
   enc.razzActive=false;
   // 3-shake system: each shake is independent with P = ∛(prob)
   // so P(pass all 3) = prob — same expected catch rate, but realistic 0-3 shake drama
@@ -4032,12 +4391,22 @@ async function _sfDoThrow(qteMult,qteMsg){
     // Earn coins (Pinap ×2 coins, shiny ×2 coins)
     const coinsEarned=SAFARI_COIN_RATE[enc.tier]*(enc.shiny?2:1)*(enc.pinapActive?2:1);
     S.safari.coins=(S.safari.coins||0)+coinsEarned;
+    S.safari.coinsEarned=(S.safari.coinsEarned||0)+coinsEarned;
+    // Weather boost catch tracking
+    if(weatherMult>1)S.safari.weatherBoostCatch=(S.safari.weatherBoostCatch||0)+1;
+    // Update catch chain
+    const primaryType=enc.poke.types[0];
+    if(!S.safari.chain)S.safari.chain={type:null,count:0,maxCount:0};
+    if(S.safari.chain.type===primaryType){S.safari.chain.count++;}
+    else{S.safari.chain={type:primaryType,count:1,maxCount:S.safari.chain.maxCount||0};}
+    S.safari.chain.maxCount=Math.max(S.safari.chain.maxCount||0,S.safari.chain.count);
     // Streak reward every 25 total catches
     const prev=S.safari.catchTotal||0;
     S.safari.catchTotal=prev+1;
     if(Math.floor(S.safari.catchTotal/25)>Math.floor(prev/25))sfStreakReward(Math.floor(S.safari.catchTotal/25));
     scheduleSave();
     sfCheckMilestones();
+    sfCheckSafariMedals();
     await _sfDelay(1800);
     showSafariHome();
   } else {
@@ -4046,6 +4415,8 @@ async function _sfDoThrow(qteMult,qteMsg){
     if(ballEl)ballEl.style.display='none';
     await _sfDelay(600);
     sprite.style.animation=enc.shiny?'sfShinyPulse 1.8s infinite':'none';
+    // Break catch chain on miss
+    if(S.safari.chain)S.safari.chain.count=0;
     enc.busy=false;
     // Flee check: Pokémon may run away after escaping the ball
     const fleeRate=SAFARI_FLEE_RATE[enc.tier]||0;
@@ -4325,6 +4696,11 @@ function sfShowDetail(id){
     </div>`).join('');
 
   _sfDetailId=id;
+  // Exchange button: show only when count > 1
+  const exchangeWrap=document.getElementById('sf-detail-exchange-wrap');
+  const exchangePreview=document.getElementById('sf-exchange-coins-preview');
+  if(exchangeWrap)exchangeWrap.style.display=data.count>1?'':'none';
+  if(exchangePreview)exchangePreview.textContent=`+${SAFARI_COIN_RATE[tier]*3} 🪙`;
   document.getElementById('sf-detail-dex-wrap').style.display='';
   document.getElementById('sf-detail-backdrop').classList.add('on');
   document.getElementById('sf-detail-sheet').classList.add('on');
@@ -4466,7 +4842,7 @@ function adminClearCaught() {
 
 function adminFullReset() {
   if (!confirm('¿Reset completo del Safari? Se perderán balls, bayas y capturados.')) return;
-  S.safari = {caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},berries:{razz:0,nanab:0,pinap:0},milestones:[],selBall:'poke',coins:0,catchTotal:0};
+  S.safari = {caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},berries:{razz:0,nanab:0,pinap:0,incense:0},milestones:[],medals:[],selBall:'poke',coins:0,coinsEarned:0,catchTotal:0,chain:{type:null,count:0,maxCount:0},incense:null,incenseUsed:0,auctions:{},auctionWins:0,exchangeCount:0,weatherBoostCatch:0,shopBuyCount:0};
   scheduleSave();
   _adminToast('Safari reseteado');
   if (document.getElementById('sf-home')?.classList.contains('on')) renderSafari();
@@ -8122,6 +8498,13 @@ window.applyColsSetting = applyColsSetting;
 window.isPwUnlocked = isPwUnlocked;
 window.setPwUnlocked = setPwUnlocked;
 window.sfHoldBegin = sfHoldBegin;
+window.sfShowAuction = sfShowAuction;
+window.sfCloseAuction = sfCloseAuction;
+window.sfBidAuction = sfBidAuction;
+window.sfShowMedals = sfShowMedals;
+window.sfCloseMedals = sfCloseMedals;
+window.sfExchangeFromDetail = sfExchangeFromDetail;
+window.sfUseIncense = sfUseIncense;
 window.sfHoldRelease = sfHoldRelease;
 window.sfToggleTestMode = sfToggleTestMode;
 window.adminFillBalls = adminFillBalls;
