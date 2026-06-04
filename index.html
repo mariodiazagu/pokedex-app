@@ -947,14 +947,14 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 @keyframes sfEscape{0%{transform:scale(0) rotate(180deg);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
 @keyframes sfBallPulse{0%,100%{filter:drop-shadow(0 0 2px rgba(255,255,255,.4))}50%{filter:drop-shadow(0 0 10px rgba(255,255,255,.95))}}
 @keyframes sfPanicFlash{0%,100%{opacity:1}50%{opacity:.25}}
-/* QTE */
-.sf-qte-overlay{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.sf-qte-ring{position:absolute;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);left:50%;top:50%}
-.sf-qte-ring-target{border:3px solid rgba(76,175,80,.9);box-shadow:0 0 14px rgba(76,175,80,.7)}
-.sf-qte-ring-outer{width:160px;height:160px;border:4px solid rgba(255,255,255,.9);box-shadow:0 0 16px rgba(255,255,255,.4)}
-@keyframes sfQteCycle{0%{width:160px;height:160px;opacity:.9}100%{width:10px;height:10px;opacity:.15}}
-@keyframes sfQteBtnPulse{0%,100%{transform:scale(1);box-shadow:0 4px 12px rgba(229,57,53,.4)}50%{transform:scale(1.06);box-shadow:0 0 22px rgba(229,57,53,.9)}}
-.sf-act-btn.throw.qte-active{background:linear-gradient(135deg,#e53935,#ff5722)!important;border-color:#e53935!important;animation:sfQteBtnPulse .55s infinite;color:#fff!important;font-size:15px!important}
+/* Hold bar */
+.sf-hold-wrap{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:10;pointer-events:none}
+.sf-hold-bar{width:22px;height:180px;background:rgba(0,0,0,.55);border-radius:11px;position:relative;overflow:hidden;border:2px solid rgba(255,255,255,.2)}
+.sf-hold-fill{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,.75);border-radius:0 0 9px 9px}
+.sf-hold-zone{position:absolute;left:0;right:0;background:rgba(76,175,80,.85);box-shadow:0 0 10px rgba(76,175,80,.7)}
+.sf-hold-lbl{font-family:var(--px);font-size:7px;color:rgba(255,255,255,.8);text-align:center;white-space:nowrap;letter-spacing:.5px}
+@keyframes sfHoldPulse{0%,100%{box-shadow:0 3px 0 rgba(0,0,0,.4)}50%{box-shadow:0 0 18px rgba(76,175,80,.8),0 3px 0 rgba(0,0,0,.4)}}
+.sf-act-btn.throw.holding{background:linear-gradient(135deg,#2e7d32,#66bb6a)!important;animation:sfHoldPulse .55s infinite}
 /* Turn dots */
 .sf-turns-row{display:flex;align-items:center;justify-content:center;gap:5px;padding:2px 0}
 .sf-turn-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .2s,transform .2s}
@@ -1371,10 +1371,13 @@ function sendPasswordReset(){
       </div>
       <img id="sf-ball-fly" class="sf-ball-fly" src="" style="display:none" alt="">
       <div id="sf-msg-box" class="sf-msg-box"></div>
-      <!-- QTE overlay -->
-      <div id="sf-qte-overlay" class="sf-qte-overlay" style="display:none" onclick="sfQteTap()">
-        <div id="sf-qte-target" class="sf-qte-ring sf-qte-ring-target"></div>
-        <div id="sf-qte-outer" class="sf-qte-ring sf-qte-ring-outer"></div>
+      <!-- Hold bar -->
+      <div id="sf-hold-wrap" class="sf-hold-wrap" style="display:none">
+        <div class="sf-hold-bar">
+          <div id="sf-hold-zone" class="sf-hold-zone"></div>
+          <div id="sf-hold-fill" class="sf-hold-fill" style="height:0%"></div>
+        </div>
+        <div class="sf-hold-lbl">Suelta</div>
       </div>
     </div>
     <div class="sf-act-panel">
@@ -1382,7 +1385,7 @@ function sendPasswordReset(){
       <div id="sf-berry-row" class="sf-berry-row" style="display:none"></div>
       <div id="sf-ball-row" class="sf-ball-row"></div>
       <div class="sf-act-row">
-        <button class="sf-act-btn throw" id="sf-btn-throw" onclick="sfThrowOrQte()">🎯 Lanzar</button>
+        <button class="sf-act-btn throw" id="sf-btn-throw" onpointerdown="sfHoldBegin(event)" onpointerup="sfHoldRelease()" onpointercancel="sfHoldRelease()">🎯 Lanzar</button>
         <button class="sf-act-btn run" onclick="safariRun()">↩ Huir</button>
       </div>
     </div>
@@ -3411,8 +3414,8 @@ const SAFARI_RENEW_AMOUNT=10;
 const SAFARI_RENEW_MS=60*60*1000; // 1 hour
 const SAFARI_TURN_MAX=[10,8,6,5,5,4];    // max turns per tier before flee
 const SAFARI_FLEE_RATE=[0.10,0.15,0.10,0.05,0,0]; // flee chance per missed throw by tier
-const SAFARI_QTE_DUR=[1800,1500,1200,1000,850,700]; // ms per QTE cycle by tier
-const SAFARI_QTE_TARGET=[70,56,44,34,24,16];        // green ring px by tier (big=easy, small=hard)
+const SAFARI_HOLD_DUR=[2800,2200,1700,1300,1000,750];       // ms to fill hold bar by tier
+const SAFARI_HOLD_ZONE=[0.30,0.24,0.18,0.14,0.10,0.07];    // green zone fraction of bar by tier
 const SAFARI_COIN_RATE=[1,2,5,10,25,50];            // coins per catch by tier (shiny ×2)
 const SAFARI_DODGE=[0,0,0.12,0.18,0.25,0.30];      // dodge chance per tier
 const SAFARI_MILESTONES=[
@@ -3591,8 +3594,7 @@ function sfSpawn(zoneId){
   return{poke,shiny,tier,zone:zoneId,busy:false,
     catchRate:SAFARI_CATCH_RATES[tier], // updated async with real value from PokéAPI
     turnsLeft:turnsMax,maxTurns:turnsMax,
-    razzActive:false,nanabActive:false,pinapActive:false,
-    qteStart:0,qteDuration:SAFARI_QTE_DUR[tier]};
+    razzActive:false,nanabActive:false,pinapActive:false};
 }
 
 function sfCatchProb(catchRate,ball,qteMult=1,razz=false){
@@ -3721,7 +3723,8 @@ function _sfShowEncounter(enc){
 
   document.getElementById('sf-msg-box').textContent=`¡Un ${cap(enc.poke.name)} salvaje apareció!`;
   document.getElementById('sf-ball-fly').style.display='none';
-  document.getElementById('sf-qte-overlay').style.display='none';
+  const holdWrap=document.getElementById('sf-hold-wrap');
+  if(holdWrap)holdWrap.style.display='none';
 
   _sfRenderBallRow();
   _sfRenderTurns();
@@ -3754,96 +3757,74 @@ function _sfRenderBallRow(){
 
 function sfSelectBall(type){S.safari.selBall=type;_sfRenderBallRow();}
 
-let _sfQteActive=false;
-function sfThrowOrQte(){if(_sfQteActive)sfQteTap();else safariThrow();}
+let _sfHoldActive=false,_sfHoldRaf=null,_sfHoldStartTime=0,_sfHoldZoneStart=0,_sfHoldZoneEnd=0;
 
-function safariThrow(){
+function sfHoldBegin(e){
   const enc=S.safari.encounter;
-  if(!enc||enc.busy)return;
+  if(!enc||enc.busy||_sfHoldActive)return;
+  e.preventDefault();
+  e.target.setPointerCapture(e.pointerId);
   const ball=S.safari.selBall||'poke';
   const b=S.safari.balls;
-  if(ball==='poke'){
-    if(!(b.poke>0)){sfToast('Sin Poké Balls');return;}
-    b.poke--;
-  } else if(ball==='great'){
-    if(!(b.great>0)){sfToast('Sin Super Balls');return;}
-    b.great--;
-  } else if(ball==='ultra'){
-    if(!S.safari.balls.ultra){sfToast('Sin Ultra Balls');return;}
-    S.safari.balls.ultra--;
-  } else if(ball==='master'){
-    if(!S.safari.balls.master){sfToast('Sin Master Balls');return;}
-    S.safari.balls.master--;
-  }
+  if(ball==='poke'){if(!(b.poke>0)){sfToast('Sin Poké Balls');return;}b.poke--;}
+  else if(ball==='great'){if(!(b.great>0)){sfToast('Sin Super Balls');return;}b.great--;}
+  else if(ball==='ultra'){if(!b.ultra){sfToast('Sin Ultra Balls');return;}b.ultra--;}
+  else if(ball==='master'){if(!b.master){sfToast('Sin Master Balls');return;}b.master--;}
   _sfRenderBallRow();
   enc.busy=true;
-  // Keep throw button active as the QTE tap target — change label + pulse
-  _sfQteActive=true;
-  const btn=document.getElementById('sf-btn-throw');
-  if(btn){btn.textContent='🎯 ¡AHORA!';btn.classList.add('qte-active');}
-  sfQteStart();
+  _sfHoldActive=true;
+  _sfHoldStartTime=Date.now();
+  const zoneSize=SAFARI_HOLD_ZONE[enc.tier];
+  _sfHoldZoneStart=0.15+Math.random()*(0.70-zoneSize);
+  _sfHoldZoneEnd=_sfHoldZoneStart+zoneSize;
+  const wrap=document.getElementById('sf-hold-wrap');
+  const zone=document.getElementById('sf-hold-zone');
+  const fill=document.getElementById('sf-hold-fill');
+  if(wrap)wrap.style.display='flex';
+  if(zone){zone.style.bottom=(_sfHoldZoneStart*100)+'%';zone.style.height=(zoneSize*100)+'%';}
+  if(fill)fill.style.height='0%';
+  document.getElementById('sf-btn-throw')?.classList.add('holding');
+  document.getElementById('sf-msg-box').textContent='¡Suelta en la zona verde!';
+  const dur=SAFARI_HOLD_DUR[enc.tier];
+  (function tick(){
+    const p=Math.min((Date.now()-_sfHoldStartTime)/dur,1);
+    if(fill)fill.style.height=(p*100)+'%';
+    if(p<1&&_sfHoldActive){_sfHoldRaf=requestAnimationFrame(tick);}
+    else if(p>=1&&_sfHoldActive){sfHoldRelease();}
+  })();
+}
+
+function sfHoldRelease(){
+  if(!_sfHoldActive)return;
+  _sfHoldActive=false;
+  if(_sfHoldRaf){cancelAnimationFrame(_sfHoldRaf);_sfHoldRaf=null;}
+  const enc=S.safari.encounter;
+  if(!enc)return;
+  const dur=SAFARI_HOLD_DUR[enc.tier];
+  const p=Math.min((Date.now()-_sfHoldStartTime)/dur,1);
+  document.getElementById('sf-hold-wrap').style.display='none';
+  document.getElementById('sf-btn-throw')?.classList.remove('holding');
+  const zoneCenter=(_sfHoldZoneStart+_sfHoldZoneEnd)/2;
+  const zoneHalf=(_sfHoldZoneEnd-_sfHoldZoneStart)/2;
+  const dist=Math.abs(p-zoneCenter);
+  let qteMult,qteMsg;
+  if(dist<zoneHalf*0.35)     {qteMult=2.0;qteMsg='✨ ¡Excelente!';}
+  else if(dist<zoneHalf)     {qteMult=1.5;qteMsg='⭐ ¡Buen tiro!';}
+  else if(dist<zoneHalf*1.5) {qteMult=1.2;qteMsg='¡Bien!';}
+  else                       {qteMult=0.85;qteMsg='Tiro normal';}
+  _sfDoThrow(qteMult,qteMsg);
 }
 
 function safariRun(){
-  if(_sfQteTimeout){clearTimeout(_sfQteTimeout);_sfQteTimeout=null;}
-  document.getElementById('sf-qte-overlay').style.display='none';
-  _sfRestoreThrowBtn();
+  _sfHoldActive=false;
+  if(_sfHoldRaf){cancelAnimationFrame(_sfHoldRaf);_sfHoldRaf=null;}
+  document.getElementById('sf-btn-throw')?.classList.remove('holding');
+  const wrap=document.getElementById('sf-hold-wrap');
+  if(wrap)wrap.style.display='none';
   S.safari.encounter=null;
   showSafariHome();
 }
 
-// ── QTE ──────────────────────────────────────────────────────
-let _sfQteTimeout=null;
-function sfQteStart(){
-  const enc=S.safari.encounter;
-  if(!enc)return;
-  enc.qteStart=Date.now();
-  const dur=enc.qteDuration;
-  const target=SAFARI_QTE_TARGET[enc.tier]||80;
-  const overlay=document.getElementById('sf-qte-overlay');
-  const outer=document.getElementById('sf-qte-outer');
-  const targetRing=document.getElementById('sf-qte-target');
-  if(overlay)overlay.style.display='flex';
-  if(targetRing){targetRing.style.width=target+'px';targetRing.style.height=target+'px';}
-  if(outer){
-    outer.style.animation='none';
-    outer.style.width='160px';outer.style.height='160px';outer.style.opacity='.9';
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      outer.style.animation=`sfQteCycle ${dur}ms linear infinite`;
-    }));
-  }
-  document.getElementById('sf-msg-box').textContent='¡Lanza en el círculo verde!';
-  _sfQteTimeout=setTimeout(()=>sfQteTap(true),dur*3+100);
-}
-
-function _sfRestoreThrowBtn(){
-  _sfQteActive=false;
-  const btn=document.getElementById('sf-btn-throw');
-  if(btn){btn.textContent='🎯 Lanzar';btn.classList.remove('qte-active');}
-}
-
-function sfQteTap(auto=false){
-  if(_sfQteTimeout){clearTimeout(_sfQteTimeout);_sfQteTimeout=null;}
-  _sfRestoreThrowBtn();
-  const enc=S.safari.encounter;
-  if(!enc||!enc.qteStart)return;
-  const outer=document.getElementById('sf-qte-outer');
-  if(outer)outer.style.animation='none';
-  document.getElementById('sf-qte-overlay').style.display='none';
-  const dur=enc.qteDuration;
-  const target=SAFARI_QTE_TARGET[enc.tier]||80;
-  const elapsed=Date.now()-enc.qteStart;
-  const cyclePos=(elapsed%dur)/dur; // 0→1 within current cycle
-  const size=160-cyclePos*150;      // 160→10 px, matches CSS animation
-  let qteMult,qteMsg;
-  if(auto)                   {qteMult=0.55;qteMsg='¡Muy tarde!';}
-  else if(size<=target/2)    {qteMult=2.0; qteMsg='✨ ¡Excelente!';}
-  else if(size<=target)      {qteMult=1.5; qteMsg='⭐ ¡Buen tiro!';}
-  else if(size<=target*1.3)  {qteMult=1.2; qteMsg='¡Bien!';}
-  else                       {qteMult=0.85;qteMsg='Tiro normal';}
-  enc.qteStart=0;
-  _sfDoThrow(qteMult,qteMsg);
-}
 
 async function _sfDoThrow(qteMult,qteMsg){
   const enc=S.safari.encounter;
@@ -4016,11 +3997,9 @@ function safariUseBerry(type){
 
 function _sfDisableActions(){
   document.getElementById('sf-btn-throw')?.setAttribute('disabled','');
-  _sfRestoreThrowBtn();
 }
 function _sfEnableActions(){
   document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
-  _sfRestoreThrowBtn();
 }
 function _sfDelay(ms){return new Promise(r=>setTimeout(r,ms));}
 
@@ -7939,7 +7918,8 @@ window.setGlass = setGlass;
 window.applyColsSetting = applyColsSetting;
 window.isPwUnlocked = isPwUnlocked;
 window.setPwUnlocked = setPwUnlocked;
-window.sfThrowOrQte = sfThrowOrQte;
+window.sfHoldBegin = sfHoldBegin;
+window.sfHoldRelease = sfHoldRelease;
 window.sfToggleTestMode = sfToggleTestMode;
 window.adminFillBalls = adminFillBalls;
 window.adminGiveBerries = adminGiveBerries;
