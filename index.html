@@ -5254,6 +5254,10 @@ appId: "1:271473943519:web:dd19d57e54086b72981a6a"
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+db.enablePersistence({ synchronizeTabs: true }).catch(e => {
+  if (e.code === 'failed-precondition') console.warn('Firestore persistence: múltiples tabs abiertas');
+  else if (e.code === 'unimplemented') console.warn('Firestore persistence: navegador no compatible');
+});
 let currentUser = null;
 let syncTimeout = null;
 
