@@ -956,6 +956,18 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-auction-tab{flex:1;padding:9px 4px;font-family:var(--px);font-size:9px;font-weight:700;border:none;background:var(--s1);color:var(--t3);cursor:pointer;letter-spacing:.4px;text-transform:uppercase}
 .sf-auction-tab.on{background:var(--ac);color:#fff}
 .sf-ahist-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--s1);border:1.5px solid var(--bd);margin-bottom:8px}
+/* Catch card */
+#sf-catch-card{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto}
+.sf-cc-wrap{max-width:420px;margin:0 auto;padding:20px 16px 48px}
+.sf-cc-poke-box{border-radius:24px;padding:28px 20px 20px;text-align:center;margin-bottom:14px;position:relative}
+.sf-cc-shiny-badge{font-family:var(--px);font-size:9px;background:linear-gradient(90deg,#f0c000,#ff8c00);color:#fff;padding:3px 12px;border-radius:20px;letter-spacing:.5px;display:inline-block;margin-bottom:8px;animation:sfShinyPulse 1.8s infinite}
+.sf-cc-name{font-family:var(--px);font-size:22px;font-weight:900;color:var(--t1);margin:8px 0 4px}
+.sf-cc-sub{font-family:var(--px);font-size:9px;color:var(--t3);letter-spacing:.4px;margin-bottom:10px}
+.sf-cc-item-box{background:var(--s1);border-radius:14px;border:2px solid #f0a000;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sf-cc-btn{flex:1;padding:14px;border-radius:16px;border:none;font-family:var(--px);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.05em}
+.sf-cc-btn.primary{background:var(--ac);color:#fff}
+.sf-cc-btn.secondary{background:var(--s1);color:var(--t1);border:2px solid var(--bd)}
+.sf-amulet-hud{display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:250;background:#1a1a2e;color:#fff;font-family:var(--px);font-size:9px;padding:4px 12px;border-radius:20px;letter-spacing:.4px;animation:sfShinyPulse 1.5s infinite}
 @keyframes sfHmrPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(1.04)}}
 .sf-hammer-box{display:none;text-align:center;padding:6px 10px;border-radius:10px;margin:2px 0}
 .sf-hmr-p1{font-family:var(--px);font-size:12px;font-weight:800;color:#d4a000}
@@ -1471,6 +1483,16 @@ function sendPasswordReset(){
       <div id="sf-auction-content"></div>
     </div>
   </div>
+  <!-- CATCH CARD -->
+  <div id="sf-catch-card">
+    <div class="sf-cc-wrap">
+      <div id="sf-cc-content"></div>
+    </div>
+  </div>
+
+  <!-- AMULET HUD -->
+  <div class="sf-amulet-hud" id="sf-amulet-hud">✨ Amuleto Shiny activo · <span id="sf-amulet-timer"></span></div>
+
   <!-- MEDALS -->
   <div id="sf-medals" class="sf-screen">
     <div class="sf-phdr">
@@ -3646,6 +3668,17 @@ const SAFARI_HOLD_DUR=[1400,1100,850,650,480,350];          // ms to fill hold b
 const SAFARI_HOLD_ZONE=[0.30,0.24,0.18,0.14,0.10,0.07];    // green zone fraction of bar by tier
 const SAFARI_COIN_RATE=[1,2,5,10,25,50];            // coins per catch by tier (shiny ×2)
 const SAFARI_DODGE=[0,0,0.12,0.18,0.25,0.30];      // dodge chance per tier
+const NATURES_ES=['Fuerte','Solitario','Valiente','Adamante','Pícaro','Audaz','Dócil','Relajado','Impasible','Flojo','Tímido','Apresurado','Serio','Jovial','Ingenuo','Modesto','Suave','Quieto','Tímido','Alocado','Sereno','Gentil','Impertinente','Cauto','Raro'];
+const HELD_ITEM_TABLE=[
+  {id:'razz',  label:'Baya Frambu',  ico:'🍓', qty:3,  w:200, apply:s=>(s.berries.razz=(s.berries.razz||0)+3)},
+  {id:'nanab', label:'Baya Nanab',   ico:'🍌', qty:3,  w:150, apply:s=>(s.berries.nanab=(s.berries.nanab||0)+3)},
+  {id:'pinap', label:'Baya Zagaya',  ico:'🍍', qty:3,  w:120, apply:s=>(s.berries.pinap=(s.berries.pinap||0)+3)},
+  {id:'poke',  label:'Poké Balls',   ico:'🔴', qty:5,  w:180, apply:s=>(s.balls.poke=(s.balls.poke||0)+5)},
+  {id:'great', label:'Super Ball',   ico:'⭐', qty:2,  w:80,  apply:s=>(s.balls.great=(s.balls.great||0)+2)},
+  {id:'ultra', label:'Ultra Ball',   ico:'🔵', qty:1,  w:35,  apply:s=>(s.balls.ultra=(s.balls.ultra||0)+1)},
+  {id:'incense',label:'Incienso',    ico:'🕯️', qty:1, w:20,  apply:s=>(s.berries.incense=(s.berries.incense||0)+1)},
+  {id:'amulet',label:'Amuleto Shiny',ico:'✨', qty:1,  w:8,   apply:s=>(s.amulet={expiresAt:Date.now()+2*60*1000}), special:true},
+];
 const SAFARI_MILESTONES=[
   {id:'sf_c1',  catches:1,   reward:{great:3},                    msg:'¡Primera captura! +3 Super Ball'},
   {id:'sf_c5',  catches:5,   reward:{great:5,razz:3},             msg:'5 capturas · +5 Super Ball +3 Razz'},
@@ -3826,7 +3859,8 @@ function sfSpawn(zoneId){
   let poke=pool[0];
   for(const{p,w}of wl){r-=w;if(r<=0){poke=p;break;}}
   const tier=_sfTier(poke);
-  const shiny=Math.random()<1/512;
+  const amuletOn=(S.safari.amulet?.expiresAt||0)>Date.now();
+  const shiny=Math.random()<(amuletOn?1/64:1/512);
   const turnsMax=SAFARI_TURN_MAX[tier];
   return{poke,shiny,tier,zone:zoneId,busy:false,
     catchRate:SAFARI_CATCH_RATES[tier], // updated async with real value from PokéAPI
@@ -4204,6 +4238,121 @@ function sfBidAuction(aucId,nextBid){
   _sfAucLeading.add(aucId);
   scheduleSave();_sfRenderAuction();
   if(!extendedEndsAt||extendedEndsAt===prevExtended)sfToast(`🔨 Puja de ${nextBid}🪙 — ¡un rival responderá pronto!`);
+}
+
+// ── CATCH CARD ──
+let _sfCatchData=null;
+function _sfRollHeldItem(tier){
+  const total=HELD_ITEM_TABLE.reduce((s,i)=>s+i.w,0);
+  const baseChance=0.12+tier*0.03; // 12–27% depending on tier
+  if(Math.random()>baseChance)return null;
+  let r=Math.random()*total;
+  for(const item of HELD_ITEM_TABLE){r-=item.w;if(r<=0)return item;}
+  return null;
+}
+function _sfApplyHeldItem(item){
+  item.apply(S.safari);
+  scheduleSave();
+}
+function _sfShowCatchCard(data){
+  _sfCatchData=data;
+  const el=document.getElementById('sf-cc-content');
+  if(!el)return;
+  const sprSrc=`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${data.shiny?'shiny/':''}${data.poke.id}.png`;
+  const tc=TYPES.find(t=>t.id===data.poke.types[0])?.c||'#888';
+  const genderHtml=data.gender==='M'?`<span style="color:#1565c0">♂</span>`:data.gender==='F'?`<span style="color:#ad1457">♀</span>`:`<span style="color:#888">⚪</span>`;
+  const tierLabel=SAFARI_TIER_LABELS[data.tier];
+  el.innerHTML=`
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-family:var(--px);font-size:10px;color:var(--t3);letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px">${data.isNew?'¡Primera captura!':'Capturado'}</div>
+      <div style="font-family:var(--px);font-size:26px;font-weight:900;color:var(--t1)">¡${cap(data.poke.name)}!</div>
+    </div>
+    <div class="sf-cc-poke-box" style="background:linear-gradient(150deg,${tc}28,${tc}08);border:2px solid ${tc}55">
+      ${data.shiny?`<div><span class="sf-cc-shiny-badge">✨ ¡SHINY!</span></div>`:''}
+      <img src="${sprSrc}" style="width:128px;height:128px;image-rendering:pixelated" onerror="this.style.opacity=.3" alt="">
+      <div class="sf-cc-name">${cap(data.poke.name)} ${genderHtml}</div>
+      <div class="sf-cc-sub">${data.nature} · ${tierLabel}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:8px">
+        ${data.poke.types.map(t=>`<span style="font-family:var(--px);font-size:8px;padding:2px 8px;border-radius:8px;background:${TYPES.find(x=>x.id===t)?.c||'#888'};color:#fff">${TYPES.find(x=>x.id===t)?.n||t}</span>`).join('')}
+      </div>
+      <div style="font-family:var(--px);font-size:10px;color:#c8a000">+${data.coinsEarned} 🪙</div>
+    </div>
+    ${data.heldItem?`
+    <div class="sf-cc-item-box">
+      <span style="font-size:28px">${data.heldItem.ico}</span>
+      <div>
+        <div style="font-family:var(--px);font-size:10px;font-weight:800;color:var(--t1)">¡Llevaba un objeto!</div>
+        <div style="font-family:var(--px);font-size:9px;color:var(--t2)">${data.heldItem.label} ×${data.heldItem.qty} añadido a tu mochila</div>
+        ${data.heldItem.special?`<div style="font-family:var(--px);font-size:8px;color:#e65100;margin-top:2px">✨ ¡Probabilidad shiny ×8 durante 2 min!</div>`:''}
+      </div>
+    </div>`:''}
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="sf-cc-btn secondary" onclick="sfShareCatch()">📤 Compartir</button>
+      <button class="sf-cc-btn primary" onclick="sfCatchCardClose()">🎯 Seguir cazando</button>
+    </div>`;
+  document.getElementById('sf-catch-card').style.display='block';
+  _sfAmuletHudTick();
+}
+function sfCatchCardClose(){
+  document.getElementById('sf-catch-card').style.display='none';
+  _sfCatchData=null;
+  showSafariHome();
+}
+async function sfShareCatch(){
+  if(!_sfCatchData)return;
+  const d=_sfCatchData;
+  const size=420,pad=28;
+  const canvas=document.createElement('canvas');
+  canvas.width=size;canvas.height=560;
+  const ctx=canvas.getContext('2d');
+  const tc=TYPES.find(t=>t.id===d.poke.types[0])?.c||'#888';
+  // Background
+  const bg=ctx.createLinearGradient(0,0,size,560);
+  bg.addColorStop(0,tc+'55');bg.addColorStop(1,tc+'11');
+  ctx.fillStyle=bg;_sfCcRoundRect(ctx,0,0,size,560,24);ctx.fill();
+  // Header band
+  ctx.fillStyle=tc+'cc';_sfCcRoundRect(ctx,0,0,size,80,{tl:24,tr:24,bl:0,br:0});ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 20px monospace';ctx.textAlign='center';
+  ctx.fillText(d.shiny?'✨ ¡SHINY CAPTURADO!':'¡POKÉMON CAPTURADO!',size/2,50);
+  // Sprite
+  const img=new Image();img.crossOrigin='anonymous';
+  await new Promise(r=>{img.onload=r;img.onerror=r;img.src=`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${d.shiny?'shiny/':''}${d.poke.id}.png`;});
+  ctx.imageSmoothingEnabled=false;
+  if(img.complete)ctx.drawImage(img,size/2-80,90,160,160);
+  // Name
+  ctx.fillStyle='#1a1a2e';ctx.font='bold 26px monospace';ctx.textAlign='center';
+  ctx.fillText(cap(d.poke.name),size/2,285);
+  // Sub info
+  ctx.fillStyle='#555';ctx.font='15px monospace';
+  ctx.fillText(`${d.gender==='M'?'♂':d.gender==='F'?'♀':'⚪'} · Naturaleza ${d.nature}`,size/2,312);
+  ctx.fillText(`+${d.coinsEarned} 🪙 · ${SAFARI_TIER_LABELS[d.tier]}`,size/2,338);
+  if(d.heldItem){ctx.fillStyle='#e65100';ctx.fillText(`Objeto: ${d.heldItem.ico} ${d.heldItem.label}`,size/2,365);}
+  // Footer
+  ctx.fillStyle='#888';ctx.font='13px monospace';
+  ctx.fillText(`PokéPlanner Safari · ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}`,size/2,420);
+  // Watermark
+  ctx.fillStyle=tc+'44';ctx.font='bold 72px monospace';ctx.fillText('#'+d.poke.id,size/2,510);
+  canvas.toBlob(async blob=>{
+    const file=new File([blob],`captura-${d.poke.name}.png`,{type:'image/png'});
+    try{await navigator.share({files:[file],title:`¡Capturé a ${cap(d.poke.name)} en PokéPlanner Safari!`});}
+    catch{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`captura-${d.poke.name}.png`;a.click();URL.revokeObjectURL(a.href);}
+  },'image/png');
+}
+function _sfCcRoundRect(ctx,x,y,w,h,r){
+  const tl=typeof r==='object'?r.tl:r,tr=typeof r==='object'?r.tr:r,br=typeof r==='object'?r.br:r,bl=typeof r==='object'?r.bl:r;
+  ctx.beginPath();ctx.moveTo(x+tl,y);ctx.lineTo(x+w-tr,y);ctx.quadraticCurveTo(x+w,y,x+w,y+tr);ctx.lineTo(x+w,y+h-br);ctx.quadraticCurveTo(x+w,y+h,x+w-br,y+h);ctx.lineTo(x+bl,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-bl);ctx.lineTo(x,y+tl);ctx.quadraticCurveTo(x,y,x+tl,y);ctx.closePath();
+}
+function _sfAmuletHudTick(){
+  const hud=document.getElementById('sf-amulet-hud');
+  const timerEl=document.getElementById('sf-amulet-timer');
+  if(!hud)return;
+  const expiresAt=S.safari.amulet?.expiresAt||0;
+  const tl=Math.max(expiresAt-Date.now(),0);
+  if(!tl){hud.style.display='none';return;}
+  hud.style.display='block';
+  const m=Math.floor(tl/60000),s=Math.floor((tl%60000)/1000);
+  if(timerEl)timerEl.textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  setTimeout(_sfAmuletHudTick,1000);
 }
 
 // ── EXCHANGE ──
@@ -4622,11 +4771,17 @@ async function _sfDoThrow(qteMult,qteMsg){
     const prev=S.safari.catchTotal||0;
     S.safari.catchTotal=prev+1;
     if(Math.floor(S.safari.catchTotal/25)>Math.floor(prev/25))sfStreakReward(Math.floor(S.safari.catchTotal/25));
+    // Individual variation
+    const gender=enc.tier>=4?'N':(Math.random()<.5?'M':'F');
+    const nature=NATURES_ES[Math.floor(Math.random()*NATURES_ES.length)];
+    // Held item roll
+    const heldItem=_sfRollHeldItem(enc.tier);
+    if(heldItem)_sfApplyHeldItem(heldItem);
     scheduleSave();
     sfCheckMilestones();
     sfCheckSafariMedals();
-    await _sfDelay(1800);
-    showSafariHome();
+    await _sfDelay(900);
+    _sfShowCatchCard({poke:enc.poke,shiny:enc.shiny,tier:enc.tier,gender,nature,coinsEarned,heldItem,isNew});
   } else {
     document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} escapó!`;
     if(sprite)sprite.style.animation='sfEscape .4s forwards';
@@ -8720,6 +8875,8 @@ window.sfShowAuction = sfShowAuction;
 window.sfCloseAuction = sfCloseAuction;
 window.sfBidAuction = sfBidAuction;
 window._sfAucTabSwitch = _sfAucTabSwitch;
+window.sfCatchCardClose = sfCatchCardClose;
+window.sfShareCatch = sfShareCatch;
 window.sfShowMedals = sfShowMedals;
 window.sfCloseMedals = sfCloseMedals;
 window.sfExchangeFromDetail = sfExchangeFromDetail;
