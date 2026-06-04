@@ -885,7 +885,7 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-zone-name{font-family:var(--px);font-size:10px;font-weight:700;color:var(--t1)}
 .sf-zone-sub{font-size:9px;color:var(--t3);margin-top:2px}
 .sf-zone-lock{font-family:var(--px);font-size:8px;color:var(--ac);margin-top:2px}
-.sf-enc-bg{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:0}
+.sf-enc-bg{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .sf-enc-bg-layer{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;filter:grayscale(1) sepia(.35) hue-rotate(220deg) saturate(2.2) brightness(.85)}
 .sf-enc-enemy{position:absolute;top:12%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:2}
 .sf-enc-sprite{width:min(150px,38vw);height:min(150px,38vw);object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 16px rgba(255,255,255,.35)) drop-shadow(2px 6px 14px rgba(0,0,0,.9))}
@@ -909,9 +909,9 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-ball-throw:disabled{opacity:.25;pointer-events:none;filter:grayscale(.6)}
 .sf-ball-throw span{font-family:var(--px);font-size:8px;color:rgba(255,255,255,.75)}
 .sf-act-row{display:flex;gap:8px}
-.sf-act-btn{flex:1;font-family:var(--px);font-size:10px;font-weight:700;border:none;border-radius:10px;padding:10px 0;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;gap:5px}
+.sf-act-btn{flex:1;font-family:var(--px);font-size:10px;font-weight:700;border:none;border-radius:10px;padding:10px 0;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;gap:5px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .sf-act-btn:active{transform:scale(.93)}
-.sf-act-btn.throw{background:var(--ac);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.sf-act-btn.throw{background:var(--ac);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.4);touch-action:none}
 .sf-act-btn.run{background:#2a2a2a;color:#888;border:2px solid #3a3a3a}
 .sf-act-btn:disabled{opacity:.35;pointer-events:none}
 /* Collection filters */
@@ -1391,7 +1391,7 @@ function sendPasswordReset(){
       <div id="sf-berry-row" class="sf-berry-row" style="display:none"></div>
       <div id="sf-ball-row" class="sf-ball-row"></div>
       <div class="sf-act-row">
-        <button class="sf-act-btn throw" id="sf-btn-throw" onpointerdown="sfHoldBegin(event)" onpointerup="sfHoldRelease()" onpointercancel="sfHoldRelease()">🎯 Lanzar</button>
+        <button class="sf-act-btn throw" id="sf-btn-throw" onpointerdown="sfHoldBegin(event)" onpointerup="sfHoldRelease()" onpointercancel="sfHoldRelease()" oncontextmenu="return false">🎯 Lanzar</button>
         <button class="sf-act-btn run" onclick="safariRun()">↩ Huir</button>
       </div>
     </div>
