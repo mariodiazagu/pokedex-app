@@ -4243,11 +4243,14 @@ function sfBidAuction(aucId,nextBid){
 // ── CATCH CARD ──
 let _sfCatchData=null;
 function _sfRollHeldItem(tier){
-  const total=HELD_ITEM_TABLE.reduce((s,i)=>s+i.w,0);
-  const baseChance=0.12+tier*0.03; // 12–27% depending on tier
+  const amulet=HELD_ITEM_TABLE.find(i=>i.id==='amulet');
+  if(Math.random()<0.05)return amulet;
+  const items=HELD_ITEM_TABLE.filter(i=>i.id!=='amulet');
+  const baseChance=0.12+tier*0.03;
   if(Math.random()>baseChance)return null;
+  const total=items.reduce((s,i)=>s+i.w,0);
   let r=Math.random()*total;
-  for(const item of HELD_ITEM_TABLE){r-=item.w;if(r<=0)return item;}
+  for(const item of items){r-=item.w;if(r<=0)return item;}
   return null;
 }
 function _sfApplyHeldItem(item){
