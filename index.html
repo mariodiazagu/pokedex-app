@@ -1580,6 +1580,11 @@ function sendPasswordReset(){
       Importar datos
     </button>
     <input type="file" id="import-file-inp" accept=".json,application/json" style="display:none" onchange="importData(this.files[0]);this.value=''">
+    <button onclick="document.getElementById('import-safari-inp').click()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Restaurar backup Safari
+    </button>
+    <input type="file" id="import-safari-inp" accept=".json,application/json" style="display:none" onchange="importSafariBackup(this.files[0]);this.value=''">
   </div>
 </div>
 
@@ -4317,12 +4322,22 @@ function adminUnlockZones() {
 }
 
 function adminClearCaught() {
-  if (!confirm('¿Borrar todos los pokémon capturados?')) return;
+  if (!confirm('¿Borrar todos los pokémon capturados?\n\nSe descargará un backup automáticamente antes de borrar.')) return;
+  // Download backup before clearing
+  const backup = {exportedAt: new Date().toISOString(), caught: S.safari.caught, milestones: S.safari.milestones};
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `safari-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
   S.safari.caught = {};
+  S.safari.milestones = [];
   _sfAdminUnlocked = false;
   scheduleSave();
-  _adminToast('Pokémon borrados');
+  _adminToast('Pokémon borrados — backup descargado');
   if (document.getElementById('sf-home')?.classList.contains('on')) renderSafari();
+  if (document.getElementById('sf-collection')?.classList.contains('on')) _sfRenderCollection();
 }
 
 function adminFullReset() {
@@ -4489,6 +4504,28 @@ function importData(file){
   reader.readAsText(file);
 }
 
+function importSafariBackup(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(typeof data !== 'object' || !data.caught)
+        throw new Error('El archivo no parece un backup de Safari.');
+      const count = Object.keys(data.caught).length;
+      if(!confirm(`¿Restaurar backup Safari?\n\n${count} Pokémon capturados serán restaurados. Se sobrescribirá tu colección actual.`)) return;
+      S.safari.caught = data.caught;
+      if(data.milestones) S.safari.milestones = data.milestones;
+      scheduleSave();
+      if(document.getElementById('sf-collection')?.classList.contains('on')) _sfRenderCollection();
+      alert(`✅ Backup restaurado — ${count} Pokémon recuperados.`);
+    } catch(err){
+      alert('Error al restaurar: ' + (err.message || 'Archivo no válido.'));
+    }
+  };
+  reader.readAsText(file);
+}
+
 function changePassword(){
   if(!currentUser) return;
   const newPass = prompt('Nueva contraseña (mínimo 6 caracteres):');
@@ -4544,7 +4581,7 @@ set: cloudSet,
 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
 };
 // In test mode, never write safari data to Firestore
-if (!_sfTestMode) cloudData.safari = _sfRealSafari || S.safari;
+if (!_sfTestMode) cloudData.safari = S.safari;
 await db.collection('users').doc(currentUser.uid).set(cloudData, { merge: true });
 setSyncing(false);
 } catch(e) {
