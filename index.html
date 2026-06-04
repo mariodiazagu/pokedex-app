@@ -933,11 +933,29 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-incense-btn:disabled{opacity:.4;cursor:default}
 .sf-incense-active{color:#ff9800;border-color:rgba(255,152,0,.6)!important;background:rgba(255,152,0,.15)!important}
 /* Auction screen */
-.sf-auction-card{background:var(--s1);border-radius:18px;border:2px solid var(--bd);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center}
-.sf-auction-price{font-family:var(--px);font-size:22px;font-weight:900;color:#c8a000}
+.sf-auction-card{background:var(--s1);border-radius:18px;border:2px solid var(--bd);padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;margin-bottom:12px}
+.sf-auction-card.flash{border-color:#ff6600;animation:sfFlashPulse 1.5s ease-in-out infinite}
+.sf-auction-card.won-card{border-color:#4caf50}
+.sf-auction-card.closed-card{opacity:.6}
+@keyframes sfFlashPulse{0%,100%{box-shadow:0 0 8px #ff660066}50%{box-shadow:0 0 22px #ff6600cc}}
+.sf-auction-price{font-family:var(--px);font-size:20px;font-weight:900;color:#c8a000}
 .sf-auction-timer{font-family:var(--px);font-size:9px;color:var(--t3);letter-spacing:.4px}
-.sf-auction-bid-btn{width:100%;padding:13px;border-radius:14px;border:none;background:var(--ac);color:#fff;font-family:var(--px);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.05em;margin-top:4px}
+.sf-auction-bid-btn{width:100%;padding:12px;border-radius:14px;border:none;background:var(--ac);color:#fff;font-family:var(--px);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.05em;margin-top:4px}
 .sf-auction-bid-btn:disabled{opacity:.4;cursor:default}
+.sf-auction-bid-btn.outbid-btn{background:#e53935}
+.sf-abid-log{width:100%;max-height:88px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding:2px 0}
+.sf-abid-row{display:flex;justify-content:space-between;align-items:center;padding:3px 10px;border-radius:6px;font-family:var(--px);font-size:8px}
+.sf-abid-row.rival{background:rgba(220,50,50,.07);color:var(--t2)}
+.sf-abid-row.me{background:rgba(0,150,0,.1);color:#1b5e20;font-weight:800}
+.sf-auc-status{font-family:var(--px);font-size:10px;font-weight:800;padding:4px 12px;border-radius:10px}
+.sf-auc-status.leading{background:#e8f5e9;color:#2e7d32}
+.sf-auc-status.outbid{background:#ffebee;color:#c62828}
+.sf-auc-status.won{background:#e8f5e9;color:#1b5e20}
+.sf-auc-status.closed{background:var(--s2);color:var(--t3)}
+.sf-auction-tabs{display:flex;border-radius:12px;overflow:hidden;border:1.5px solid var(--bd);margin-bottom:14px}
+.sf-auction-tab{flex:1;padding:9px 4px;font-family:var(--px);font-size:9px;font-weight:700;border:none;background:var(--s1);color:var(--t3);cursor:pointer;letter-spacing:.4px;text-transform:uppercase}
+.sf-auction-tab.on{background:var(--ac);color:#fff}
+.sf-ahist-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--s1);border:1.5px solid var(--bd);margin-bottom:8px}
 /* Medals */
 .sf-medal-card{background:var(--s1);border-radius:12px;border:2px solid var(--bd);padding:12px;display:flex;align-items:center;gap:12px}
 .sf-medal-card.earned{border-color:var(--ac)}
@@ -3907,34 +3925,121 @@ function _sfUpdateChainDisplay(){
 }
 
 // ── AUCTION ──
-let _sfAuctionInterval=null;
+let _sfAuctionInterval=null,_sfAuctionTicker=null,_sfAuctionTab='active',_sfLastAucSlot=null,_sfAucEndTimes={};
+const AUCTION_RIVALS=['Red','Celeste','Brock','Misty','Giovanni','Leaf','May','Dawn','N','Iris'];
 function sfAuctionSlot(){return Math.floor(Date.now()/(4*60*60*1000));}
-function sfAuctionPoke(slot){
+function _aHash(n){return((n*2654435761)>>>0);}
+function sfGetFlashAuction(){
+  const day=Math.floor(Date.now()/86400000);
+  const seed=_aHash(day*137);
+  const start=day*86400000+(seed%(23*60))*60000;
+  const end=start+20*60*1000;
+  const now=Date.now();
+  if(now<start||now>end)return null;
   if(!S.poke)return null;
-  const pool=S.poke.filter(p=>{const t=_sfTier(p);return t>=1&&t<=3;});
+  const pool=S.poke.filter(p=>_sfTier(p)>=3);
   if(!pool.length)return null;
-  const idx=((slot*2654435761)>>>0)%pool.length;
-  const poke=pool[idx];
+  const poke=pool[_aHash(day*991)%pool.length];
   const tier=_sfTier(poke);
-  const minPrice=SAFARI_COIN_RATE[tier]*3;
-  const maxPrice=SAFARI_COIN_RATE[tier]*12;
-  const elapsed=Date.now()-slot*4*60*60*1000;
-  const dur=4*60*60*1000;
-  const t=Math.min(elapsed/dur,1);
-  const currentPrice=Math.max(Math.round(maxPrice-(maxPrice-minPrice)*t),minPrice);
-  return{poke,tier,minPrice,maxPrice,currentPrice,timeLeft:Math.max(dur-elapsed,0),slot};
+  return{id:`flash-${day}`,isFlash:true,poke,tier,startPrice:SAFARI_COIN_RATE[tier]*5,increment:SAFARI_COIN_RATE[tier],startAt:start,endsAt:end,slot:day,index:-1};
+}
+function sfGetAuctions(slot){
+  if(!S.poke)return[];
+  const pool=S.poke.filter(p=>{const t=_sfTier(p);return t>=1&&t<=3;});
+  if(!pool.length)return[];
+  const slotStart=slot*4*60*60*1000,slotEnd=slotStart+4*60*60*1000;
+  return[0,1,2].map(i=>{
+    const seed=_aHash(slot*7+i*31337);
+    const poke=pool[seed%pool.length];
+    const tier=_sfTier(poke);
+    return{id:`${slot}-${i}`,isFlash:false,poke,tier,startPrice:SAFARI_COIN_RATE[tier]*2,increment:Math.max(1,SAFARI_COIN_RATE[tier]),startAt:slotStart,endsAt:slotEnd,slot,index:i};
+  });
+}
+function _sfAuctionRivals(auc){
+  const dur=auc.endsAt-auc.startAt;
+  const seed=_aHash(auc.slot*13+(auc.index+2)*7919);
+  const numBids=3+((seed>>8)%5);
+  const bids=[];let price=auc.startPrice;
+  for(let i=0;i<numBids;i++){
+    const frac=0.10+(i/numBids)*0.85+(_aHash(seed+i*17)%100)/1000;
+    price+=auc.increment*(1+(_aHash(seed+i*23)%3));
+    bids.push({at:auc.startAt+dur*Math.min(frac,0.97),bidder:AUCTION_RIVALS[_aHash(seed+i*41)%AUCTION_RIVALS.length],price});
+  }
+  return bids.sort((a,b)=>a.at-b.at);
+}
+function _sfAucState(auc){
+  const now=Date.now();
+  const allRivals=_sfAuctionRivals(auc);
+  const revealed=allRivals.filter(b=>b.at<=now);
+  const topRival=revealed.length?revealed[revealed.length-1].price:0;
+  const saved=S.safari.auctions?.[auc.id]||{};
+  const userBid=saved.userBid||0;
+  const currentTop=Math.max(topRival,auc.startPrice);
+  return{revealed,allRivals,topRival,userBid,currentTop,leading:userBid>0&&userBid>topRival,nextBid:currentTop+auc.increment,isOver:now>=auc.endsAt,won:saved.won,finalized:saved.finalized};
+}
+function _sfCheckAuctionResult(auc){
+  const saved=S.safari.auctions?.[auc.id];
+  if(!saved||saved.finalized||!saved.userBid)return;
+  const allRivals=_sfAuctionRivals(auc);
+  const finalTop=allRivals.length?allRivals[allRivals.length-1].price:auc.startPrice-1;
+  const won=saved.userBid>finalTop;
+  if(won){
+    const key=String(auc.poke.id);
+    if(!S.safari.caught[key])S.safari.caught[key]={count:0,shiny:false,firstDate:Date.now(),firstZone:'auction'};
+    S.safari.caught[key].count++;S.safari.caught[key].lastDate=Date.now();
+    S.safari.auctionWins=(S.safari.auctionWins||0)+1;
+    sfCheckSafariMedals();
+    sfToast(`🔨 ¡${cap(auc.poke.name)} conseguido en subasta!`);
+  }else{
+    S.safari.coins=(S.safari.coins||0)+saved.userBid;
+    sfToast(`💸 Subasta perdida — ${saved.userBid}🪙 devueltos`);
+  }
+  saved.won=won;saved.finalized=true;scheduleSave();
+}
+function _sfFinalizeOldAuctions(){
+  if(!S.safari.auctions||!S.poke)return;
+  const now=Date.now();
+  for(const[id,saved]of Object.entries(S.safari.auctions)){
+    if(saved.finalized||!saved.userBid||!saved.endsAt||now<saved.endsAt)continue;
+    const poke=S.poke.find(p=>p.id===saved.pokeId);
+    if(!poke)continue;
+    _sfCheckAuctionResult({id,poke,slot:saved.slot,index:saved.index,startAt:saved.startAt,endsAt:saved.endsAt,startPrice:saved.startPrice,increment:saved.increment,isFlash:saved.isFlash});
+  }
 }
 function sfShowAuction(){
+  _sfFinalizeOldAuctions();
   document.getElementById('sf-home')?.classList.remove('on');
   document.getElementById('sf-auction')?.classList.add('on');
   _sfRenderAuction();
-  if(_sfAuctionInterval)clearInterval(_sfAuctionInterval);
+  clearInterval(_sfAuctionInterval);clearInterval(_sfAuctionTicker);
   _sfAuctionInterval=setInterval(_sfRenderAuction,30000);
+  _sfAuctionTicker=setInterval(_sfAuctionTick,1000);
 }
 function sfCloseAuction(){
-  if(_sfAuctionInterval){clearInterval(_sfAuctionInterval);_sfAuctionInterval=null;}
+  clearInterval(_sfAuctionInterval);clearInterval(_sfAuctionTicker);
+  _sfAuctionInterval=_sfAuctionTicker=null;
   document.getElementById('sf-auction')?.classList.remove('on');
   document.getElementById('sf-home')?.classList.add('on');
+}
+function _sfAuctionTick(){
+  const now=Date.now(),slot=sfAuctionSlot();
+  if(_sfLastAucSlot!==null&&_sfLastAucSlot!==slot){_sfRenderAuction();return;}
+  for(const[id,endsAt]of Object.entries(_sfAucEndTimes)){
+    const el=document.getElementById(`sf-auc-cd-${id}`);
+    if(!el)continue;
+    const tl=Math.max(endsAt-now,0);
+    if(!tl){
+      el.textContent='⏱ Finalizada';
+      const saved=S.safari.auctions?.[id];
+      if(saved&&!saved.finalized&&saved.userBid&&S.poke){
+        const poke=S.poke.find(p=>p.id===saved.pokeId);
+        if(poke){_sfCheckAuctionResult({id,poke,slot:saved.slot,index:saved.index,startAt:saved.startAt,endsAt:saved.endsAt,startPrice:saved.startPrice,increment:saved.increment});_sfRenderAuction();}
+      }
+      continue;
+    }
+    const h=Math.floor(tl/3600000),m=Math.floor((tl%3600000)/60000),s=Math.floor((tl%60000)/1000);
+    el.textContent=h?`⏳ ${h}h ${m}m ${s}s`:`⏳ ${m}m ${s}s`;
+  }
 }
 function _sfRenderAuction(){
   const el=document.getElementById('sf-auction-content');
@@ -3942,51 +4047,102 @@ function _sfRenderAuction(){
   if(!el)return;
   const coins=S.safari.coins||0;
   if(coinsEl)coinsEl.textContent=`🪙 ${coins}`;
-  const slot=sfAuctionSlot();
-  const data=sfAuctionPoke(slot);
-  if(!data){el.innerHTML='<div style="text-align:center;color:var(--t3);padding:40px 16px">Sin datos disponibles. ¡Sigue jugando!</div>';return;}
-  const already=S.safari.auctions?.[slot];
-  const id=String(data.poke.id);
-  const sprSrc=`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
-  const h=Math.floor(data.timeLeft/3600000);
-  const m=Math.floor((data.timeLeft%3600000)/60000);
-  const tc=SAFARI_TIER_COLORS[data.tier];
+  _sfAucEndTimes={};_sfLastAucSlot=sfAuctionSlot();
+  const slot=_sfLastAucSlot,flash=sfGetFlashAuction(),auctions=sfGetAuctions(slot);
+  for(const auc of auctions){const st=_sfAucState(auc);if(st.isOver&&!st.finalized&&st.userBid)_sfCheckAuctionResult(auc);}
   el.innerHTML=`
-    <div class="sf-auction-card">
-      <div style="font-family:var(--px);font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px">Subasta actual</div>
-      <img src="${sprSrc}" style="width:96px;height:96px;image-rendering:pixelated" onerror="this.style.opacity=.3" alt="">
-      <div style="font-family:var(--px);font-size:15px;font-weight:900;color:var(--t1)">${cap(data.poke.name)}</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
-        <span style="font-family:var(--px);font-size:8px;padding:2px 8px;border-radius:8px;background:${tc};color:#fff">${SAFARI_TIER_LABELS[data.tier]}</span>
-        ${data.poke.types.map(t=>`<span style="font-family:var(--px);font-size:8px;padding:2px 8px;border-radius:8px;background:${TYPES.find(x=>x.id===t)?.c||'#888'};color:#fff">${TYPES.find(x=>x.id===t)?.n||t}</span>`).join('')}
-      </div>
-      ${already
-        ?`<div style="font-family:var(--px);font-size:11px;color:#4caf50;font-weight:700">✅ Ya reclamaste esta subasta</div>`
-        :`<div class="sf-auction-price">${data.currentPrice} 🪙</div>
-          <div class="sf-auction-timer">⏳ ${h}h ${m}min restantes · precio sigue bajando</div>
-          <div style="font-size:10px;color:var(--t3)">Mín: ${data.minPrice} 🪙 · Máx: ${data.maxPrice} 🪙</div>
-          <button class="sf-auction-bid-btn" onclick="sfBidAuction(${slot},${data.currentPrice})" ${coins<data.currentPrice?'disabled':''}>Reclamar por ${data.currentPrice} 🪙</button>`
-      }
+    <div class="sf-auction-tabs">
+      <button class="sf-auction-tab ${_sfAuctionTab==='active'?'on':''}" onclick="_sfAucTabSwitch('active')">Activas</button>
+      <button class="sf-auction-tab ${_sfAuctionTab==='history'?'on':''}" onclick="_sfAucTabSwitch('history')">Historial</button>
     </div>
-    <div style="margin-top:14px;font-family:var(--px);font-size:9px;color:var(--t3);text-align:center;line-height:1.6">Nueva subasta cada 4 horas<br>El precio baja cuanto más esperas</div>`;
+    ${_sfAuctionTab==='active'
+      ?(flash?_sfAucCard(flash,coins):'')+(auctions.map(a=>_sfAucCard(a,coins)).join(''))
+        +`<div style="margin-top:10px;font-family:var(--px);font-size:9px;color:var(--t3);text-align:center;line-height:1.7">3 subastas activas · se renuevan cada 4h<br>El ganador es quien más haya pujado al cierre · si pierdes se te devuelven las monedas</div>`
+      :_sfAucHistory()
+    }`;
 }
-function sfBidAuction(slot,price){
-  const data=sfAuctionPoke(slot);
-  if(!data)return;
-  if((S.safari.coins||0)<price){sfToast('Monedas insuficientes');return;}
-  if(S.safari.auctions?.[slot]){sfToast('Ya reclamaste esta subasta');return;}
-  S.safari.coins-=price;
+function _sfAucCard(auc,coins){
+  const st=_sfAucState(auc);
+  const sprSrc=`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${auc.poke.id}.png`;
+  const tc=SAFARI_TIER_COLORS[auc.tier];
+  _sfAucEndTimes[auc.id]=auc.endsAt;
+  const saved=S.safari.auctions?.[auc.id]||{};
+  const logItems=[...st.revealed.map(b=>({at:b.at,html:`<div class="sf-abid-row rival"><span>⚔️ ${b.bidder}</span><span>${b.price}🪙</span></div>`}))];
+  if(saved.userBid)logItems.push({at:saved.bidAt||0,html:`<div class="sf-abid-row me"><span>👤 Tú</span><span>${saved.userBid}🪙</span></div>`});
+  logItems.sort((a,b)=>a.at-b.at);
+  let status='',btn='';
+  if(st.won===true){
+    status=`<div class="sf-auc-status won">✅ ¡Ganaste!</div>`;
+    btn=`<button class="sf-auction-bid-btn" disabled>Pokémon conseguido</button>`;
+  }else if(st.won===false){
+    status=`<div class="sf-auc-status closed">❌ Perdiste · ${saved.userBid}🪙 devueltos</div>`;
+    btn=`<button class="sf-auction-bid-btn" disabled>Subasta cerrada</button>`;
+  }else if(st.isOver){
+    status=`<div class="sf-auc-status closed">⏱ Finalizada · sin participación</div>`;
+    btn=`<button class="sf-auction-bid-btn" disabled>Cerrada</button>`;
+  }else if(st.leading){
+    status=`<div class="sf-auc-status leading">🟢 Vas ganando · ${saved.userBid}🪙</div>`;
+    btn=`<button class="sf-auction-bid-btn" disabled>Liderando — espera el cierre</button>`;
+  }else if(saved.userBid){
+    status=`<div class="sf-auc-status outbid">🔴 ¡Te han superado!</div>`;
+    const addl=st.nextBid-saved.userBid;
+    btn=`<button class="sf-auction-bid-btn outbid-btn" onclick="sfBidAuction('${auc.id}',${st.nextBid})" ${coins<addl?'disabled':''}>Volver a pujar ${st.nextBid}🪙 (+${addl})</button>`;
+  }else{
+    btn=`<button class="sf-auction-bid-btn" onclick="sfBidAuction('${auc.id}',${st.nextBid})" ${coins<st.nextBid?'disabled':''}>Pujar ${st.nextBid}🪙</button>`;
+  }
+  const now=Date.now(),tl=Math.max(auc.endsAt-now,0);
+  const th=Math.floor(tl/3600000),tm=Math.floor((tl%3600000)/60000),ts=Math.floor((tl%60000)/1000);
+  return`<div class="sf-auction-card ${st.won===true?'won-card':st.isOver||st.won===false?'closed-card':''} ${auc.isFlash?'flash':''}">
+    ${auc.isFlash
+      ?`<div style="font-family:var(--px);font-size:8px;background:#ff6600;color:#fff;padding:2px 10px;border-radius:8px;letter-spacing:.5px">⚡ SUBASTA FLASH · 20 MIN</div>`
+      :`<div style="font-family:var(--px);font-size:8px;color:var(--t3)">Lote ${auc.index+1} de 3</div>`}
+    <img src="${sprSrc}" style="width:88px;height:88px;image-rendering:pixelated" onerror="this.style.opacity=.3" alt="">
+    <div style="font-family:var(--px);font-size:14px;font-weight:900;color:var(--t1)">${cap(auc.poke.name)}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+      <span style="font-family:var(--px);font-size:8px;padding:2px 8px;border-radius:8px;background:${tc};color:#fff">${SAFARI_TIER_LABELS[auc.tier]}</span>
+      ${auc.poke.types.map(t=>`<span style="font-family:var(--px);font-size:8px;padding:2px 8px;border-radius:8px;background:${TYPES.find(x=>x.id===t)?.c||'#888'};color:#fff">${TYPES.find(x=>x.id===t)?.n||t}</span>`).join('')}
+    </div>
+    ${logItems.length?`<div class="sf-abid-log">${logItems.map(l=>l.html).join('')}</div>`:''}
+    ${status}
+    <div class="sf-auction-timer" id="sf-auc-cd-${auc.id}">${tl?(th?`⏳ ${th}h ${tm}m ${ts}s`:`⏳ ${tm}m ${ts}s`):'⏱ Finalizada'}</div>
+    <div style="font-family:var(--px);font-size:8px;color:var(--t3)">Inicio: ${auc.startPrice}🪙 · mín. incremento: ${auc.increment}🪙</div>
+    ${btn}
+  </div>`;
+}
+function _sfAucHistory(){
+  if(!S.safari.auctions)return`<div style="text-align:center;color:var(--t3);padding:40px 16px;font-family:var(--px);font-size:10px">Sin historial aún</div>`;
+  const currentSlot=sfAuctionSlot();
+  const entries=Object.entries(S.safari.auctions).filter(([,d])=>d.finalized&&d.slot!==currentSlot).sort(([,a],[,b])=>(b.endsAt||0)-(a.endsAt||0)).slice(0,12);
+  if(!entries.length)return`<div style="text-align:center;color:var(--t3);padding:40px 16px;font-family:var(--px);font-size:10px">Sin subastas completadas aún</div>`;
+  return entries.map(([,d])=>{
+    const sprSrc=`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${d.pokeId}.png`;
+    const date=d.endsAt?new Date(d.endsAt).toLocaleDateString('es-ES',{day:'numeric',month:'short'}):'';
+    return`<div class="sf-ahist-row">
+      <img src="${sprSrc}" style="width:40px;height:40px;image-rendering:pixelated" onerror="this.style.opacity=.3">
+      <div style="flex:1;text-align:left">
+        <div style="font-family:var(--px);font-size:10px;font-weight:800;color:var(--t1)">${cap(d.pokeName||'?')}</div>
+        <div style="font-family:var(--px);font-size:8px;${d.won?'color:#2e7d32':'color:#888'}">${d.won?`✅ Ganaste · ${d.userBid}🪙`:`❌ Perdiste · ${d.userBid}🪙 devueltos`}</div>
+        ${date?`<div style="font-family:var(--px);font-size:7px;color:var(--t3)">${date}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function _sfAucTabSwitch(tab){_sfAuctionTab=tab;_sfRenderAuction();}
+function sfBidAuction(aucId,nextBid){
+  const slot=sfAuctionSlot();
+  const auc=[sfGetFlashAuction(),...sfGetAuctions(slot)].filter(Boolean).find(a=>a.id===aucId);
+  if(!auc){sfToast('Subasta no encontrada');return;}
+  const st=_sfAucState(auc);
+  if(st.isOver){sfToast('La subasta ha terminado');return;}
+  if(st.won===true){sfToast('Ya ganaste esta subasta');return;}
+  if(nextBid<st.nextBid){sfToast('Puja superada — la pantalla se actualiza');_sfRenderAuction();return;}
+  const prevBid=st.userBid,additional=nextBid-prevBid;
+  if((S.safari.coins||0)<additional){sfToast('Monedas insuficientes');return;}
+  S.safari.coins-=additional;
   if(!S.safari.auctions)S.safari.auctions={};
-  S.safari.auctions[slot]={won:true,paid:price};
-  S.safari.auctionWins=(S.safari.auctionWins||0)+1;
-  const key=String(data.poke.id);
-  if(!S.safari.caught[key])S.safari.caught[key]={count:0,shiny:false,firstDate:Date.now(),firstZone:'auction'};
-  S.safari.caught[key].count++;
-  S.safari.caught[key].lastDate=Date.now();
-  scheduleSave();
-  sfCheckSafariMedals();
-  _sfRenderAuction();
-  sfToast(`🔨 ¡${cap(data.poke.name)} conseguido por ${price} 🪙!`);
+  S.safari.auctions[aucId]={...(S.safari.auctions[aucId]||{}),userBid:nextBid,bidAt:Date.now(),pokeId:auc.poke.id,pokeName:auc.poke.name,slot:auc.slot,index:auc.index,startAt:auc.startAt,endsAt:auc.endsAt,startPrice:auc.startPrice,increment:auc.increment,isFlash:auc.isFlash,won:null,finalized:false};
+  scheduleSave();_sfRenderAuction();
+  sfToast(`🔨 Puja de ${nextBid}🪙 registrada — ¡mucha suerte!`);
 }
 
 // ── EXCHANGE ──
@@ -8502,6 +8658,7 @@ window.sfHoldBegin = sfHoldBegin;
 window.sfShowAuction = sfShowAuction;
 window.sfCloseAuction = sfCloseAuction;
 window.sfBidAuction = sfBidAuction;
+window._sfAucTabSwitch = _sfAucTabSwitch;
 window.sfShowMedals = sfShowMedals;
 window.sfCloseMedals = sfCloseMedals;
 window.sfExchangeFromDetail = sfExchangeFromDetail;
