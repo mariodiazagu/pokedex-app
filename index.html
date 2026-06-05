@@ -833,29 +833,6 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .cmpv-bar.flip{transform:scaleX(-1)}
 .cmpv-fill{height:100%;border-radius:99px}
 .cmpv-slbl{font-size:9px;font-weight:700;color:var(--t3);width:46px;text-align:center;flex-shrink:0}
-/* ── DARK MODE ──────────────────────────────────────────── */
-html.dark{
-  --bg:       #1A1A1A;
-  --s1:       rgba(255,255,255,0.07);
-  --s2:       rgba(255,255,255,0.05);
-  --s3:       rgba(255,255,255,0.07);
-  --t1:       #F0F0F0;
-  --t2:       #AAAAAA;
-  --t3:       #666666;
-  --bd:       rgba(255,255,255,0.12);
-  --bd2:      rgba(255,255,255,0.07);
-  --shadow:   0 2px 12px rgba(0,0,0,.4);
-  --shadow-md:0 8px 32px rgba(0,0,0,.5);
-  --shadow-lg:0 16px 48px rgba(0,0,0,.6);
-}
-html.dark #mdl{background:rgba(28,28,28,0.97)}
-html.dark .hdr-wrap{background:rgba(26,26,26,.92)}
-html.dark .srch-wrap{background:rgba(255,255,255,.07)}
-html.dark .nav-btn.on{background:rgba(255,255,255,.08)}
-html.dark .mmode-btn.on{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2);color:#fff}
-html.dark input,html.dark textarea,html.dark select{background:rgba(255,255,255,.07);color:var(--t1)}
-html.dark #resources-panel,html.dark #move-popup-sheet{background:#1A1A1A}
-/* ─────────────────────────────────────────────────────── */
 /* ── SAFARI ───────────────────────────────────────────────────── */
 #pg-safari{display:none;flex-direction:column;padding:0;overflow:hidden}
 #pg-safari.on{display:flex}
@@ -882,7 +859,6 @@ html.dark #resources-panel,html.dark #move-popup-sheet{background:#1A1A1A}
 .sf-zone-art-bg{position:absolute;inset:0;background-size:180%;background-position:center;filter:grayscale(1) sepia(.4) hue-rotate(220deg) saturate(2.5)}
 .sf-zone-art .sf-zone-emoji{position:relative;z-index:1;font-size:34px;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.4))}
 .sf-zone-body{background:rgba(255,255,255,.9);padding:6px 10px 8px}
-html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 .sf-zone-name{font-family:var(--px);font-size:10px;font-weight:700;color:var(--t1)}
 .sf-zone-sub{font-size:9px;color:var(--t3);margin-top:2px}
 .sf-zone-lock{font-family:var(--px);font-size:8px;color:var(--ac);margin-top:2px}
@@ -1071,18 +1047,6 @@ html.dark .sf-zone-body{background:rgba(25,25,25,.9)}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-// DEBUG HELPER
-function dbg(msg){
-  var el = document.getElementById('debug-log');
-  if(el){
-    var line = document.createElement('div');
-    line.textContent = new Date().toLocaleTimeString() + ' ' + msg;
-    el.appendChild(line);
-    el.scrollTop = el.scrollHeight;
-  }
-  console.log('[DBG]', msg);
-}
-dbg('standalone=' + !!navigator.standalone + ' | UA=' + navigator.userAgent.slice(0,40));
 
 function signInWithGoogle(){
   var loading = document.getElementById('auth-loading');
@@ -1687,18 +1651,6 @@ function sendPasswordReset(){
   <div id="theme-grid" style="display:flex;flex-wrap:wrap;gap:8px"></div>
 </div>
 <!-- Walker toggle -->
-<div class="cfg-card">
-  <div class="cfg-row">
-    <div>
-      <div class="cfg-label">Modo oscuro</div>
-      <div class="cfg-sub">Cambia la apariencia a colores oscuros</div>
-    </div>
-    <button class="cfg-toggle" id="dark-toggle" onclick="setDark(!S.set.dark)">
-      <div class="cfg-toggle-knob"></div>
-    </button>
-  </div>
-</div>
-
 <div class="cfg-card">
   <div class="cfg-row">
     <div>
@@ -3116,9 +3068,7 @@ root.style.setProperty('--ac',t.ac);
 root.style.setProperty('--ac2',t.ac2);
 root.style.setProperty('--red',t.ac);
 root.style.setProperty('--acg',t.ac+'22');
-document.body.style.backgroundImage=S.set.dark
-?`radial-gradient(circle,rgba(255,255,255,0.06) var(--dot-size),transparent var(--dot-size))`
-:`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
+document.body.style.backgroundImage=`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
 const avatar=document.getElementById('hdr-trainer-avatar');
 if(avatar){
 avatar.style.background=t.ac;
@@ -3127,25 +3077,11 @@ avatar.style.boxShadow=`0 2px 8px ${t.ac}55`;
 }
 }
 
-function applyDark(isDark){
-document.documentElement.classList.toggle('dark',isDark);
-document.body.style.backgroundImage=isDark
-?`radial-gradient(circle,rgba(255,255,255,0.06) var(--dot-size),transparent var(--dot-size))`
-:`radial-gradient(circle,rgba(0,0,0,0.18) var(--dot-size),transparent var(--dot-size))`;
-}
-
 function setTheme(themeId){
 S.set.theme=themeId;
 applyTheme(themeId);
 scheduleSave();
 renderSettings();
-}
-
-function setDark(isDark){
-S.set.dark=isDark;
-applyDark(isDark);
-scheduleSave();
-if(S.tab==='cfg')renderSettings();
 }
 
 // Banners removed -- hero uses dynamic type color
@@ -3573,7 +3509,6 @@ for(let i=0;i<results.length;i+=BATCH){
 applyTypesData(typeMap);
 saveTypesCache(typeMap);
 if(syncEl){syncEl.innerHTML='<span class="sync-dot"></span> Sincronizado';}
-console.log(`[PokéPlanner] Types updated from API for ${Object.keys(typeMap).length} Pokémon`);
 
 } catch(e){
 if(syncEl){syncEl.innerHTML='<span class="sync-dot"></span> Sincronizado';}
@@ -4301,18 +4236,15 @@ function _sfShowCatchCard(data){
   card.style.display='flex';
   _sfAmuletHudTick();
 }
-function sfCatchCardClose(){
+function _sfDismissCatchCard(stayInZone){
   document.getElementById('sf-catch-card').style.display='none';
-  _sfCatchData=null;
-  showSafariHome();
-}
-function sfCatchCardStay(){
-  const zone=_sfCatchData?.zone;
-  document.getElementById('sf-catch-card').style.display='none';
+  const zone=stayInZone?_sfCatchData?.zone:null;
   _sfCatchData=null;
   if(zone) sfStartEncounter(zone);
   else showSafariHome();
 }
+function sfCatchCardClose(){_sfDismissCatchCard(false);}
+function sfCatchCardStay(){_sfDismissCatchCard(true);}
 async function sfShareCatch(){
   if(!_sfCatchData)return;
   const d=_sfCatchData;
@@ -4614,8 +4546,10 @@ function _sfRenderBallRow(){
 
 function sfSelectBall(type){S.safari.selBall=type;_sfRenderBallRow();}
 
-let _sfHoldActive=false,_sfHoldRaf=null,_sfHoldStartTime=0;
+let _sfHoldActive=false,_sfHoldRaf=null,_sfHoldStartTime=0,_sfHoldFeedbackTimer=null;
 let _sfHoldZoneStart=0,_sfHoldZoneEnd=0,_sfHoldCycle=0,_sfHoldZoneCenter=0,_sfHoldOrigZoneHalf=0,_sfHoldSweetSpot=0;
+let _sfHoldWrapEl=null,_sfHoldFillEl=null;
+const SAFARI_QTE_COLORS={2.5:'rgba(0,200,83,.95)',2.0:'rgba(76,175,80,.9)',1.5:'rgba(255,193,7,.9)',1.2:'rgba(255,152,0,.85)',0.85:'rgba(120,120,120,.8)'};
 const SAFARI_HOLD_ZONE_COLORS=[
   ['rgba(76,175,80,.85)','rgba(76,175,80,.7)'],
   ['rgba(139,195,74,.85)','rgba(139,195,74,.7)'],
@@ -4656,9 +4590,12 @@ function sfHoldBegin(e){
   _sfHoldZoneCenter=0.15+Math.random()*(0.70-zoneSize)+zoneSize/2;
   _sfHoldOrigZoneHalf=zoneSize/2;
   _sfHoldSweetSpot=_sfHoldZoneCenter+((Math.random()*0.7-0.35)*zoneSize);
-  const wrap=document.getElementById('sf-hold-wrap');
+  if(_sfHoldFeedbackTimer){clearTimeout(_sfHoldFeedbackTimer);_sfHoldFeedbackTimer=null;}
+  _sfHoldWrapEl=_sfHoldWrapEl||document.getElementById('sf-hold-wrap');
+  _sfHoldFillEl=_sfHoldFillEl||document.getElementById('sf-hold-fill');
+  const wrap=_sfHoldWrapEl;
   const zone=document.getElementById('sf-hold-zone');
-  const fill=document.getElementById('sf-hold-fill');
+  const fill=_sfHoldFillEl;
   const center=document.getElementById('sf-hold-center');
   if(wrap)wrap.style.display='flex';
   _sfHoldApplyZone(zone,center,_sfHoldOrigZoneHalf,true);
@@ -4697,20 +4634,21 @@ function sfHoldRelease(){
   document.getElementById('sf-btn-throw')?.classList.remove('holding');
   const zoneHalf=(_sfHoldZoneEnd-_sfHoldZoneStart)/2;
   const sweetDist=Math.abs(p-_sfHoldSweetSpot);
-  let qteMult,qteMsg,feedbackColor;
-  if(zoneHalf<0.015)                                          {qteMult=0.85;qteMsg='Tiro normal';    feedbackColor='rgba(120,120,120,.8)';}
-  else if(sweetDist<0.018)                                    {qteMult=2.5; qteMsg='✨ ¡Perfecto!';  feedbackColor='rgba(0,200,83,.95)';}
-  else if(sweetDist<0.040)                                    {qteMult=2.0; qteMsg='✨ ¡Excelente!'; feedbackColor='rgba(76,175,80,.9)';}
-  else if(p>=_sfHoldZoneStart&&p<=_sfHoldZoneEnd)             {qteMult=1.5; qteMsg='⭐ ¡Buen tiro!';feedbackColor='rgba(255,193,7,.9)';}
-  else if(p>=_sfHoldZoneStart-zoneHalf*.5&&p<=_sfHoldZoneEnd+zoneHalf*.5){qteMult=1.2;qteMsg='¡Bien!';feedbackColor='rgba(255,152,0,.85)';}
-  else                                                        {qteMult=0.85;qteMsg='Tiro normal';    feedbackColor='rgba(120,120,120,.8)';}
-  const wrap=document.getElementById('sf-hold-wrap');
-  const fill=document.getElementById('sf-hold-fill');
-  if(fill)fill.style.background=feedbackColor;
-  setTimeout(()=>{
+  let qteMult,qteMsg;
+  if(zoneHalf<0.015)                                              {qteMult=0.85;qteMsg='Tiro normal';}
+  else if(sweetDist<0.018)                                        {qteMult=2.5; qteMsg='✨ ¡Perfecto!';}
+  else if(sweetDist<0.040)                                        {qteMult=2.0; qteMsg='✨ ¡Excelente!';}
+  else if(p>=_sfHoldZoneStart&&p<=_sfHoldZoneEnd)                 {qteMult=1.5; qteMsg='⭐ ¡Buen tiro!';}
+  else if(p>=_sfHoldZoneStart-zoneHalf*.5&&p<=_sfHoldZoneEnd+zoneHalf*.5){qteMult=1.2;qteMsg='¡Bien!';}
+  else                                                            {qteMult=0.85;qteMsg='Tiro normal';}
+  const wrap=_sfHoldWrapEl;
+  const fill=_sfHoldFillEl;
+  if(fill)fill.style.background=SAFARI_QTE_COLORS[qteMult];
+  _sfHoldFeedbackTimer=setTimeout(()=>{
+    _sfHoldFeedbackTimer=null;
     if(wrap)wrap.style.display='none';
     document.getElementById('sf-hold-center').style.display='none';
-    if(fill){fill.style.background='rgba(255,255,255,.75)';}
+    if(fill)fill.style.background='rgba(255,255,255,.75)';
     _sfDoThrow(qteMult,qteMsg);
   },300);
 }
@@ -5138,7 +5076,6 @@ const ADMIN_EMAIL = 'mario.diazagu@gmail.com';
 let _sfTestMode = false;
 let _sfRealSafari = null;
 let _sfAdminUnlocked = false; // runtime-only, never persisted
-let _safariCloudReady = false; // true only after successful Firestore load
 
 function _isAdmin() {
   return currentUser && currentUser.email === ADMIN_EMAIL;
@@ -5297,9 +5234,9 @@ let syncTimeout = null;
 // Recoger resultado del redirect (debe ir DESPUÉS de initializeApp)
 auth.getRedirectResult().then(function(result){
   if(result && result.user){
-    dbg('getRedirectResult OK: ' + result.user.email);
+    // redirect sign-in succeeded
   } else {
-    dbg('getRedirectResult: sin usuario');
+    // no redirect user
   }
 }).catch(function(err){
   console.error('Redirect error:', err.code, err.message);
@@ -5462,7 +5399,10 @@ const dot = document.querySelector('.sync-dot');
 if (dot) dot.classList.toggle('syncing', on);
 }
 
-// ── FIRESTORE SAVE (debounced 600ms to avoid hammering) ──
+// ── FIRESTORE SYNC ──────────────────────────────────────────────
+// Guards writes until loadUserData completes — prevents overwriting cloud data with empty local state on network failure
+let _safariCloudReady = false;
+
 function scheduleSave() {
 if (!currentUser) { saveToLocalStorage(); return; }
 // Don't write to Firestore until initial cloud load completed — prevents overwriting real data with empty state on network failure
@@ -5485,7 +5425,6 @@ theme: S.set.theme || 'magenta',
 dailyDone: S.set.dailyDone || null,
 dailyCount: S.dailyCount || 0,
 showWalker: S.set.showWalker !== false,
-dark: S.set.dark||false,
 companion: S.companion || {hp:80,energy:80,hunger:70,mood:75,lastVisit:null,fainted:false,faintCount:0,history:[]},
 glass: S.set.glass || 45,
 };
@@ -5546,7 +5485,6 @@ if (d.set.theme !== undefined) { S.set.theme = d.set.theme; applyTheme(d.set.the
 if (d.set.dailyDone !== undefined) S.set.dailyDone = d.set.dailyDone;
 if (d.set.dailyCount !== undefined) S.dailyCount = d.set.dailyCount;
 if (d.set.showWalker !== undefined) S.set.showWalker = d.set.showWalker;
-if (d.set.dark !== undefined) { S.set.dark = d.set.dark; applyDark(d.set.dark); }
 if (d.set.companion !== undefined) S.companion = d.set.companion;
 if (d.set.glass !== undefined) { S.set.glass = d.set.glass; applyGlass(d.set.glass); }
 }
@@ -7274,8 +7212,6 @@ function renderSettings(){
 _updateAdminPanel();
 const walkerTog=document.getElementById('walker-toggle');
 if(walkerTog)walkerTog.className=`cfg-toggle${S.set.showWalker?' on':''}`;
-const darkTog=document.getElementById('dark-toggle');
-if(darkTog)darkTog.className=`cfg-toggle${S.set.dark?' on':''}`;
 
 // Theme grid
 const themeGrid=document.getElementById('theme-grid');
@@ -8937,7 +8873,6 @@ window.adminClearCaught = adminClearCaught;
 window.adminFullReset = adminFullReset;
 
 auth.onAuthStateChanged(async user => {
-dbg('onAuthStateChanged: ' + (user ? user.email : 'null'));
 if (user && isPwUnlocked()) {
 // Fully authenticated -- show app
 currentUser = user;
@@ -8992,8 +8927,6 @@ if(localStorage.getItem('sf_tm')==='1'){
 applyColsSetting();
 // Apply saved theme
 applyTheme(S.set.theme||'magenta');
-// Apply saved dark mode
-applyDark(S.set.dark||false);
 // Apply saved glass opacity
 applyGlass(S.set.glass||45);
 // Apply trainer UI
@@ -9039,7 +8972,6 @@ renderGrid();
   <img id="walker-img" style="position:absolute;bottom:calc(var(--nav-h, 72px) - 2px);width:40px;height:40px;object-fit:contain;image-rendering:pixelated;pointer-events:all;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));left:10%;transition:left .06s linear,bottom .2s,transform .15s" onclick="walkerClick()">
 </div>
 
-  <div id="debug-log"></div>
 </div>
 
 <div id="move-popup" onclick="closeMovePopup(event)">
