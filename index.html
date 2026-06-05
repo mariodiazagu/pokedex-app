@@ -4318,12 +4318,11 @@ function sfExchangeFromDetail(){
   if(!id)return;
   const data=S.safari.caught[id];
   const p=S.poke?.find(x=>x.id===+id);
-  if(!data||!p||!_sfHasDuplicate(data))return;
+  const variant=_sfDetailVariant||'normal';
+  if(!data||!p||!(data[variant]?.count>1))return;
   const tier=_sfTier(p);
   const coins=SAFARI_COIN_RATE[tier]*3;
-  // Remove one duplicate from whichever variant has extras
-  if(data.normal?.count>1)data.normal.count--;
-  else data.shiny.count--;
+  data[variant].count--;
   S.safari.coins=(S.safari.coins||0)+coins;
   S.safari.coinsEarned=(S.safari.coinsEarned||0)+coins;
   S.safari.exchangeCount=(S.safari.exchangeCount||0)+1;
@@ -4949,30 +4948,34 @@ function _sfRenderCollection(){
     return;
   }
 
-  grid.innerHTML=pool.map(p=>{
+  const CDN='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
+  grid.innerHTML=pool.flatMap(p=>{
     const id=String(p.id);
     const data=S.safari.caught[id];
-    const hasShiny=!!(data?.shiny);
-    const hasNormal=!!(data?.normal);
-    const sprSrc=hasShiny
-      ?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`
-      :`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
-    if(data){
-      const totalCount=_sfCaughtTotal(data);
-      const bothBadge=hasShiny&&hasNormal?'<div class="sf-coll-both-badge">N+✨</div>':'';
-      return`<div class="sf-coll-card${hasShiny?' shiny':''}" onclick="sfShowDetail('${id}')">
+    const cards=[];
+    if(data?.normal){
+      cards.push(`<div class="sf-coll-card" onclick="sfShowDetail('${id}','normal')">
         <button class="sf-coll-dex-btn" onclick="event.stopPropagation();openMdl(${id})" title="Ver en Pokédex">i</button>
-        <img class="sf-coll-spr" src="${sprSrc}" loading="lazy" onerror="this.style.opacity=.3" alt="">
-        ${hasShiny?'<div class="sf-coll-shiny-dot">✨</div>':''}
-        ${bothBadge}
+        <img class="sf-coll-spr" src="${CDN}/${id}.png" loading="lazy" onerror="this.style.opacity=.3" alt="">
         <div class="sf-coll-name">${cap(p.name)}</div>
-        <div class="sf-coll-cnt">x${totalCount}</div>
-      </div>`;
-    }else{
-      return`<div class="sf-coll-card missing">
-        <img class="sf-coll-spr sf-coll-sil" src="${sprSrc}" loading="lazy" alt="">
-      </div>`;
+        <div class="sf-coll-cnt">x${data.normal.count}</div>
+      </div>`);
     }
+    if(data?.shiny){
+      cards.push(`<div class="sf-coll-card shiny" onclick="sfShowDetail('${id}','shiny')">
+        <button class="sf-coll-dex-btn" onclick="event.stopPropagation();openMdl(${id})" title="Ver en Pokédex">i</button>
+        <img class="sf-coll-spr" src="${CDN}/shiny/${id}.png" loading="lazy" onerror="this.style.opacity=.3" alt="">
+        <div class="sf-coll-shiny-dot">✨</div>
+        <div class="sf-coll-name">${cap(p.name)}</div>
+        <div class="sf-coll-cnt">x${data.shiny.count}</div>
+      </div>`);
+    }
+    if(!cards.length){
+      cards.push(`<div class="sf-coll-card missing">
+        <img class="sf-coll-spr sf-coll-sil" src="${CDN}/${id}.png" loading="lazy" alt="">
+      </div>`);
+    }
+    return cards;
   }).join('');
 }
 
@@ -5015,17 +5018,18 @@ function sfShowWhere(id){
   document.getElementById('sf-detail-sheet').classList.add('on');
 }
 
-function sfShowDetail(id){
+function sfShowDetail(id, variant){
   const data=S.safari.caught[id];
   const p=S.poke.find(x=>x.id===+id);
   if(!data||!p)return;
+  // Default to whichever variant exists; prefer shiny if both present
+  if(!variant)variant=data.shiny?'shiny':'normal';
 
   const tier=_sfTier(p);
-  const hasShiny=!!(data.shiny);
-  const hasNormal=!!(data.normal);
-  const sprSrc=hasShiny
-    ?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`
-    :`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
+  const isShiny=variant==='shiny';
+  const vData=data[variant];
+  const CDN='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
+  const sprSrc=isShiny?`${CDN}/shiny/${id}.png`:`${CDN}/${id}.png`;
 
   const detSpr=document.getElementById('sf-detail-spr');
   detSpr.src=sprSrc;
@@ -5038,8 +5042,7 @@ function sfShowDetail(id){
     psychic:'#F85888',bug:'#A8B820',rock:'#B8A038',ghost:'#705898',dragon:'#7038F8',
     dark:'#705848',steel:'#B8B8D0',fairy:'#EE99AC'};
   const tags=[];
-  if(hasShiny)tags.push(`<span class="sf-detail-tag" style="background:#b8860b">✨ Shiny</span>`);
-  if(hasNormal&&hasShiny)tags.push(`<span class="sf-detail-tag" style="background:rgba(255,255,255,.15);color:var(--t2)">Normal</span>`);
+  if(isShiny)tags.push(`<span class="sf-detail-tag" style="background:#b8860b">✨ Shiny</span>`);
   tags.push(`<span class="sf-detail-tag" style="background:${SAFARI_TIER_COLORS[tier]}">${SAFARI_TIER_LABELS[tier]}</span>`);
   (p.types||[]).forEach(t=>tags.push(`<span class="sf-detail-tag" style="background:${TYPE_COLORS[t]||'#888'}">${t}</span>`));
   document.getElementById('sf-detail-tags').innerHTML=tags.join('');
@@ -5056,39 +5059,31 @@ function sfShowDetail(id){
     return`${d.toLocaleDateString('es',{day:'2-digit',month:'2-digit',year:'numeric'})} · ${time}`;
   };
   const zoneName=z=>SAFARI_ZONES[z]?.name??'—';
-
-  const variantRows=(v,label,emoji)=>{
-    if(!v)return'';
-    const rows=[
-      {ico:emoji,lbl:label,val:`x${v.count}`},
-      {ico:'📅',lbl:'Primera captura',val:fmt(v.firstDate)},
-      ...(v.count>1?[{ico:'🔄',lbl:'Última captura',val:fmt(v.lastDate)}]:[]),
-      {ico:'🗺️',lbl:'Primera zona',val:zoneName(v.firstZone)},
-      ...(v.lastZone&&v.lastZone!==v.firstZone?[{ico:'📍',lbl:'Última zona',val:zoneName(v.lastZone)}]:[]),
-    ];
-    return rows.map(r=>`<div class="sf-detail-row">
+  const rows=[
+    {ico:'🎯',lbl:'Capturas',val:`x${vData.count}`},
+    {ico:'📅',lbl:'Primera captura',val:fmt(vData.firstDate)},
+    ...(vData.count>1?[{ico:'🔄',lbl:'Última captura',val:fmt(vData.lastDate)}]:[]),
+    {ico:'🗺️',lbl:'Primera zona',val:zoneName(vData.firstZone)},
+    ...(vData.lastZone&&vData.lastZone!==vData.firstZone?[{ico:'📍',lbl:'Última zona',val:zoneName(vData.lastZone)}]:[]),
+  ];
+  // Hint about the other variant
+  const otherVariant=isShiny?'normal':'shiny';
+  const otherLabel=isShiny?'versión normal':'versión shiny ✨';
+  const otherNote=data[otherVariant]
+    ?`<div class="sf-detail-row"><span class="sf-detail-row-ico">💡</span><span class="sf-detail-row-lbl" style="color:var(--t3)">También tienes la ${otherLabel}</span></div>`
+    :'';
+  document.getElementById('sf-detail-rows').innerHTML=
+    rows.map(r=>`<div class="sf-detail-row">
       <span class="sf-detail-row-ico">${r.ico}</span>
       <span class="sf-detail-row-lbl">${r.lbl}</span>
       <span class="sf-detail-row-val">${r.val}</span>
-    </div>`).join('');
-  };
-
-  const shinySection=hasShiny?`
-    <div class="sf-detail-variant-hdr" style="background:rgba(184,134,11,.15);color:#c8a000">✨ Shiny</div>
-    ${variantRows(data.shiny,'Capturas shiny','✨')}`:
-    `<div class="sf-detail-variant-hdr" style="background:rgba(255,255,255,.06);color:var(--t3)">✨ Shiny — sin capturar</div>`;
-
-  const normalSection=`
-    <div class="sf-detail-variant-hdr" style="background:rgba(255,255,255,.06);color:var(--t2)">Normal</div>
-    ${hasNormal?variantRows(data.normal,'Capturas normales','🎯'):'<div class="sf-detail-row"><span class="sf-detail-row-lbl" style="color:var(--t3)">Sin capturar</span></div>'}`;
-
-  document.getElementById('sf-detail-rows').innerHTML=shinySection+normalSection;
+    </div>`).join('')+otherNote;
 
   _sfDetailId=id;
-  const totalCount=_sfCaughtTotal(data);
+  _sfDetailVariant=variant;
   const exchangeWrap=document.getElementById('sf-detail-exchange-wrap');
   const exchangePreview=document.getElementById('sf-exchange-coins-preview');
-  if(exchangeWrap)exchangeWrap.style.display=_sfHasDuplicate(data)?'':'none';
+  if(exchangeWrap)exchangeWrap.style.display=(vData.count>1)?'':'none';
   if(exchangePreview)exchangePreview.textContent=`+${SAFARI_COIN_RATE[tier]*3} 🪙`;
   document.getElementById('sf-detail-dex-wrap').style.display='';
   document.getElementById('sf-detail-backdrop').classList.add('on');
@@ -5096,6 +5091,7 @@ function sfShowDetail(id){
 }
 
 let _sfDetailId=null;
+let _sfDetailVariant='normal';
 
 function sfOpenPokedex(){
   sfCloseDetail();
