@@ -986,6 +986,7 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .sf-coll-name{font-family:var(--px);font-size:7px;color:var(--t2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;padding:0 2px}
 .sf-coll-cnt{font-family:var(--px);font-size:8px;color:var(--ac)}
 .sf-coll-shiny-dot{font-size:9px}
+.sf-coll-both-badge{position:absolute;bottom:20px;left:2px;font-family:var(--px);font-size:6px;font-weight:700;background:#b8860b;color:#fff;border-radius:4px;padding:1px 3px;line-height:1.4}
 .sf-toast{position:fixed;bottom:calc(var(--sb,0px) + 78px);left:50%;transform:translateX(-50%) translateY(8px);background:var(--ac);color:#fff;font-family:var(--px);font-size:10px;padding:8px 16px;border-radius:10px;z-index:9900;box-shadow:0 4px 16px rgba(0,0,0,.4);pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;white-space:nowrap;max-width:80vw;text-align:center}
 .sf-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .sf-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px;padding:32px}
@@ -1034,6 +1035,7 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .sf-detail-tag{font-family:var(--px);font-size:8px;padding:2px 8px;border-radius:6px;color:#fff}
 .sf-detail-rows{display:flex;flex-direction:column;gap:0;background:var(--s1);border-radius:14px;overflow:hidden}
 .sf-detail-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--bd2)}
+.sf-detail-variant-hdr{font-family:var(--px);font-size:9px;font-weight:700;letter-spacing:.5px;padding:6px 14px;text-transform:uppercase}
 .sf-detail-row:last-child{border-bottom:none}
 .sf-detail-row-ico{font-size:16px;flex-shrink:0;width:22px;text-align:center}
 .sf-detail-row-lbl{font-family:var(--px);font-size:9px;color:var(--t3);flex-shrink:0;min-width:90px}
@@ -3636,7 +3638,19 @@ function _sfTier(poke){
 }
 function _sfTotalCaught(){return Object.keys(S.safari.caught).length;}
 function _sfTotalShinies(){return Object.values(S.safari.caught).filter(c=>c.shiny).length;}
+function _sfCaughtTotal(data){return(data?.normal?.count||0)+(data?.shiny?.count||0);}
 function _sfTotalLegs(){return Object.entries(S.safari.caught).filter(([id])=>{const p=S.poke.find(x=>x.id===+id);return p&&(p.rarity==='legendary'||p.rarity==='mythical');}).length;}
+
+// Migrate legacy caught entries {count,shiny:bool,...} → {normal:{...},shiny:{...}}
+function _sfMigrateCaught(){
+  const caught=S.safari.caught;
+  for(const [id,data] of Object.entries(caught)){
+    if(typeof data.count!=='number')continue; // already new format
+    const variant=data.shiny?'shiny':'normal';
+    const legacy={count:data.count,firstDate:data.firstDate,lastDate:data.lastDate,firstZone:data.firstZone,lastZone:data.lastZone};
+    caught[id]={[variant]:legacy};
+  }
+}
 function _sfBasicBalls(){return (S.safari.balls.poke||0)+(S.safari.balls.great||0);}
 
 function sfRenewBalls(){
@@ -3982,8 +3996,9 @@ function _sfCheckAuctionResult(auc){
   const won=saved.userBid>finalTop;
   if(won){
     const key=String(auc.poke.id);
-    if(!S.safari.caught[key])S.safari.caught[key]={count:0,shiny:false,firstDate:Date.now(),firstZone:'auction'};
-    S.safari.caught[key].count++;S.safari.caught[key].lastDate=Date.now();
+    if(!S.safari.caught[key])S.safari.caught[key]={};
+    if(!S.safari.caught[key].normal)S.safari.caught[key].normal={count:0,firstDate:Date.now(),firstZone:'auction'};
+    S.safari.caught[key].normal.count++;S.safari.caught[key].normal.lastDate=Date.now();
     S.safari.auctionWins=(S.safari.auctionWins||0)+1;
     sfCheckSafariMedals();
     sfToast(`🔨 ¡${cap(auc.poke.name)} conseguido en subasta!`);
@@ -4302,10 +4317,14 @@ function sfExchangeFromDetail(){
   if(!id)return;
   const data=S.safari.caught[id];
   const p=S.poke?.find(x=>x.id===+id);
-  if(!data||!p||data.count<=1)return;
+  if(!data||!p||_sfCaughtTotal(data)<=1)return;
   const tier=_sfTier(p);
   const coins=SAFARI_COIN_RATE[tier]*3;
-  data.count--;
+  // Remove one duplicate — prefer normal over shiny
+  if(data.normal?.count>1)data.normal.count--;
+  else if(data.shiny?.count>1)data.shiny.count--;
+  else if(data.normal?.count===1&&data.shiny)delete data.normal;
+  else if(data.shiny?.count===1&&data.normal)delete data.shiny;
   S.safari.coins=(S.safari.coins||0)+coins;
   S.safari.coinsEarned=(S.safari.coinsEarned||0)+coins;
   S.safari.exchangeCount=(S.safari.exchangeCount||0)+1;
@@ -4501,7 +4520,8 @@ function _sfShowEncounter(enc){
   const shinyEl=document.getElementById('sf-enemy-shiny');
   if(shinyEl)shinyEl.style.display=enc.shiny?'':'none';
   const caughtTagEl=document.getElementById('sf-enemy-caught-tag');
-  if(caughtTagEl)caughtTagEl.style.display=S.safari.caught[String(enc.poke.id)]?'':'none';
+  const _caughtEntry=S.safari.caught[String(enc.poke.id)];
+  if(caughtTagEl)caughtTagEl.style.display=(_caughtEntry&&(enc.shiny?_caughtEntry.shiny:_caughtEntry.normal))?'':'none';
 
   const msgBox=document.getElementById('sf-msg-box');
   if(msgBox)msgBox.innerHTML=`¡Un ${cap(enc.poke.name)} salvaje apareció!<span class="sf-msg-sub">Toca y mantén para lanzar</span>`;
@@ -4720,12 +4740,15 @@ async function _sfDoThrow(qteMult,qteMsg){
     document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} capturado!`;
     _ballAt('sfBallPulse 1s infinite');
     const key=String(enc.poke.id);
-    const isNew=!S.safari.caught[key];
-    if(isNew){S.safari.caught[key]={count:0,shiny:enc.shiny,firstDate:Date.now(),firstZone:enc.zone};}
-    S.safari.caught[key].count+=1;
-    S.safari.caught[key].lastDate=Date.now();
-    S.safari.caught[key].lastZone=enc.zone;
-    if(enc.shiny)S.safari.caught[key].shiny=true;
+    const variant=enc.shiny?'shiny':'normal';
+    if(!S.safari.caught[key])S.safari.caught[key]={};
+    const entry=S.safari.caught[key];
+    const isNewVariant=!entry[variant];
+    const isNew=!entry.normal&&!entry.shiny; // true first time this species is caught at all
+    if(isNewVariant)entry[variant]={count:0,firstDate:Date.now(),firstZone:enc.zone};
+    entry[variant].count+=1;
+    entry[variant].lastDate=Date.now();
+    entry[variant].lastZone=enc.zone;
     // Earn coins (Pinap ×2 coins, shiny ×2 coins)
     const coinsEarned=SAFARI_COIN_RATE[enc.tier]*(enc.shiny?2:1)*(enc.pinapActive?2:1);
     S.safari.coins=(S.safari.coins||0)+coinsEarned;
@@ -4752,7 +4775,7 @@ async function _sfDoThrow(qteMult,qteMsg){
     sfCheckMilestones();
     sfCheckSafariMedals();
     await _sfDelay(900);
-    _sfShowCatchCard({poke:enc.poke,shiny:enc.shiny,tier:enc.tier,gender,nature,coinsEarned,heldItem,isNew,zone:enc.zone});
+    _sfShowCatchCard({poke:enc.poke,shiny:enc.shiny,tier:enc.tier,gender,nature,coinsEarned,heldItem,isNew:isNewVariant,zone:enc.zone});
   } else {
     document.getElementById('sf-msg-box').textContent=`¡${cap(enc.poke.name)} escapó!`;
     if(sprite)sprite.style.animation='sfEscape .4s forwards';
@@ -4911,7 +4934,8 @@ function _sfRenderCollection(){
   if(!grid)return;
   const search=(document.getElementById('sf-coll-search')?.value||'').toLowerCase().trim();
   const caughtCount=Object.keys(S.safari.caught).length;
-  if(cnt)cnt.textContent=`${caughtCount}/1025`;
+  const shinyCount=_sfTotalShinies();
+  if(cnt)cnt.textContent=`${caughtCount}/1025${shinyCount?` · ✨${shinyCount}`:''}`;
 
   let pool=S.poke?[...S.poke].sort((a,b)=>a.id-b.id):[];
   if(_sfCollFilter==='caught') pool=pool.filter(p=>S.safari.caught[String(p.id)]);
@@ -4929,16 +4953,21 @@ function _sfRenderCollection(){
   grid.innerHTML=pool.map(p=>{
     const id=String(p.id);
     const data=S.safari.caught[id];
-    const sprSrc=data?.shiny
+    const hasShiny=!!(data?.shiny);
+    const hasNormal=!!(data?.normal);
+    const sprSrc=hasShiny
       ?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`
       :`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
     if(data){
-      return`<div class="sf-coll-card${data.shiny?' shiny':''}" onclick="sfShowDetail('${id}')">
+      const totalCount=_sfCaughtTotal(data);
+      const bothBadge=hasShiny&&hasNormal?'<div class="sf-coll-both-badge">N+✨</div>':'';
+      return`<div class="sf-coll-card${hasShiny?' shiny':''}" onclick="sfShowDetail('${id}')">
         <button class="sf-coll-dex-btn" onclick="event.stopPropagation();openMdl(${id})" title="Ver en Pokédex">i</button>
         <img class="sf-coll-spr" src="${sprSrc}" loading="lazy" onerror="this.style.opacity=.3" alt="">
-        ${data.shiny?'<div class="sf-coll-shiny-dot">✨</div>':''}
+        ${hasShiny?'<div class="sf-coll-shiny-dot">✨</div>':''}
+        ${bothBadge}
         <div class="sf-coll-name">${cap(p.name)}</div>
-        <div class="sf-coll-cnt">x${data.count}</div>
+        <div class="sf-coll-cnt">x${totalCount}</div>
       </div>`;
     }else{
       return`<div class="sf-coll-card missing">
@@ -4993,28 +5022,29 @@ function sfShowDetail(id){
   if(!data||!p)return;
 
   const tier=_sfTier(p);
-  const sprSrc=data.shiny
+  const hasShiny=!!(data.shiny);
+  const hasNormal=!!(data.normal);
+  const sprSrc=hasShiny
     ?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/shiny/${id}.png`
     :`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
 
   const detSpr=document.getElementById('sf-detail-spr');
   detSpr.src=sprSrc;
-  detSpr.style.filter=''; // reset silhouette filter if coming from sfShowWhere
+  detSpr.style.filter='';
   document.getElementById('sf-detail-name').textContent=cap(p.name);
   document.getElementById('sf-detail-num').textContent=`#${String(id).padStart(4,'0')}`;
 
-  // Tags
   const TYPE_COLORS={normal:'#A8A878',fire:'#F08030',water:'#6890F0',electric:'#F8D030',grass:'#78C850',
     ice:'#98D8D8',fighting:'#C03028',poison:'#A040A0',ground:'#E0C068',flying:'#A890F0',
     psychic:'#F85888',bug:'#A8B820',rock:'#B8A038',ghost:'#705898',dragon:'#7038F8',
     dark:'#705848',steel:'#B8B8D0',fairy:'#EE99AC'};
   const tags=[];
-  if(data.shiny)tags.push(`<span class="sf-detail-tag" style="background:#b8860b">✨ Shiny</span>`);
+  if(hasShiny)tags.push(`<span class="sf-detail-tag" style="background:#b8860b">✨ Shiny</span>`);
+  if(hasNormal&&hasShiny)tags.push(`<span class="sf-detail-tag" style="background:rgba(255,255,255,.15);color:var(--t2)">Normal</span>`);
   tags.push(`<span class="sf-detail-tag" style="background:${SAFARI_TIER_COLORS[tier]}">${SAFARI_TIER_LABELS[tier]}</span>`);
   (p.types||[]).forEach(t=>tags.push(`<span class="sf-detail-tag" style="background:${TYPE_COLORS[t]||'#888'}">${t}</span>`));
   document.getElementById('sf-detail-tags').innerHTML=tags.join('');
 
-  // Rows
   const fmt=ts=>{
     if(!ts)return'—';
     const d=new Date(ts);
@@ -5027,25 +5057,39 @@ function sfShowDetail(id){
     return`${d.toLocaleDateString('es',{day:'2-digit',month:'2-digit',year:'numeric'})} · ${time}`;
   };
   const zoneName=z=>SAFARI_ZONES[z]?.name??'—';
-  const rows=[
-    {ico:'🎯',lbl:'Total capturado',val:`x${data.count}`},
-    {ico:'📅',lbl:'Primera captura',val:fmt(data.firstDate)},
-    ...(data.count>1?[{ico:'🔄',lbl:'Última captura',val:fmt(data.lastDate)}]:[]),
-    {ico:'🗺️',lbl:'Primera zona',val:zoneName(data.firstZone)},
-    ...(data.lastZone&&data.lastZone!==data.firstZone?[{ico:'📍',lbl:'Última zona',val:zoneName(data.lastZone)}]:[]),
-  ];
-  document.getElementById('sf-detail-rows').innerHTML=rows.map(r=>
-    `<div class="sf-detail-row">
+
+  const variantRows=(v,label,emoji)=>{
+    if(!v)return'';
+    const rows=[
+      {ico:emoji,lbl:label,val:`x${v.count}`},
+      {ico:'📅',lbl:'Primera captura',val:fmt(v.firstDate)},
+      ...(v.count>1?[{ico:'🔄',lbl:'Última captura',val:fmt(v.lastDate)}]:[]),
+      {ico:'🗺️',lbl:'Primera zona',val:zoneName(v.firstZone)},
+      ...(v.lastZone&&v.lastZone!==v.firstZone?[{ico:'📍',lbl:'Última zona',val:zoneName(v.lastZone)}]:[]),
+    ];
+    return rows.map(r=>`<div class="sf-detail-row">
       <span class="sf-detail-row-ico">${r.ico}</span>
       <span class="sf-detail-row-lbl">${r.lbl}</span>
       <span class="sf-detail-row-val">${r.val}</span>
     </div>`).join('');
+  };
+
+  const shinySection=hasShiny?`
+    <div class="sf-detail-variant-hdr" style="background:rgba(184,134,11,.15);color:#c8a000">✨ Shiny</div>
+    ${variantRows(data.shiny,'Capturas shiny','✨')}`:
+    `<div class="sf-detail-variant-hdr" style="background:rgba(255,255,255,.06);color:var(--t3)">✨ Shiny — sin capturar</div>`;
+
+  const normalSection=`
+    <div class="sf-detail-variant-hdr" style="background:rgba(255,255,255,.06);color:var(--t2)">Normal</div>
+    ${hasNormal?variantRows(data.normal,'Capturas normales','🎯'):'<div class="sf-detail-row"><span class="sf-detail-row-lbl" style="color:var(--t3)">Sin capturar</span></div>'}`;
+
+  document.getElementById('sf-detail-rows').innerHTML=shinySection+normalSection;
 
   _sfDetailId=id;
-  // Exchange button: show only when count > 1
+  const totalCount=_sfCaughtTotal(data);
   const exchangeWrap=document.getElementById('sf-detail-exchange-wrap');
   const exchangePreview=document.getElementById('sf-exchange-coins-preview');
-  if(exchangeWrap)exchangeWrap.style.display=data.count>1?'':'none';
+  if(exchangeWrap)exchangeWrap.style.display=totalCount>1?'':'none';
   if(exchangePreview)exchangePreview.textContent=`+${SAFARI_COIN_RATE[tier]*3} 🪙`;
   document.getElementById('sf-detail-dex-wrap').style.display='';
   document.getElementById('sf-detail-backdrop').classList.add('on');
@@ -5490,6 +5534,7 @@ if (d.set.glass !== undefined) { S.set.glass = d.set.glass; applyGlass(d.set.gla
 if (d.safari) Object.assign(S.safari, d.safari);
 delete S.safari._adminUnlocked; // runtime-only flag, never load from storage
 if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+_sfMigrateCaught();
 _safariCloudReady = true;
 } else {
 loadFromLocalStorage();
@@ -5525,6 +5570,7 @@ try { const d = localStorage.getItem('st'); if(d) Object.assign(S.set, JSON.pars
 try { const d = localStorage.getItem('sf'); if(d) Object.assign(S.safari, JSON.parse(d)); } catch(e){}
 delete S.safari._adminUnlocked;
 if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
+_sfMigrateCaught();
 }
 
 function forceRefreshTypes(){
