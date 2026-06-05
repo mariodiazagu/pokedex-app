@@ -3639,6 +3639,7 @@ function _sfTier(poke){
 function _sfTotalCaught(){return Object.keys(S.safari.caught).length;}
 function _sfTotalShinies(){return Object.values(S.safari.caught).filter(c=>c.shiny).length;}
 function _sfCaughtTotal(data){return(data?.normal?.count||0)+(data?.shiny?.count||0);}
+function _sfHasDuplicate(data){return(data?.normal?.count||0)>1||(data?.shiny?.count||0)>1;}
 function _sfTotalLegs(){return Object.entries(S.safari.caught).filter(([id])=>{const p=S.poke.find(x=>x.id===+id);return p&&(p.rarity==='legendary'||p.rarity==='mythical');}).length;}
 
 // Migrate legacy caught entries {count,shiny:bool,...} → {normal:{...},shiny:{...}}
@@ -4317,14 +4318,12 @@ function sfExchangeFromDetail(){
   if(!id)return;
   const data=S.safari.caught[id];
   const p=S.poke?.find(x=>x.id===+id);
-  if(!data||!p||_sfCaughtTotal(data)<=1)return;
+  if(!data||!p||!_sfHasDuplicate(data))return;
   const tier=_sfTier(p);
   const coins=SAFARI_COIN_RATE[tier]*3;
-  // Remove one duplicate — prefer normal over shiny
+  // Remove one duplicate from whichever variant has extras
   if(data.normal?.count>1)data.normal.count--;
-  else if(data.shiny?.count>1)data.shiny.count--;
-  else if(data.normal?.count===1&&data.shiny)delete data.normal;
-  else if(data.shiny?.count===1&&data.normal)delete data.shiny;
+  else data.shiny.count--;
   S.safari.coins=(S.safari.coins||0)+coins;
   S.safari.coinsEarned=(S.safari.coinsEarned||0)+coins;
   S.safari.exchangeCount=(S.safari.exchangeCount||0)+1;
@@ -5089,7 +5088,7 @@ function sfShowDetail(id){
   const totalCount=_sfCaughtTotal(data);
   const exchangeWrap=document.getElementById('sf-detail-exchange-wrap');
   const exchangePreview=document.getElementById('sf-exchange-coins-preview');
-  if(exchangeWrap)exchangeWrap.style.display=totalCount>1?'':'none';
+  if(exchangeWrap)exchangeWrap.style.display=_sfHasDuplicate(data)?'':'none';
   if(exchangePreview)exchangePreview.textContent=`+${SAFARI_COIN_RATE[tier]*3} 🪙`;
   document.getElementById('sf-detail-dex-wrap').style.display='';
   document.getElementById('sf-detail-backdrop').classList.add('on');
