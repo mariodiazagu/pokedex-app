@@ -3643,14 +3643,32 @@ function _sfHasDuplicate(data){return(data?.normal?.count||0)>1||(data?.shiny?.c
 function _sfTotalLegs(){return Object.entries(S.safari.caught).filter(([id])=>{const p=S.poke.find(x=>x.id===+id);return p&&(p.rarity==='legendary'||p.rarity==='mythical');}).length;}
 
 // Migrate legacy caught entries {count,shiny:bool,...} → {normal:{...},shiny:{...}}
+// Also fixes a bad first migration that put all count into shiny.
 function _sfMigrateCaught(){
   const caught=S.safari.caught;
+  let dirty=false;
   for(const [id,data] of Object.entries(caught)){
-    if(typeof data.count!=='number')continue; // already new format
-    const variant=data.shiny?'shiny':'normal';
-    const legacy={count:data.count,firstDate:data.firstDate,lastDate:data.lastDate,firstZone:data.firstZone,lastZone:data.lastZone};
-    caught[id]={[variant]:legacy};
+    if(typeof data.count==='number'){
+      // Phase 1 — legacy flat format
+      const base={firstDate:data.firstDate,lastDate:data.lastDate,firstZone:data.firstZone,lastZone:data.lastZone};
+      if(data.shiny){
+        caught[id]={shiny:{count:1,...base}};
+        if(data.count>1)caught[id].normal={count:data.count-1,...base};
+      }else{
+        caught[id]={normal:{count:data.count,...base}};
+      }
+      dirty=true;
+      continue;
+    }
+    // Phase 2 — fix bad migration: shiny.count>1 with no normal → split
+    if(data.shiny&&!data.normal&&data.shiny.count>1){
+      const excess=data.shiny.count-1;
+      data.normal={count:excess,firstDate:data.shiny.firstDate,lastDate:data.shiny.lastDate,firstZone:data.shiny.firstZone,lastZone:data.shiny.lastZone};
+      data.shiny.count=1;
+      dirty=true;
+    }
   }
+  if(dirty)scheduleSave();
 }
 function _sfBasicBalls(){return (S.safari.balls.poke||0)+(S.safari.balls.great||0);}
 
