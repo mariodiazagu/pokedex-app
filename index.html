@@ -862,7 +862,9 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .sf-zone-name{font-family:var(--px);font-size:10px;font-weight:700;color:var(--t1)}
 .sf-zone-sub{font-size:9px;color:var(--t3);margin-top:2px}
 .sf-zone-lock{font-family:var(--px);font-size:8px;color:var(--ac);margin-top:2px}
-.sf-enc-bg{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.sf-enc-bg{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;cursor:crosshair}
+@keyframes sfEncHold{0%,100%{box-shadow:inset 0 0 0 rgba(255,255,255,0)}50%{box-shadow:inset 0 0 40px rgba(255,255,255,.07)}}
+.sf-enc-bg.holding{animation:sfEncHold .55s ease-in-out infinite}
 .sf-enc-bg-layer{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;filter:grayscale(1) sepia(.35) hue-rotate(220deg) saturate(2.2) brightness(.85)}
 .sf-enc-enemy{position:absolute;top:12%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:2}
 .sf-enc-sprite{width:min(150px,38vw);height:min(150px,38vw);object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 16px rgba(255,255,255,.35)) drop-shadow(2px 6px 14px rgba(0,0,0,.9))}
@@ -880,20 +882,17 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
   100%{top:16%;left:calc(50% - 22px);width:44px;height:44px;opacity:1;transform:rotate(-540deg) scale(1)}
 }
 @keyframes sfZonePop{0%{transform:scaleY(0);opacity:0}65%{transform:scaleY(1.14);opacity:1}82%{transform:scaleY(.93)}100%{transform:scaleY(1);opacity:1}}
-.sf-msg-box{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:var(--px);font-size:11px;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.9);background:rgba(0,0,0,.7);border-radius:10px;padding:7px 14px;text-align:center;white-space:nowrap;z-index:4;min-width:160px}
-.sf-act-panel{background:rgba(12,12,12,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 16px 14px;display:flex;flex-direction:column;gap:9px;flex-shrink:0}
+.sf-msg-box{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:var(--px);font-size:11px;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.9);background:rgba(0,0,0,.7);border-radius:10px;padding:7px 14px;text-align:center;z-index:4;min-width:160px;max-width:80%}
+.sf-msg-sub{font-size:8px;opacity:.65;display:block;margin-top:2px}
+.sf-act-panel{background:rgba(12,12,12,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:8px 16px max(14px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+.sf-run-btn{align-self:center;font-family:var(--px);font-size:9px;font-weight:700;color:rgba(255,255,255,.45);background:transparent;border:1.5px solid rgba(255,255,255,.12);border-radius:20px;padding:4px 18px;cursor:pointer;transition:all .15s;letter-spacing:.3px}
+.sf-run-btn:active{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)}
 .sf-ball-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
 .sf-ball-row-lbl{font-family:var(--px);font-size:8px;color:rgba(255,255,255,.4);text-align:center;margin-bottom:-4px}
 .sf-ball-throw{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 12px;border-radius:10px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);cursor:pointer;transition:all .15s;min-width:58px;flex:1}
 .sf-ball-throw.sel{border-color:rgba(255,255,255,.9);background:rgba(255,255,255,.18);box-shadow:0 0 12px rgba(255,255,255,.15)}
 .sf-ball-throw:disabled{opacity:.25;pointer-events:none;filter:grayscale(.6)}
 .sf-ball-throw span{font-family:var(--px);font-size:8px;color:rgba(255,255,255,.75)}
-.sf-act-row{display:flex;gap:8px}
-.sf-act-btn{flex:1;font-family:var(--px);font-size:10px;font-weight:700;border:none;border-radius:10px;padding:10px 0;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;gap:5px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.sf-act-btn:active{transform:scale(.93)}
-.sf-act-btn.throw{background:var(--ac);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.4);touch-action:none}
-.sf-act-btn.run{background:#2a2a2a;color:#888;border:2px solid #3a3a3a}
-.sf-act-btn:disabled{opacity:.35;pointer-events:none}
 /* Help screen */
 .sf-help-card{display:flex;gap:12px;align-items:flex-start;background:var(--s1);border-radius:14px;padding:12px 14px;border:1.5px solid var(--bd)}
 .sf-help-ico{font-size:22px;flex-shrink:0;margin-top:1px}
@@ -1005,8 +1004,6 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .sf-hold-zone{position:absolute;left:0;right:0;background:rgba(76,175,80,.85);box-shadow:0 0 10px rgba(76,175,80,.7)}
 .sf-hold-center{position:absolute;left:0;right:0;height:2px;border-radius:1px;background:#1b5e20;box-shadow:0 0 6px rgba(27,94,32,.95),0 0 14px rgba(27,94,32,.6);pointer-events:none;z-index:3;transform:translateY(50%)}
 .sf-hold-lbl{font-family:var(--px);font-size:7px;color:rgba(255,255,255,.8);text-align:center;white-space:nowrap;letter-spacing:.5px}
-@keyframes sfHoldPulse{0%,100%{box-shadow:0 3px 0 rgba(0,0,0,.4)}50%{box-shadow:0 0 18px rgba(76,175,80,.8),0 3px 0 rgba(0,0,0,.4)}}
-.sf-act-btn.throw.holding{background:linear-gradient(135deg,#2e7d32,#66bb6a)!important;animation:sfHoldPulse .55s infinite}
 /* Turn dots */
 .sf-turns-row{display:flex;align-items:center;justify-content:center;gap:5px;padding:2px 0}
 .sf-turn-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .2s,transform .2s}
@@ -1402,7 +1399,7 @@ function sendPasswordReset(){
   </div>
   <!-- ENCOUNTER -->
   <div id="sf-encounter" class="sf-screen">
-    <div id="sf-enc-bg" class="sf-enc-bg">
+    <div id="sf-enc-bg" class="sf-enc-bg" onpointerdown="sfHoldBegin(event)" onpointerup="sfHoldRelease()" onpointercancel="sfHoldRelease()" oncontextmenu="return false">
       <div id="sf-enc-bg-layer" class="sf-enc-bg-layer"></div>
       <button class="sf-enc-info-btn" onclick="sfEncInfo()" title="Ver en Pokédex">i</button>
       <div class="sf-enc-enemy" id="sf-enemy">
@@ -1433,10 +1430,7 @@ function sendPasswordReset(){
       <div id="sf-chain-wrap" style="display:none;padding:0 12px 4px"><div id="sf-chain-pill" class="sf-chain-pill"></div></div>
       <div id="sf-berry-row" class="sf-berry-row" style="display:none"></div>
       <div id="sf-ball-row" class="sf-ball-row"></div>
-      <div class="sf-act-row">
-        <button class="sf-act-btn throw" id="sf-btn-throw" onpointerdown="sfHoldBegin(event)" onpointerup="sfHoldRelease()" onpointercancel="sfHoldRelease()" oncontextmenu="return false">🎯 Lanzar</button>
-        <button class="sf-act-btn run" onclick="safariRun()">↩ Huir</button>
-      </div>
+      <button class="sf-run-btn" onclick="safariRun()">↩ Huir</button>
     </div>
   </div>
   <!-- AUCTION -->
@@ -4509,16 +4503,17 @@ function _sfShowEncounter(enc){
   const caughtTagEl=document.getElementById('sf-enemy-caught-tag');
   if(caughtTagEl)caughtTagEl.style.display=S.safari.caught[String(enc.poke.id)]?'':'none';
 
-  document.getElementById('sf-msg-box').textContent=`¡Un ${cap(enc.poke.name)} salvaje apareció!`;
+  const msgBox=document.getElementById('sf-msg-box');
+  if(msgBox)msgBox.innerHTML=`¡Un ${cap(enc.poke.name)} salvaje apareció!<span class="sf-msg-sub">Toca y mantén para lanzar</span>`;
   document.getElementById('sf-ball-fly').style.display='none';
   const holdWrap=document.getElementById('sf-hold-wrap');
   if(holdWrap)holdWrap.style.display='none';
+  _sfEnableActions();
 
   _sfRenderBallRow();
   _sfRenderTurns();
   _sfRenderBerryRow();
   _sfUpdateChainDisplay();
-  document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
 }
 
 function _sfRenderBallRow(){
@@ -4572,10 +4567,11 @@ function _sfHoldApplyZone(zone,center,half,animate){
 }
 
 function sfHoldBegin(e){
+  if(e.target.closest('button,a'))return;
   const enc=S.safari.encounter;
   if(!enc||enc.busy||_sfHoldActive)return;
   e.preventDefault();
-  e.target.setPointerCapture(e.pointerId);
+  document.getElementById('sf-enc-bg').setPointerCapture(e.pointerId);
   const ball=S.safari.selBall||'poke';
   const b=S.safari.balls;
   if(ball==='poke'){if(!(b.poke>0)){sfToast('Sin Poké Balls');return;}b.poke--;}
@@ -4602,8 +4598,9 @@ function sfHoldBegin(e){
   const zCol=SAFARI_HOLD_ZONE_COLORS[enc.tier]||SAFARI_HOLD_ZONE_COLORS[0];
   if(zone){zone.style.background=zCol[0];zone.style.boxShadow=`0 0 10px ${zCol[1]}`;}
   if(fill)fill.style.height='0%';
-  document.getElementById('sf-btn-throw')?.classList.add('holding');
-  document.getElementById('sf-msg-box').textContent='¡Suelta en la zona verde!';
+  document.getElementById('sf-enc-bg').classList.add('holding');
+  const msgBox=document.getElementById('sf-msg-box');
+  msgBox.innerHTML='¡Suelta en la zona verde!<span class="sf-msg-sub">Mantén presionado · Suelta en la zona</span>';
   _sfHoldStartTime=Date.now();
   const dur=SAFARI_HOLD_DUR[enc.tier];
   (function tick(){
@@ -4631,7 +4628,7 @@ function sfHoldRelease(){
   if(!enc)return;
   const dur=SAFARI_HOLD_DUR[enc.tier];
   const p=Math.min((Date.now()-_sfHoldStartTime)/dur,1);
-  document.getElementById('sf-btn-throw')?.classList.remove('holding');
+  document.getElementById('sf-enc-bg').classList.remove('holding');
   const zoneHalf=(_sfHoldZoneEnd-_sfHoldZoneStart)/2;
   const sweetDist=Math.abs(p-_sfHoldSweetSpot);
   let qteMult,qteMsg;
@@ -4656,7 +4653,7 @@ function sfHoldRelease(){
 function safariRun(){
   _sfHoldActive=false;
   if(_sfHoldRaf){cancelAnimationFrame(_sfHoldRaf);_sfHoldRaf=null;}
-  document.getElementById('sf-btn-throw')?.classList.remove('holding');
+  document.getElementById('sf-enc-bg').classList.remove('holding');
   const wrap=document.getElementById('sf-hold-wrap');
   if(wrap)wrap.style.display='none';
   S.safari.encounter=null;
@@ -4855,10 +4852,12 @@ function safariUseBerry(type){
 }
 
 function _sfDisableActions(){
-  document.getElementById('sf-btn-throw')?.setAttribute('disabled','');
+  const bg=document.getElementById('sf-enc-bg');
+  if(bg)bg.style.pointerEvents='none';
 }
 function _sfEnableActions(){
-  document.getElementById('sf-btn-throw')?.removeAttribute('disabled');
+  const bg=document.getElementById('sf-enc-bg');
+  if(bg)bg.style.pointerEvents='';
 }
 function _sfDelay(ms){return new Promise(r=>setTimeout(r,ms));}
 
