@@ -7080,14 +7080,18 @@ const gamesWithData=(S.set.myGames?.length?activeGames():GAMES).filter(g=>
 Object.values(S.track).some(pt=>pt[g.id]&&(pt[g.id].captured||pt[g.id].shiny))
 );
 const favKey=S.set.cardFavKey&&S.favs.has(S.set.cardFavKey)?S.set.cardFavKey:[...S.favs][0];
-const favBaseId=favKey?parseInt(String(favKey).split('*')[0]):null;
+const favIsShiny=favKey?.endsWith('*s')||false;
+const favBaseKey=favIsShiny&&favKey?favKey.slice(0,-2):favKey;
+const favUnderIdx=favBaseKey?String(favBaseKey).indexOf('_'):-1;
+const favBaseId=favBaseKey?parseInt(favUnderIdx>=0?String(favBaseKey).slice(0,favUnderIdx):String(favBaseKey)):null;
 const favPoke=favBaseId&&!isNaN(favBaseId)?S.poke.find(p=>p.id===favBaseId):null;
-// For variant favs, get the form sprite
-const favFormId=favKey&&String(favKey).includes('*')?parseInt(String(favKey).split('*')[1]):null;
-const favForm=favFormId?(S.fc?.[favBaseId]||[]).find(f=>f.id===favFormId):null;
+const favFormPart=favUnderIdx>=0?String(favBaseKey).slice(favUnderIdx+1):null;
+const favFormId=favFormPart?parseInt(favFormPart):null;
+const favForm=favFormId&&!isNaN(favFormId)?(S.fc?.[favBaseId]||[]).find(f=>f.id===favFormId):null;
 const favSpriteId=favForm?favForm.id:favBaseId;
-const favAnimUrl=favSpriteId&&favSpriteId<=649?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${favSpriteId}.gif`:null;
-const favStaticUrl=favSpriteId?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${favSpriteId}.png`:null;
+const _favBase=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon`;
+const favAnimUrl=favSpriteId&&favSpriteId<=649?`${_favBase}/versions/generation-v/black-white/animated/${favIsShiny?'shiny/':''}${favSpriteId}.gif`:null;
+const favStaticUrl=favSpriteId?`${_favBase}/${favIsShiny?'shiny/':''}${favSpriteId}.png`:null;
 const trainerId=String(name).split('').reduce((a,c)=>a+c.charCodeAt(0),10000).toString().slice(-5);
 const typeIconUrl=t=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-viii/sword-shield/${TYPE_ID[t]||1}.png`;
 const r=parseInt(topTypeColor.slice(1,3),16);
@@ -7461,17 +7465,19 @@ renderFav();
 function renderFav(){
 renderFavFilters();
 
-// Parse fav keys
+// Parse fav keys — format: "id", "id_formPart", "id*s", "id_formPart*s"
 const entries=[...S.favs].map(k=>{
-const parts=String(k).split('*');
-const baseId=parseInt(parts[0]);
+const isShiny=k.endsWith('*s');
+const baseKey=isShiny?k.slice(0,-2):k;
+const underIdx=baseKey.indexOf('_');
+const baseId=parseInt(underIdx>=0?baseKey.slice(0,underIdx):baseKey);
 if(isNaN(baseId))return null;
-const formPart=parts.slice(1).join('*')||null;
-return{key:k, baseId, formPart};
+const formPart=underIdx>=0?baseKey.slice(underIdx+1):null;
+return{key:k,baseId,formPart,isShiny};
 }).filter(Boolean);
 
 // Get types for each entry
-const withTypes=entries.map(({key,baseId,formPart})=>{
+const withTypes=entries.map(({key,baseId,formPart,isShiny})=>{
 const p=S.poke.find(x=>x.id===baseId);
 if(!p)return null;
 const forms=S.fc[baseId]||[];
@@ -7480,7 +7486,7 @@ const form=formPart
 ?(isNaN(formId)?forms.find(f=>f.isCostume&&(f.formName||f.name)===formPart):forms.find(f=>f.id===formId))
 :null;
 const types=(form?.types||p.types);
-return{key,baseId,formPart,p,form,types};
+return{key,baseId,formPart,isShiny,p,form,types};
 }).filter(Boolean);
 
 // Apply filters
@@ -7501,13 +7507,33 @@ return;
 }
 
 const mod=_modFromMode();
-const cards=filtered.map(({baseId,formPart,p,form})=>{
-if(!form)return cardHTML(p,true);
-const sp=mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id));
-const formLabel=form.isCostume?fmtF(form.formName||form.name,form.speciesName):fmtF(form.name,form.speciesName);
-const types=(form.types||p.types).map(t=>`<span class="tbadge" style="background:${tc(t)}">${cap(t)}</span>`).join('');
+const CDN='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
+const cards=filtered.map(({key,baseId,isShiny,p,form})=>{
 const rar=RAR[p.rarity]||RAR.normal;
-return`<div class="card" style="border-color:${tc(form.types?.[0]||p.types[0])}80;background:${tc(form.types?.[0]||p.types[0])}12" data-id="${baseId}" onclick="openMdl(${baseId})"> <div class="card-hdr"><span class="card-id">#${pad(baseId)}</span><span class="card-rdot" style="background:${rar.d}"></span></div> <img src="${sp}" class="card-img${mod?'':' px'} loaded" alt="${cap(p.name)}"> <div class="card-name">${cap(p.name)}</div> <div style="font-size:10px;font-weight:600;color:var(--t3);margin-top:-4px;margin-bottom:2px">${formLabel}</div> <div class="card-types">${types}</div> </div>`;
+const dispTypes=(form?.types||p.types);
+const types=dispTypes.map(t=>`<span class="tbadge" style="background:${tc(t)}">${cap(t)}</span>`).join('');
+const typeClr=tc(dispTypes[0]);
+const borderClr=isShiny?'#c8a00080':typeClr+'80';
+const bgClr=isShiny?'#c8a00012':typeClr+'12';
+let sp,subLabel;
+if(form){
+  sp=isShiny?(mod?(form.sprites.official_shiny||iShy(form.id)):(form.sprites.front_shiny||iPxN(form.id,true)))
+             :(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id)));
+  const fl=form.isCostume?fmtF(form.formName||form.name,form.speciesName):fmtF(form.name,form.speciesName);
+  subLabel=isShiny?`✨ ${fl}`:fl;
+}else{
+  sp=isShiny?(mod?iShy(baseId):iPxN(baseId,true)):(mod?iArt(baseId):iPx(baseId));
+  subLabel=isShiny?'✨ Shiny':null;
+}
+const shinyBadge=isShiny?`<div style="position:absolute;top:5px;left:7px;font-size:9px;line-height:1;background:#c8a00030;border-radius:4px;padding:2px 3px">✨</div>`:'';
+return`<div class="card" style="border-color:${borderClr};background:${bgClr}" data-id="${baseId}" onclick="openMdl(${baseId},${isShiny})">
+  <div class="card-hdr"><span class="card-id">#${pad(baseId)}</span><span class="card-rdot" style="background:${rar.d}"></span></div>
+  <img src="${sp}" class="card-img${mod?'':' px'} loaded" alt="${cap(p.name)}">
+  ${shinyBadge}
+  <div class="card-name">${cap(p.name)}</div>
+  ${subLabel?`<div style="font-size:10px;font-weight:600;color:${isShiny?'#c8a000':'var(--t3)'};margin-top:-4px;margin-bottom:2px">${subLabel}</div>`:''}
+  <div class="card-types">${types}</div>
+</div>`;
 }).join('');
 w.innerHTML=`<div class="grid">${cards}</div>`;
 setupImgObserver();
@@ -8086,10 +8112,10 @@ ${c.fainted?`<div style="width:100%;max-width:340px;background:rgba(248,113,113,
 
 }
 
-async function openMdl(id){
+async function openMdl(id,_initShiny=false){
 S.mId=id;S.mImgMode=_imgMode();S.mMod=S.mImgMode==='art';S.mShy=false;S.mForms=[];
-S.mPreviewForm=null;S.mPreviewShiny=false;
-_vpPoke=id;_vpForm=id;_vpShiny=false;
+S.mPreviewForm=null;S.mPreviewShiny=!!_initShiny;
+_vpPoke=id;_vpForm=id;_vpShiny=!!_initShiny;
 const base=S.poke.find(p=>p.id===id);if(!base)return;
 buildMdl(base,[]);
 document.getElementById('ov').classList.add('on');
@@ -8104,23 +8130,30 @@ fetchEvoChain(id),
 if(S.mId===id){
 S.mForms=forms;
 
-// Pre-select fav variant if coming from fav tab
-if(S.tab==='fav'&&forms.length>0){
-  const favKey=[...S.favs].find(k=>{
-    const parts=String(k).split('_');
-    return parseInt(parts[0])===id && parts.length>1;
+// Pre-select fav variant/shiny if coming from fav tab
+if(S.tab==='fav'){
+  const matchedFavKey=[...S.favs].find(k=>{
+    const bk=k.endsWith('*s')?k.slice(0,-2):k;
+    return parseInt(bk.split('_')[0])===id;
   });
-  if(favKey){
-    const formId=parseInt(String(favKey).split('_')[1]);
-    const form=forms.find(f=>f.id===formId);
-    if(form){ S.mPreviewForm=form; _vpPoke=id; _vpForm=formId; _vpShiny=false; }
+  if(matchedFavKey){
+    const isShiny=matchedFavKey.endsWith('*s');
+    const baseKey=isShiny?matchedFavKey.slice(0,-2):matchedFavKey;
+    const underIdx=baseKey.indexOf('_');
+    const formPart=underIdx>=0?baseKey.slice(underIdx+1):null;
+    S.mPreviewShiny=isShiny;_vpShiny=isShiny;
+    if(formPart&&forms.length>0){
+      const fId=parseInt(formPart);
+      const form=!isNaN(fId)?forms.find(f=>f.id===fId):forms.find(f=>f.isCostume&&(f.formName||f.name)===formPart);
+      if(form){S.mPreviewForm=form;_vpPoke=id;_vpForm=form.id;}
+    }
   } else {
-    S.mPreviewForm=null; _vpPoke=id; _vpForm=id; _vpShiny=false;
+    S.mPreviewForm=null;S.mPreviewShiny=false;_vpPoke=id;_vpForm=id;_vpShiny=false;
   }
 }
 
 buildMdl(base, forms);
-_refreshPickerButtons(id, _vpForm, false);
+_refreshPickerButtons(id, _vpForm, _vpShiny);
 
 // Inject evo chain after all sync/setTimeout code has run
 const evoHTML = renderEvoChain(evoStages, id);
@@ -8258,9 +8291,9 @@ const rar=RAR[base.rarity]||RAR.normal;
 const pf=S.mPreviewForm;
 const ps=S.mPreviewShiny;
 
-const trkKey=pf&&(pf.id!==id||pf.isCostume)
+const trkKey=(pf&&(pf.id!==id||pf.isCostume)
 ?(pf.isCostume?`${id}_${pf.formName||pf.name}`:`${id}_${pf.id}`)
-:String(id);
+:String(id))+(ps?'*s':'');
 const favKey=trkKey;
 
 const fav=isFav(favKey);
