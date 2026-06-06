@@ -1385,13 +1385,13 @@ function sendPasswordReset(){
     <div class="sf-phdr">
       <div class="sf-ptitle">Safari</div>
       <button class="ibtn" onclick="sfShowShop()" title="Tienda" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></button>
-      <button class="ibtn" onclick="sfShowAuction()" title="Subasta">🔨</button>
-      <button class="ibtn" onclick="sfShowMedals()" title="Medallas Safari">🏅</button>
+      <button class="ibtn" onclick="sfShowAuction()" title="Subasta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 20h20"/><path d="M5 20V8l7-6 7 6v12"/><path d="M9 20v-5h6v5"/></svg></button>
+      <button class="ibtn" onclick="sfShowMedals()" title="Medallas Safari"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="14" r="6"/><path d="M8 14l4-4 4 4"/><path d="M12 2v4"/><path d="M9 5H6L3 8"/><path d="M15 5h3l3 3"/></svg></button>
       <button class="ibtn" onclick="sfShowHelp()" title="Cómo funciona"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
     </div>
     <div id="sf-weather-bar" style="display:flex;align-items:center;justify-content:space-between;padding:0 2px 4px;gap:8px">
       <div id="sf-weather-chip" class="sf-weather-chip"></div>
-      <div id="sf-incense-global" style="display:none;font-family:var(--px);font-size:8px;font-weight:700;color:#ff9800">🕯️ <span id="sf-incense-timer-lbl"></span></div>
+      <div id="sf-incense-global" style="display:none;font-family:var(--px);font-size:8px;font-weight:700;color:#ff9800"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/lax-incense.png" width="14" height="14" style="image-rendering:pixelated;vertical-align:middle"> <span id="sf-incense-timer-lbl"></span></div>
     </div>
     <div id="sf-test-banner" style="display:none;margin:0 0 8px;padding:6px 12px;border-radius:10px;background:#E53935;color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;text-align:center;text-transform:uppercase">
       ⚗️ MODO PRUEBA — datos aislados
@@ -1417,7 +1417,7 @@ function sendPasswordReset(){
         <div id="sf-enemy-name" class="sf-enc-name"></div>
         <div class="sf-enc-tags">
           <div id="sf-enemy-tier" class="sf-enc-tag"></div>
-          <div id="sf-enemy-shiny" class="sf-enc-tag" style="display:none;background:#b8860b">✨ Shiny</div>
+          <div id="sf-enemy-shiny" class="sf-enc-tag" style="display:none;background:#b8860b"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/star-piece.png" width="12" height="12" style="image-rendering:pixelated;vertical-align:middle"> Shiny</div>
           <div id="sf-enemy-caught-tag" class="sf-enc-tag sf-enc-caught-tag" style="display:none">
             <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" width="10" height="10" style="image-rendering:pixelated;vertical-align:middle"> Ya cazado
           </div>
@@ -1462,7 +1462,7 @@ function sendPasswordReset(){
   </div>
 
   <!-- AMULET HUD -->
-  <div class="sf-amulet-hud" id="sf-amulet-hud">✨ Amuleto Shiny activo · <span id="sf-amulet-timer"></span></div>
+  <div class="sf-amulet-hud" id="sf-amulet-hud"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/star-piece.png" width="12" height="12" style="image-rendering:pixelated;vertical-align:middle"> Amuleto Shiny activo · <span id="sf-amulet-timer"></span></div>
 
   <!-- MEDALS -->
   <div id="sf-medals" class="sf-screen">
@@ -1482,7 +1482,7 @@ function sendPasswordReset(){
     <div class="gscroll" style="padding:12px 14px 32px;display:flex;flex-direction:column;gap:12px">
 
       <div class="sf-help-card">
-        <div class="sf-help-ico">🗺️</div>
+        <div class="sf-help-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg></div>
         <div>
           <div class="sf-help-title">Zonas</div>
           <div class="sf-help-body">El Safari tiene distintas zonas según el hábitat. Cada zona tiene sus propios Pokémon según el tipo. Desbloqueas nuevas zonas al ir capturando más Pokémon.</div>
@@ -1490,15 +1490,15 @@ function sendPasswordReset(){
       </div>
 
       <div class="sf-help-card">
-        <div class="sf-help-ico">🎯</div>
+        <div class="sf-help-ico"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" width="26" height="26" style="image-rendering:pixelated"></div>
         <div>
           <div class="sf-help-title">Lanzar la Pokéball</div>
-          <div class="sf-help-body">Mantén pulsado el botón <b>Lanzar</b>. Aparece una barra que sube — suéltala cuando la barra esté dentro de la zona verde para aumentar tus probabilidades de captura.</div>
+          <div class="sf-help-body">Mantén pulsado en la pantalla. Aparece una barra que sube — suéltala cuando la barra esté dentro de la zona verde para aumentar tus probabilidades de captura.</div>
         </div>
       </div>
 
       <div class="sf-help-card">
-        <div class="sf-help-ico">🟢</div>
+        <div class="sf-help-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="#4caf50"><circle cx="12" cy="12" r="10"/></svg></div>
         <div>
           <div class="sf-help-title">Zona verde y ciclos</div>
           <div class="sf-help-body">Si la barra llega al 100% sin soltar, vuelve a empezar. Cada dos ciclos la zona verde se hace la mitad de grande — cuanto más esperes, más difícil acertar. El punto blanco central es la zona <b>Excelente</b> (×2).</div>
@@ -1506,12 +1506,12 @@ function sendPasswordReset(){
       </div>
 
       <div class="sf-help-card">
-        <div class="sf-help-ico">⭐</div>
+        <div class="sf-help-ico"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/star-piece.png" width="26" height="26" style="image-rendering:pixelated"></div>
         <div>
           <div class="sf-help-title">Puntuación del tiro</div>
           <div class="sf-help-body">
-            <div class="sf-help-row"><span style="color:#fff;background:#388e3c;border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800">✨ Excelente</span> Centro exacto — ×2 prob.</div>
-            <div class="sf-help-row"><span style="color:#fff;background:#1976d2;border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800">⭐ Buen tiro</span> Dentro de la zona — ×1.5 prob.</div>
+            <div class="sf-help-row"><span style="color:#fff;background:#388e3c;border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800">Excelente</span> Centro exacto — ×2 prob.</div>
+            <div class="sf-help-row"><span style="color:#fff;background:#1976d2;border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800">Buen tiro</span> Dentro de la zona — ×1.5 prob.</div>
             <div class="sf-help-row"><span style="color:#fff;background:#f57c00;border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800">¡Bien!</span> Borde de la zona — ×1.2 prob.</div>
             <div class="sf-help-row"><span style="color:var(--t2);background:var(--s2);border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800">Normal</span> Fuera — ×0.85 prob.</div>
           </div>
@@ -1519,7 +1519,7 @@ function sendPasswordReset(){
       </div>
 
       <div class="sf-help-card">
-        <div class="sf-help-ico">🔢</div>
+        <div class="sf-help-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg></div>
         <div>
           <div class="sf-help-title">Turnos</div>
           <div class="sf-help-body">Cada Pokémon tiene un límite de intentos. Los comunes tienen <b>menos turnos</b> (3) y los míticos <b>más</b> (16). Si se agotan, el Pokémon huye.</div>
@@ -1527,32 +1527,32 @@ function sendPasswordReset(){
       </div>
 
       <div class="sf-help-card">
-        <div class="sf-help-ico">🍓</div>
+        <div class="sf-help-ico"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/razz-berry.png" width="26" height="26" style="image-rendering:pixelated"></div>
         <div>
           <div class="sf-help-title">Bayas</div>
           <div class="sf-help-body">
-            <div class="sf-help-row"><b>Razz 🍓</b> — +10% probabilidad de captura ese turno.</div>
-            <div class="sf-help-row"><b>Nanab 🍌</b> — reduce la probabilidad de huida un 70%.</div>
-            <div class="sf-help-row"><b>Pinap 🍍</b> — dobla las monedas si capturas ese turno.</div>
+            <div class="sf-help-row"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/razz-berry.png" width="14" height="14" style="image-rendering:pixelated;vertical-align:middle"> <b>Razz</b> — +10% probabilidad de captura ese turno.</div>
+            <div class="sf-help-row"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/nanab-berry.png" width="14" height="14" style="image-rendering:pixelated;vertical-align:middle"> <b>Nanab</b> — reduce la probabilidad de huida un 70%.</div>
+            <div class="sf-help-row"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pinap-berry.png" width="14" height="14" style="image-rendering:pixelated;vertical-align:middle"> <b>Pinap</b> — dobla las monedas si capturas ese turno.</div>
           </div>
         </div>
       </div>
 
       <div class="sf-help-card">
-        <div class="sf-help-ico">🔵</div>
+        <div class="sf-help-ico"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png" width="26" height="26" style="image-rendering:pixelated"></div>
         <div>
           <div class="sf-help-title">Tipos de Pokéball</div>
           <div class="sf-help-body">
-            <div class="sf-help-row"><b>Poké Ball 🔴</b> — multiplicador ×1</div>
-            <div class="sf-help-row"><b>Super Ball ⭐</b> — multiplicador ×1.5</div>
-            <div class="sf-help-row"><b>Ultra Ball 🔵</b> — multiplicador ×2</div>
-            <div class="sf-help-row"><b>Master Ball 💜</b> — captura garantizada</div>
+            <div class="sf-help-row"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" width="14" height="14" style="image-rendering:pixelated;vertical-align:middle"> <b>Poké Ball</b> — multiplicador ×1</div>
+            <div class="sf-help-row"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png" width="14" height="14" style="image-rendering:pixelated;vertical-align:middle"> <b>Super Ball</b> — multiplicador ×1.5</div>
+            <div class="sf-help-row"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png" width="14" height="14" style="image-rendering:pixelated;vertical-align:middle"> <b>Ultra Ball</b> — multiplicador ×2</div>
+            <div class="sf-help-row"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" width="14" height="14" style="image-rendering:pixelated;vertical-align:middle"> <b>Master Ball</b> — captura garantizada</div>
           </div>
         </div>
       </div>
 
       <div class="sf-help-card">
-        <div class="sf-help-ico">🪙</div>
+        <div class="sf-help-ico"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/amulet-coin.png" width="26" height="26" style="image-rendering:pixelated"></div>
         <div>
           <div class="sf-help-title">Monedas</div>
           <div class="sf-help-body">Ganas monedas al capturar Pokémon. Los más raros dan más monedas. Úsalas en la <b>Tienda</b> para comprar más Pokéballs y bayas.</div>
@@ -1601,7 +1601,7 @@ function sendPasswordReset(){
     </div>
     <div id="sf-detail-rows" class="sf-detail-rows"></div>
     <div id="sf-detail-exchange-wrap" style="display:none;padding:4px 16px">
-      <button onclick="sfExchangeFromDetail()" style="width:100%;padding:11px;border-radius:12px;border:1.5px solid var(--bd);background:var(--s2);color:var(--t1);font-family:var(--px);font-size:10px;font-weight:700;cursor:pointer">🔄 Intercambiar duplicado · <span id="sf-exchange-coins-preview"></span></button>
+      <button onclick="sfExchangeFromDetail()" style="width:100%;padding:11px;border-radius:12px;border:1.5px solid var(--bd);background:var(--s2);color:var(--t1);font-family:var(--px);font-size:10px;font-weight:700;cursor:pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M16 17H5v-2L2 18l3 3v-2h13v-4h-2v2zM8 7h11v2l3-3-3-3v2H6v4h2V7z"/></svg> Intercambiar duplicado · <span id="sf-exchange-coins-preview"></span></button>
     </div>
     <div id="sf-detail-dex-wrap" style="display:none;padding:8px 16px 4px">
       <button onclick="sfOpenPokedex()" style="width:100%;padding:11px;border-radius:12px;border:none;background:var(--ac);color:#fff;font-family:var(--px);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.04em">Ver en Pokédex →</button>
@@ -1616,7 +1616,7 @@ function sendPasswordReset(){
   <div class="sf-detail-body">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px">
       <div style="font-family:var(--px);font-size:13px;font-weight:700;color:var(--t1)">Tienda Safari</div>
-      <div id="sf-shop-coins-display" style="font-family:var(--px);font-size:11px;font-weight:700;color:#c8a000">🪙 0</div>
+      <div id="sf-shop-coins-display" style="font-family:var(--px);font-size:11px;font-weight:700;color:#c8a000"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/amulet-coin.png" width="16" height="16" style="image-rendering:pixelated;vertical-align:middle"> 0</div>
     </div>
     <div id="sf-shop-items"></div>
   </div>
@@ -1770,10 +1770,10 @@ function sendPasswordReset(){
       ⚾ Rellenar todas las balls (99 de cada)
     </button>
     <button onclick="adminGiveBerries()" style="padding:10px 14px;border-radius:12px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer;text-align:left">
-      🍓 Dar 50 bayas de cada tipo
+      Dar 50 bayas de cada tipo
     </button>
     <button onclick="adminUnlockZones()" style="padding:10px 14px;border-radius:12px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer;text-align:left">
-      🗺️ Desbloquear todas las zonas
+      Desbloquear todas las zonas
     </button>
     <button onclick="adminClearCaught()" style="padding:10px 14px;border-radius:12px;border:1.5px solid #ff980022;background:#ff980008;font-family:var(--fn);font-size:13px;font-weight:700;color:#e65100;cursor:pointer;text-align:left">
       🗑️ Borrar pokémon capturados
@@ -1881,7 +1881,7 @@ function sendPasswordReset(){
         <div class="help-step"><div class="help-step-num">6</div><div class="help-step-text"><b>Trainer Card</b> -- Ábrela desde el menú de tu avatar. Muestra tus estadísticas, logros y el reto del día.</div></div>
         <div class="help-step"><div class="help-step-num">7</div><div class="help-step-text"><b>Ajustes</b> -- Cambia el tema de color, el número de columnas, selecciona tus juegos y personaliza tu perfil de entrenador.</div></div>
       </div>
-      <div class="help-tip">💡 Tus datos se guardan en la nube y están disponibles en cualquier dispositivo donde inicies sesión con tu cuenta de Google.</div>
+      <div class="help-tip"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg> Tus datos se guardan en la nube y están disponibles en cualquier dispositivo donde inicies sesión con tu cuenta de Google.</div>
     </div>
   </div>
 </div>
@@ -3539,59 +3539,100 @@ safari:{caught:{},balls:{poke:10,great:0,ultra:0,master:0,lastRenew:null},berrie
 // ═══════════════════════════════════════
 //  SAFARI GAME
 // ═══════════════════════════════════════
+
+// ── Pixel-sprite helpers (replaces emojis) ──
+const _PITEMS='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items';
+const _PTYPES='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-viii/sword-shield';
+const SPRS={
+  razz:   _PITEMS+'/razz-berry.png',
+  nanab:  _PITEMS+'/nanab-berry.png',
+  pinap:  _PITEMS+'/pinap-berry.png',
+  coin:   _PITEMS+'/amulet-coin.png',
+  incense:_PITEMS+'/lax-incense.png',
+  shiny:  _PITEMS+'/star-piece.png',
+  poke:   _PITEMS+'/poke-ball.png',
+  great:  _PITEMS+'/great-ball.png',
+  ultra:  _PITEMS+'/ultra-ball.png',
+  master: _PITEMS+'/master-ball.png',
+  safari: _PITEMS+'/safari-ball.png',
+  trophy: _PITEMS+'/big-nugget.png',
+  fire_s: _PITEMS+'/fire-stone.png',
+  relic:  _PITEMS+'/relic-gold.png',
+  dragon: _PITEMS+'/dragon-scale.png',
+  sun:    _PITEMS+'/sun-stone.png',
+  scarf:  _PITEMS+'/choice-scarf.png',
+  hammer: _PITEMS+'/hard-stone.png',
+  doll:   _PITEMS+'/poke-doll.png',
+};
+const ZONE_TYPE_MAP={pradera:12,bosque:7,montana:6,costa:11,cueva:8,mar:11,volcan:10,tundra:15,ruinas:14,espacio:16};
+const WEATHER_TYPE_MAP={sunny:10,rain:11,snow:15,fog:8,storm:13,wind:3,cloudy:1};
+const _si=(k,sz=24)=>`<img src="${SPRS[k]||''}" width="${sz}" height="${sz}" style="object-fit:contain;image-rendering:pixelated;vertical-align:middle" alt="">`;
+const _ti=(id,w=52,h=20)=>`<img src="${_PTYPES}/${id}.png" width="${w}" height="${h}" style="object-fit:contain;image-rendering:pixelated;vertical-align:middle" alt="">`;
+const _svgi={
+  lock:`<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`,
+  map:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>`,
+  cal:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>`,
+  pin:`<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
+  hit:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10 10-4.49 10-10S17.51 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3-8c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"/></svg>`,
+  swap:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M16 17H5v-2L2 18l3 3v-2h13v-4h-2v2zM8 7h11v2l3-3-3-3v2H6v4h2V7z"/></svg>`,
+  info:`<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;opacity:.6"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg>`,
+  next:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>`,
+  zone:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
+};
+
 const SAFARI_ZONES={
-  pradera: {name:'Pradera',  emoji:'🌿', types:['normal','grass','flying','fairy'],   primaryTypes:['normal','grass','flying'],  minCatch:0,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/pradera.png') center/cover no-repeat"},
-  bosque:  {name:'Bosque',   emoji:'🌲', types:['bug','grass','poison','dark'],       primaryTypes:['bug','grass','poison'],     minCatch:0,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/bosque.png') center/cover no-repeat"},
-  montana: {name:'Montaña',  emoji:'⛰️', types:['rock','fighting','flying','steel'],  primaryTypes:['rock','fighting','steel'],  minCatch:5,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/montana.png') center/cover no-repeat"},
-  costa:   {name:'Costa',    emoji:'🏖️', types:['water','normal','psychic'],          primaryTypes:['water','normal'],           minCatch:5,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/costa.png') center/cover no-repeat"},
-  cueva:   {name:'Cueva',    emoji:'🕳️', types:['poison','ground','ghost','dark'],    primaryTypes:['poison','ground','ghost'],  minCatch:10, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/cueva.png') center/cover no-repeat"},
-  mar:     {name:'Mar',      emoji:'🌊', types:['water','dragon','ice'],              primaryTypes:['water','ice'],              minCatch:15, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/mar.png') center/cover no-repeat"},
-  volcan:  {name:'Volcán',   emoji:'🌋', types:['fire','ground','dragon'],            primaryTypes:['fire','ground'],            minCatch:20, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/volcan.png') center/cover no-repeat"},
-  tundra:  {name:'Tundra',   emoji:'❄️', types:['ice','psychic','dragon'],            primaryTypes:['ice','dragon'],             minCatch:25, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/tundra.png') center/cover no-repeat"},
-  ruinas:  {name:'Ruinas',   emoji:'🏛️', types:['psychic','ghost','dragon','steel'],  primaryTypes:['psychic','ghost'],          minCatch:80, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/ruinas.png') center/cover no-repeat"},
-  espacio: {name:'Espacio',  emoji:'🌌', types:['dragon','psychic','steel','fairy'],  primaryTypes:['dragon','psychic','steel'], minCatch:200,bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/espacio.png') center/cover no-repeat"},
+  pradera: {name:'Pradera',  types:['normal','grass','flying','fairy'],   primaryTypes:['normal','grass','flying'],  minCatch:0,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/pradera.png') center/cover no-repeat"},
+  bosque:  {name:'Bosque',   types:['bug','grass','poison','dark'],       primaryTypes:['bug','grass','poison'],     minCatch:0,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/bosque.png') center/cover no-repeat"},
+  montana: {name:'Montaña',  types:['rock','fighting','flying','steel'],  primaryTypes:['rock','fighting','steel'],  minCatch:5,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/montana.png') center/cover no-repeat"},
+  costa:   {name:'Costa',    types:['water','normal','psychic'],          primaryTypes:['water','normal'],           minCatch:5,  bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/costa.png') center/cover no-repeat"},
+  cueva:   {name:'Cueva',    types:['poison','ground','ghost','dark'],    primaryTypes:['poison','ground','ghost'],  minCatch:10, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/cueva.png') center/cover no-repeat"},
+  mar:     {name:'Mar',      types:['water','dragon','ice'],              primaryTypes:['water','ice'],              minCatch:15, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/mar.png') center/cover no-repeat"},
+  volcan:  {name:'Volcán',   types:['fire','ground','dragon'],            primaryTypes:['fire','ground'],            minCatch:20, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/volcan.png') center/cover no-repeat"},
+  tundra:  {name:'Tundra',   types:['ice','psychic','dragon'],            primaryTypes:['ice','dragon'],             minCatch:25, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/tundra.png') center/cover no-repeat"},
+  ruinas:  {name:'Ruinas',   types:['psychic','ghost','dragon','steel'],  primaryTypes:['psychic','ghost'],          minCatch:80, bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/ruinas.png') center/cover no-repeat"},
+  espacio: {name:'Espacio',  types:['dragon','psychic','steel','fairy'],  primaryTypes:['dragon','psychic','steel'], minCatch:200,bg:"url('https://raw.githubusercontent.com/mariodiazagu/pokedex-app/main/assets/safari/espacio.png') center/cover no-repeat"},
 };
 const SAFARI_PSEUDO=new Set([149,248,373,376,445,612,635,706,784,887,998]);
 const SAFARI_TIER_COLORS=['#888','#c47a00','#8B3AA2','#1a6bc1','#d44400','#7b1fa2'];
 const SAFARI_TIER_LABELS=['Común','Poco común','Raro','Ultra/Paradoja','Legendario','Mítico'];
 const SAFARI_WEATHER=[
-  {id:'sunny', emoji:'☀️', name:'Soleado',  types:['fire','grass','ground'],       mult:1.10},
-  {id:'rain',  emoji:'🌧️',name:'Lluvia',   types:['water','bug','electric'],      mult:0.95},
-  {id:'snow',  emoji:'❄️', name:'Nieve',    types:['ice','steel'],                 mult:0.95},
-  {id:'fog',   emoji:'🌫️',name:'Niebla',   types:['ghost','dark','dragon'],       mult:1.05},
-  {id:'storm', emoji:'⛈️',name:'Tormenta', types:['electric','flying','dragon'],  mult:0.90},
-  {id:'wind',  emoji:'💨', name:'Viento',   types:['flying','normal','fairy'],     mult:1.00},
-  {id:'cloudy',emoji:'☁️', name:'Nublado',  types:['normal','rock','poison'],      mult:1.00},
+  {id:'sunny', name:'Soleado',  types:['fire','grass','ground'],       mult:1.10},
+  {id:'rain',  name:'Lluvia',   types:['water','bug','electric'],      mult:0.95},
+  {id:'snow',  name:'Nieve',    types:['ice','steel'],                 mult:0.95},
+  {id:'fog',   name:'Niebla',   types:['ghost','dark','dragon'],       mult:1.05},
+  {id:'storm', name:'Tormenta', types:['electric','flying','dragon'],  mult:0.90},
+  {id:'wind',  name:'Viento',   types:['flying','normal','fairy'],     mult:1.00},
+  {id:'cloudy',name:'Nublado',  types:['normal','rock','poison'],      mult:1.00},
 ];
 const SAFARI_MEDALS=[
-  {id:'sm_first',    emoji:'🎯',label:'Primera sangre',     desc:'Tu primera captura en el Safari',                         reward:{poke:5},    check:s=>s.catchTotal>=1},
-  {id:'sm_catch50',  emoji:'🏆',label:'Medio centenar',     desc:'50 capturas en total',                                    reward:{ultra:3},   check:s=>s.catchTotal>=50},
-  {id:'sm_catch200', emoji:'🏆',label:'Veterano',           desc:'200 capturas en total',                                   reward:{master:1},  check:s=>s.catchTotal>=200},
-  {id:'sm_shiny1',   emoji:'✨',label:'¡Shiny!',            desc:'Captura tu primer Pokémon shiny',                         reward:{ultra:3},   check:s=>Object.values(s.caught||{}).some(c=>c.shiny)},
-  {id:'sm_shiny5',   emoji:'✨',label:'Cazador de brillos', desc:'5 Pokémon shiny capturados',                              reward:{ultra:5},   check:s=>Object.values(s.caught||{}).filter(c=>c.shiny).length>=5},
-  {id:'sm_chain5',   emoji:'🔥',label:'Racha x5',           desc:'Cadena de 5 capturas del mismo tipo seguidas',            reward:{razz:5},    check:s=>(s.chain?.maxCount||0)>=5},
-  {id:'sm_chain10',  emoji:'🔥',label:'Racha x10',          desc:'Cadena de 10 capturas del mismo tipo seguidas',           reward:{ultra:3},   check:s=>(s.chain?.maxCount||0)>=10},
-  {id:'sm_leg1',     emoji:'🏅',label:'Leyenda',            desc:'Captura tu primer Pokémon legendario',                    reward:{ultra:5},   check:s=>Object.keys(s.caught||{}).some(id=>{const p=S.poke?.find(x=>x.id===+id);return p&&_sfTier(p)===4;})},
-  {id:'sm_myth1',    emoji:'💎',label:'Mítico',             desc:'Captura tu primer Pokémon mítico',                        reward:{master:1},  check:s=>Object.keys(s.caught||{}).some(id=>{const p=S.poke?.find(x=>x.id===+id);return p&&_sfTier(p)===5;})},
-  {id:'sm_weather',  emoji:'🌤️',label:'Meteorólogo',        desc:'Captura un Pokémon boosteado por el clima actual',        reward:{nanab:5},   check:s=>(s.weatherBoostCatch||0)>=1},
-  {id:'sm_incense1', emoji:'🕯️',label:'Rastro oloroso',    desc:'Usa un incienso en una zona',                             reward:{razz:3},    check:s=>(s.incenseUsed||0)>=1},
-  {id:'sm_exchange1',emoji:'🔄',label:'Primer trueque',     desc:'Intercambia tu primer duplicado por monedas',             reward:{coins:30},  check:s=>(s.exchangeCount||0)>=1},
-  {id:'sm_auction1', emoji:'🔨',label:'Pujador',            desc:'Reclama tu primer Pokémon en subasta',                    reward:{great:10},  check:s=>(s.auctionWins||0)>=1},
-  {id:'sm_rich',     emoji:'🪙',label:'Rico en monedas',    desc:'Acumula 500 monedas totales ganadas',                     reward:{ultra:5},   check:s=>(s.coinsEarned||0)>=500},
-  {id:'sm_shop10',   emoji:'🛒',label:'Comprador habitual', desc:'Compra 10 objetos en la tienda',                          reward:{coins:50},  check:s=>(s.shopBuyCount||0)>=10},
-  {id:'sm_zone_pradera',emoji:'🌿',label:'Pradera completa',desc:'Captura todos los Pokémon de la Pradera',                 reward:{ultra:5},   check:_=>sfZoneCompletion('pradera').pct>=100},
-  {id:'sm_zone_bosque', emoji:'🌲',label:'Bosque completo', desc:'Captura todos los Pokémon del Bosque',                    reward:{ultra:5},   check:_=>sfZoneCompletion('bosque').pct>=100},
-  {id:'sm_zone_montana',emoji:'⛰️',label:'Montaña completa',desc:'Captura todos los Pokémon de la Montaña',                reward:{ultra:5},   check:_=>sfZoneCompletion('montana').pct>=100},
-  {id:'sm_zone_costa',  emoji:'🏖️',label:'Costa completa', desc:'Captura todos los Pokémon de la Costa',                   reward:{ultra:5},   check:_=>sfZoneCompletion('costa').pct>=100},
-  {id:'sm_zone_cueva',  emoji:'🕳️',label:'Cueva completa', desc:'Captura todos los Pokémon de la Cueva',                   reward:{ultra:5},   check:_=>sfZoneCompletion('cueva').pct>=100},
-  {id:'sm_zone_mar',    emoji:'🌊',label:'Mar completo',    desc:'Captura todos los Pokémon del Mar',                       reward:{ultra:5},   check:_=>sfZoneCompletion('mar').pct>=100},
-  {id:'sm_zone_volcan', emoji:'🌋',label:'Volcán completo', desc:'Captura todos los Pokémon del Volcán',                    reward:{ultra:5},   check:_=>sfZoneCompletion('volcan').pct>=100},
-  {id:'sm_zone_tundra', emoji:'❄️',label:'Tundra completa', desc:'Captura todos los Pokémon de la Tundra',                  reward:{ultra:5},   check:_=>sfZoneCompletion('tundra').pct>=100},
-  {id:'sm_zone_ruinas', emoji:'🏛️',label:'Ruinas completas',desc:'Captura todos los Pokémon de las Ruinas',                reward:{master:1},  check:_=>sfZoneCompletion('ruinas').pct>=100},
-  {id:'sm_zone_espacio',emoji:'🌌',label:'Espacio completo',desc:'Captura todos los Pokémon del Espacio',                   reward:{master:2},  check:_=>sfZoneCompletion('espacio').pct>=100},
-  {id:'sm_gen1',emoji:'🔴',label:'Kanto completo',          desc:'Captura al menos una especie de cada Pokémon de Gen I',   reward:{master:1},  check:_=>_sfGenComplete(1)},
-  {id:'sm_gen2',emoji:'🌿',label:'Johto completo',          desc:'Captura al menos una especie de cada Pokémon de Gen II',  reward:{master:1},  check:_=>_sfGenComplete(2)},
-  {id:'sm_gen3',emoji:'💧',label:'Hoenn completo',          desc:'Captura al menos una especie de cada Pokémon de Gen III', reward:{master:1},  check:_=>_sfGenComplete(3)},
+  {id:'sm_first',    ico:_si('safari',32),  label:'Primera sangre',     desc:'Tu primera captura en el Safari',                         reward:{poke:5},    check:s=>s.catchTotal>=1},
+  {id:'sm_catch50',  ico:_si('trophy',32),  label:'Medio centenar',     desc:'50 capturas en total',                                    reward:{ultra:3},   check:s=>s.catchTotal>=50},
+  {id:'sm_catch200', ico:_si('trophy',32),  label:'Veterano',           desc:'200 capturas en total',                                   reward:{master:1},  check:s=>s.catchTotal>=200},
+  {id:'sm_shiny1',   ico:_si('shiny',32),   label:'¡Shiny!',            desc:'Captura tu primer Pokémon shiny',                         reward:{ultra:3},   check:s=>Object.values(s.caught||{}).some(c=>c.shiny)},
+  {id:'sm_shiny5',   ico:_si('shiny',32),   label:'Cazador de brillos', desc:'5 Pokémon shiny capturados',                              reward:{ultra:5},   check:s=>Object.values(s.caught||{}).filter(c=>c.shiny).length>=5},
+  {id:'sm_chain5',   ico:_si('fire_s',32),  label:'Racha x5',           desc:'Cadena de 5 capturas del mismo tipo seguidas',            reward:{razz:5},    check:s=>(s.chain?.maxCount||0)>=5},
+  {id:'sm_chain10',  ico:_si('fire_s',32),  label:'Racha x10',          desc:'Cadena de 10 capturas del mismo tipo seguidas',           reward:{ultra:3},   check:s=>(s.chain?.maxCount||0)>=10},
+  {id:'sm_leg1',     ico:_si('relic',32),   label:'Leyenda',            desc:'Captura tu primer Pokémon legendario',                    reward:{ultra:5},   check:s=>Object.keys(s.caught||{}).some(id=>{const p=S.poke?.find(x=>x.id===+id);return p&&_sfTier(p)===4;})},
+  {id:'sm_myth1',    ico:_si('dragon',32),  label:'Mítico',             desc:'Captura tu primer Pokémon mítico',                        reward:{master:1},  check:s=>Object.keys(s.caught||{}).some(id=>{const p=S.poke?.find(x=>x.id===+id);return p&&_sfTier(p)===5;})},
+  {id:'sm_weather',  ico:_si('sun',32),     label:'Meteorólogo',        desc:'Captura un Pokémon boosteado por el clima actual',        reward:{nanab:5},   check:s=>(s.weatherBoostCatch||0)>=1},
+  {id:'sm_incense1', ico:_si('incense',32), label:'Rastro oloroso',     desc:'Usa un incienso en una zona',                             reward:{razz:3},    check:s=>(s.incenseUsed||0)>=1},
+  {id:'sm_exchange1',ico:_si('scarf',32),   label:'Primer trueque',     desc:'Intercambia tu primer duplicado por monedas',             reward:{coins:30},  check:s=>(s.exchangeCount||0)>=1},
+  {id:'sm_auction1', ico:_si('hammer',32),  label:'Pujador',            desc:'Reclama tu primer Pokémon en subasta',                    reward:{great:10},  check:s=>(s.auctionWins||0)>=1},
+  {id:'sm_rich',     ico:_si('coin',32),    label:'Rico en monedas',    desc:'Acumula 500 monedas totales ganadas',                     reward:{ultra:5},   check:s=>(s.coinsEarned||0)>=500},
+  {id:'sm_shop10',   ico:_si('doll',32),    label:'Comprador habitual', desc:'Compra 10 objetos en la tienda',                          reward:{coins:50},  check:s=>(s.shopBuyCount||0)>=10},
+  {id:'sm_zone_pradera',ico:_ti(12),label:'Pradera completa',desc:'Captura todos los Pokémon de la Pradera',                 reward:{ultra:5},   check:_=>sfZoneCompletion('pradera').pct>=100},
+  {id:'sm_zone_bosque', ico:_ti(7), label:'Bosque completo', desc:'Captura todos los Pokémon del Bosque',                    reward:{ultra:5},   check:_=>sfZoneCompletion('bosque').pct>=100},
+  {id:'sm_zone_montana',ico:_ti(6), label:'Montaña completa',desc:'Captura todos los Pokémon de la Montaña',                reward:{ultra:5},   check:_=>sfZoneCompletion('montana').pct>=100},
+  {id:'sm_zone_costa',  ico:_ti(11),label:'Costa completa',  desc:'Captura todos los Pokémon de la Costa',                   reward:{ultra:5},   check:_=>sfZoneCompletion('costa').pct>=100},
+  {id:'sm_zone_cueva',  ico:_ti(8), label:'Cueva completa',  desc:'Captura todos los Pokémon de la Cueva',                   reward:{ultra:5},   check:_=>sfZoneCompletion('cueva').pct>=100},
+  {id:'sm_zone_mar',    ico:_ti(11),label:'Mar completo',    desc:'Captura todos los Pokémon del Mar',                       reward:{ultra:5},   check:_=>sfZoneCompletion('mar').pct>=100},
+  {id:'sm_zone_volcan', ico:_ti(10),label:'Volcán completo', desc:'Captura todos los Pokémon del Volcán',                    reward:{ultra:5},   check:_=>sfZoneCompletion('volcan').pct>=100},
+  {id:'sm_zone_tundra', ico:_ti(15),label:'Tundra completa', desc:'Captura todos los Pokémon de la Tundra',                  reward:{ultra:5},   check:_=>sfZoneCompletion('tundra').pct>=100},
+  {id:'sm_zone_ruinas', ico:_ti(14),label:'Ruinas completas',desc:'Captura todos los Pokémon de las Ruinas',                reward:{master:1},  check:_=>sfZoneCompletion('ruinas').pct>=100},
+  {id:'sm_zone_espacio',ico:_ti(16),label:'Espacio completo',desc:'Captura todos los Pokémon del Espacio',                   reward:{master:2},  check:_=>sfZoneCompletion('espacio').pct>=100},
+  {id:'sm_gen1',ico:_si('poke',32),  label:'Kanto completo', desc:'Captura al menos una especie de cada Pokémon de Gen I',   reward:{master:1},  check:_=>_sfGenComplete(1)},
+  {id:'sm_gen2',ico:_ti(12),         label:'Johto completo', desc:'Captura al menos una especie de cada Pokémon de Gen II',  reward:{master:1},  check:_=>_sfGenComplete(2)},
+  {id:'sm_gen3',ico:_ti(11),         label:'Hoenn completo', desc:'Captura al menos una especie de cada Pokémon de Gen III', reward:{master:1},  check:_=>_sfGenComplete(3)},
 ];
 const SAFARI_CATCH_RATES=[50,45,22,8,3,2]; // tier 0 (común) → tier 5 (mítico)
 const SAFARI_BALL_MULT={poke:1,great:1.5,ultra:2,master:999};
@@ -3612,14 +3653,14 @@ const SAFARI_COIN_RATE=[1,2,5,10,25,50];            // coins per catch by tier (
 const SAFARI_DODGE=[0,0,0.12,0.18,0.25,0.30];      // dodge chance per tier
 const NATURES_ES=['Fuerte','Solitario','Valiente','Adamante','Pícaro','Audaz','Dócil','Relajado','Impasible','Flojo','Tímido','Apresurado','Serio','Jovial','Ingenuo','Modesto','Suave','Quieto','Tímido','Alocado','Sereno','Gentil','Impertinente','Cauto','Raro'];
 const HELD_ITEM_TABLE=[
-  {id:'razz',  label:'Baya Frambu',  ico:'🍓', qty:3,  w:200, apply:s=>(s.berries.razz=(s.berries.razz||0)+3)},
-  {id:'nanab', label:'Baya Nanab',   ico:'🍌', qty:3,  w:150, apply:s=>(s.berries.nanab=(s.berries.nanab||0)+3)},
-  {id:'pinap', label:'Baya Zagaya',  ico:'🍍', qty:3,  w:120, apply:s=>(s.berries.pinap=(s.berries.pinap||0)+3)},
-  {id:'poke',  label:'Poké Balls',   ico:'🔴', qty:5,  w:180, apply:s=>(s.balls.poke=(s.balls.poke||0)+5)},
-  {id:'great', label:'Super Ball',   ico:'⭐', qty:2,  w:80,  apply:s=>(s.balls.great=(s.balls.great||0)+2)},
-  {id:'ultra', label:'Ultra Ball',   ico:'🔵', qty:1,  w:35,  apply:s=>(s.balls.ultra=(s.balls.ultra||0)+1)},
-  {id:'incense',label:'Incienso',    ico:'🕯️', qty:1, w:20,  apply:s=>(s.berries.incense=(s.berries.incense||0)+1)},
-  {id:'amulet',label:'Amuleto Shiny',ico:'✨', qty:1,  w:8,   apply:s=>(s.amulet={expiresAt:Date.now()+2*60*1000}), special:true},
+  {id:'razz',  label:'Baya Frambu',  ico:_si('razz',28),   qty:3,  w:200, apply:s=>(s.berries.razz=(s.berries.razz||0)+3)},
+  {id:'nanab', label:'Baya Nanab',   ico:_si('nanab',28),  qty:3,  w:150, apply:s=>(s.berries.nanab=(s.berries.nanab||0)+3)},
+  {id:'pinap', label:'Baya Zagaya',  ico:_si('pinap',28),  qty:3,  w:120, apply:s=>(s.berries.pinap=(s.berries.pinap||0)+3)},
+  {id:'poke',  label:'Poké Balls',   ico:_si('poke',28),   qty:5,  w:180, apply:s=>(s.balls.poke=(s.balls.poke||0)+5)},
+  {id:'great', label:'Super Ball',   ico:_si('great',28),  qty:2,  w:80,  apply:s=>(s.balls.great=(s.balls.great||0)+2)},
+  {id:'ultra', label:'Ultra Ball',   ico:_si('ultra',28),  qty:1,  w:35,  apply:s=>(s.balls.ultra=(s.balls.ultra||0)+1)},
+  {id:'incense',label:'Incienso',    ico:_si('incense',28),qty:1,  w:20,  apply:s=>(s.berries.incense=(s.berries.incense||0)+1)},
+  {id:'amulet',label:'Amuleto Shiny',ico:_si('shiny',28),  qty:1,  w:8,   apply:s=>(s.amulet={expiresAt:Date.now()+2*60*1000}), special:true},
 ];
 const SAFARI_MILESTONES=[
   {id:'sf_c1',  catches:1,   reward:{great:3},                    msg:'¡Primera captura! +3 Super Ball'},
@@ -3728,29 +3769,29 @@ function sfStreakReward(n){
   const parts=[];
   if(reward.great)parts.push(`+${reward.great} Super Ball`);
   if(reward.ultra)parts.push(`+${reward.ultra} Ultra Ball`);
-  if(reward.coins)parts.push(`+${reward.coins} 🪙`);
+  if(reward.coins)parts.push(`+${reward.coins} monedas`);
   sfToast(`¡Racha x${n*25}! ${parts.join(' · ')}`);
 }
 
 const SF_SHOP=[
-  {id:'poke10', label:'10 Poké Balls',  ico:'🔴', price:5,  reward:{poke:10}},
-  {id:'great5', label:'5 Super Balls',  ico:'⭐', price:15, reward:{great:5}},
-  {id:'ultra3', label:'3 Ultra Balls',  ico:'🔵', price:30, reward:{ultra:3}},
-  {id:'master1',label:'1 Master Ball',  ico:'💜', price:100,reward:{master:1}},
-  {id:'razz3',  label:'3 Razz Berries', ico:'🍓', price:8,  reward:{razz:3}},
-  {id:'nanab3', label:'3 Nanab Berries',ico:'🍌', price:6,  reward:{nanab:3}},
-  {id:'pinap3',   label:'3 Pinap Berries', ico:'🍍', price:10, reward:{pinap:3}},
-  {id:'incense1', label:'1 Incienso',      ico:'🕯️', price:20, reward:{incense:1}},
+  {id:'poke10', label:'10 Poké Balls',  ico:_si('poke',20),   price:5,  reward:{poke:10}},
+  {id:'great5', label:'5 Super Balls',  ico:_si('great',20),  price:15, reward:{great:5}},
+  {id:'ultra3', label:'3 Ultra Balls',  ico:_si('ultra',20),  price:30, reward:{ultra:3}},
+  {id:'master1',label:'1 Master Ball',  ico:_si('master',20), price:100,reward:{master:1}},
+  {id:'razz3',  label:'3 Razz Berries', ico:_si('razz',20),   price:8,  reward:{razz:3}},
+  {id:'nanab3', label:'3 Nanab Berries',ico:_si('nanab',20),  price:6,  reward:{nanab:3}},
+  {id:'pinap3',   label:'3 Pinap Berries', ico:_si('pinap',20),  price:10, reward:{pinap:3}},
+  {id:'incense1', label:'1 Incienso',      ico:_si('incense',20),price:20, reward:{incense:1}},
 ];
 
 function sfShowShop(){
   const coins=S.safari.coins||0;
-  document.getElementById('sf-shop-coins-display').textContent=`🪙 ${coins}`;
+  document.getElementById('sf-shop-coins-display').innerHTML=`${_si('coin',16)} ${coins}`;
   document.getElementById('sf-shop-items').innerHTML=SF_SHOP.map(item=>`
     <div class="sf-shop-item">
       <div>
         <div style="font-family:var(--px);font-size:11px;font-weight:700;color:var(--t1)">${item.ico} ${item.label}</div>
-        <div style="font-size:10px;color:var(--t3);margin-top:2px">Precio: ${item.price} 🪙</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:2px">Precio: ${item.price} ${_si('coin',12)}</div>
       </div>
       <button class="sf-shop-buy" onclick="sfBuyBall('${item.id}')" ${coins<item.price?'disabled':''}>Comprar</button>
     </div>`).join('');
@@ -3889,7 +3930,7 @@ function _sfUpdateWeatherChip(){
   const w=sfGetWeather();
   const nextSlot=(Math.floor(Date.now()/(2*60*60*1000))+1)*2*60*60*1000;
   const mins=Math.ceil((nextSlot-Date.now())/60000);
-  chip.textContent=`${w.emoji} ${w.name} · ${mins}min`;
+  chip.innerHTML=`${_ti(WEATHER_TYPE_MAP[w.id],44,16)} ${w.name} · ${mins}min`;
   chip.title=w.types.length?`Pokémon boosteados: ${w.types.join(', ')}`:'Sin bonus de tipo';
   // Incense global timer
   const ig=document.getElementById('sf-incense-global');
@@ -3921,7 +3962,7 @@ function sfUseIncense(zoneId){
   _sfRenderZones();
   _sfUpdateWeatherChip();
   sfCheckSafariMedals();
-  sfToast(`🕯️ Incienso activo en ${SAFARI_ZONES[zoneId]?.name} — 5 minutos`);
+  sfToast(`Incienso activo en ${SAFARI_ZONES[zoneId]?.name} — 5 minutos`);
 }
 
 // ── CATCH CHAIN DISPLAY ──
@@ -3954,11 +3995,11 @@ function _sfUpdateHammer(id,tl){
   if(tl>30000){el.style.display='none';return;}
   el.style.display='block';
   const leading=_sfAucLeading.has(id);
-  if(tl>20000)el.innerHTML=`<span class="sf-hmr-p1">🔨 ¡A la una!</span>`;
-  else if(tl>10000)el.innerHTML=`<span class="sf-hmr-p2">🔨 ¡A las dos!</span>`;
+  if(tl>20000)el.innerHTML=`<span class="sf-hmr-p1">¡A la una!</span>`;
+  else if(tl>10000)el.innerHTML=`<span class="sf-hmr-p2">¡A las dos!</span>`;
   else el.innerHTML=leading
-    ?`<span class="sf-hmr-p3-win">🔨 ¡A las tres! — ¡ES TUYO!</span>`
-    :`<span class="sf-hmr-p3-lose">🔨 ¡A las tres! — ¡SE ESCAPA!</span>`;
+    ?`<span class="sf-hmr-p3-win">¡A las tres! — ¡ES TUYO!</span>`
+    :`<span class="sf-hmr-p3-lose">¡A las tres! — ¡SE ESCAPA!</span>`;
 }
 const AUCTION_RIVALS=['Red','Celeste','Brock','Misty','Giovanni','Leaf','May','Dawn','N','Iris'];
 function sfAuctionSlot(){return Math.floor(Date.now()/(4*60*60*1000));}
@@ -4029,10 +4070,10 @@ function _sfCheckAuctionResult(auc){
     S.safari.caught[key].normal.count++;S.safari.caught[key].normal.lastDate=Date.now();
     S.safari.auctionWins=(S.safari.auctionWins||0)+1;
     sfCheckSafariMedals();
-    sfToast(`🔨 ¡${cap(auc.poke.name)} conseguido en subasta!`);
+    sfToast(`¡${cap(auc.poke.name)} conseguido en subasta!`);
   }else{
     S.safari.coins=(S.safari.coins||0)+saved.userBid;
-    sfToast(`💸 Subasta perdida — ${saved.userBid}🪙 devueltos`);
+    sfToast(`Subasta perdida — ${saved.userBid} monedas devueltas`);
   }
   saved.won=won;saved.finalized=true;scheduleSave();
 }
@@ -4101,7 +4142,7 @@ function _sfRenderAuction(){
   const coinsEl=document.getElementById('sf-auction-coins');
   if(!el)return;
   const coins=S.safari.coins||0;
-  if(coinsEl)coinsEl.textContent=`🪙 ${coins}`;
+  if(coinsEl)coinsEl.innerHTML=`${_si('coin',14)} ${coins}`;
   _sfAucEndTimes={};_sfLastAucSlot=sfAuctionSlot();
   const slot=_sfLastAucSlot,flash=sfGetFlashAuction(),auctions=sfGetAuctions(slot);
   for(const auc of auctions){const st=_sfAucState(auc);if(st.isOver&&!st.finalized&&st.userBid)_sfCheckAuctionResult(auc);}
@@ -4123,28 +4164,29 @@ function _sfAucCard(auc,coins){
   _sfAucEndTimes[auc.id]=st.effectiveEndsAt;
   st.leading?_sfAucLeading.add(auc.id):_sfAucLeading.delete(auc.id);
   const saved=S.safari.auctions?.[auc.id]||{};
-  const logItems=[...st.revealed.map(b=>({at:b.at,html:`<div class="sf-abid-row rival"><span>⚔️ ${b.bidder}</span><span>${b.price}🪙</span></div>`}))];
-  if(saved.userBid)logItems.push({at:saved.bidAt||0,html:`<div class="sf-abid-row me"><span>👤 Tú</span><span>${saved.userBid}🪙</span></div>`});
+  const _c=_si('coin',12);
+  const logItems=[...st.revealed.map(b=>({at:b.at,html:`<div class="sf-abid-row rival"><span>Rival ${b.bidder}</span><span>${b.price} ${_c}</span></div>`}))];
+  if(saved.userBid)logItems.push({at:saved.bidAt||0,html:`<div class="sf-abid-row me"><span>Tú</span><span>${saved.userBid} ${_c}</span></div>`});
   logItems.sort((a,b)=>a.at-b.at);
   let status='',btn='';
   if(st.won===true){
-    status=`<div class="sf-auc-status won">✅ ¡Ganaste!</div>`;
+    status=`<div class="sf-auc-status won">¡Ganaste!</div>`;
     btn=`<button class="sf-auction-bid-btn" disabled>Pokémon conseguido</button>`;
   }else if(st.won===false){
-    status=`<div class="sf-auc-status closed">❌ Perdiste · ${saved.userBid}🪙 devueltos</div>`;
+    status=`<div class="sf-auc-status closed">Perdiste · ${saved.userBid} ${_c} devueltos</div>`;
     btn=`<button class="sf-auction-bid-btn" disabled>Subasta cerrada</button>`;
   }else if(st.isOver){
-    status=`<div class="sf-auc-status closed">⏱ Finalizada · sin participación</div>`;
+    status=`<div class="sf-auc-status closed">Finalizada · sin participación</div>`;
     btn=`<button class="sf-auction-bid-btn" disabled>Cerrada</button>`;
   }else if(st.leading){
-    status=`<div class="sf-auc-status leading">🟢 Vas ganando · ${saved.userBid}🪙</div>`;
+    status=`<div class="sf-auc-status leading">Vas ganando · ${saved.userBid} ${_c}</div>`;
     btn=`<button class="sf-auction-bid-btn" disabled>Liderando — espera el cierre</button>`;
   }else if(saved.userBid){
-    status=`<div class="sf-auc-status outbid">🔴 ¡Te han superado!</div>`;
+    status=`<div class="sf-auc-status outbid">¡Te han superado!</div>`;
     const addl=st.nextBid-saved.userBid;
-    btn=`<button class="sf-auction-bid-btn outbid-btn" onclick="sfBidAuction('${auc.id}',${st.nextBid})" ${coins<addl?'disabled':''}>Volver a pujar ${st.nextBid}🪙 (+${addl})</button>`;
+    btn=`<button class="sf-auction-bid-btn outbid-btn" onclick="sfBidAuction('${auc.id}',${st.nextBid})" ${coins<addl?'disabled':''}>Volver a pujar ${st.nextBid} ${_c} (+${addl})</button>`;
   }else{
-    btn=`<button class="sf-auction-bid-btn" onclick="sfBidAuction('${auc.id}',${st.nextBid})" ${coins<st.nextBid?'disabled':''}>Pujar ${st.nextBid}🪙</button>`;
+    btn=`<button class="sf-auction-bid-btn" onclick="sfBidAuction('${auc.id}',${st.nextBid})" ${coins<st.nextBid?'disabled':''}>Pujar ${st.nextBid} ${_c}</button>`;
   }
   const now=Date.now(),tl=Math.max(st.effectiveEndsAt-now,0);
   const th=Math.floor(tl/3600000),tm=Math.floor((tl%3600000)/60000),ts=Math.floor((tl%60000)/1000);
@@ -4162,8 +4204,8 @@ function _sfAucCard(auc,coins){
     ${logItems.length?`<div class="sf-abid-log">${logItems.map(l=>l.html).join('')}</div>`:''}
     ${status}
     <div class="sf-hammer-box" id="sf-auc-hammer-${auc.id}"></div>
-    <div class="sf-auction-timer" id="sf-auc-cd-${auc.id}">${tl?(th?`⏳ ${th}h ${tm}m ${ts}s`:`⏳ ${tm}m ${ts}s`):'⏱ Finalizada'}</div>
-    <div style="font-family:var(--px);font-size:8px;color:var(--t3)">Inicio: ${auc.startPrice}🪙 · mín. incremento: ${auc.increment}🪙</div>
+    <div class="sf-auction-timer" id="sf-auc-cd-${auc.id}">${tl?(th?`${th}h ${tm}m ${ts}s`:`${tm}m ${ts}s`):'Finalizada'}</div>
+    <div style="font-family:var(--px);font-size:8px;color:var(--t3)">Inicio: ${auc.startPrice} ${_c} · mín. incremento: ${auc.increment} ${_c}</div>
     ${btn}
   </div>`;
 }
@@ -4179,7 +4221,7 @@ function _sfAucHistory(){
       <img src="${sprSrc}" style="width:40px;height:40px;image-rendering:pixelated" onerror="this.style.opacity=.3">
       <div style="flex:1;text-align:left">
         <div style="font-family:var(--px);font-size:10px;font-weight:800;color:var(--t1)">${cap(d.pokeName||'?')}</div>
-        <div style="font-family:var(--px);font-size:8px;${d.won?'color:#2e7d32':'color:#888'}">${d.won?`✅ Ganaste · ${d.userBid}🪙`:`❌ Perdiste · ${d.userBid}🪙 devueltos`}</div>
+        <div style="font-family:var(--px);font-size:8px;${d.won?'color:#2e7d32':'color:#888'}">${d.won?`Ganaste · ${d.userBid} ${_si('coin',10)}`:`Perdiste · ${d.userBid} ${_si('coin',10)} devueltos`}</div>
         ${date?`<div style="font-family:var(--px);font-size:7px;color:var(--t3)">${date}</div>`:''}
       </div>
     </div>`;
@@ -4212,7 +4254,7 @@ function sfBidAuction(aucId,nextBid){
   if(extendedEndsAt)_sfAucEndTimes[aucId]=extendedEndsAt;
   _sfAucLeading.add(aucId);
   scheduleSave();_sfRenderAuction();
-  if(!extendedEndsAt||extendedEndsAt===prevExtended)sfToast(`🔨 Puja de ${nextBid}🪙 — ¡un rival responderá pronto!`);
+  if(!extendedEndsAt||extendedEndsAt===prevExtended)sfToast(`Puja de ${nextBid} monedas — ¡un rival responderá pronto!`);
 }
 
 // ── CATCH CARD ──
@@ -4246,28 +4288,28 @@ function _sfShowCatchCard(data){
       <div style="font-family:var(--px);font-size:26px;font-weight:900;color:var(--t1)">¡${cap(data.poke.name)}!</div>
     </div>
     <div class="sf-cc-poke-box" style="background:linear-gradient(150deg,${tc}28,${tc}08);border:2px solid ${tc}55">
-      ${data.shiny?`<div><span class="sf-cc-shiny-badge">✨ ¡SHINY!</span></div>`:''}
+      ${data.shiny?`<div><span class="sf-cc-shiny-badge">${_si('shiny',14)} ¡SHINY!</span></div>`:''}
       <img src="${sprSrc}" style="width:128px;height:128px;image-rendering:pixelated" onerror="this.style.opacity=.3" alt="">
       <div class="sf-cc-name">${cap(data.poke.name)} ${genderHtml}</div>
       <div class="sf-cc-sub">${data.nature} · ${tierLabel}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:8px">
         ${data.poke.types.map(t=>`<span style="font-family:var(--px);font-size:8px;padding:2px 8px;border-radius:8px;background:${TYPES.find(x=>x.id===t)?.c||'#888'};color:#fff">${TYPES.find(x=>x.id===t)?.n||t}</span>`).join('')}
       </div>
-      <div style="font-family:var(--px);font-size:10px;color:#c8a000">+${data.coinsEarned} 🪙</div>
+      <div style="font-family:var(--px);font-size:10px;color:#c8a000">+${data.coinsEarned} ${_si('coin',14)}</div>
     </div>
     ${data.heldItem?`
     <div class="sf-cc-item-box">
-      <span style="font-size:28px">${data.heldItem.ico}</span>
+      <span>${data.heldItem.ico}</span>
       <div>
         <div style="font-family:var(--px);font-size:10px;font-weight:800;color:var(--t1)">¡Llevaba un objeto!</div>
         <div style="font-family:var(--px);font-size:9px;color:var(--t2)">${data.heldItem.label} ×${data.heldItem.qty} añadido a tu mochila</div>
-        ${data.heldItem.special?`<div style="font-family:var(--px);font-size:8px;color:#e65100;margin-top:2px">✨ ¡Probabilidad shiny ×8 durante 2 min!</div>`:''}
+        ${data.heldItem.special?`<div style="font-family:var(--px);font-size:8px;color:#e65100;margin-top:2px">${_si('shiny',12)} ¡Probabilidad shiny ×8 durante 2 min!</div>`:''}
       </div>
     </div>`:''}
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
-      <button class="sf-cc-btn primary" onclick="sfCatchCardStay()">🎯 Siguiente Pokémon</button>
-      <button class="sf-cc-btn secondary" onclick="sfCatchCardClose()">🗺️ Cambiar zona</button>
-      <button class="sf-cc-btn secondary" onclick="sfShareCatch()">📤 Compartir</button>
+      <button class="sf-cc-btn primary" onclick="sfCatchCardStay()">${_svgi.next} Siguiente Pokémon</button>
+      <button class="sf-cc-btn secondary" onclick="sfCatchCardClose()">${_svgi.map} Cambiar zona</button>
+      <button class="sf-cc-btn secondary" onclick="sfShareCatch()">Compartir</button>
     </div>`;
   const card=document.getElementById('sf-catch-card');
   card.style.display='flex';
@@ -4297,7 +4339,7 @@ async function sfShareCatch(){
   // Header band
   ctx.fillStyle=tc+'cc';_sfCcRoundRect(ctx,0,0,size,80,{tl:24,tr:24,bl:0,br:0});ctx.fill();
   ctx.fillStyle='#fff';ctx.font='bold 20px monospace';ctx.textAlign='center';
-  ctx.fillText(d.shiny?'✨ ¡SHINY CAPTURADO!':'¡POKÉMON CAPTURADO!',size/2,50);
+  ctx.fillText(d.shiny?'★ ¡SHINY CAPTURADO!':'¡POKÉMON CAPTURADO!',size/2,50);
   // Sprite
   const img=new Image();img.crossOrigin='anonymous';
   await new Promise(r=>{img.onload=r;img.onerror=r;img.src=`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${d.shiny?'shiny/':''}${d.poke.id}.png`;});
@@ -4309,8 +4351,8 @@ async function sfShareCatch(){
   // Sub info
   ctx.fillStyle='#555';ctx.font='15px monospace';
   ctx.fillText(`${d.gender==='M'?'♂':d.gender==='F'?'♀':'⚪'} · Naturaleza ${d.nature}`,size/2,312);
-  ctx.fillText(`+${d.coinsEarned} 🪙 · ${SAFARI_TIER_LABELS[d.tier]}`,size/2,338);
-  if(d.heldItem){ctx.fillStyle='#e65100';ctx.fillText(`Objeto: ${d.heldItem.ico} ${d.heldItem.label}`,size/2,365);}
+  ctx.fillText(`+${d.coinsEarned} monedas · ${SAFARI_TIER_LABELS[d.tier]}`,size/2,338);
+  if(d.heldItem){ctx.fillStyle='#e65100';ctx.fillText(`Objeto: ${d.heldItem.label}`,size/2,365);}
   // Footer
   ctx.fillStyle='#888';ctx.font='13px monospace';
   ctx.fillText(`PokéPlanner Safari · ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}`,size/2,420);
@@ -4355,7 +4397,7 @@ function sfExchangeFromDetail(){
   S.safari.exchangeCount=(S.safari.exchangeCount||0)+1;
   scheduleSave();
   sfCheckSafariMedals();
-  sfToast(`🔄 +${coins} 🪙 por ${cap(p.name)}`);
+  sfToast(`+${coins} monedas por ${cap(p.name)}`);
   sfShowDetail(id);
 }
 
@@ -4377,14 +4419,17 @@ function _sfRenderMedals(){
   if(cnt)cnt.textContent=`${earned.length}/${SAFARI_MEDALS.length}`;
   grid.innerHTML=SAFARI_MEDALS.map(m=>{
     const done=earned.includes(m.id);
+    const statusIco=done
+      ?`<svg width="18" height="18" viewBox="0 0 24 24" fill="#4caf50"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`
+      :_svgi.lock;
     return`<div class="sf-medal-card${done?' earned':''}">
-      <div class="sf-medal-ico" style="${done?'':'filter:grayscale(1);opacity:.3'}">${m.emoji}</div>
+      <div class="sf-medal-ico" style="${done?'':'filter:grayscale(1);opacity:.3'}">${m.ico}</div>
       <div style="flex:1;min-width:0">
         <div class="sf-medal-name" style="${done?'color:var(--ac)':''}">${m.label}</div>
         <div class="sf-medal-desc">${m.desc}</div>
         <div class="sf-medal-reward" style="${done?'':'color:var(--t3)'}">${done?'✓ ':''}Premio: ${_sfRewardStr(m.reward)}</div>
       </div>
-      <div style="font-size:18px">${done?'✅':'🔒'}</div>
+      <div>${statusIco}</div>
     </div>`;
   }).join('');
 }
@@ -4397,7 +4442,7 @@ function _sfRewardStr(r){
   if(r.razz)  p.push(`${r.razz} Razz`);
   if(r.nanab) p.push(`${r.nanab} Nanab`);
   if(r.pinap) p.push(`${r.pinap} Pinap`);
-  if(r.coins) p.push(`${r.coins} 🪙`);
+  if(r.coins) p.push(`${r.coins} ${_si('coin',12)}`);
   return p.join(', ')||'—';
 }
 function sfCheckSafariMedals(){
@@ -4418,7 +4463,7 @@ function sfCheckSafariMedals(){
     if(m.reward.nanab) S.safari.berries.nanab=(S.safari.berries.nanab||0)+m.reward.nanab;
     if(m.reward.pinap) S.safari.berries.pinap=(S.safari.berries.pinap||0)+m.reward.pinap;
     if(m.reward.coins) S.safari.coins=(S.safari.coins||0)+m.reward.coins;
-    sfToast(`🏅 ¡Medalla desbloqueada: ${m.label}!`);
+    sfToast(`Medalla desbloqueada: ${m.label}!`);
     awarded=true;
   }
   if(awarded)scheduleSave();
@@ -4449,7 +4494,7 @@ function _sfRenderBalls(){
   ].filter(x=>x.count>0||(x.type==='poke'));
   bar.innerHTML=balls.map(({type,count})=>`<div class="sf-ball-item"><img class="sf-ball-ico" src="${SAFARI_BALL_IMGS[type]}" alt="${type}"><span class="sf-ball-n">x${count}</span></div>`).join('')
     +`<span class="sf-renew-lbl">↺ ${renewStr} · ${basic}/${SAFARI_MAX_BASIC}</span>`
-    +`<span class="sf-coins-chip" onclick="sfShowShop()">🪙 ${S.safari.coins||0}</span>`;
+    +`<span class="sf-coins-chip" onclick="sfShowShop()">${_si('coin',16)} ${S.safari.coins||0}</span>`;
 }
 
 function _sfRenderZones(){
@@ -4469,18 +4514,18 @@ function _sfRenderZones(){
     return`<div class="sf-zone-card${locked?' locked':''}" onclick="${locked?'':'sfStartEncounter(\''+id+'\')'}">
       <div class="sf-zone-art">
         <div class="sf-zone-art-bg" style="background:${z.bg}"></div>
-        ${weatherBoosted?`<div style="position:absolute;top:4px;left:5px;font-size:15px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))">${weather.emoji}</div>`:''}
-        ${incenseActive?`<div style="position:absolute;top:4px;right:5px;font-size:15px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))">🕯️</div>`:''}
+        ${weatherBoosted?`<div style="position:absolute;top:4px;left:5px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))">${_ti(WEATHER_TYPE_MAP[weather.id],36,14)}</div>`:''}
+        ${incenseActive?`<div style="position:absolute;top:4px;right:5px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))">${_si('incense',18)}</div>`:''}
       </div>
       <div class="sf-zone-body">
         <div class="sf-zone-name">${z.name}</div>
         <div class="sf-zone-sub">${pool.length} Pokémon disponibles</div>
-        ${locked?`<div class="sf-zone-lock">🔒 ${z.minCatch} capturas</div>`:''}
+        ${locked?`<div class="sf-zone-lock">${_svgi.lock} ${z.minCatch} capturas</div>`:''}
         ${!locked&&zt>0?`<div class="sf-zone-prog"><div class="sf-zone-prog-fill" style="width:${zpct}%;background:${zpct>=100?'#4caf50':'var(--ac)'}"></div></div>
           <div style="font-family:var(--px);font-size:7px;color:var(--t3);margin-top:2px">${zc}/${zt} · ${zpct}%</div>`:''}
         ${!locked?(incenseActive
-          ?`<div class="sf-incense-btn sf-incense-active">🕯️ Incienso activo · ${incenseMins}min</div>`
-          :`<button class="sf-incense-btn" onclick="event.stopPropagation();sfUseIncense('${id}')" ${hasIncense?'':'disabled'}>🕯️ Incienso (${S.safari.berries?.incense||0})</button>`):''}
+          ?`<div class="sf-incense-btn sf-incense-active">${_si('incense',14)} Incienso activo · ${incenseMins}min</div>`
+          :`<button class="sf-incense-btn" onclick="event.stopPropagation();sfUseIncense('${id}')" ${hasIncense?'':'disabled'}>${_si('incense',14)} Incienso (${S.safari.berries?.incense||0})</button>`):''}
       </div>
     </div>`;
   }).join('');
@@ -4678,9 +4723,9 @@ function sfHoldRelease(){
   const sweetDist=Math.abs(p-_sfHoldSweetSpot);
   let qteMult,qteMsg;
   if(zoneHalf<0.015)                                              {qteMult=0.85;qteMsg='Tiro normal';}
-  else if(sweetDist<0.018)                                        {qteMult=2.5; qteMsg='✨ ¡Perfecto!';}
-  else if(sweetDist<0.040)                                        {qteMult=2.0; qteMsg='✨ ¡Excelente!';}
-  else if(p>=_sfHoldZoneStart&&p<=_sfHoldZoneEnd)                 {qteMult=1.5; qteMsg='⭐ ¡Buen tiro!';}
+  else if(sweetDist<0.018)                                        {qteMult=2.5; qteMsg='★ ¡Perfecto!';}
+  else if(sweetDist<0.040)                                        {qteMult=2.0; qteMsg='★ ¡Excelente!';}
+  else if(p>=_sfHoldZoneStart&&p<=_sfHoldZoneEnd)                 {qteMult=1.5; qteMsg='¡Buen tiro!';}
   else if(p>=_sfHoldZoneStart-zoneHalf*.5&&p<=_sfHoldZoneEnd+zoneHalf*.5){qteMult=1.2;qteMsg='¡Bien!';}
   else                                                            {qteMult=0.85;qteMsg='Tiro normal';}
   const wrap=_sfHoldWrapEl;
@@ -4867,17 +4912,17 @@ function _sfRenderBerryRow(){
   if(!S.safari.berries)S.safari.berries={razz:0,nanab:0,pinap:0};
   const b=S.safari.berries;
   const defs=[
-    {type:'razz', emoji:'🍓',name:'Razz',  desc:'+10% captura', active:enc?.razzActive},
-    {type:'nanab',emoji:'🍌',name:'Nanab', desc:'-70% huida',    active:enc?.nanabActive},
-    {type:'pinap',emoji:'🍍',name:'Pinap', desc:'x2 monedas',   active:enc?.pinapActive},
+    {type:'razz', name:'Razz',  desc:'+10% captura', active:enc?.razzActive},
+    {type:'nanab',name:'Nanab', desc:'-70% huida',    active:enc?.nanabActive},
+    {type:'pinap',name:'Pinap', desc:'x2 monedas',   active:enc?.pinapActive},
   ];
   const hasAny=defs.some(d=>(b[d.type]||0)>0||d.active);
   row.style.display=hasAny?'flex':'none';
   if(!hasAny)return;
-  row.innerHTML=defs.map(({type,emoji,name,desc,active})=>`
+  row.innerHTML=defs.map(({type,name,desc,active})=>`
     <button class="sf-berry-btn${active?' used':''}" ${(b[type]||0)<=0&&!active?'disabled':''}
       onclick="safariUseBerry('${type}')">
-      <span class="sf-b-emoji">${emoji}</span>
+      <span class="sf-b-emoji">${_si(type,18)}</span>
       <span class="sf-b-name">${name}${(b[type]||0)>0?' x'+(b[type]):'✓'}</span>
       <span class="sf-b-desc">${desc}</span>
     </button>`).join('');
@@ -4895,7 +4940,7 @@ function safariUseBerry(type){
   else if(type==='pinap'){enc.pinapActive=true;}
   scheduleSave();
   _sfRenderBerryRow();
-  const msgs={razz:'🍓 Razz · Más fácil de atrapar',nanab:'🍌 Nanab · Menos probable que huya',pinap:'🍍 Pinap · x2 monedas al capturar'};
+  const msgs={razz:'Razz · Más fácil de atrapar',nanab:'Nanab · Menos probable que huya',pinap:'Pinap · x2 monedas al capturar'};
   document.getElementById('sf-msg-box').textContent=msgs[type];
 }
 
@@ -4958,7 +5003,7 @@ function _sfUpdateCollPill(){
   if(!el)return;
   const caught=Object.keys(S.safari.caught).length;
   const shinies=_sfTotalShinies();
-  el.textContent=caught+(shinies?` · ✨${shinies}`:'');
+  el.innerHTML=caught+(shinies?` · ${_si('shiny',12)}${shinies}`:'');
 }
 
 function _sfRenderCollection(){
@@ -4969,7 +5014,7 @@ function _sfRenderCollection(){
   const search=(document.getElementById('sf-coll-search')?.value||'').toLowerCase().trim();
   const caughtCount=Object.keys(S.safari.caught).length;
   const shinyCount=_sfTotalShinies();
-  if(cnt)cnt.textContent=`${caughtCount}/1025${shinyCount?` · ✨${shinyCount}`:''}`;
+  if(cnt)cnt.innerHTML=`${caughtCount}/1025${shinyCount?` · ${_si("shiny",12)}${shinyCount}`:""}`;
 
   let pool=S.poke?[...S.poke].sort((a,b)=>a.id-b.id):[];
   if(_sfCollFilter==='caught') pool=pool.filter(p=>S.safari.caught[String(p.id)]);
@@ -5013,7 +5058,7 @@ function _sfRenderCollection(){
       cards.push(`<div class="sf-coll-card shiny" onclick="sfShowDetail('${id}','shiny')">
         <button class="sf-coll-dex-btn" onclick="event.stopPropagation();openMdl(${id})" title="Ver en Pokédex">i</button>
         <img class="sf-coll-spr" src="${src}" loading="lazy" onerror="this.src='${fallback}'" alt="">
-        <div class="sf-coll-shiny-dot">✨</div>
+        <div class="sf-coll-shiny-dot">${_si('shiny',10)}</div>
         <div class="sf-coll-name">${cap(p.name)}</div>
         <div class="sf-coll-cnt">x${data.shiny.count}</div>
       </div>`);
@@ -5047,16 +5092,16 @@ function sfShowWhere(id){
     `<span class="sf-detail-tag" style="background:rgba(255,255,255,.15);color:var(--t2)">${rateLabels[tier]}</span>`;
 
   const zoneRows=zones.length
-    ?zones.map(({z,locked})=>`<div class="sf-detail-row">
-        <span class="sf-detail-row-ico">${z.emoji}</span>
+    ?zones.map(({z,locked},_i,arr)=>`<div class="sf-detail-row">
+        <span class="sf-detail-row-ico">${_ti(ZONE_TYPE_MAP[Object.keys(SAFARI_ZONES).find(k=>SAFARI_ZONES[k]===z)],44,18)}</span>
         <span class="sf-detail-row-lbl">${z.name}</span>
-        <span class="sf-detail-row-val">${locked?`🔒 ${z.minCatch} capturas`:'Disponible'}</span>
+        <span class="sf-detail-row-val">${locked?`${_svgi.lock} ${z.minCatch} capturas`:'Disponible'}</span>
       </div>`).join('')
     :`<div class="sf-detail-row"><span style="font-size:11px;color:var(--t3)">No aparece en ninguna zona conocida</span></div>`;
 
   document.getElementById('sf-detail-rows').innerHTML=
     `<div class="sf-detail-row" style="border-radius:14px 14px 0 0">
-      <span class="sf-detail-row-ico">📍</span>
+      <span class="sf-detail-row-ico">${_svgi.zone}</span>
       <span class="sf-detail-row-lbl" style="font-weight:700;color:var(--t1)">Dónde encontrarlo</span>
     </div>${zoneRows}`;
 
@@ -5090,7 +5135,7 @@ function sfShowDetail(id, variant){
     psychic:'#F85888',bug:'#A8B820',rock:'#B8A038',ghost:'#705898',dragon:'#7038F8',
     dark:'#705848',steel:'#B8B8D0',fairy:'#EE99AC'};
   const tags=[];
-  if(isShiny)tags.push(`<span class="sf-detail-tag" style="background:#b8860b">✨ Shiny</span>`);
+  if(isShiny)tags.push(`<span class="sf-detail-tag" style="background:#b8860b">${_si('shiny',12)} Shiny</span>`);
   tags.push(`<span class="sf-detail-tag" style="background:${SAFARI_TIER_COLORS[tier]}">${SAFARI_TIER_LABELS[tier]}</span>`);
   (p.types||[]).forEach(t=>tags.push(`<span class="sf-detail-tag" style="background:${TYPE_COLORS[t]||'#888'}">${t}</span>`));
   document.getElementById('sf-detail-tags').innerHTML=tags.join('');
@@ -5108,17 +5153,17 @@ function sfShowDetail(id, variant){
   };
   const zoneName=z=>SAFARI_ZONES[z]?.name??'—';
   const rows=[
-    {ico:'🎯',lbl:'Capturas',val:`x${vData.count}`},
-    {ico:'📅',lbl:'Primera captura',val:fmt(vData.firstDate)},
-    ...(vData.count>1?[{ico:'🔄',lbl:'Última captura',val:fmt(vData.lastDate)}]:[]),
-    {ico:'🗺️',lbl:'Primera zona',val:zoneName(vData.firstZone)},
-    ...(vData.lastZone&&vData.lastZone!==vData.firstZone?[{ico:'📍',lbl:'Última zona',val:zoneName(vData.lastZone)}]:[]),
+    {ico:_svgi.hit, lbl:'Capturas',val:`x${vData.count}`},
+    {ico:_svgi.cal, lbl:'Primera captura',val:fmt(vData.firstDate)},
+    ...(vData.count>1?[{ico:_svgi.swap,lbl:'Última captura',val:fmt(vData.lastDate)}]:[]),
+    {ico:_svgi.map, lbl:'Primera zona',val:zoneName(vData.firstZone)},
+    ...(vData.lastZone&&vData.lastZone!==vData.firstZone?[{ico:_svgi.pin,lbl:'Última zona',val:zoneName(vData.lastZone)}]:[]),
   ];
   // Hint about the other variant
   const otherVariant=isShiny?'normal':'shiny';
-  const otherLabel=isShiny?'versión normal':'versión shiny ✨';
+  const otherLabel=isShiny?'versión normal':`versión shiny ${_si('shiny',12)}`;
   const otherNote=data[otherVariant]
-    ?`<div class="sf-detail-row"><span class="sf-detail-row-ico">💡</span><span class="sf-detail-row-lbl" style="color:var(--t3)">También tienes la ${otherLabel}</span></div>`
+    ?`<div class="sf-detail-row"><span class="sf-detail-row-ico">${_svgi.info}</span><span class="sf-detail-row-lbl" style="color:var(--t3)">También tienes la ${otherLabel}</span></div>`
     :'';
   document.getElementById('sf-detail-rows').innerHTML=
     rows.map(r=>`<div class="sf-detail-row">
@@ -5132,7 +5177,7 @@ function sfShowDetail(id, variant){
   const exchangeWrap=document.getElementById('sf-detail-exchange-wrap');
   const exchangePreview=document.getElementById('sf-exchange-coins-preview');
   if(exchangeWrap)exchangeWrap.style.display=(vData.count>1)?'':'none';
-  if(exchangePreview)exchangePreview.textContent=`+${SAFARI_COIN_RATE[tier]*3} 🪙`;
+  if(exchangePreview)exchangePreview.innerHTML=`+${SAFARI_COIN_RATE[tier]*3} ${_si('coin',12)}`;
   document.getElementById('sf-detail-dex-wrap').style.display='';
   document.getElementById('sf-detail-backdrop').classList.add('on');
   document.getElementById('sf-detail-sheet').classList.add('on');
@@ -5632,13 +5677,15 @@ try { const d = localStorage.getItem('fc5'); if(d) S.fc = JSON.parse(d); } catch
 
 // ── WHAT'S NEW ──
 const APP_VERSION='1.4';
+const _WHATS_B='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items';
+const _WHATS_T='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-viii/sword-shield';
 const WHATS_NEW=[
-{emoji:'🎨',title:'Temas de color',desc:'19 temas -- uno por cada tipo Pokémon. Elige el tuyo en Ajustes.'},
-{emoji:'🏅',title:'Logros',desc:'25 medallas desbloqueables según tu progreso. Aparecen en tu Trainer Card.'},
-{emoji:'📅',title:'Reto diario',desc:'Cada día un nuevo reto. Complétalo para que aparezca en tu Trainer Card.'},
-{emoji:'🐾',title:'Pokémon caminante',desc:'Un Pokémon del día pasea sobre el menú. Puedes desactivarlo en Ajustes.'},
-{emoji:'✨',title:'Variantes independientes',desc:'Captura, favoritos y equipo ahora funcionan por variante. Zorua de Hisui es independiente del Zorua normal.'},
-{emoji:'❓',title:'Ayuda',desc:'Nuevo botón ? en el header con la guía de uso.'},
+{ico:`<img src="${_WHATS_T}/14.png" width="52" height="20" style="image-rendering:pixelated">`,title:'Temas de color',desc:'19 temas -- uno por cada tipo Pokémon. Elige el tuyo en Ajustes.'},
+{ico:`<img src="${_WHATS_B}/relic-gold.png" width="28" height="28" style="image-rendering:pixelated">`,title:'Logros',desc:'25 medallas desbloqueables según tu progreso. Aparecen en tu Trainer Card.'},
+{ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>`,title:'Reto diario',desc:'Cada día un nuevo reto. Complétalo para que aparezca en tu Trainer Card.'},
+{ico:`<img src="${_WHATS_T}/1.png" width="52" height="20" style="image-rendering:pixelated">`,title:'Pokémon caminante',desc:'Un Pokémon del día pasea sobre el menú. Puedes desactivarlo en Ajustes.'},
+{ico:`<img src="${_WHATS_B}/star-piece.png" width="28" height="28" style="image-rendering:pixelated">`,title:'Variantes independientes',desc:'Captura, favoritos y equipo ahora funcionan por variante. Zorua de Hisui es independiente del Zorua normal.'},
+{ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg>`,title:'Ayuda',desc:'Nuevo botón ? en el header con la guía de uso.'},
 ];
 
 function showWhatsNew(){
@@ -5647,7 +5694,7 @@ if(seen===APP_VERSION)return;
 const modal=document.getElementById('whatsnew-modal');
 const list=document.getElementById('whatsnew-list');
 if(!modal||!list)return;
-list.innerHTML=WHATS_NEW.map(item=>` <div style="display:flex;gap:12px;align-items:flex-start"> <div style="width:40px;height:40px;border-radius:16px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${item.emoji}</div> <div> <div style="font-size:14px;font-weight:800;color:var(--t1)">${item.title}</div> <div style="font-size:13px;color:var(--t2);margin-top:2px;line-height:1.5">${item.desc}</div> </div> </div>`).join('');
+list.innerHTML=WHATS_NEW.map(item=>` <div style="display:flex;gap:12px;align-items:flex-start"> <div style="width:40px;height:40px;border-radius:16px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0">${item.ico}</div> <div> <div style="font-size:14px;font-weight:800;color:var(--t1)">${item.title}</div> <div style="font-size:13px;color:var(--t2);margin-top:2px;line-height:1.5">${item.desc}</div> </div> </div>`).join('');
 modal.style.display='flex';
 }
 
@@ -6641,7 +6688,7 @@ for(let i=0;i<12;i++){
 await new Promise(r=>setTimeout(r,500));
 const msg = document.createElement('div');
 msg.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.8); background:var(--s1);border:2px solid var(--gold);border-radius:24px; padding:24px 32px;z-index:9999;text-align:center; box-shadow:0 8px 40px rgba(0,0,0,.3); transition:all .3s cubic-bezier(.34,1.56,.64,1);opacity:0;`;
-msg.innerHTML = `<div style="font-size:32px;margin-bottom:8px">✨</div> <div style="font-family:'Press Start 2P',monospace;font-size:9px;color:var(--gold);margin-bottom:12px;letter-spacing:1px">DATOS ANCESTRALES<br>DESBLOQUEADOS</div> <div style="font-size:16px;font-weight:900;color:var(--t1);line-height:1.5">Enhorabuena,<br>eres perfectx</div> <div style="font-size:11px;color:var(--t3);margin-top:8px">-- Mew 🌟</div> <button onclick="this.parentElement.remove()" style="margin-top:16px;padding:8px 20px;border-radius:24px;border:none;background:var(--gold);color:#fff;font-weight:800;font-size:12px;cursor:pointer;font-family:var(--fn)">✨ Gracias</button>`;
+msg.innerHTML = `<div style="margin-bottom:8px"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/star-piece.png" width="32" height="32" style="image-rendering:pixelated"></div> <div style="font-family:'Press Start 2P',monospace;font-size:9px;color:var(--gold);margin-bottom:12px;letter-spacing:1px">DATOS ANCESTRALES<br>DESBLOQUEADOS</div> <div style="font-size:16px;font-weight:900;color:var(--t1);line-height:1.5">Enhorabuena,<br>eres perfectx</div> <div style="font-size:11px;color:var(--t3);margin-top:8px">-- Mew ★</div> <button onclick="this.parentElement.remove()" style="margin-top:16px;padding:8px 20px;border-radius:24px;border:none;background:var(--gold);color:#fff;font-weight:800;font-size:12px;cursor:pointer;font-family:var(--fn)">Gracias</button>`;
 document.body.appendChild(msg);
 requestAnimationFrame(()=>{
 msg.style.opacity='1';
@@ -7367,7 +7414,7 @@ if(accountInfo){
   if(currentUser){
     const provider=currentUser.providerData[0]?.providerId;
     const isEmail=provider==='password';
-    const icon=isEmail?'✉️':'🔵';
+    const icon=isEmail?'[email]':'[Google]';
     accountInfo.textContent=icon+' '+(currentUser.email||'Cuenta vinculada');
     if(passRow)passRow.style.display=isEmail?'':'none';
   } else {
@@ -7550,12 +7597,12 @@ if(form){
   sp=isShiny?(mod?(form.sprites.official_shiny||iShy(form.id)):(form.sprites.front_shiny||iPxN(form.id,true)))
              :(mod?(form.sprites.official||iArt(form.id)):(form.sprites.front_default||iPx(form.id)));
   const fl=form.isCostume?fmtF(form.formName||form.name,form.speciesName):fmtF(form.name,form.speciesName);
-  subLabel=isShiny?`✨ ${fl}`:fl;
+  subLabel=isShiny?`★ ${fl}`:fl;
 }else{
   sp=isShiny?(mod?iShy(baseId):iPxN(baseId,true)):(mod?iArt(baseId):iPx(baseId));
-  subLabel=isShiny?'✨ Shiny':null;
+  subLabel=isShiny?"★ Shiny":null;
 }
-const shinyBadge=isShiny?`<div style="position:absolute;top:5px;left:7px;font-size:9px;line-height:1;background:#c8a00030;border-radius:4px;padding:2px 3px">✨</div>`:'';
+const shinyBadge=isShiny?`<div style="position:absolute;top:5px;left:7px;line-height:1;background:#c8a00030;border-radius:4px;padding:2px 3px"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/star-piece.png" width="10" height="10" style="image-rendering:pixelated"></div>`:'';
 return`<div class="card" style="border-color:${borderClr};background:${bgClr}" data-id="${baseId}" onclick="openMdl(${baseId},${isShiny})">
   <div class="card-hdr"><span class="card-id">#${pad(baseId)}</span><span class="card-rdot" style="background:${rar.d}"></span></div>
   <img src="${sp}" class="card-img${mod?'':' px'} loaded" alt="${cap(p.name)}">
