@@ -838,6 +838,9 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 #pg-safari.on{display:flex}
 .sf-screen{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden}
 .sf-screen.on{display:flex}
+.sf-coll-pill-bar{flex-shrink:0;display:flex;justify-content:center;padding:8px 16px max(14px,env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 38%);margin-top:-32px;pointer-events:none;position:relative;z-index:2}
+.sf-coll-pill{pointer-events:all;display:flex;align-items:center;gap:7px;padding:10px 22px;background:var(--ac);color:#fff;border:none;border-radius:28px;font-family:var(--px);font-size:11px;font-weight:700;letter-spacing:.3px;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.15) inset;transition:transform .12s,box-shadow .12s}
+.sf-coll-pill:active{transform:scale(.94);box-shadow:0 2px 10px rgba(0,0,0,.3)}
 .sf-phdr{display:flex;align-items:center;gap:10px;padding:10px 16px 8px;border-bottom:1px solid var(--bd);flex-shrink:0}
 .sf-ptitle{font-family:var(--px);font-size:14px;font-weight:700;color:var(--t1)}
 .sf-balls-bar{display:flex;gap:10px;align-items:center;padding:8px 16px 6px;flex-shrink:0;border-bottom:1px solid var(--bd);flex-wrap:wrap}
@@ -1382,7 +1385,6 @@ function sendPasswordReset(){
     <div class="sf-phdr">
       <div class="sf-ptitle">Safari</div>
       <button class="ibtn" onclick="sfShowShop()" title="Tienda" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></button>
-      <button class="ibtn" onclick="showSafariCollection()" title="Colección"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
       <button class="ibtn" onclick="sfShowAuction()" title="Subasta">🔨</button>
       <button class="ibtn" onclick="sfShowMedals()" title="Medallas Safari">🏅</button>
       <button class="ibtn" onclick="sfShowHelp()" title="Cómo funciona"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
@@ -1397,6 +1399,12 @@ function sendPasswordReset(){
     <div id="sf-balls-bar" class="sf-balls-bar"></div>
     <div class="gscroll">
       <div id="sf-zone-grid" class="sf-zone-grid"></div>
+    </div>
+    <div class="sf-coll-pill-bar">
+      <button class="sf-coll-pill" onclick="showSafariCollection()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Mi Colección · <span id="sf-pill-count">0</span>
+      </button>
     </div>
   </div>
   <!-- ENCOUNTER -->
@@ -3858,6 +3866,7 @@ function showSafariHome(){
   _sfRenderBalls();
   _sfRenderZones();
   _sfUpdateWeatherChip();
+  _sfUpdateCollPill();
 }
 
 function sfShowHelp(){
@@ -4935,16 +4944,25 @@ function _sfRenderCollFilterRows(){
 }
 
 function showSafariCollection(){
+  _sfCollFilter='caught';
   document.getElementById('sf-home')?.classList.remove('on');
   document.getElementById('sf-encounter')?.classList.remove('on');
   document.getElementById('sf-collection')?.classList.add('on');
   document.querySelectorAll('.sf-filter-btn').forEach(b=>b.classList.remove('on'));
-  document.getElementById('sf-f-'+_sfCollFilter)?.classList.add('on');
+  document.getElementById('sf-f-caught')?.classList.add('on');
   _sfRenderCollFilterRows();
   _sfRenderCollection();
 }
+function _sfUpdateCollPill(){
+  const el=document.getElementById('sf-pill-count');
+  if(!el)return;
+  const caught=Object.keys(S.safari.caught).length;
+  const shinies=_sfTotalShinies();
+  el.textContent=caught+(shinies?` · ✨${shinies}`:'');
+}
 
 function _sfRenderCollection(){
+  _sfUpdateCollPill();
   const grid=document.getElementById('sf-coll-grid');
   const cnt=document.getElementById('sf-coll-count');
   if(!grid)return;
@@ -4967,22 +4985,34 @@ function _sfRenderCollection(){
   }
 
   const CDN='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
+  const ANIM='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated';
+  const useAnim=_sfCollFilter==='caught';
+  const sprUrl=(numId,shiny)=>{
+    if(useAnim&&numId<=649){
+      return shiny?`${ANIM}/shiny/${numId}.gif`:`${ANIM}/${numId}.gif`;
+    }
+    return shiny?`${CDN}/shiny/${numId}.png`:`${CDN}/${numId}.png`;
+  };
   grid.innerHTML=pool.flatMap(p=>{
     const id=String(p.id);
     const data=S.safari.caught[id];
     const cards=[];
     if(data?.normal){
+      const src=sprUrl(p.id,false);
+      const fallback=`${CDN}/${id}.png`;
       cards.push(`<div class="sf-coll-card" onclick="sfShowDetail('${id}','normal')">
         <button class="sf-coll-dex-btn" onclick="event.stopPropagation();openMdl(${id})" title="Ver en Pokédex">i</button>
-        <img class="sf-coll-spr" src="${CDN}/${id}.png" loading="lazy" onerror="this.style.opacity=.3" alt="">
+        <img class="sf-coll-spr" src="${src}" loading="lazy" onerror="this.src='${fallback}'" alt="">
         <div class="sf-coll-name">${cap(p.name)}</div>
         <div class="sf-coll-cnt">x${data.normal.count}</div>
       </div>`);
     }
     if(data?.shiny){
+      const src=sprUrl(p.id,true);
+      const fallback=`${CDN}/shiny/${id}.png`;
       cards.push(`<div class="sf-coll-card shiny" onclick="sfShowDetail('${id}','shiny')">
         <button class="sf-coll-dex-btn" onclick="event.stopPropagation();openMdl(${id})" title="Ver en Pokédex">i</button>
-        <img class="sf-coll-spr" src="${CDN}/shiny/${id}.png" loading="lazy" onerror="this.style.opacity=.3" alt="">
+        <img class="sf-coll-spr" src="${src}" loading="lazy" onerror="this.src='${fallback}'" alt="">
         <div class="sf-coll-shiny-dot">✨</div>
         <div class="sf-coll-name">${cap(p.name)}</div>
         <div class="sf-coll-cnt">x${data.shiny.count}</div>
