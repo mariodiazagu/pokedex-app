@@ -1916,7 +1916,7 @@ function sendPasswordReset(){
         <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text"><b>Explora la Pokédex</b> -- Busca por nombre, número o filtra por tipo, generación y rareza. Toca cualquier Pokémon para abrir su ficha completa.</div></div>
         <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text"><b>Registra tus capturas</b> -- Dentro de la ficha, despliega la generación y marca si lo has capturado, si tienes su shiny, qué ball usaste y el nivel.</div></div>
         <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text"><b>Variantes y formas</b> -- Si el Pokémon tiene formas regionales o cosméticas aparecen en <b>Variantes</b>. La base ya está seleccionada por defecto.</div></div>
-        <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text"><b>Construye tu equipo</b> -- En la pestaña <b>Equipo</b> selecciona un juego. Desde la ficha puedes añadir cualquier variante o shiny directamente.</div></div>
+        <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text"><b>Construye tu equipo</b> -- En la pestaña <b>Equipo</b> selecciona un juego. Desde la ficha puedes añadir cualquier variante o shiny directamente. Debajo de tus 6 espacios, el <b>Análisis del equipo</b> calcula las debilidades y resistencias de tipo de tu plantilla y te avisa de los huecos en tu cobertura.</div></div>
         <div class="help-step"><div class="help-step-num">5</div><div class="help-step-text"><b>Favoritos</b> -- El corazón guarda el Pokémon en favoritos. Desde favoritos puedes elegir cuál aparece en tu Trainer Card.</div></div>
         <div class="help-step"><div class="help-step-num">6</div><div class="help-step-text"><b>Trainer Card</b> -- Ábrela desde el menú de tu avatar. Muestra tus estadísticas, logros y el reto del día.</div></div>
         <div class="help-step"><div class="help-step-num">7</div><div class="help-step-text"><b>Ajustes</b> -- Cambia el tema de color, el número de columnas, selecciona tus juegos y personaliza tu perfil de entrenador.</div></div>
@@ -5745,16 +5745,15 @@ try { const d = localStorage.getItem('fc5'); if(d) S.fc = JSON.parse(d); } catch
 }
 
 // ── WHAT'S NEW ──
-const APP_VERSION='1.4';
+const APP_VERSION='1.5';
 const _WHATS_B='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items';
 const _WHATS_T='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-viii/sword-shield';
 const WHATS_NEW=[
-{ico:`<img src="${_WHATS_T}/14.png" width="52" height="20" style="image-rendering:pixelated">`,title:'Temas de color',desc:'19 temas -- uno por cada tipo Pokémon. Elige el tuyo en Ajustes.'},
-{ico:`<img src="${_WHATS_B}/relic-gold.png" width="28" height="28" style="image-rendering:pixelated">`,title:'Logros',desc:'25 medallas desbloqueables según tu progreso. Aparecen en tu Trainer Card.'},
-{ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>`,title:'Reto diario',desc:'Cada día un nuevo reto. Complétalo para que aparezca en tu Trainer Card.'},
-{ico:`<img src="${_WHATS_T}/1.png" width="52" height="20" style="image-rendering:pixelated">`,title:'Pokémon caminante',desc:'Un Pokémon del día pasea sobre el menú. Puedes desactivarlo en Ajustes.'},
-{ico:`<img src="${_WHATS_B}/star-piece.png" width="28" height="28" style="image-rendering:pixelated">`,title:'Variantes independientes',desc:'Captura, favoritos y equipo ahora funcionan por variante. Zorua de Hisui es independiente del Zorua normal.'},
-{ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg>`,title:'Ayuda',desc:'Nuevo botón ? en el header con la guía de uso.'},
+{ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>`,title:'Análisis del equipo',desc:'La pestaña Equipo ahora calcula las debilidades y resistencias de tipo de todo tu equipo, y te avisa si hay huecos en tu cobertura.'},
+{ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 3a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zm5 9H7v-.7c0-1.67 3.33-2.6 5-2.6s5 .93 5 2.6V16z"/></svg>`,title:'Cabecera renovada',desc:'Reorganizamos tu información de entrenador en el header para que sea más clara y menos apretada.'},
+{ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 0 0-6 0zm-4-4l2 2a7.074 7.074 0 0 1 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>`,title:'Estado de conexión',desc:'Ahora verás un aviso si pierdes la conexión, y un punto junto a tu nombre indica si tus datos están sincronizados.'},
+{ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13H5v-2h14v2z" transform="rotate(45 12 12)"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,title:'Filtros sin resultados',desc:'Si una búsqueda no encuentra nada en la Pokédex, ahora puedes limpiar todos los filtros con un toque.'},
+{ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>`,title:'Más fluido y táctil',desc:'Animaciones más cuidadas, controles más grandes y precisos en iPhone, y pantallas de carga mientras llegan tus datos.'},
 ];
 
 function showWhatsNew(force){
