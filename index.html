@@ -129,7 +129,9 @@ transition:all .15s;
 
 /* ── PAGES ── */
 .pg{display:none;flex-direction:column;flex:1;min-height:0;overflow:clip;height:100%}
-.pg.on{display:flex}
+.pg.on{display:flex;animation:pgIn .22s cubic-bezier(.25,.46,.45,.94) both}
+@keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){.pg.on{animation:none}}
 
 /* ── SEARCH ── */
 .srch{padding:10px 16px 8px;flex-shrink:0}
@@ -641,7 +643,10 @@ font-weight:700;color:var(--t2);margin-top:4px;transition:background .12s;
 .sync-status{font-size:10px;color:var(--t3);font-weight:600;margin-top:1px;display:flex;align-items:center;gap:4px}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
 .sync-dot.syncing{background:var(--gold);animation:pulse .8s infinite}
+.sync-dot.offline{background:var(--t3);animation:none}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.offline-banner{display:none;align-items:center;justify-content:center;gap:6px;padding:7px 12px;font-size:11px;font-weight:700;color:#fff;background:var(--t2);flex-shrink:0}
+.offline-banner.on{display:flex}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 
 /* ── WORLD CLOCK BAR ── */
@@ -1213,6 +1218,11 @@ function sendPasswordReset(){
 
 <div id="app">
 
+<div class="offline-banner" id="offline-banner">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12" y2="20"/></svg>
+  Sin conexión · usando datos guardados
+</div>
+
 <!-- WORLD CLOCK BAR -->
 <div id="top-bar">
 <div id="world-clock-bar" style="
@@ -1782,6 +1792,19 @@ function sendPasswordReset(){
       ⚠️ Reset completo del Safari
     </button>
   </div>
+</div>
+
+<!-- About -->
+<div class="cfg-card">
+  <div class="cfg-label">Acerca de PokéPlanner</div>
+  <div class="cfg-row" style="margin-top:12px">
+    <div class="cfg-sub" style="margin-top:0">Versión</div>
+    <div style="font-size:12px;font-weight:800;color:var(--t1);font-family:var(--px)" id="cfg-app-version">--</div>
+  </div>
+  <button onclick="showWhatsNew(true)" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:12px 14px;border-radius:14px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><line x1="12" y1="8" x2="12" y2="8.01"/></svg>
+    Novedades de esta versión
+  </button>
 </div>
 
 <div style="height:20px"></div>
@@ -5530,6 +5553,23 @@ const dot = document.querySelector('.sync-dot');
 if (dot) dot.classList.toggle('syncing', on);
 }
 
+// ── CONNECTION STATUS ──
+function _updateConnStatus(){
+const online = navigator.onLine;
+const banner = document.getElementById('offline-banner');
+if(banner) banner.classList.toggle('on', !online);
+const dot = document.querySelector('.sync-dot');
+const stat = document.querySelector('.sync-status');
+if(dot) dot.classList.toggle('offline', !online);
+if(stat && !stat.querySelector('.sync-dot.syncing')){
+const label = stat.querySelector('.sync-dot')?.nextSibling;
+if(label) label.textContent = online ? ' Sincronizado' : ' Sin conexión';
+}
+}
+window.addEventListener('online', _updateConnStatus);
+window.addEventListener('offline', _updateConnStatus);
+document.addEventListener('DOMContentLoaded', _updateConnStatus);
+
 // ── FIRESTORE SYNC ──────────────────────────────────────────────
 // Guards writes until loadUserData completes — prevents overwriting cloud data with empty local state on network failure
 let _safariCloudReady = false;
@@ -5688,9 +5728,9 @@ const WHATS_NEW=[
 {ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg>`,title:'Ayuda',desc:'Nuevo botón ? en el header con la guía de uso.'},
 ];
 
-function showWhatsNew(){
+function showWhatsNew(force){
 const seen=localStorage.getItem('wn_version');
-if(seen===APP_VERSION)return;
+if(!force && seen===APP_VERSION)return;
 const modal=document.getElementById('whatsnew-modal');
 const list=document.getElementById('whatsnew-list');
 if(!modal||!list)return;
@@ -6587,6 +6627,7 @@ syncEl.className = 'sync-status';
 syncEl.innerHTML = '<span class="sync-dot"></span> Sincronizado';
 stat.after(syncEl);
 }
+_updateConnStatus();
 }
 // Always update trainer avatar
 updateTrainerUI();
@@ -7349,6 +7390,8 @@ if(teamImg){teamImg.src=sprite;teamImg.style.display=hasName?'block':'none';}
 
 function renderSettings(){
 _updateAdminPanel();
+const verEl=document.getElementById('cfg-app-version');
+if(verEl)verEl.textContent='v'+APP_VERSION;
 const walkerTog=document.getElementById('walker-toggle');
 if(walkerTog)walkerTog.className=`cfg-toggle${S.set.showWalker?' on':''}`;
 
