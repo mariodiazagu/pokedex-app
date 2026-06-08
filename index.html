@@ -532,8 +532,10 @@ font-family:var(--fn);cursor:pointer;transition:all .13s;backdrop-filter:blur(3p
 .hdr-trainer{display:flex;align-items:center;gap:7px;min-width:0}
 .hdr-trainer-img{width:32px;height:32px;object-fit:contain;image-rendering:pixelated}
 .hdr-trainer-info{min-width:0}
-.hdr-trainer-lbl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px}
-.hdr-trainer-name{font-size:16px;font-weight:900;letter-spacing:-.3px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-trainer-lbl{font-size:8px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:1px}
+.hdr-trainer-name{font-size:17px;font-weight:900;letter-spacing:-.3px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.hdr-meta-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:2px}
+.hdr-stat{font-size:10px;color:var(--t3);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cfg-card{background:var(--s1);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
 .cfg-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .cfg-label{font-size:15px;font-weight:800;color:var(--t1)}
@@ -644,7 +646,7 @@ border-radius:var(--r-sm);cursor:pointer;font-size:13px;
 font-weight:700;color:var(--t2);margin-top:4px;transition:background .12s;
 }
 .user-menu-btn:active{background:var(--s2)}
-.sync-status{font-size:10px;color:var(--t3);font-weight:600;margin-top:1px;display:flex;align-items:center;gap:4px}
+.sync-status{font-size:10px;color:var(--t3);font-weight:600;display:inline-flex;align-items:center;gap:4px;padding-left:7px;border-left:1px solid var(--bd);flex-shrink:0}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
 .sync-dot.syncing{background:var(--gold);animation:pulse .8s infinite}
 .sync-dot.offline{background:var(--t3);animation:none}
@@ -1246,7 +1248,9 @@ function sendPasswordReset(){
     <div class="hdr-trainer-info">
       <div class="hdr-trainer-lbl" id="hdr-trainer-lbl">Trainer</div>
       <div class="hdr-trainer-name" id="hdr-trainer-name">--</div>
-      <div class="hdr-stat" id="hstat" style="font-size:10px;color:var(--t3);font-weight:500;margin-top:1px">Cargando...</div>
+      <div class="hdr-meta-row" id="hdr-meta-row">
+        <span class="hdr-stat" id="hstat">Cargando...</span>
+      </div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:6px">
@@ -6638,12 +6642,12 @@ if(user){
 document.getElementById('um-name').textContent = user.displayName || 'Usuario';
 document.getElementById('um-email').textContent = user.email || '';
 // Show sync dot
-const stat = document.getElementById('hstat');
-if(stat && !stat.querySelector('.sync-dot')){
+const metaRow = document.getElementById('hdr-meta-row');
+if(metaRow && !metaRow.querySelector('.sync-dot')){
 const syncEl = document.createElement('span');
 syncEl.className = 'sync-status';
 syncEl.innerHTML = '<span class="sync-dot"></span> Sincronizado';
-stat.after(syncEl);
+metaRow.appendChild(syncEl);
 }
 _updateConnStatus();
 }
