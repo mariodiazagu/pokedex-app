@@ -1885,7 +1885,7 @@ function sendPasswordReset(){
         <div style="width:40px;height:40px;border-radius:18px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🎉</div>
         <div>
           <div style="font-size:18px;font-weight:900;color:var(--t1)">¿Qué hay de nuevo?</div>
-          <div style="font-size:11px;color:var(--t3);font-weight:600;margin-top:1px">Versión 1.4</div>
+          <div style="font-size:11px;color:var(--t3);font-weight:600;margin-top:1px" id="whatsnew-version">Versión</div>
         </div>
       </div>
     </div>
@@ -5762,6 +5762,8 @@ if(!force && seen===APP_VERSION)return;
 const modal=document.getElementById('whatsnew-modal');
 const list=document.getElementById('whatsnew-list');
 if(!modal||!list)return;
+const verEl=document.getElementById('whatsnew-version');
+if(verEl)verEl.textContent='Versión '+APP_VERSION;
 list.innerHTML=WHATS_NEW.map(item=>` <div style="display:flex;gap:12px;align-items:flex-start"> <div style="width:40px;height:40px;border-radius:16px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0">${item.ico}</div> <div> <div style="font-size:14px;font-weight:800;color:var(--t1)">${item.title}</div> <div style="font-size:13px;color:var(--t2);margin-top:2px;line-height:1.5">${item.desc}</div> </div> </div>`).join('');
 modal.style.display='flex';
 }
