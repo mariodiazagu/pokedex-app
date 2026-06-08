@@ -95,7 +95,7 @@ cursor:pointer;flex-shrink:0;color:var(--t3);
 .ibtn.on{background:var(--ac);color:#fff}
 .ibtn:active{transform:scale(.9)}
 .mmode-btns{display:flex;gap:2px;align-items:center}
-.mmode-btn{width:28px;height:28px;border-radius:9px;border:1.5px solid transparent;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .15s;padding:0;flex-shrink:0}
+.mmode-btn{width:34px;height:34px;border-radius:10px;border:1.5px solid transparent;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .15s;padding:0;flex-shrink:0}
 .mmode-btn.on{background:rgba(255,255,255,.7);border-color:var(--bd);color:var(--t1)}
 
 /* ── TABS -- floating pill bar ── */
@@ -114,6 +114,7 @@ padding:4px;
 gap:2px;
 }
 .tab{
+position:relative;
 flex:1;display:flex;flex-direction:column;
 align-items:center;justify-content:center;
 padding:7px 4px;cursor:pointer;gap:3px;
@@ -121,6 +122,8 @@ border:none;background:none;font-family:var(--fn);
 color:var(--t3);border-radius:99px;
 transition:all .15s;
 }
+.tab-badge{position:absolute;top:4px;right:calc(50% - 17px);min-width:7px;height:7px;border-radius:99px;background:var(--ac);box-shadow:0 0 0 1.5px var(--bg);display:none}
+.tab-badge.on{display:block}
 .tab.on{background:rgba(255,255,255,0.75);color:var(--ac);box-shadow:none}
 .tab svg{transition:color .15s}
 .tab-lbl{font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;transition:color .15s;font-family:var(--px)}
@@ -129,7 +132,9 @@ transition:all .15s;
 
 /* ── PAGES ── */
 .pg{display:none;flex-direction:column;flex:1;min-height:0;overflow:clip;height:100%}
-.pg.on{display:flex}
+.pg.on{display:flex;animation:pgIn .22s cubic-bezier(.25,.46,.45,.94) both}
+@keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){.pg.on{animation:none}}
 
 /* ── SEARCH ── */
 .srch{padding:10px 16px 8px;flex-shrink:0}
@@ -147,7 +152,7 @@ flex:1;background:none;border:none;outline:none;
 color:var(--t1);font-size:16px;font-family:var(--fn);font-weight:500;
 }
 .srch-inp::placeholder{color:var(--t3)}
-.srch-x{color:var(--t3);cursor:pointer;padding:2px;display:none;align-items:center}
+.srch-x{color:var(--t3);cursor:pointer;padding:9px;margin:-9px;display:none;align-items:center}
 .srch-x.on{display:flex}
 
 /* ── FILTER ROWS ── */
@@ -231,7 +236,7 @@ padding:4px 16px 12px;border-bottom:1px solid var(--bd);flex-shrink:0;
 .mdl-panel{width:50%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;align-self:stretch;touch-action:pan-y}
 /* Dot indicators */
 .mdl-dots{display:flex;gap:5px;justify-content:center;padding:6px 0 4px;margin:-4px 0 0}
-.mdl-dot{height:5px;border-radius:3px;background:rgba(0,0,0,.12);transition:all .22s;width:5px;cursor:pointer}
+.mdl-dot{height:5px;border-radius:3px;background:rgba(0,0,0,.12);background-clip:content-box;box-sizing:content-box;transition:all .22s;width:5px;padding:9px 7px;cursor:pointer}
 .mdl-dot.on{background:var(--ac);width:16px}
 /* Tracking panel mini-header */
 .mtrack-hdr{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:12px;background:rgba(255,255,255,.7);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-radius:20px}
@@ -391,6 +396,7 @@ min-height:110px;
 .tslot-rm{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;
 background:var(--s3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
 color:var(--t3);font-size:10px;padding:0;}
+.tslot-rm::before{content:'';position:absolute;inset:-13px}
 .tcap-chip{
 display:flex;flex-direction:column;align-items:center;gap:2px;
 padding:6px 4px;border-radius:18px;border:2px solid transparent;
@@ -615,7 +621,7 @@ backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
 .auth-divider{display:flex;align-items:center;gap:10px;width:100%;max-width:300px;margin:2px 0}
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--bd)}
 .auth-divider span{font-size:11px;font-weight:700;color:var(--t3)}
-.auth-inp{width:100%;max-width:300px;padding:14px 18px;border-radius:18px;border:1.5px solid var(--bd);background:rgba(255,255,255,.6);font-family:var(--fn);font-size:15px;color:var(--t1);outline:none;transition:border-color .15s;box-sizing:border-box;-webkit-appearance:none}
+.auth-inp{width:100%;max-width:300px;padding:14px 18px;border-radius:18px;border:1.5px solid var(--bd);background:rgba(255,255,255,.6);font-family:var(--fn);font-size:16px;color:var(--t1);outline:none;transition:border-color .15s;box-sizing:border-box;-webkit-appearance:none}
 .auth-inp:focus{border-color:var(--ac)}
 .auth-link{font-size:13px;font-weight:700;color:var(--ac);background:none;border:none;cursor:pointer;font-family:var(--fn);padding:4px 0;text-decoration:underline}
 .auth-err{font-size:12px;color:#E53935;font-weight:600;min-height:18px;max-width:300px}
@@ -641,7 +647,10 @@ font-weight:700;color:var(--t2);margin-top:4px;transition:background .12s;
 .sync-status{font-size:10px;color:var(--t3);font-weight:600;margin-top:1px;display:flex;align-items:center;gap:4px}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
 .sync-dot.syncing{background:var(--gold);animation:pulse .8s infinite}
+.sync-dot.offline{background:var(--t3);animation:none}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.offline-banner{display:none;align-items:center;justify-content:center;gap:6px;padding:7px 12px;font-size:11px;font-weight:700;color:#fff;background:var(--t2);flex-shrink:0}
+.offline-banner.on{display:flex}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 
 /* ── WORLD CLOCK BAR ── */
@@ -726,7 +735,7 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 /* Tooltips */
 .wiki-tooltip{position:relative;cursor:help}
 .wiki-tooltip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(20,20,20,0.9);color:#fff;font-size:11px;font-weight:600;padding:5px 9px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:100;max-width:200px;white-space:normal;text-align:center;line-height:1.4}
-.wiki-tooltip:hover::after{opacity:1}
+.wiki-tooltip:hover::after,.wiki-tooltip:active::after{opacity:1}
 
 .wmove-row{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.5);margin-bottom:3px}
 .wmove-name{flex:1;font-size:12px;font-weight:700;color:var(--t1)}
@@ -803,7 +812,7 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .wflavor-chip{flex-shrink:0;padding:3px 10px;border-radius:99px;border:1.5px solid var(--bd);background:none;font-size:10px;font-weight:700;color:var(--t3);cursor:pointer;font-family:var(--fn);white-space:nowrap;transition:all .12s}
 .wflavor-chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
 /* ── MODAL NAV ── */
-.mdl-nav-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:5;background:rgba(255,255,255,.82);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12);color:var(--t1)}
+.mdl-nav-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:5;background:rgba(255,255,255,.82);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:none;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12);color:var(--t1)}
 .mdl-nav-prev{left:6px}
 .mdl-nav-next{right:6px}
 /* ── COMPARE PANEL ── */
@@ -813,7 +822,7 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 #cmp-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
 .cmp-title{font-size:17px;font-weight:800;color:var(--t1);flex:1}
 .cmp-srch-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.7);border-radius:16px;padding:0 12px;border:1.5px solid var(--bd);margin:12px 16px}
-.cmp-inp{flex:1;border:none;background:none;padding:10px 0;font-family:var(--fn);font-size:15px;color:var(--t1);outline:none}
+.cmp-inp{flex:1;border:none;background:none;padding:10px 0;font-family:var(--fn);font-size:16px;color:var(--t1);outline:none}
 .cmp-list{padding:4px 8px}
 .cmp-item{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:14px;cursor:pointer;transition:background .12s}
 .cmp-item:active{background:rgba(0,0,0,.06)}
@@ -966,7 +975,7 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 /* Collection filters */
 .sf-coll-filters{padding:8px 12px 6px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--bd);flex-shrink:0}
 .sf-coll-search-wrap{position:relative}
-.sf-coll-search-wrap input{width:100%;padding:7px 10px 7px 30px;border-radius:20px;border:1.5px solid var(--bd);background:var(--s1);color:var(--t1);font-size:13px;font-family:var(--fn);outline:none;box-sizing:border-box}
+.sf-coll-search-wrap input{width:100%;padding:7px 10px 7px 30px;border-radius:20px;border:1.5px solid var(--bd);background:var(--s1);color:var(--t1);font-size:16px;font-family:var(--fn);outline:none;box-sizing:border-box}
 .sf-coll-filter-row{display:flex;gap:6px}
 .sf-filter-btn{font-family:var(--px);font-size:8px;padding:4px 10px;border-radius:14px;border:1.5px solid var(--bd);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s;flex:1}
 .sf-filter-btn.on{background:var(--ac);color:#fff;border-color:var(--ac)}
@@ -982,6 +991,7 @@ border-radius:14px;padding:6px 14px;flex-shrink:0;
 .sf-coll-card.missing{background:var(--s2);border-color:transparent;opacity:.55;cursor:default}
 .sf-coll-card.missing:active{transform:none}
 .sf-coll-dex-btn{position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:var(--ac);border:none;color:#fff;font-size:9px;font-weight:900;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:.75;transition:opacity .15s}
+.sf-coll-dex-btn::before{content:'';position:absolute;inset:-14px}
 .sf-coll-dex-btn:active{opacity:1}
 .sf-enc-info-btn{position:absolute;top:10px;right:10px;z-index:3;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1.5px solid rgba(255,255,255,.25);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .sf-coll-spr{width:44px;height:44px;object-fit:contain;image-rendering:pixelated}
@@ -1212,6 +1222,11 @@ function sendPasswordReset(){
 </div>
 
 <div id="app">
+
+<div class="offline-banner" id="offline-banner">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12" y2="20"/></svg>
+  Sin conexión · usando datos guardados
+</div>
 
 <!-- WORLD CLOCK BAR -->
 <div id="top-bar">
@@ -1784,6 +1799,19 @@ function sendPasswordReset(){
   </div>
 </div>
 
+<!-- About -->
+<div class="cfg-card">
+  <div class="cfg-label">Acerca de PokéPlanner</div>
+  <div class="cfg-row" style="margin-top:12px">
+    <div class="cfg-sub" style="margin-top:0">Versión</div>
+    <div style="font-size:12px;font-weight:800;color:var(--t1);font-family:var(--px)" id="cfg-app-version">--</div>
+  </div>
+  <button onclick="showWhatsNew(true)" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:12px 14px;border-radius:14px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><line x1="12" y1="8" x2="12" y2="8.01"/></svg>
+    Novedades de esta versión
+  </button>
+</div>
+
 <div style="height:20px"></div>
 
 <div style="padding:0 4px 8px;text-align:center;font-size:10px;color:var(--t3);line-height:1.6;font-weight:500">
@@ -1808,6 +1836,7 @@ function sendPasswordReset(){
     <span class="tab-lbl">Equipo</span>
   </button>
   <button class="tab" id="tb-safari" onclick="goTab('safari')">
+    <span class="tab-badge" id="tbb-safari"></span>
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
     <span class="tab-lbl">Safari</span>
   </button>
@@ -4406,6 +4435,18 @@ function sfShowMedals(){
   document.getElementById('sf-home')?.classList.remove('on');
   document.getElementById('sf-medals')?.classList.add('on');
   _sfRenderMedals();
+  S.safari.medalsSeen=(S.safari.medals||[]).length;
+  scheduleSave();
+  _updateTabBadges();
+}
+// ── TAB BADGES ──
+function _updateTabBadges(){
+  const safariBadge=document.getElementById('tbb-safari');
+  if(safariBadge){
+    const earned=(S.safari.medals||[]).length;
+    const seen=S.safari.medalsSeen||0;
+    safariBadge.classList.toggle('on', earned>seen);
+  }
 }
 function sfCloseMedals(){
   document.getElementById('sf-medals')?.classList.remove('on');
@@ -4466,7 +4507,7 @@ function sfCheckSafariMedals(){
     sfToast(`Medalla desbloqueada: ${m.label}!`);
     awarded=true;
   }
-  if(awarded)scheduleSave();
+  if(awarded){scheduleSave();_updateTabBadges();}
 }
 function _sfGenComplete(gen){
   if(!S.poke)return false;
@@ -5530,6 +5571,23 @@ const dot = document.querySelector('.sync-dot');
 if (dot) dot.classList.toggle('syncing', on);
 }
 
+// ── CONNECTION STATUS ──
+function _updateConnStatus(){
+const online = navigator.onLine;
+const banner = document.getElementById('offline-banner');
+if(banner) banner.classList.toggle('on', !online);
+const dot = document.querySelector('.sync-dot');
+const stat = document.querySelector('.sync-status');
+if(dot) dot.classList.toggle('offline', !online);
+if(stat && !stat.querySelector('.sync-dot.syncing')){
+const label = stat.querySelector('.sync-dot')?.nextSibling;
+if(label) label.textContent = online ? ' Sincronizado' : ' Sin conexión';
+}
+}
+window.addEventListener('online', _updateConnStatus);
+window.addEventListener('offline', _updateConnStatus);
+document.addEventListener('DOMContentLoaded', _updateConnStatus);
+
 // ── FIRESTORE SYNC ──────────────────────────────────────────────
 // Guards writes until loadUserData completes — prevents overwriting cloud data with empty local state on network failure
 let _safariCloudReady = false;
@@ -5688,9 +5746,9 @@ const WHATS_NEW=[
 {ico:`<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg>`,title:'Ayuda',desc:'Nuevo botón ? en el header con la guía de uso.'},
 ];
 
-function showWhatsNew(){
+function showWhatsNew(force){
 const seen=localStorage.getItem('wn_version');
-if(seen===APP_VERSION)return;
+if(!force && seen===APP_VERSION)return;
 const modal=document.getElementById('whatsnew-modal');
 const list=document.getElementById('whatsnew-list');
 if(!modal||!list)return;
@@ -6587,6 +6645,7 @@ syncEl.className = 'sync-status';
 syncEl.innerHTML = '<span class="sync-dot"></span> Sincronizado';
 stat.after(syncEl);
 }
+_updateConnStatus();
 }
 // Always update trainer avatar
 updateTrainerUI();
@@ -7022,7 +7081,12 @@ if(!grid)return;
 S.filtered=getFiltered();S.rendered=0;
 grid.innerHTML='';
 document.getElementById('rc').textContent=`${S.filtered.length} Pokémon`;
-renderMore();setupScrollSentinel();updateStat();
+if(S.filtered.length===0){
+grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="etitle">Sin resultados</div><div class="esub">Prueba con otros filtros o términos de búsqueda</div><button onclick="clearAllFilters()" style="margin-top:6px;padding:10px 18px;border-radius:14px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:12px;font-weight:700;color:var(--t1);cursor:pointer">Limpiar filtros</button></div>`;
+}else{
+renderMore();setupScrollSentinel();
+}
+updateStat();
 applyColsSetting();
 }catch(e){console.error('renderGrid error:',e);}
 }
@@ -7086,6 +7150,12 @@ function clearTypes(){S.f.types=[];renderFilters();renderGrid();}
 function setGen(g){S.f.gen=g;renderFilters();renderGrid();}
 function setRar(r){S.f.rar=r;renderFilters();renderGrid();}
 function clearSearch(){S.f.q='';document.getElementById('si').value='';document.getElementById('sx').classList.remove('on');renderGrid();}
+function clearAllFilters(){
+S.f.q='';S.f.gen=0;S.f.types=[];S.f.rar=null;
+const si=document.getElementById('si');if(si)si.value='';
+document.getElementById('sx')?.classList.remove('on');
+renderFilters();renderGrid();
+}
 
 // Helper: get active games (myGames if set, all games otherwise)
 function activeGames(){
@@ -7349,6 +7419,8 @@ if(teamImg){teamImg.src=sprite;teamImg.style.display=hasName?'block':'none';}
 
 function renderSettings(){
 _updateAdminPanel();
+const verEl=document.getElementById('cfg-app-version');
+if(verEl)verEl.textContent='v'+APP_VERSION;
 const walkerTog=document.getElementById('walker-toggle');
 if(walkerTog)walkerTog.className=`cfg-toggle${S.set.showWalker?' on':''}`;
 
@@ -8303,6 +8375,9 @@ window.closeImgViewer=function(e){
   _scale=1;
 };
 
+// iOS Safari only fires :active styles on elements when a touchstart listener exists on the document
+document.addEventListener('touchstart',function(){},{passive:true});
+
 document.addEventListener('DOMContentLoaded',function(){
   const v=document.getElementById('img-viewer');
   const img=document.getElementById('img-viewer-img');
@@ -9061,6 +9136,7 @@ _updateAdminPanel();
 setTimeout(fetchTypesInBackground, 1500);
 setTimeout(initWalker, 500);
 setTimeout(showWhatsNew, 800);
+_updateTabBadges();
 // Update companion state on each visit
 updateCompanionOnVisit();
 } else {
