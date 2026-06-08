@@ -545,6 +545,8 @@ font-family:var(--fn);cursor:pointer;transition:all .13s;backdrop-filter:blur(3p
 #cols-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ac);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 .cfg-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .cfg-label{font-size:15px;font-weight:800;color:var(--t1)}
+.cfg-section-hdr{font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin:22px 6px 8px}
+.cfg-section-hdr:first-child{margin-top:6px}
 .cfg-sub{font-size:12px;color:var(--t3);font-weight:500;margin-top:2px}
 .cfg-toggle{width:48px;height:28px;border-radius:18px;background:var(--s3);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
 .cfg-toggle.on{background:var(--ac)}
@@ -1653,6 +1655,7 @@ function sendPasswordReset(){
   <div class="phdr"><div class="ptitle">Ajustes</div></div>
   <div class="gscroll" style="padding:0 16px">
 
+<div class="cfg-section-hdr">Perfil</div>
 <!-- Trainer Profile -->
 <div class="cfg-card" style="background:linear-gradient(135deg,var(--ac) 0%,var(--ac2) 100%);color:#fff">
   <div style="display:flex;align-items:center;gap:14px">
@@ -1675,6 +1678,13 @@ function sendPasswordReset(){
     </div>
   </div>
 </div>
+<!-- My games -->
+<div class="cfg-card">
+  <div class="cfg-label" style="margin-bottom:4px">Mis juegos</div>
+  <div class="cfg-sub" style="margin-bottom:12px">Solo estos juegos aparecerán en las fichas y equipos. Si no seleccionas ninguno, se muestran todos.</div>
+  <div id="my-games-grid"></div>
+</div>
+<div class="cfg-section-hdr">Apariencia</div>
 <!-- Theme selector -->
 <div class="cfg-card">
   <div class="cfg-label" style="margin-bottom:4px">Tema de color</div>
@@ -1732,13 +1742,7 @@ function sendPasswordReset(){
   </div>
 </div>
 
-<!-- My games -->
-<div class="cfg-card">
-  <div class="cfg-label" style="margin-bottom:4px">Mis juegos</div>
-  <div class="cfg-sub" style="margin-bottom:12px">Solo estos juegos aparecerán en las fichas y equipos. Si no seleccionas ninguno, se muestran todos.</div>
-  <div id="my-games-grid"></div>
-</div>
-
+<div class="cfg-section-hdr">Cuenta y datos</div>
 <!-- Cuenta -->
 <div class="cfg-card">
   <div class="cfg-label">Cuenta</div>
@@ -1771,6 +1775,7 @@ function sendPasswordReset(){
   </div>
 </div>
 
+<div class="cfg-section-hdr">Información</div>
 <!-- Admin Panel (email-gated) -->
 <div class="cfg-card" id="admin-panel-card" style="display:none;border:1.5px solid #E53935;background:#E5393508">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
