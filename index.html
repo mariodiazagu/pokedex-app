@@ -537,6 +537,11 @@ font-family:var(--fn);cursor:pointer;transition:all .13s;backdrop-filter:blur(3p
 .hdr-meta-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:2px}
 .hdr-stat{font-size:10px;color:var(--t3);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cfg-card{background:var(--s1);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+#cols-slider{-webkit-appearance:none;appearance:none;height:6px;border-radius:99px;background:var(--s3);outline:none}
+#cols-slider::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:var(--s3)}
+#cols-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;margin-top:-8px;border-radius:50%;background:var(--ac);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+#cols-slider::-moz-range-track{height:6px;border-radius:99px;background:var(--s3)}
+#cols-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ac);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 .cfg-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .cfg-label{font-size:15px;font-weight:800;color:var(--t1)}
 .cfg-sub{font-size:12px;color:var(--t3);font-weight:500;margin-top:2px}
