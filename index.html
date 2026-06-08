@@ -1778,6 +1778,18 @@ function sendPasswordReset(){
     <div style="margin-left:auto;font-size:10px;font-weight:700;color:#E53935;opacity:.6">PRIVADO</div>
   </div>
 
+  <!-- Announcement / what's new editor -->
+  <div style="padding:10px 12px;border-radius:12px;background:var(--s2);border:1.5px solid var(--bd);margin-bottom:12px">
+    <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px">Notas de la versión</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Aparecen en "Qué hay de nuevo" y en la guía de Ayuda para todos los usuarios.</div>
+    <textarea id="admin-announcement-input" placeholder="Escribe aquí las notas que verán los usuarios..." style="width:100%;min-height:84px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--bd);background:var(--s1);font-family:var(--fn);font-size:13px;color:var(--t1);resize:vertical;box-sizing:border-box"></textarea>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+      <button onclick="adminSaveAnnouncement()" style="padding:9px 16px;border-radius:10px;border:none;background:#E53935;color:#fff;font-family:var(--fn);font-size:12px;font-weight:700;cursor:pointer">Guardar</button>
+      <button onclick="adminClearAnnouncement()" style="padding:9px 16px;border-radius:10px;border:1.5px solid var(--bd);background:var(--s1);color:var(--t2);font-family:var(--fn);font-size:12px;font-weight:700;cursor:pointer">Borrar</button>
+      <span id="admin-announcement-status" style="font-size:11px;color:var(--t3);margin-left:auto"></span>
+    </div>
+  </div>
+
   <!-- Test mode toggle -->
   <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--s2);border:1.5px solid var(--bd);margin-bottom:12px">
     <div style="flex:1">
@@ -1889,6 +1901,7 @@ function sendPasswordReset(){
         </div>
       </div>
     </div>
+    <div id="whatsnew-announcement"></div>
     <!-- Changes list -->
     <div style="overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px" id="whatsnew-list"></div>
     <!-- CTA -->
@@ -1912,6 +1925,7 @@ function sendPasswordReset(){
       </button>
     </div>
     <div style="overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div id="help-announcement"></div>
       <div class="help-steps">
         <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text"><b>Explora la Pokédex</b> -- Busca por nombre, número o filtra por tipo, generación y rareza. Toca cualquier Pokémon para abrir su ficha completa.</div></div>
         <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text"><b>Registra tus capturas</b> -- Dentro de la ficha, despliega la generación y marca si lo has capturado, si tienes su shiny, qué ball usaste y el nivel.</div></div>
@@ -5269,6 +5283,61 @@ function _updateAdminPanel() {
   if (!card) return;
   card.style.display = _isAdmin() ? '' : 'none';
   _updateTestToggleUI();
+  if (_isAdmin()) {
+    const ta = document.getElementById('admin-announcement-input');
+    if (ta && document.activeElement !== ta) ta.value = _announcement;
+  }
+}
+
+// ── ANNOUNCEMENT (admin-editable notes shown in Help / What's New) ──
+let _announcement = '';
+
+function loadAnnouncement() {
+  db.collection('config').doc('announcement').get().then(doc => {
+    _announcement = (doc.exists && doc.data().text) ? doc.data().text.trim() : '';
+    _renderAnnouncement();
+    const ta = document.getElementById('admin-announcement-input');
+    if (ta && document.activeElement !== ta) ta.value = _announcement;
+  }).catch(() => {});
+}
+
+function _renderAnnouncement() {
+  const card = _announcement ? `
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:rgba(229,57,53,.08);border:1px solid rgba(229,57,53,.18);margin-bottom:4px">
+      <span style="font-size:16px;line-height:1">📣</span>
+      <div style="font-size:12px;color:var(--t2);line-height:1.5;white-space:pre-wrap">${_announcement.replace(/</g,'&lt;')}</div>
+    </div>` : '';
+  const wn = document.getElementById('whatsnew-announcement');
+  if (wn) wn.innerHTML = card ? `<div style="padding:0 20px">${card}</div>` : '';
+  const hp = document.getElementById('help-announcement');
+  if (hp) hp.innerHTML = card;
+}
+
+async function adminSaveAnnouncement() {
+  if (!_isAdmin()) return;
+  const ta = document.getElementById('admin-announcement-input');
+  const status = document.getElementById('admin-announcement-status');
+  if (!ta) return;
+  const text = ta.value.trim();
+  try {
+    await db.collection('config').doc('announcement').set({
+      text,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: currentUser.email
+    });
+    _announcement = text;
+    _renderAnnouncement();
+    if (status) { status.textContent = 'Guardado ✓'; setTimeout(() => { if(status.textContent==='Guardado ✓') status.textContent=''; }, 2500); }
+  } catch (e) {
+    if (status) status.textContent = 'Error al guardar';
+  }
+}
+
+function adminClearAnnouncement() {
+  if (!_isAdmin()) return;
+  const ta = document.getElementById('admin-announcement-input');
+  if (ta) ta.value = '';
+  adminSaveAnnouncement();
 }
 
 function _updateTestToggleUI() {
@@ -5764,6 +5833,7 @@ const list=document.getElementById('whatsnew-list');
 if(!modal||!list)return;
 const verEl=document.getElementById('whatsnew-version');
 if(verEl)verEl.textContent='Versión '+APP_VERSION;
+_renderAnnouncement();
 list.innerHTML=WHATS_NEW.map(item=>` <div style="display:flex;gap:12px;align-items:flex-start"> <div style="width:40px;height:40px;border-radius:16px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0">${item.ico}</div> <div> <div style="font-size:14px;font-weight:800;color:var(--t1)">${item.title}</div> <div style="font-size:13px;color:var(--t2);margin-top:2px;line-height:1.5">${item.desc}</div> </div> </div>`).join('');
 modal.style.display='flex';
 }
@@ -7524,6 +7594,7 @@ const modal=document.getElementById('help-modal');
 if(!modal)return;
 const isOpen=modal.style.display==='flex';
 modal.style.display=isOpen?'none':'flex';
+if(!isOpen)_renderAnnouncement();
 }
 function closeHelp(){
 const modal=document.getElementById('help-modal');
@@ -9185,6 +9256,7 @@ GAMES.forEach(g => { const o = document.createElement('option'); o.value = g.id;
 }
 updateTrainerUI();
 _updateAdminPanel();
+loadAnnouncement();
 setTimeout(fetchTypesInBackground, 1500);
 setTimeout(initWalker, 500);
 setTimeout(showWhatsNew, 800);
