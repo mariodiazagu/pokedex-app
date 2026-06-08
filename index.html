@@ -114,6 +114,7 @@ padding:4px;
 gap:2px;
 }
 .tab{
+position:relative;
 flex:1;display:flex;flex-direction:column;
 align-items:center;justify-content:center;
 padding:7px 4px;cursor:pointer;gap:3px;
@@ -121,6 +122,8 @@ border:none;background:none;font-family:var(--fn);
 color:var(--t3);border-radius:99px;
 transition:all .15s;
 }
+.tab-badge{position:absolute;top:4px;right:calc(50% - 17px);min-width:7px;height:7px;border-radius:99px;background:var(--ac);box-shadow:0 0 0 1.5px var(--bg);display:none}
+.tab-badge.on{display:block}
 .tab.on{background:rgba(255,255,255,0.75);color:var(--ac);box-shadow:none}
 .tab svg{transition:color .15s}
 .tab-lbl{font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;transition:color .15s;font-family:var(--px)}
@@ -1831,6 +1834,7 @@ function sendPasswordReset(){
     <span class="tab-lbl">Equipo</span>
   </button>
   <button class="tab" id="tb-safari" onclick="goTab('safari')">
+    <span class="tab-badge" id="tbb-safari"></span>
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
     <span class="tab-lbl">Safari</span>
   </button>
@@ -4429,6 +4433,18 @@ function sfShowMedals(){
   document.getElementById('sf-home')?.classList.remove('on');
   document.getElementById('sf-medals')?.classList.add('on');
   _sfRenderMedals();
+  S.safari.medalsSeen=(S.safari.medals||[]).length;
+  scheduleSave();
+  _updateTabBadges();
+}
+// ── TAB BADGES ──
+function _updateTabBadges(){
+  const safariBadge=document.getElementById('tbb-safari');
+  if(safariBadge){
+    const earned=(S.safari.medals||[]).length;
+    const seen=S.safari.medalsSeen||0;
+    safariBadge.classList.toggle('on', earned>seen);
+  }
 }
 function sfCloseMedals(){
   document.getElementById('sf-medals')?.classList.remove('on');
@@ -4489,7 +4505,7 @@ function sfCheckSafariMedals(){
     sfToast(`Medalla desbloqueada: ${m.label}!`);
     awarded=true;
   }
-  if(awarded)scheduleSave();
+  if(awarded){scheduleSave();_updateTabBadges();}
 }
 function _sfGenComplete(gen){
   if(!S.poke)return false;
@@ -7063,7 +7079,12 @@ if(!grid)return;
 S.filtered=getFiltered();S.rendered=0;
 grid.innerHTML='';
 document.getElementById('rc').textContent=`${S.filtered.length} Pokémon`;
-renderMore();setupScrollSentinel();updateStat();
+if(S.filtered.length===0){
+grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="etitle">Sin resultados</div><div class="esub">Prueba con otros filtros o términos de búsqueda</div><button onclick="clearAllFilters()" style="margin-top:6px;padding:10px 18px;border-radius:14px;border:1.5px solid var(--bd);background:var(--s2);font-family:var(--fn);font-size:12px;font-weight:700;color:var(--t1);cursor:pointer">Limpiar filtros</button></div>`;
+}else{
+renderMore();setupScrollSentinel();
+}
+updateStat();
 applyColsSetting();
 }catch(e){console.error('renderGrid error:',e);}
 }
@@ -7127,6 +7148,12 @@ function clearTypes(){S.f.types=[];renderFilters();renderGrid();}
 function setGen(g){S.f.gen=g;renderFilters();renderGrid();}
 function setRar(r){S.f.rar=r;renderFilters();renderGrid();}
 function clearSearch(){S.f.q='';document.getElementById('si').value='';document.getElementById('sx').classList.remove('on');renderGrid();}
+function clearAllFilters(){
+S.f.q='';S.f.gen=0;S.f.types=[];S.f.rar=null;
+const si=document.getElementById('si');if(si)si.value='';
+document.getElementById('sx')?.classList.remove('on');
+renderFilters();renderGrid();
+}
 
 // Helper: get active games (myGames if set, all games otherwise)
 function activeGames(){
@@ -9104,6 +9131,7 @@ _updateAdminPanel();
 setTimeout(fetchTypesInBackground, 1500);
 setTimeout(initWalker, 500);
 setTimeout(showWhatsNew, 800);
+_updateTabBadges();
 // Update companion state on each visit
 updateCompanionOnVisit();
 } else {
