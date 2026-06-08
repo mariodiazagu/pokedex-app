@@ -1360,6 +1360,8 @@ function sendPasswordReset(){
     <div id="tslots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
   </div>
 
+  <div id="team-analysis" style="padding:0 16px"></div>
+
   <!-- Captured pokemon toggle -->
 
   <div id="tcap-section" style="display:none">
@@ -7817,6 +7819,46 @@ return`<div class="tslot filled" style="background:linear-gradient(135deg,rgba(2
 // Show captured section
 if(capSection)capSection.style.display='block';
 renderTeamCaptured();
+renderTeamAnalysis();
+}
+
+function renderTeamAnalysis(){
+const gid=S.teamGame;
+const el=document.getElementById('team-analysis');
+if(!el)return;
+const team=(S.teams[gid]||[]).map(slot=>S.poke.find(x=>x.id===slot.pokeId)).filter(Boolean);
+if(!gid||team.length===0){el.innerHTML='';return;}
+
+const rows=TYPES.map(t=>{
+let weak=0,resist=0;
+team.forEach(p=>{
+let mult=1;
+(p.types||[]).forEach(def=>{mult*=((TYPE_CHART[def]||{})[t.id]!==undefined?TYPE_CHART[def][t.id]:1);});
+if(mult>=2)weak++;else if(mult<1)resist++;
+});
+return{...t,weak,resist};
+});
+
+const holes=rows.filter(r=>r.weak>=2&&r.resist===0);
+const chips=rows.filter(r=>r.weak>0||r.resist>0).sort((a,b)=>(b.weak-b.resist)-(a.weak-a.resist)).map(r=>`
+<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:12px;background:var(--s2);border:1px solid var(--bd);min-width:60px">
+<span class="tbadge" style="background:${r.c};font-size:9px;padding:3px 8px">${cap(r.n)}</span>
+<div style="display:flex;gap:5px;font-size:10px;font-weight:700">
+${r.weak?`<span style="color:var(--red)">▲${r.weak}</span>`:''}
+${r.resist?`<span style="color:var(--green)">▼${r.resist}</span>`:''}
+</div>
+</div>`).join('');
+
+el.innerHTML=`
+<div class="card" style="padding:14px">
+<div style="font-size:13px;font-weight:800;margin-bottom:2px">Análisis del equipo</div>
+<div style="font-size:11px;color:var(--t3);margin-bottom:10px">Cobertura de tipos según ${team.length} Pokémon &middot; <span style="color:var(--red)">▲</span> débiles &middot; <span style="color:var(--green)">▼</span> resistentes</div>
+<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch">${chips||'<div style="font-size:12px;color:var(--t3)">Sin debilidades ni resistencias destacables</div>'}</div>
+${holes.length?`<div style="margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(196,30,30,.08);border:1px solid rgba(196,30,30,.18);font-size:11px;color:var(--t2);display:flex;align-items:flex-start;gap:8px">
+<span style="font-size:14px">⚠️</span>
+<span><b>Sin cobertura:</b> ningún miembro resiste ${holes.map(h=>cap(h.n)).join(', ')}, y varios son vulnerables a ${holes.length===1?'ese tipo':'esos tipos'}.</span>
+</div>`:''}
+</div>`;
 }
 
 function rmTeamSlot(idx,gid){
